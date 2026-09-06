@@ -7,8 +7,13 @@ order of preference.
 
 ## 1. Supabase with the user's session (default)
 
-- **Web:** Server Components read via `createClient()` from `apps/web/lib/supabase/server.ts`.
-  Mutations go through Server Actions that validate with Zod then call Supabase.
+- **Web (public pages):** `createPublicClient()` from `apps/web/lib/supabase/public.ts` — anon key,
+  no cookies, so marketing/tour/destination pages are statically generated and revalidated
+  (`revalidate = 300`). Query modules live in `apps/web/lib/data/` (`tours.ts`, `destinations.ts`);
+  pure filtering logic in `tour-filters.ts` is unit-tested.
+- **Web (signed-in):** Server Components read via `createClient()` from
+  `apps/web/lib/supabase/server.ts`. Mutations go through Server Actions that validate with Zod
+  then call Supabase.
 - **Mobile:** a small service layer under `apps/mobile/src/lib/` wraps `supabase`:
 
   ```

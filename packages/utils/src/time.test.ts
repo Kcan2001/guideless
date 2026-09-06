@@ -3,7 +3,10 @@ import {
   addDays,
   daysBetween,
   daysUntilDeparture,
+  formatDate,
+  formatDateRange,
   formatInZone,
+  formatWallTime,
   isValidTimeZone,
   offsetMinutes,
   toLocalDate,
@@ -54,6 +57,15 @@ describe("time zones", () => {
     expect(formatInZone("2027-06-08T17:30:00Z", "Europe/Paris", { includeDate: false })).toBe(
       "7:30 PM",
     );
+  });
+
+  it("formats wall times and calendar dates without zone shifts", () => {
+    expect(formatWallTime("10:52:00")).toBe("10:52 AM");
+    expect(formatWallTime("19:00")).toBe("7:00 PM");
+    expect(formatDate("2027-05-14")).toBe("May 14, 2027");
+    expect(formatDate("2027-05-14", "en-US", { weekday: "long" })).toBe("Friday");
+    expect(formatDateRange("2027-05-14", "2027-05-22")).toMatch(/May 14\s*[–-]\s*22, 2027/);
+    expect(formatDateRange("2027-09-28", "2027-10-06")).toMatch(/Sep 28\s*[–-]\s*Oct 6, 2027/);
   });
 
   it("does calendar-day arithmetic", () => {

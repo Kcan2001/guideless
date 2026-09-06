@@ -47,6 +47,10 @@ yarn-error.log*
 .pnpm-debug.log*
 .metro-health-check*
 
+# browser automation artifacts (screenshots, snapshots)
+.playwright-mcp/
+/*.png
+
 # os / editor
 .DS_Store
 Thumbs.db

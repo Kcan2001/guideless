@@ -136,6 +136,40 @@ export function daysUntilDeparture(
   return daysBetween(toLocalDate(now, timeZone), departureDate);
 }
 
+/** "10:52:00" or "10:52" → "10:52 AM" (locale-aware, no zone conversion — wall time is already local). */
+export function formatWallTime(time: string, locale = "en-US"): string {
+  const [h = 0, m = 0] = time.split(":").map(Number);
+  return new Intl.DateTimeFormat(locale, {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "UTC",
+  }).format(new Date(Date.UTC(2000, 0, 1, h, m)));
+}
+
+/** "2027-05-14" → "May 14, 2027" (or per `options`). Calendar dates never shift with zones. */
+export function formatDate(
+  date: ISODate,
+  locale = "en-US",
+  options: Intl.DateTimeFormatOptions = { month: "short", day: "numeric", year: "numeric" },
+): string {
+  const [y, m, d] = splitDate(date);
+  return new Intl.DateTimeFormat(locale, { ...options, timeZone: "UTC" }).format(
+    new Date(Date.UTC(y, m, d)),
+  );
+}
+
+/** "2027-05-14", "2027-05-22" → "May 14 – 22, 2027"; crosses months/years gracefully. */
+export function formatDateRange(start: ISODate, end: ISODate, locale = "en-US"): string {
+  const [sy, sm, sd] = splitDate(start);
+  const [ey, em, ed] = splitDate(end);
+  return new Intl.DateTimeFormat(locale, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  }).formatRange(new Date(Date.UTC(sy, sm, sd)), new Date(Date.UTC(ey, em, ed)));
+}
+
 function splitDate(date: ISODate): [number, number, number] {
   const [y, m, d] = date.split("-").map(Number) as [number, number, number];
   return [y, m - 1, d];
