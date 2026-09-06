@@ -1,0 +1,12 @@
+node_modules
+.next
+.expo
+.turbo
+dist
+build
+coverage
+pnpm-lock.yaml
+supabase/.temp
+supabase/.branches
+*.webp
+*.png

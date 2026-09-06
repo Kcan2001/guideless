@@ -1,0 +1,7 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# React Native / Expo need a single hoisted copy of react & react-native.
+# Keep the tree flat enough for Metro while still using pnpm.
+nodeLinker: hoisted

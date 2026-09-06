@@ -1,0 +1,16 @@
+# Normalize line endings to LF in the repository; Windows checkouts keep LF too so
+# Prettier, ESLint and Metro behave identically on every machine.
+* text=auto eol=lf
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.pdf binary

@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+/*
+ * Guideless Tours design tokens.
+ * Source of truth: packages/config/src/tokens.ts — keep these values in sync.
+ * Ratio: ~70% neutral, ~20% ink, ~10% aqua/cyan accent. Restrained, calm, premium.
+ */
+:root {
+  /* Brand palette */
+  --color-ink: #0b2025;
+  --color-aqua: #60e1bb;
+  --color-cyan: #17b1df;
+  --color-teal: #40b4bd;
+  --color-sand: #dad9d0;
+  --color-cloud: #f5f6f2;
+  --color-white: #ffffff;
+
+  /* Semantic roles */
+  --background: var(--color-cloud);
+  --foreground: var(--color-ink);
+  --surface: var(--color-white);
+  --surface-muted: var(--color-sand);
+  --surface-inverse: var(--color-ink);
+  --muted-foreground: #586266;
+  --border: #dad9d0;
+  --border-strong: #b8bfc1;
+  --primary: var(--color-ink);
+  --primary-foreground: var(--color-white);
+  --accent: var(--color-aqua);
+  --accent-foreground: var(--color-ink);
+  --link: var(--color-cyan);
+  --link-hover: #0f7e9f;
+  --ring: var(--color-cyan);
+  --success: #2fa88a;
+  --warning: #d9a441;
+  --danger: #c9484d;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+}
+
+@theme inline {
+  /* Palette */
+  --color-ink: var(--color-ink);
+  --color-aqua: var(--color-aqua);
+  --color-cyan: var(--color-cyan);
+  --color-teal: var(--color-teal);
+  --color-sand: var(--color-sand);
+  --color-cloud: var(--color-cloud);
+
+  /* Semantic (usable as bg-background, text-foreground, border-border, …) */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-inverse: var(--surface-inverse);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-link: var(--link);
+  --color-link-hover: var(--link-hover);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+
+  /* Typography — Inter for body/UI, Manrope for headings */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-heading: var(--font-manrope), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+a {
+  color: var(--link);
+  text-underline-offset: 0.15em;
+}
+a:hover {
+  color: var(--link-hover);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
