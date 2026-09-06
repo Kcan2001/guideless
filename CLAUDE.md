@@ -46,6 +46,14 @@ pnpm db:types           # regenerate packages/types/src/database.ts — commit t
 pnpm check              # lint + typecheck + test + build (run before finishing any task)
 ```
 
+## Admin (/admin) — see docs/admin.md
+
+Staff-only via `requireStaff(roles)` in `apps/web/lib/auth/staff.ts`; role groups CONTENT / OPS /
+FINANCE mirror the SQL helpers. Mutations are Server Actions in `apps/web/lib/admin/actions/*`:
+`requireStaff` → `parseForm(zod)` → Supabase as the staff user (RLS) → `revalidatePath` → `flash()`.
+Grant a role locally: `insert into public.user_roles (user_id, role) select id, 'admin' from
+auth.users where email = '…';`
+
 ## Migration conventions (see docs/database.md)
 
 - One migration per concern: `supabase/migrations/<timestamp>_<name>.sql`. Forward-only.
