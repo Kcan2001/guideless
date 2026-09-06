@@ -38,6 +38,14 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 96
         }
+      ],
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "color": "#0B2025",
+          "defaultChannel": "operational"
+        }
       ]
     ],
     "experiments": {
