@@ -65,6 +65,19 @@ pnpm dev:web          # http://localhost:3000
 pnpm dev:mobile       # Expo dev server; scan QR with Expo Go or a dev build
 ```
 
+## Payments locally (Stripe test mode)
+
+1. Put `STRIPE_SECRET_KEY=sk_test_…` and `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_…` in
+   `apps/web/.env.local`. Without them checkout stops at the payment step with a clear message and
+   creates no booking or hold.
+2. Forward webhooks: `stripe listen --forward-to localhost:3000/api/webhooks/stripe` and copy the
+   printed `whsec_…` into `STRIPE_WEBHOOK_SECRET`.
+3. Pay with `4242 4242 4242 4242`. The webhook confirms the booking; `/account` and the
+   confirmation page reflect it. Replaying the event (`stripe events resend <id>`) is a no-op
+   thanks to `webhook_events`.
+4. Emails: with no `RESEND_API_KEY` the booking-confirmed email is recorded in `email_events`
+   as `skipped` and logged to the server console.
+
 ## Observability
 
 Sentry (web + mobile) for errors and performance; PostHog for product analytics; Vercel and

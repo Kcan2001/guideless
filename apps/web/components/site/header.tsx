@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { brand } from "@guideless/config";
+import { SessionNav } from "@/components/auth/session-nav";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -40,6 +41,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-3">
+          <SessionNav className="hidden text-sm text-foreground no-underline hover:text-link sm:inline" />
           <Link
             href="/tours"
             className={cn(buttonVariants({ size: "sm" }), "hidden sm:inline-flex")}

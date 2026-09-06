@@ -355,6 +355,45 @@ export type Database = {
           },
         ];
       };
+      booking_notes: {
+        Row: {
+          body: string;
+          booking_id: string;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+        };
+        Insert: {
+          body: string;
+          booking_id: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+        };
+        Update: {
+          body?: string;
+          booking_id?: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "booking_notes_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "booking_notes_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings_public";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       booking_preferences: {
         Row: {
           accessibility_needs: string | null;
@@ -469,7 +508,6 @@ export type Database = {
           discount_amount: number;
           hold_expires_at: string | null;
           id: string;
-          internal_notes: string | null;
           payment_status: Database["public"]["Enums"]["payment_status"];
           refund_percentage: number | null;
           status: Database["public"]["Enums"]["booking_status"];
@@ -497,7 +535,6 @@ export type Database = {
           discount_amount?: number;
           hold_expires_at?: string | null;
           id?: string;
-          internal_notes?: string | null;
           payment_status?: Database["public"]["Enums"]["payment_status"];
           refund_percentage?: number | null;
           status?: Database["public"]["Enums"]["booking_status"];
@@ -525,7 +562,6 @@ export type Database = {
           discount_amount?: number;
           hold_expires_at?: string | null;
           id?: string;
-          internal_notes?: string | null;
           payment_status?: Database["public"]["Enums"]["payment_status"];
           refund_percentage?: number | null;
           status?: Database["public"]["Enums"]["booking_status"];
@@ -841,6 +877,45 @@ export type Database = {
           },
         ];
       };
+      departure_notes: {
+        Row: {
+          body: string;
+          created_at: string;
+          created_by: string | null;
+          departure_id: string;
+          id: string;
+        };
+        Insert: {
+          body: string;
+          created_at?: string;
+          created_by?: string | null;
+          departure_id: string;
+          id?: string;
+        };
+        Update: {
+          body?: string;
+          created_at?: string;
+          created_by?: string | null;
+          departure_id?: string;
+          id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "departure_notes_departure_id_fkey";
+            columns: ["departure_id"];
+            isOneToOne: false;
+            referencedRelation: "departures";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "departure_notes_departure_id_fkey";
+            columns: ["departure_id"];
+            isOneToOne: false;
+            referencedRelation: "departures_public";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       departures: {
         Row: {
           balance_due_date: string | null;
@@ -852,7 +927,6 @@ export type Database = {
           deposit_amount: number;
           end_date: string;
           id: string;
-          internal_notes: string | null;
           minimum_travelers: number;
           price_amount: number;
           start_date: string;
@@ -872,7 +946,6 @@ export type Database = {
           deposit_amount?: number;
           end_date: string;
           id?: string;
-          internal_notes?: string | null;
           minimum_travelers?: number;
           price_amount: number;
           start_date: string;
@@ -892,7 +965,6 @@ export type Database = {
           deposit_amount?: number;
           end_date?: string;
           id?: string;
-          internal_notes?: string | null;
           minimum_travelers?: number;
           price_amount?: number;
           start_date?: string;
@@ -3271,6 +3343,25 @@ export type Database = {
       assert_departure_capacity: {
         Args: { p_departure_id: string };
         Returns: undefined;
+      };
+      create_booking: {
+        Args: {
+          p_departure_id: string;
+          p_emergency_contact: Json;
+          p_payment_option?: string;
+          p_preferences: Json;
+          p_terms_version?: string;
+          p_travelers: Json;
+        };
+        Returns: {
+          amount_due_now: number;
+          booking_id: string;
+          confirmation_number: string;
+          currency: string;
+          deposit_amount: number;
+          hold_expires_at: string;
+          total_amount: number;
+        }[];
       };
       create_trip_for_group: { Args: { p_group_id: string }; Returns: string };
       generate_confirmation_number: { Args: never; Returns: string };

@@ -54,6 +54,26 @@ Supabase Realtime (Postgres changes / broadcast) for `messages`, `live_moments`,
 `trip_itinerary_items`, `notifications`. Subscribers receive only rows RLS allows. Chat presence
 uses Realtime presence channels keyed by room.
 
+## Checkout (Milestone 4, implemented)
+
+```
+/checkout/[departureId]  (client wizard, draft in sessionStorage)
+  travelers → preferences → account (inline LoginForm, next=?step=4) → terms → review & pay
+       │
+       ▼ startCheckout() Server Action  (apps/web/lib/bookings/actions.ts)
+  1. Zod: createBookingSchema            4. stripe.checkout.sessions.create (amount_due_now,
+  2. refuse if Stripe not configured        metadata.booking_id, expires_at = hold)
+  3. rpc create_booking(...)  ──────────► 5. service role: bookings.stripe_checkout_session_id
+     (security definer; pending_payment    6. redirect → Stripe
+      + 30-min hold; capacity trigger)
+                                          on Stripe error: hold released immediately (→ draft)
+/checkout/[departureId]/confirmation?booking=…   reads via RLS; shows "processing" until the
+                                                  webhook lands; fires GA4 purchase when confirmed
+```
+
+Auth: `/login` (magic link default, password, sign-up, Google), `/auth/callback` exchanges the
+code, `signOut` Server Action. `proxy.ts` refreshes sessions and gates /account, /trips, /admin.
+
 ## Webhooks and idempotency
 
 ```
