@@ -75,10 +75,38 @@ marks anything paid.
 
 ## HTTP hardening
 
-`next.config.ts` sets `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`,
-`Permissions-Policy`. Add a CSP once third-party script needs (GA4, PostHog, Stripe, Maps) are
-finalized. Server Actions carry Next.js CSRF protection; Route Handlers that mutate must check
-origin or a signed token.
+`next.config.ts` sets `Strict-Transport-Security` (2 years, preload), `X-Content-Type-Options`,
+`X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`
+(camera, microphone, geolocation, payment off) and a **Content-Security-Policy**:
+
+- `default-src 'self'`; `object-src 'none'`; `base-uri 'self'`; `frame-ancestors 'none'`.
+- `script-src 'self' 'unsafe-inline'` + Google Tag Manager, PostHog, Stripe.js. `'unsafe-inline'`
+  stays because marketing pages are statically generated (no per-request nonce); moving to
+  nonce-based `'strict-dynamic'` is the next hardening step and needs those pages to render
+  dynamically.
+- `connect-src` allows only the configured Supabase URL (https + wss), GA4, PostHog, Stripe and
+  Sentry ingest. `frame-src` only Stripe. `form-action 'self' https://checkout.stripe.com`.
+- `img-src 'self' data: blob: https:` (Supabase Storage / Instagram thumbnails); tighten to the
+  storage host once assets move off placeholders.
+
+Server Actions carry Next.js origin checks; the Stripe webhook is the only unauthenticated Route
+Handler and verifies the Stripe signature before touching the database. Playwright asserts the
+CSP and `nosniff` headers on every CI run (`apps/web/e2e/marketing.spec.ts`).
+
+### Security review (Milestone 7, 2026-09-06)
+
+Reviewed: RLS on every table (pgTAP), privilege boundary of the three Supabase clients, Server
+Actions (Zod + role checks), Stripe webhook idempotency, trip activation (service role only),
+Live Moments (members only; drafts and `staff_only` never leave the database), Sentry scrubbing.
+
+| #   | Finding                                                                                 | Status                                                                                                                                   |
+| --- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | No CSP; clickjacking relied on `X-Frame-Options` only                                   | Fixed: CSP above, `frame-ancestors 'none'`, HSTS                                                                                         |
+| 2   | Error reporting could ship request bodies, cookies or tokens                            | Fixed: `lib/sentry-scrub.ts` `beforeSend` redacts sensitive keys on every runtime                                                        |
+| 3   | Traveler-suggested Live Moments can set `is_official` / `visibility` themselves         | Mitigated: RLS insert policy requires trip membership; admin shows a "Traveler" badge for non-official; add a check constraint if abused |
+| 4   | `script-src 'unsafe-inline'` weakens XSS defence                                        | Accepted for now (see nonce note above)                                                                                                  |
+| 5   | `img-src https:` is broad                                                               | Accepted: restrict to the storage host after asset migration                                                                             |
+| 6   | Mobile menu `<summary>` was not exposed as a button to keyboard and screen-reader users | Fixed: `role="button"`, verified by the Pixel 7 Playwright project                                                                       |
 
 ## Audit logging
 
@@ -100,8 +128,10 @@ support_assignment, message_deleted. Insert-only; no update/delete policies for 
 ## Never log
 
 Passwords, access tokens, Stripe secrets, card data, passport numbers, sensitive personal
-information. Log ids and diagnostic metadata. Sentry scrubbing rules must be configured before
-production traffic.
+information. Log ids and diagnostic metadata. Sentry is initialised with `sendDefaultPii: false`
+on every runtime; `apps/web/lib/sentry-scrub.ts` strips cookies, redacts header/body/extra keys
+matching password, token, secret, card, passport, dob, email or phone, masks auth codes in URLs and
+keeps only `user.id`. The mobile app drops request and response bodies from breadcrumbs.
 
 ## Environments
 

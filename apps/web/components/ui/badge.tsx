@@ -12,7 +12,7 @@ export const badgeVariants = cva(
         optional: "border border-border text-muted-foreground",
         guideless: "bg-ink text-cloud",
         traveler: "border border-teal text-ink",
-        info: "bg-cyan/15 text-[#0F7E9F]",
+        info: "bg-cyan/15 text-[#0B6680]",
         warning: "bg-warning/15 text-[#8A6414]",
         danger: "bg-danger/15 text-[#9B2F33]",
       },

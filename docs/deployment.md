@@ -27,6 +27,15 @@ See [`.env.example`](../.env.example). Web reads `NEXT_PUBLIC_*` (public) and un
 server secrets; mobile reads `EXPO_PUBLIC_*` only — it must never hold a secret.
 `apps/web/lib/env.ts` validates variables with Zod at startup.
 
+Observability variables (all optional; the features are no-ops when unset):
+
+| Variable                                              | Where           | Purpose                                                           |
+| ----------------------------------------------------- | --------------- | ----------------------------------------------------------------- |
+| `NEXT_PUBLIC_SENTRY_DSN`                              | web             | Enables Sentry on the browser, Node and Edge runtimes             |
+| `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT`   | web (CI/Vercel) | Source-map upload at build time; skipped when the token is absent |
+| `EXPO_PUBLIC_SENTRY_DSN`                              | mobile          | Enables `@sentry/react-native` (wraps the root layout)            |
+| `NEXT_PUBLIC_POSTHOG_KEY` / `EXPO_PUBLIC_POSTHOG_KEY` | web / mobile    | Product analytics (see docs/api.md, Analytics events)             |
+
 Secrets live in Vercel project settings, Supabase project secrets (`supabase secrets set`) and
 EAS secrets. Never in git.
 
@@ -35,12 +44,20 @@ EAS secrets. Never in git.
 ```
 PR / push main
  ├── check:    pnpm install → format:check → lint → typecheck → test → build (web)
- └── database: supabase start (migrations + seeds) → supabase db lint → supabase test db (pgTAP)
+ ├── database: supabase start (migrations + seeds) → supabase db lint → supabase test db (pgTAP)
+ └── e2e:      (after check) supabase start → next build against local Supabase → playwright test
 ```
 
-Add when the corresponding code exists: Playwright E2E against the Vercel preview; Expo
-`eas build --profile preview` on release branches; `supabase db push` and
-`supabase functions deploy` on `main` (guarded by the `production` GitHub environment).
+End-to-end tests live in `apps/web/e2e/` (`pnpm --filter web test:e2e`). `playwright.config.ts`
+does not build: it starts `next start -p 3100` from the existing `.next` output, so run
+`pnpm --filter web build` first. Two projects run, desktop Chromium and a Pixel 7 emulation for
+the marketing spec. Specs cover the marketing funnel (home, list filters, tour detail with
+JSON-LD, 404, departure page, sitemap/robots, security headers) and the customer funnel (sign
+up, wizard, payment step refused cleanly without Stripe, protected-route redirects).
+
+Add when the corresponding code exists: Expo `eas build --profile preview` on release branches;
+`supabase db push` and `supabase functions deploy` on `main` (guarded by the `production`
+GitHub environment).
 
 ## Release flow
 
@@ -78,9 +95,41 @@ pnpm dev:mobile       # Expo dev server; scan QR with Expo Go or a dev build
 4. Emails: with no `RESEND_API_KEY` the booking-confirmed email is recorded in `email_events`
    as `skipped` and logged to the server console.
 
+## Social publishing (per environment)
+
+The `social-publish` Edge Function runs only where these exist (see docs/marketing.md):
+
+```bash
+supabase secrets set SOCIAL_PUBLISH_SECRET=<random-64-hex> SOCIAL_DRY_RUN=0   # staging: SOCIAL_DRY_RUN=1
+supabase functions deploy social-publish
+# in the SQL editor of that project:
+select vault.create_secret('https://<ref>.supabase.co/functions/v1/social-publish', 'social_publish_url');
+select vault.create_secret('<same random>', 'social_publish_secret');
+insert into public.social_accounts (platform, external_id, username, access_token, token_expires_at)
+values ('instagram', '<ig-user-id>', 'guidelesstravel', '<long-lived-token>', now() + interval '60 days');
+```
+
+Staging publishes nothing (dry run) but exercises claiming, so a broken queue shows up before prod.
+
 ## Observability
 
 Sentry (web + mobile) for errors and performance; PostHog for product analytics; Vercel and
-Supabase dashboards for infrastructure. Operational metrics to expose in admin: booking success
-rate, payment failure rate, support response time, trip issue count, supplier confirmation rate,
-push delivery rate.
+Supabase dashboards for infrastructure.
+
+- **Web Sentry**: `instrumentation.ts` (server and edge init plus `onRequestError`),
+  `instrumentation-client.ts` (browser init plus router transitions), `app/global-error.tsx`.
+  Session Replay is off (sample rates 0); traces sampled at 10%. Everything passes through
+  `lib/sentry-scrub.ts`.
+- **Mobile Sentry**: initialised in `src/app/_layout.tsx` only when `EXPO_PUBLIC_SENTRY_DSN` is
+  set; the root layout is wrapped with `Sentry.wrap` so navigation breadcrumbs and native crashes
+  are captured. Add the `@sentry/react-native/expo` config plugin to `app.config.ts` (with
+  `SENTRY_AUTH_TOKEN` in EAS secrets) when source-map upload is wanted.
+- **Lighthouse (2026-09-06, mobile emulation, local production build, after the Milestone 7
+  fixes)**: home 78 / 100 / 100 / 100, trips list 73 / 100 / 100 / 100, tour detail
+  84 / 100 / 100 / 100, how-it-works 87 / 100 / 100 / 100 (performance / accessibility / best
+  practices / SEO). Fixes: link and muted-text tokens darkened to clear WCAG AA contrast, card
+  heading levels follow the page outline, image links carry their visible text in the accessible
+  name, the mobile menu toggle is a real button, Zod runs jitless so the CSP reports no `eval`
+  probe, and Manrope ships as one variable font file. LCP is the hero `h1` waiting on that web
+  font under simulated slow 4G; remaining performance debt is unused JavaScript from the Sentry
+  and PostHog client bundles (about 190 KiB).

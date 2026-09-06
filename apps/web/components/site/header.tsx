@@ -50,6 +50,8 @@ export function SiteHeader() {
           </Link>
           <details className="relative md:hidden">
             <summary
+              role="button"
+              aria-haspopup="menu"
               className="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-lg border border-border text-foreground [&::-webkit-details-marker]:hidden"
               aria-label="Open menu"
             >

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TRIP_STATUSES } from "@guideless/types";
-import { formatDate, formatDateRange } from "@guideless/utils";
+import { formatDate, formatDateRange, formatInZone } from "@guideless/utils";
 import { Flash } from "@/components/admin/flash";
 import { ItineraryEditor } from "@/components/admin/itinerary-editor";
 import { SubmitButton } from "@/components/admin/submit-button";
@@ -10,7 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import {
   addTripItemAction,
   addTripNoteAction,
+  createLiveMomentAction,
   deleteTripItemAction,
+  setLiveMomentStatusAction,
   setTripStatusAction,
   updateTripItemAction,
 } from "@/lib/admin/actions/trips";
@@ -28,7 +30,7 @@ export default async function AdminTripPage(
   ]);
   const data = await getTripAdmin(tripId);
   if (!data || data.departure.id !== id) notFound();
-  const { trip, departure, tour, days, members, notes, destinations } = data;
+  const { trip, departure, tour, days, members, notes, destinations, moments } = data;
   const canOps = ctx.can(OPS_ROLES);
 
   return (
@@ -114,6 +116,154 @@ export default async function AdminTripPage(
               ])}
               empty="No members yet — travelers are enrolled when their booking is confirmed at activation."
             />
+          </Section>
+
+          <Section
+            id="moments"
+            title={`Live Moments (${moments.length})`}
+            description="Optional gatherings announced to the group. Travelers can suggest their own; official ones carry the Guideless badge."
+          >
+            {canOps && (
+              <form action={createLiveMomentAction} className="mb-4 grid gap-2 sm:grid-cols-2">
+                <input type="hidden" name="departureId" value={departure.id} />
+                <input type="hidden" name="tripId" value={trip.id} />
+                <label className="text-sm sm:col-span-2">
+                  <span className="sr-only">Title</span>
+                  <input
+                    name="title"
+                    placeholder="e.g. Sunset drinks on the terrace"
+                    className={inputClass}
+                    required
+                    minLength={3}
+                    maxLength={120}
+                  />
+                </label>
+                <label className="text-sm">
+                  <span className="sr-only">Date</span>
+                  <input type="date" name="date" className={inputClass} required />
+                </label>
+                <div className="flex gap-2">
+                  <label className="flex-1 text-sm">
+                    <span className="sr-only">Start time</span>
+                    <input type="time" name="startTime" className={inputClass} required />
+                  </label>
+                  <label className="flex-1 text-sm">
+                    <span className="sr-only">End time</span>
+                    <input type="time" name="endTime" className={inputClass} />
+                  </label>
+                </div>
+                <label className="text-sm">
+                  <span className="sr-only">Location</span>
+                  <input
+                    name="locationName"
+                    placeholder="Where (e.g. Hotel lobby)"
+                    className={inputClass}
+                    maxLength={200}
+                  />
+                </label>
+                <label className="text-sm">
+                  <span className="sr-only">Capacity</span>
+                  <input
+                    type="number"
+                    name="capacity"
+                    min={1}
+                    max={500}
+                    placeholder="Max people (optional)"
+                    className={inputClass}
+                  />
+                </label>
+                <label className="text-sm sm:col-span-2">
+                  <span className="sr-only">Details</span>
+                  <textarea
+                    name="description"
+                    rows={2}
+                    placeholder="Details travelers should know (optional)"
+                    className={inputClass}
+                    maxLength={2000}
+                  />
+                </label>
+                <div className="flex items-center gap-2 sm:col-span-2">
+                  <select
+                    name="status"
+                    defaultValue="scheduled"
+                    className={inputClass}
+                    aria-label="Publish state"
+                  >
+                    <option value="scheduled">Announce now</option>
+                    <option value="draft">Save as draft</option>
+                  </select>
+                  <SubmitButton size="sm">Add moment</SubmitButton>
+                </div>
+              </form>
+            )}
+            <ul className="space-y-3 text-sm">
+              {moments.map((m) => (
+                <li key={m.id} className="rounded-lg bg-cloud p-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <p className="font-medium">
+                        {m.title}{" "}
+                        {m.is_official ? (
+                          <Badge variant="guideless">Guideless</Badge>
+                        ) : (
+                          <Badge variant="traveler">Traveler</Badge>
+                        )}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatInZone(m.start_at, m.timezone)}
+                        {m.location_name ? ` · ${m.location_name}` : ""} · {m.joined} going
+                        {m.capacity ? ` of ${m.capacity}` : ""}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <StatusBadge kind="generic" status={m.status} />
+                      {canOps && (
+                        <form action={setLiveMomentStatusAction} className="flex gap-1">
+                          <input type="hidden" name="departureId" value={departure.id} />
+                          <input type="hidden" name="tripId" value={trip.id} />
+                          <input type="hidden" name="momentId" value={m.id} />
+                          {m.status === "draft" && (
+                            <SubmitButton
+                              size="sm"
+                              variant="secondary"
+                              name="status"
+                              value="scheduled"
+                            >
+                              Announce
+                            </SubmitButton>
+                          )}
+                          {m.status === "scheduled" && (
+                            <SubmitButton size="sm" variant="secondary" name="status" value="live">
+                              Start
+                            </SubmitButton>
+                          )}
+                          {m.status === "live" && (
+                            <SubmitButton
+                              size="sm"
+                              variant="secondary"
+                              name="status"
+                              value="completed"
+                            >
+                              Finish
+                            </SubmitButton>
+                          )}
+                          {(m.status === "draft" ||
+                            m.status === "scheduled" ||
+                            m.status === "live") && (
+                            <SubmitButton size="sm" variant="ghost" name="status" value="cancelled">
+                              Cancel
+                            </SubmitButton>
+                          )}
+                        </form>
+                      )}
+                    </div>
+                  </div>
+                </li>
+              ))}
+              {moments.length === 0 && (
+                <li className="text-muted-foreground">Nothing planned yet.</li>
+              )}
+            </ul>
           </Section>
 
           <Section id="notes" title="Staff notes" description="Never shown to travelers.">

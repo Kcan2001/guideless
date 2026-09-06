@@ -1,7 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { itineraryItemSchema, noteSchema, uuidSchema } from "@guideless/validation";
+import {
+  itineraryItemSchema,
+  liveMomentFormSchema,
+  noteSchema,
+  uuidSchema,
+} from "@guideless/validation";
+import { zonedToUtc } from "@guideless/utils";
 import { OPS_ROLES, requireStaff } from "@/lib/auth/staff";
 import { dbErrorMessage, flash, parseForm } from "@/lib/admin/form";
 import { createClient } from "@/lib/supabase/server";
@@ -131,4 +137,64 @@ export async function setTripStatusAction(fd: FormData): Promise<void> {
   revalidatePath(to);
   revalidatePath(`/admin/departures/${departureId}`);
   flash(to, "ok", `Trip marked ${status}.`);
+}
+
+// ── Live Moments (spec §24) ───────────────────────────────────────────────────
+export async function createLiveMomentAction(fd: FormData): Promise<void> {
+  const ctx = await requireStaff(OPS_ROLES);
+  const departureId = id(fd, "departureId");
+  const tripId = id(fd, "tripId");
+  const to = back(departureId, tripId, "#moments");
+  const parsed = parseForm(liveMomentFormSchema, fd);
+  if (!parsed.ok) flash(to, "error", parsed.error);
+  const m = parsed.data;
+  const sb = await createClient();
+  const { data: trip } = await sb.from("trips").select("timezone").eq("id", tripId).maybeSingle();
+  const timezone = m.timezone ?? trip?.timezone ?? "Europe/Paris";
+  const startAt = zonedToUtc(m.date, m.startTime, timezone);
+  const endAt = m.endTime ? zonedToUtc(m.date, m.endTime, timezone) : null;
+  const { error } = await sb.from("live_moments").insert({
+    trip_id: tripId,
+    created_by: ctx.user.id,
+    title: m.title,
+    description: m.description ?? null,
+    start_at: startAt.toISOString(),
+    end_at: endAt ? endAt.toISOString() : null,
+    timezone,
+    location_name: m.locationName ?? null,
+    address: m.address ?? null,
+    capacity: m.capacity ?? null,
+    status: m.status,
+    visibility: "trip_member",
+    is_official: true,
+  });
+  if (error) flash(to, "error", dbErrorMessage(error));
+  revalidatePath(to);
+  flash(
+    to,
+    "ok",
+    m.status === "scheduled"
+      ? "Live Moment announced to the group."
+      : "Live Moment saved as draft.",
+  );
+}
+
+export async function setLiveMomentStatusAction(fd: FormData): Promise<void> {
+  await requireStaff(OPS_ROLES);
+  const departureId = id(fd, "departureId");
+  const tripId = id(fd, "tripId");
+  const momentId = id(fd, "momentId");
+  const to = back(departureId, tripId, "#moments");
+  const status = fd.get("status");
+  const allowed = ["draft", "scheduled", "live", "completed", "cancelled"] as const;
+  if (typeof status !== "string" || !(allowed as readonly string[]).includes(status))
+    flash(to, "error", "Invalid status.");
+  const sb = await createClient();
+  const { error } = await sb
+    .from("live_moments")
+    .update({ status: status as (typeof allowed)[number] })
+    .eq("id", momentId);
+  if (error) flash(to, "error", dbErrorMessage(error));
+  revalidatePath(to);
+  flash(to, "ok", `Live Moment marked ${status}.`);
 }

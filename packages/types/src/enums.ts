@@ -207,6 +207,23 @@ export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 export const WEBHOOK_EVENT_STATUSES = ["received", "processed", "failed", "skipped"] as const;
 export type WebhookEventStatus = (typeof WEBHOOK_EVENT_STATUSES)[number];
 
+// ── Marketing / social publishing (migration 025) ────────────────────────────
+export const SOCIAL_PLATFORMS = ["instagram"] as const;
+export type SocialPlatform = (typeof SOCIAL_PLATFORMS)[number];
+
+export const SOCIAL_MEDIA_KINDS = ["image", "carousel"] as const;
+export type SocialMediaKind = (typeof SOCIAL_MEDIA_KINDS)[number];
+
+export const SOCIAL_POST_STATUSES = [
+  "draft",
+  "scheduled",
+  "publishing",
+  "published",
+  "failed",
+  "cancelled",
+] as const;
+export type SocialPostStatus = (typeof SOCIAL_POST_STATUSES)[number];
+
 /** ISO 4217 codes we sell in. Extend deliberately; each needs Stripe + pricing support. */
 export const CURRENCIES = ["USD", "EUR", "GBP"] as const;
 export type Currency = (typeof CURRENCIES)[number];

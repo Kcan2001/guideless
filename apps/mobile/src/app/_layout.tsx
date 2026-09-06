@@ -8,6 +8,7 @@ import { useFonts } from "expo-font";
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
+import * as Sentry from "@sentry/react-native";
 import { PostHogProvider } from "posthog-react-native";
 import { useEffect, type ReactNode } from "react";
 import { useColorScheme } from "react-native";
@@ -20,6 +21,27 @@ import { usePushRegistration } from "@/lib/notifications/push";
 import { QueryProvider } from "@/lib/query";
 
 SplashScreen.preventAutoHideAsync();
+
+/**
+ * Crash reporting (spec §85). No-op without a DSN; never sends PII — travelers are identified in
+ * Sentry only by an opaque user id, and breadcrumbs skip request bodies.
+ */
+const SENTRY_DSN = process.env.EXPO_PUBLIC_SENTRY_DSN;
+if (SENTRY_DSN) {
+  Sentry.init({
+    dsn: SENTRY_DSN,
+    sendDefaultPii: false,
+    tracesSampleRate: 0.1,
+    enableAutoSessionTracking: true,
+    beforeBreadcrumb(breadcrumb) {
+      if (breadcrumb.category === "xhr" || breadcrumb.category === "fetch") {
+        delete breadcrumb.data?.request_body;
+        delete breadcrumb.data?.response_body;
+      }
+      return breadcrumb;
+    },
+  });
+}
 
 /** PostHog context (owned by the analytics module); a passthrough when no key is configured. */
 function Analytics({ children }: { children: ReactNode }) {
@@ -49,7 +71,7 @@ function AuthGate({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-export default function RootLayout() {
+function RootLayout() {
   const scheme = useColorScheme();
   const dark = scheme === "dark";
   const c = Colors[dark ? "dark" : "light"];
@@ -108,6 +130,10 @@ export default function RootLayout() {
                   options={{ title: "Contact Guideless", presentation: "modal" }}
                 />
                 <Stack.Screen name="support/[threadId]" options={{ title: "Support" }} />
+                <Stack.Screen
+                  name="moments/new"
+                  options={{ title: "Suggest a moment", presentation: "modal" }}
+                />
               </Stack>
             </AuthGate>
           </ThemeProvider>
@@ -116,3 +142,5 @@ export default function RootLayout() {
     </Analytics>
   );
 }
+
+export default SENTRY_DSN ? Sentry.wrap(RootLayout) : RootLayout;

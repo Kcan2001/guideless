@@ -34,15 +34,16 @@ RLS enforces authorization for everything in this channel.
 Server Actions / Route Handlers (web) or Edge Functions (`supabase/functions/`) using the
 service role, for operations that must bypass or exceed the user's own permissions:
 
-| Operation                          | Where                                                 | Why privileged                                    |
-| ---------------------------------- | ----------------------------------------------------- | ------------------------------------------------- |
-| Create Stripe Checkout session     | Server Action `createCheckout`                        | Stripe secret; writes booking hold                |
-| Stripe webhook                     | Route Handler `/api/webhooks/stripe` or Edge Function | Signature verification, updates payments/bookings |
-| Refund                             | Server Action (finance/admin)                         | Stripe secret, audit log                          |
-| Notification fan-out               | Edge Function `notify`                                | Writes to many users                              |
-| Release expired holds              | Scheduled (pg_cron → function)                        | Cross-customer inventory                          |
-| Activate departure → trip snapshot | Server Action (trip_staff/admin)                      | Bulk copy across tables                           |
-| Supplier API calls (Phase 3)       | Edge Function adapters                                | Vendor credentials                                |
+| Operation                          | Where                                                         | Why privileged                                    |
+| ---------------------------------- | ------------------------------------------------------------- | ------------------------------------------------- |
+| Create Stripe Checkout session     | Server Action `createCheckout`                                | Stripe secret; writes booking hold                |
+| Stripe webhook                     | Route Handler `/api/webhooks/stripe` or Edge Function         | Signature verification, updates payments/bookings |
+| Refund                             | Server Action (finance/admin)                                 | Stripe secret, audit log                          |
+| Notification fan-out               | Edge Function `notify`                                        | Writes to many users                              |
+| Release expired holds              | Scheduled (pg_cron → function)                                | Cross-customer inventory                          |
+| Publish due social posts           | Scheduled (pg_cron → pg_net → Edge Function `social-publish`) | Instagram token; writes `social_posts` result     |
+| Activate departure → trip snapshot | Server Action (trip_staff/admin)                              | Bulk copy across tables                           |
+| Supplier API calls (Phase 3)       | Edge Function adapters                                        | Vendor credentials                                |
 
 Every privileged action: validates input with Zod → checks caller role (for admin actions) →
 performs work in a transaction → writes `audit_logs` where sensitive → returns a human error on
@@ -92,6 +93,20 @@ It writes `notifications` (in_app), enqueues push via Expo (respecting `push_tok
 via Resend (templates in `supabase/functions/_shared/email/`), honoring
 `notification_preferences` — except operational notifications during an active trip.
 
+Two database triggers (migration 027) write `notifications` rows without application code,
+through the `service_role`-only function `notify_trip_members(trip_id, category, type, title,
+body, deep_link, exclude_user)`:
+
+- `live_moments_notify`: a moment inserted as, or moved from draft to, `scheduled` or `live`
+  notifies every current member except its creator (`social` / `live_moment`, deep link
+  `{kind:'live_moment', tripId, momentId}`). `staff_only` moments never notify.
+- `trip_items_notify`: an itinerary item whose status, start time, title or location changed
+  notifies all members (`operational` / `itinerary_change`, deep link
+  `{kind:'itinerary_item', tripId, itemId}`).
+
+Push and email delivery for those rows is the notification worker's job (not yet built); the
+app reads `notifications` directly.
+
 ## Deep links
 
 `guideless://trip/{tripId}` · `guideless://trip/{tripId}/itinerary/{itemId}` ·
@@ -109,6 +124,7 @@ with ids only, never PII.
 
 GA4 (web marketing): `view_tour, view_departure, start_checkout, add_traveler, begin_payment,
 purchase(tour_id, departure_id, currency, value), search_tours, filter_tours, view_destination`.
-PostHog (product, web + mobile): `trip_opened, itinerary_item_viewed, recommendation_opened,
-map_opened, live_moment_joined, chat_opened, message_sent, support_started, document_opened,
-trip_completed`. No PII in either.
+PostHog (product, web + mobile): `app_opened, trip_opened, itinerary_item_viewed,
+recommendation_opened, map_opened, live_moment_joined, chat_opened, message_sent,
+support_started, document_opened, trip_completed`. Mobile events carry ids and enum values only
+(`trip_id`, `item_id`, `type`, `source`, `category`, `moment_id`). No PII in either.

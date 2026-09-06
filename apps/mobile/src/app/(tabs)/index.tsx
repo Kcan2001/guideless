@@ -30,6 +30,7 @@ import {
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { useCurrentTrip } from "@/hooks/use-trip";
+import { track } from "@/lib/analytics";
 import {
   currentDay,
   greeting,
@@ -49,6 +50,11 @@ export default function TripHomeScreen() {
     const t = setInterval(() => setNow(new Date()), 60_000);
     return () => clearInterval(t);
   }, []);
+  const openedTripId = detail?.trip.id;
+  const openedTripStatus = detail?.trip.status;
+  useEffect(() => {
+    if (openedTripId) track("trip_opened", { trip_id: openedTripId, status: openedTripStatus });
+  }, [openedTripId, openedTripStatus]);
 
   if (trips.isPending || (current && isPending && !detail)) {
     return (
@@ -149,11 +155,12 @@ export default function TripHomeScreen() {
             </Muted>
             {hotel.address && (
               <Pressable
-                onPress={() =>
+                onPress={() => {
+                  track("map_opened", { source: "accommodation" });
                   Linking.openURL(
                     `https://maps.google.com/?q=${encodeURIComponent(`${hotel.name}, ${hotel.address}`)}`,
-                  )
-                }
+                  );
+                }}
                 style={styles.inlineLink}
                 accessibilityRole="link"
               >

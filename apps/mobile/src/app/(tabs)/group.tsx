@@ -1,9 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
+import { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { emptyStates } from "@guideless/config";
+import { formatInZone } from "@guideless/utils";
 import {
+  Button,
   Card,
   EmptyState,
   Eyebrow,
@@ -18,8 +21,11 @@ import {
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { useCurrentTrip } from "@/hooks/use-trip";
+import { track } from "@/lib/analytics";
 import { useSession } from "@/lib/auth/session";
 import { chatService } from "@/lib/chat/service";
+import { momentsService } from "@/lib/moments/service";
+import { supabase } from "@/lib/supabase";
 
 const ROOM_ICON = {
   trip_group: "chatbubbles-outline",
@@ -35,6 +41,7 @@ const ROOM_HINT = {
 export default function GroupScreen() {
   const c = useTheme();
   const router = useRouter();
+  const qc = useQueryClient();
   const { user } = useSession();
   const { detail } = useCurrentTrip();
   const tripId = detail?.trip.id ?? null;
@@ -44,6 +51,34 @@ export default function GroupScreen() {
     enabled: !!tripId,
     queryFn: () => chatService.listRooms(tripId!),
     refetchInterval: 30_000,
+  });
+
+  const moments = useQuery({
+    queryKey: ["moments", tripId],
+    enabled: !!tripId && !!user,
+    queryFn: () => momentsService.list(tripId!, user!.id),
+  });
+
+  useEffect(() => {
+    if (!tripId) return;
+    const channel = momentsService.subscribe(tripId, () =>
+      qc.invalidateQueries({ queryKey: ["moments", tripId] }),
+    );
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [tripId, qc]);
+
+  const toggle = useMutation({
+    mutationFn: async ({ momentId, going }: { momentId: string; going: boolean }) => {
+      if (going) {
+        await momentsService.join(momentId, user!.id);
+        track("live_moment_joined", { moment_id: momentId });
+      } else {
+        await momentsService.leave(momentId, user!.id);
+      }
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["moments", tripId] }),
   });
 
   if (!detail) {
@@ -67,6 +102,70 @@ export default function GroupScreen() {
       <Eyebrow>Your group</Eyebrow>
       <H1>{members.length} travelers</H1>
       <Muted>Social, but optional. Say hello — or don&rsquo;t.</Muted>
+
+      <View style={{ gap: Spacing.two }}>
+        <View
+          style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}
+        >
+          <Eyebrow>Live Moments</Eyebrow>
+          <Button
+            title="Suggest one"
+            variant="ghost"
+            icon="add-circle-outline"
+            onPress={() => router.push("/moments/new")}
+          />
+        </View>
+        {moments.isPending ? (
+          <Loading />
+        ) : (moments.data ?? []).length === 0 ? (
+          <Card>
+            <H2 style={{ fontSize: 16 }}>Nothing planned right now.</H2>
+            <Muted>Coffee at ten? A sunset walk? Suggest a moment and see who&rsquo;s in.</Muted>
+          </Card>
+        ) : (
+          (moments.data ?? []).map((m) => {
+            const going = m.mine === "joined";
+            const full = m.capacity != null && m.joined >= m.capacity && !going;
+            return (
+              <Card key={m.id} tone={m.status === "live" ? "accent" : "default"}>
+                <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap" }}>
+                  {m.is_official ? (
+                    <Pill tone="accent">Guideless</Pill>
+                  ) : (
+                    <Pill>Traveler suggested</Pill>
+                  )}
+                  {m.status === "live" && <Pill tone="warning">Happening now</Pill>}
+                </View>
+                <H2>{m.title}</H2>
+                <Muted>
+                  {formatInZone(m.start_at, m.timezone)}
+                  {m.location_name ? ` · ${m.location_name}` : ""}
+                </Muted>
+                {m.description && <Muted style={{ fontSize: 14 }}>{m.description}</Muted>}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginTop: 4,
+                  }}
+                >
+                  <Muted style={{ fontSize: 13 }}>
+                    {m.joined} going{m.capacity ? ` · ${m.capacity} max` : ""}
+                  </Muted>
+                  <Button
+                    title={going ? "I'm going ✓" : full ? "Full" : "Join"}
+                    variant={going ? "secondary" : "primary"}
+                    disabled={full || toggle.isPending}
+                    onPress={() => toggle.mutate({ momentId: m.id, going: !going })}
+                    style={{ minHeight: 40, paddingHorizontal: 16 }}
+                  />
+                </View>
+              </Card>
+            );
+          })
+        )}
+      </View>
 
       <View style={{ gap: Spacing.two }}>
         <Eyebrow>Chat</Eyebrow>

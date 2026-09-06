@@ -21,15 +21,17 @@
   --surface: var(--color-white);
   --surface-muted: var(--color-sand);
   --surface-inverse: var(--color-ink);
-  --muted-foreground: #586266;
+  --muted-foreground: #4d575b; /* 5.2:1 on sand, 4.5:1 minimum */
   --border: #dad9d0;
   --border-strong: #b8bfc1;
   --primary: var(--color-ink);
   --primary-foreground: var(--color-white);
   --accent: var(--color-aqua);
   --accent-foreground: var(--color-ink);
-  --link: var(--color-cyan);
-  --link-hover: #0f7e9f;
+  /* Brand cyan (#17b1df) is 2.5:1 on white — decorative only. Text links use a darkened cyan
+     that clears WCAG AA (4.5:1) at body sizes. */
+  --link: #0b6680;
+  --link-hover: #084b5e;
   --ring: var(--color-cyan);
   --success: #2fa88a;
   --warning: #d9a441;

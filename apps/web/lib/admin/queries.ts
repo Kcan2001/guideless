@@ -448,6 +448,8 @@ export async function getTripAdmin(tripId: string) {
     { data: members },
     { data: notes },
     { data: destinations },
+    { data: moments },
+    { data: momentCounts },
   ] = await Promise.all([
     sb.from("departures").select("*").eq("id", trip.departure_id).maybeSingle(),
     sb
@@ -463,6 +465,8 @@ export async function getTripAdmin(tripId: string) {
       .eq("trip_id", tripId)
       .order("created_at", { ascending: false }),
     sb.from("destinations").select("*").order("name"),
+    sb.from("live_moments").select("*").eq("trip_id", tripId).order("start_at"),
+    sb.from("live_moment_counts").select("*"),
   ]);
   const { data: tour } = departure
     ? await sb.from("tours").select("*").eq("id", departure.tour_id).maybeSingle()
@@ -486,6 +490,10 @@ export async function getTripAdmin(tripId: string) {
     members: (members ?? []).map((m) => ({ ...m, profile: profileById.get(m.user_id) ?? null })),
     notes: notes ?? [],
     destinations: destinations ?? [],
+    moments: (moments ?? []).map((m) => ({
+      ...m,
+      joined: (momentCounts ?? []).find((c) => c.moment_id === m.id)?.joined ?? 0,
+    })),
   };
 }
 

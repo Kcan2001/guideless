@@ -24,6 +24,8 @@
     "db:migration": "supabase migration new",
     "db:types": "node scripts/gen-types.mjs && prettier --write packages/types/src/database.ts",
     "db:test": "supabase test db",
+    "social:import": "node scripts/social-import.mjs",
+    "social:import:dry": "node scripts/social-import.mjs --dry-run",
     "clean": "turbo run clean && rimraf node_modules"
   },
   "pnpm": {
@@ -38,6 +40,7 @@
   "devDependencies": {
     "prettier": "^3.6.2",
     "rimraf": "^6.0.1",
+    "sharp": "^0.35.4",
     "supabase": "^2.116.0",
     "turbo": "^2.10.12",
     "typescript": "^5.9.3"

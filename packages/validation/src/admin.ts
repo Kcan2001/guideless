@@ -168,6 +168,26 @@ export const supplierFormSchema = z.object({
   countryCode: optionalText(2),
 });
 
+// ── Live Moments (spec §24) ───────────────────────────────────────────────────
+export const liveMomentFormSchema = z.object({
+  title: z.string().trim().min(3).max(120),
+  description: optionalText(2000),
+  /** Local date in the moment's timezone. */
+  date: isoDateSchema,
+  startTime: localTimeSchema,
+  endTime: z.preprocess((v) => (v === "" ? null : v), localTimeSchema.nullable()).optional(),
+  /** Defaults to the trip's timezone when omitted. */
+  timezone: z.preprocess((v) => (v === "" ? undefined : v), z.string().min(1).max(64).optional()),
+  locationName: optionalText(200),
+  address: optionalText(300),
+  capacity: z.preprocess(
+    (v) => (v === "" || v === undefined ? null : v),
+    intField(1, 500).nullable(),
+  ),
+  status: z.enum(["draft", "scheduled"]).default("scheduled"),
+});
+export type LiveMomentForm = z.infer<typeof liveMomentFormSchema>;
+
 // ── Bookings ──────────────────────────────────────────────────────────────────
 export const cancelBookingSchema = z.object({
   reason: z.string().trim().min(3).max(1000),

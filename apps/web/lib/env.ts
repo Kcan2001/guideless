@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+// First Zod consumer on both runtimes: disable the eval-based JIT before any schema parses so the
+// web CSP (no 'unsafe-eval') never sees a probe. Mirrors packages/validation/src/index.ts.
+z.config({ jitless: true });
+
 /**
  * Validated environment access.
  *

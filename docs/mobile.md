@@ -45,6 +45,18 @@ components/itinerary-item.tsx, sync-badge.tsx, screen-tracker.tsx
   Notification taps route through `deepLinkToPath()`.
 - **Privacy**: group members see display name plus whatever a traveler toggled on (home country,
   bio). Never email, phone, DOB. Blocking hides a traveler's messages via RLS.
+- **Live Moments** (Group tab): scheduled and live moments for the trip with a Join / Leave
+  toggle (`live_moment_participants` upsert, counts from the `live_moment_counts` view) and
+  realtime refresh on `live_moments` changes. "Suggest one" opens `moments/new`, a modal form
+  (title, local date and time in the trip's zone, place, details, capacity) that inserts a
+  member-visible, non-official moment and joins the creator. Official moments come from admin.
+  Database triggers notify the other members when a moment is announced (migration 027).
+- **Analytics** (`src/lib/analytics.ts`, PostHog): `app_opened`, `trip_opened`,
+  `itinerary_item_viewed`, `map_opened` (item or accommodation), `recommendation_opened`,
+  `live_moment_joined`, `chat_opened`, `message_sent`, `support_started`; screens are tracked by
+  `ScreenTracker`. Ids only, never content or PII.
+- **Crash reporting**: `@sentry/react-native`, enabled only with `EXPO_PUBLIC_SENTRY_DSN`;
+  `sendDefaultPii: false`, network bodies dropped from breadcrumbs.
 
 ## Running
 
@@ -60,5 +72,6 @@ On a physical device against local Supabase, replace `127.0.0.1` with your machi
 
 ## Not yet
 
-Maps view, documents tab, Live Moments UI, photo sharing, offline queue for outgoing messages,
-E2E tests (Detox/Maestro), store assets (icons/splash are still Expo placeholders on ink).
+Maps view, documents tab, photo sharing, offline queue for outgoing messages, E2E tests
+(Detox/Maestro), store assets (icons/splash are still Expo placeholders on ink), Sentry source-map
+upload (`@sentry/react-native/expo` plugin in `app.config.ts`).

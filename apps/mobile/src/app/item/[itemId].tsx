@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect } from "react";
 import { Linking, View } from "react-native";
 import { formatDate } from "@guideless/utils";
 import { ITEM_ICON, ITEM_LABEL, timeLabel } from "@/components/itinerary-item";
@@ -18,6 +19,7 @@ import {
 } from "@/components/ui";
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
+import { track } from "@/lib/analytics";
 import { tripService } from "@/lib/trips/service";
 
 /** One itinerary item: what, when (local), where, who arranges it, and how to get help. */
@@ -30,6 +32,10 @@ export default function ItemScreen() {
     enabled: !!itemId,
     queryFn: () => tripService.getItem(itemId!),
   });
+  const itemType = item.data?.type;
+  useEffect(() => {
+    if (itemId && itemType) track("itinerary_item_viewed", { item_id: itemId, type: itemType });
+  }, [itemId, itemType]);
 
   if (item.isPending) {
     return (
@@ -104,13 +110,14 @@ export default function ItemScreen() {
             title="Open in Maps"
             variant="secondary"
             icon="navigate-outline"
-            onPress={() =>
+            onPress={() => {
+              track("map_opened", { source: "item", type: i.type });
               Linking.openURL(
                 i.latitude && i.longitude
                   ? `https://maps.google.com/?q=${i.latitude},${i.longitude}`
                   : `https://maps.google.com/?q=${encodeURIComponent(mapsQuery)}`,
-              )
-            }
+              );
+            }}
           />
         </Card>
       )}

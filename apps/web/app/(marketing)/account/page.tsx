@@ -9,6 +9,7 @@ import { signOut } from "@/lib/auth/actions";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { listMyBookings } from "@/lib/data/bookings";
+import { listMyTrips } from "@/lib/data/trips";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -46,13 +47,14 @@ export default async function AccountPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/account");
 
-  const bookings = await listMyBookings();
+  const [bookings, trips] = await Promise.all([listMyBookings(), listMyTrips()]);
   const upcoming = bookings.filter((b) =>
     ["confirmed", "pending_payment"].includes(b.booking.status),
   );
   const other = bookings.filter(
     (b) => !["confirmed", "pending_payment"].includes(b.booking.status),
   );
+  const liveTrips = trips.filter((t) => t.status !== "cancelled");
 
   return (
     <div className="mx-auto w-full max-w-5xl px-6 py-16">
@@ -70,6 +72,28 @@ export default async function AccountPage() {
           </Button>
         </form>
       </div>
+
+      {liveTrips.length > 0 && (
+        <section className="mt-12">
+          <h2 className="text-xl font-semibold">Open trip</h2>
+          <ul className="mt-4 grid gap-4 md:grid-cols-2">
+            {liveTrips.map((t) => (
+              <li key={t.id} className="rounded-xl border border-aqua bg-aqua/10 p-5">
+                <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                  {t.status}
+                </p>
+                <p className="mt-1 font-heading text-xl font-semibold">{t.name}</p>
+                <p className="text-sm text-muted-foreground">
+                  {formatDateRange(t.start_date, t.end_date)}
+                </p>
+                <Link href={`/trips/${t.id}`} className={buttonVariants({ size: "sm" }) + " mt-4"}>
+                  Open trip <ArrowRight className="h-4 w-4" aria-hidden />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {bookings.length === 0 ? (
         <div className="mt-12 rounded-xl border border-dashed border-border p-10">

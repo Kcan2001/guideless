@@ -7,6 +7,7 @@ import { Card, EmptyState, Eyebrow, H1, H2, Loading, Muted, Pill, Screen } from 
 import { Radius, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { useCurrentTrip } from "@/hooks/use-trip";
+import { track } from "@/lib/analytics";
 import { exploreService } from "@/lib/explore/service";
 import { currentDay } from "@/lib/trips/next-up";
 
@@ -94,12 +95,16 @@ export default function ExploreScreen() {
               {(r.maps_url || r.address) && (
                 <Pressable
                   accessibilityRole="link"
-                  onPress={() =>
+                  onPress={() => {
+                    track("recommendation_opened", {
+                      recommendation_id: r.id,
+                      category: r.categories[0],
+                    });
                     Linking.openURL(
                       r.maps_url ??
                         `https://maps.google.com/?q=${encodeURIComponent(`${r.title} ${r.address ?? ""}`)}`,
-                    )
-                  }
+                    );
+                  }}
                   style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
                 >
                   <Ionicons name="navigate-outline" size={16} color={c.link} />

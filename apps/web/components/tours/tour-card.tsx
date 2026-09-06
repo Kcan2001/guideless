@@ -7,7 +7,14 @@ import { tourFromPrice, type TourListItem } from "@/lib/data/tour-filters";
 
 const LEVEL_LABEL = { relaxed: "Relaxed", moderate: "Moderate", active: "Active" } as const;
 
-export function TourCard({ item }: { item: TourListItem }) {
+export function TourCard({
+  item,
+  headingLevel: Heading = "h3",
+}: {
+  item: TourListItem;
+  /** h2 when the card sits directly under the page h1 (e.g. /tours), h3 inside a titled section. */
+  headingLevel?: "h2" | "h3";
+}) {
   const { tour, version, destinations, departures } = item;
   const price = tourFromPrice(item);
   const next = departures[0];
@@ -17,7 +24,6 @@ export function TourCard({ item }: { item: TourListItem }) {
       <Link
         href={`/tours/${tour.slug}`}
         className="relative block aspect-[4/3] overflow-hidden no-underline"
-        aria-label={`${tour.name} — view trip`}
       >
         <RouteArt
           stops={destinations.length || 3}
@@ -28,7 +34,10 @@ export function TourCard({ item }: { item: TourListItem }) {
             <p className="text-xs uppercase tracking-[0.18em] text-aqua">
               {destinations.map((d) => d.name).join(" → ") || "Route"}
             </p>
-            <h3 className="mt-1 font-heading text-2xl font-bold">{tour.name}</h3>
+            <Heading className="mt-1 font-heading text-2xl font-bold">
+              {tour.name}
+              <span className="sr-only"> — view trip</span>
+            </Heading>
           </div>
         </div>
       </Link>
