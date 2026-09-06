@@ -1388,6 +1388,44 @@ export type Database = {
           },
         ];
       };
+      notification_deliveries: {
+        Row: {
+          attempted_at: string;
+          channel: Database["public"]["Enums"]["notification_channel"];
+          detail: string | null;
+          id: string;
+          notification_id: string;
+          provider_id: string | null;
+          status: string;
+        };
+        Insert: {
+          attempted_at?: string;
+          channel: Database["public"]["Enums"]["notification_channel"];
+          detail?: string | null;
+          id?: string;
+          notification_id: string;
+          provider_id?: string | null;
+          status: string;
+        };
+        Update: {
+          attempted_at?: string;
+          channel?: Database["public"]["Enums"]["notification_channel"];
+          detail?: string | null;
+          id?: string;
+          notification_id?: string;
+          provider_id?: string | null;
+          status?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notification_deliveries_notification_id_fkey";
+            columns: ["notification_id"];
+            isOneToOne: false;
+            referencedRelation: "notifications";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       notification_preferences: {
         Row: {
           marketing_email: boolean;
@@ -1429,7 +1467,9 @@ export type Database = {
           body: string | null;
           category: Database["public"]["Enums"]["notification_category"];
           created_at: string;
+          dedupe_key: string | null;
           deep_link: Json | null;
+          dispatched_at: string | null;
           id: string;
           read_at: string | null;
           title: string;
@@ -1441,7 +1481,9 @@ export type Database = {
           body?: string | null;
           category: Database["public"]["Enums"]["notification_category"];
           created_at?: string;
+          dedupe_key?: string | null;
           deep_link?: Json | null;
+          dispatched_at?: string | null;
           id?: string;
           read_at?: string | null;
           title: string;
@@ -1453,7 +1495,9 @@ export type Database = {
           body?: string | null;
           category?: Database["public"]["Enums"]["notification_category"];
           created_at?: string;
+          dedupe_key?: string | null;
           deep_link?: Json | null;
+          dispatched_at?: string | null;
           id?: string;
           read_at?: string | null;
           title?: string;
@@ -1587,6 +1631,7 @@ export type Database = {
           app_version: string | null;
           created_at: string;
           device_name: string | null;
+          disabled_at: string | null;
           id: string;
           last_seen_at: string;
           platform: string;
@@ -1597,6 +1642,7 @@ export type Database = {
           app_version?: string | null;
           created_at?: string;
           device_name?: string | null;
+          disabled_at?: string | null;
           id?: string;
           last_seen_at?: string;
           platform: string;
@@ -1607,6 +1653,7 @@ export type Database = {
           app_version?: string | null;
           created_at?: string;
           device_name?: string | null;
+          disabled_at?: string | null;
           id?: string;
           last_seen_at?: string;
           platform?: string;
@@ -3528,6 +3575,32 @@ export type Database = {
           isSetofReturn: true;
         };
       };
+      claim_pending_notifications: {
+        Args: { p_limit?: number };
+        Returns: {
+          body: string;
+          category: Database["public"]["Enums"]["notification_category"];
+          created_at: string;
+          deep_link: Json;
+          display_name: string;
+          id: string;
+          marketing_email: boolean;
+          marketing_push: boolean;
+          operational_email: boolean;
+          push_tokens: string[];
+          quiet_hours_end: string;
+          quiet_hours_start: string;
+          recipient_email: string;
+          social_email: boolean;
+          social_push: boolean;
+          title: string;
+          trip_active: boolean;
+          trip_id: string;
+          trip_timezone: string;
+          type: string;
+          user_id: string;
+        }[];
+      };
       create_booking: {
         Args: {
           p_departure_id: string;
@@ -3548,6 +3621,12 @@ export type Database = {
         }[];
       };
       create_trip_for_group: { Args: { p_group_id: string }; Returns: string };
+      enqueue_payment_reminders: { Args: never; Returns: number };
+      enqueue_trip_reminders: { Args: never; Returns: number };
+      format_money: {
+        Args: { p_amount: number; p_currency: string };
+        Returns: string;
+      };
       generate_confirmation_number: { Args: never; Returns: string };
       get_departure_availability: {
         Args: { p_departure_id: string };
@@ -3562,6 +3641,7 @@ export type Database = {
         Args: { required: Database["public"]["Enums"]["app_role"][] };
         Returns: boolean;
       };
+      invoke_notify_dispatch: { Args: never; Returns: undefined };
       invoke_social_publish: { Args: never; Returns: undefined };
       is_admin: { Args: never; Returns: boolean };
       is_chat_member: { Args: { p_room_id: string }; Returns: boolean };
@@ -3588,6 +3668,7 @@ export type Database = {
         Args: {
           p_body: string;
           p_category: Database["public"]["Enums"]["notification_category"];
+          p_dedupe_prefix?: string;
           p_deep_link: Json;
           p_exclude?: string;
           p_title: string;
@@ -3601,6 +3682,7 @@ export type Database = {
         Returns: number;
       };
       release_expired_holds: { Args: never; Returns: number };
+      run_lifecycle_notifications: { Args: never; Returns: undefined };
       shares_trip_with: { Args: { p_user_id: string }; Returns: boolean };
       tour_version_is_public: { Args: { version_id: string }; Returns: boolean };
     };

@@ -6,6 +6,7 @@ describe("deep links", () => {
     expect(deepLinkToPath({ kind: "itinerary_item", tripId: "t1", itemId: "i9" })).toBe("/item/i9");
     expect(deepLinkToPath({ kind: "chat_room", roomId: "r2" })).toBe("/chat/r2");
     expect(deepLinkToPath({ kind: "support_thread", threadId: "s3" })).toBe("/support/s3");
+    expect(deepLinkToPath({ kind: "live_moment", tripId: "t1", momentId: "m5" })).toBe("/group");
     expect(deepLinkToPath({ kind: "payment", bookingId: "b4" })).toBeNull();
   });
 

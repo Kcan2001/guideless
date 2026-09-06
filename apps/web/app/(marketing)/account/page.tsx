@@ -5,11 +5,15 @@ import { ArrowRight, CalendarDays } from "lucide-react";
 import { emptyStates } from "@guideless/config";
 import { formatDate, formatDateRange, formatMoney } from "@guideless/utils";
 import type { BookingStatus, PaymentStatus } from "@guideless/types";
+import { OnboardingChecklist } from "@/components/account/onboarding-checklist";
 import { signOut } from "@/lib/auth/actions";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { payBalance } from "@/lib/bookings/actions";
+import { daysBetweenDates, onboardingSteps, travelersComplete } from "@/lib/bookings/onboarding";
 import { listMyBookings } from "@/lib/data/bookings";
 import { listMyTrips } from "@/lib/data/trips";
+import { isStripeConfigured } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -40,14 +44,38 @@ const PAYMENT: Record<PaymentStatus, string> = {
   failed: "Payment failed",
 };
 
-export default async function AccountPage() {
+const ERRORS: Record<string, string> = {
+  invalid: "That booking link didn't look right. Please try again from this page.",
+  payments_unavailable: "Online payment isn't switched on yet. We'll email you when it is.",
+  not_payable: "That booking can't take a payment right now. Contact us if that seems wrong.",
+  nothing_due: "There's nothing left to pay on that booking.",
+  unknown: "We couldn't open the payment page. Nothing was charged. Please try again.",
+};
+
+export default async function AccountPage(props: PageProps<"/account">) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const [
+    {
+      data: { user },
+    },
+    sp,
+  ] = await Promise.all([supabase.auth.getUser(), props.searchParams]);
   if (!user) redirect("/login?next=/account");
 
   const [bookings, trips] = await Promise.all([listMyBookings(), listMyTrips()]);
+  const travelerIds = bookings.flatMap((b) => b.travelers.map((t) => t.id));
+  const [{ data: contacts }, { data: tokens }] = await Promise.all([
+    travelerIds.length
+      ? supabase.from("emergency_contacts").select("traveler_id").in("traveler_id", travelerIds)
+      : Promise.resolve({ data: [] as { traveler_id: string }[] }),
+    supabase.from("push_tokens").select("id").is("disabled_at", null).limit(1),
+  ]);
+  const contactTravelerIds = new Set((contacts ?? []).map((c) => c.traveler_id));
+  const appConnected = (tokens ?? []).length > 0;
+  const todayISO = new Date().toISOString().slice(0, 10);
+  const tripByDeparture = new Map(trips.map((t) => [t.departure_id, t.id]));
+  const paid = typeof sp.paid === "string" ? sp.paid : null;
+  const error = typeof sp.error === "string" ? ERRORS[sp.error] : null;
   const upcoming = bookings.filter((b) =>
     ["confirmed", "pending_payment"].includes(b.booking.status),
   );
@@ -72,6 +100,20 @@ export default async function AccountPage() {
           </Button>
         </form>
       </div>
+
+      {paid && (
+        <p role="status" className="mt-8 rounded-xl border border-aqua bg-aqua/10 p-4 text-sm">
+          Thank you. Your payment for {paid} is being confirmed and will show below within a minute.
+        </p>
+      )}
+      {error && (
+        <p
+          role="alert"
+          className="mt-8 rounded-xl border border-warning/40 bg-warning/10 p-4 text-sm"
+        >
+          {error}
+        </p>
+      )}
 
       {liveTrips.length > 0 && (
         <section className="mt-12">
@@ -105,8 +147,39 @@ export default async function AccountPage() {
         </div>
       ) : (
         <>
-          <BookingList title="Upcoming" items={upcoming} />
-          {other.length > 0 && <BookingList title="Past and cancelled" items={other} />}
+          {upcoming
+            .filter((b) => b.booking.status === "confirmed" && b.departure.start_date)
+            .map((b) => {
+              const balance = Math.max(b.booking.total_amount - b.booking.amount_paid, 0);
+              const steps = onboardingSteps({
+                daysUntilStart: daysBetweenDates(todayISO, b.departure.start_date!),
+                balanceDue: balance,
+                balanceDueDate: b.departure.balance_due_date
+                  ? formatDate(b.departure.balance_due_date)
+                  : null,
+                travelersComplete: travelersComplete(
+                  b.travelers.map((t) => ({
+                    date_of_birth: t.date_of_birth,
+                    nationality: t.nationality,
+                    hasEmergencyContact: contactTravelerIds.has(t.id),
+                  })),
+                ),
+                appConnected,
+                tripId: tripByDeparture.get(b.booking.departure_id) ?? null,
+              });
+              return (
+                <section key={b.booking.id} className="mt-12">
+                  <h2 className="text-xl font-semibold">Getting ready</h2>
+                  <div className="mt-4">
+                    <OnboardingChecklist steps={steps} tourName={b.tour.name} />
+                  </div>
+                </section>
+              );
+            })}
+          <BookingList title="Upcoming" items={upcoming} stripeReady={isStripeConfigured()} />
+          {other.length > 0 && (
+            <BookingList title="Past and cancelled" items={other} stripeReady={false} />
+          )}
         </>
       )}
     </div>
@@ -116,15 +189,23 @@ export default async function AccountPage() {
 function BookingList({
   title,
   items,
+  stripeReady,
 }: {
   title: string;
   items: Awaited<ReturnType<typeof listMyBookings>>;
+  stripeReady: boolean;
 }) {
   if (items.length === 0) return null;
+  const firstPayable = items.find(
+    (x) => x.booking.status === "confirmed" && x.booking.total_amount > x.booking.amount_paid,
+  );
   return (
     <section className="mt-12">
       <h2 className="text-xl font-semibold">{title}</h2>
-      <ul className="mt-4 divide-y divide-border rounded-xl border border-border bg-surface">
+      <ul
+        id={title === "Upcoming" ? "travelers" : undefined}
+        className="mt-4 divide-y divide-border rounded-xl border border-border bg-surface"
+      >
         {items.map(({ booking: b, departure, tour, travelers }) => {
           const currency = b.currency as Parameters<typeof formatMoney>[0]["currency"];
           const balance = Math.max(b.total_amount - b.amount_paid, 0);
@@ -158,7 +239,17 @@ function BookingList({
                   </p>
                 )}
               </div>
-              {b.status === "pending_payment" || b.status === "draft" ? (
+              {b.status === "confirmed" && balance > 0 ? (
+                <form
+                  action={payBalance}
+                  id={firstPayable?.booking.id === b.id ? "pay" : undefined}
+                >
+                  <input type="hidden" name="bookingId" value={b.id} />
+                  <Button type="submit" size="sm" disabled={!stripeReady}>
+                    {stripeReady ? "Pay balance" : "Payment opens soon"}
+                  </Button>
+                </form>
+              ) : b.status === "pending_payment" || b.status === "draft" ? (
                 <Link
                   href={`/checkout/${b.departure_id}`}
                   className={buttonVariants({ size: "sm" })}

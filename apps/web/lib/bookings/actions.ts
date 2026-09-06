@@ -171,3 +171,84 @@ export async function startCheckout(input: CreateBookingInput): Promise<Checkout
   }
   redirect(checkoutUrl as Route); // external Stripe URL; typedRoutes only knows internal paths
 }
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/**
+ * Account → "Pay balance": a second Stripe Checkout for what is still owed on a confirmed booking.
+ * The webhook classifies the payment (`paymentKind` → "balance") and updates the booking; this
+ * action only creates the session. Errors land back on /account as a one-line message.
+ */
+export async function payBalance(formData: FormData): Promise<void> {
+  const bookingId = String(formData.get("bookingId") ?? "");
+  if (!UUID_RE.test(bookingId)) redirect("/account?error=invalid" as Route);
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login?next=/account" as Route);
+  if (!isStripeConfigured()) redirect("/account?error=payments_unavailable" as Route);
+
+  const { data: booking } = await supabase
+    .from("bookings")
+    .select("*")
+    .eq("id", bookingId)
+    .eq("customer_id", user.id)
+    .maybeSingle();
+  if (!booking || booking.status !== "confirmed") redirect("/account?error=not_payable" as Route);
+  const balance = booking.total_amount - booking.amount_paid;
+  if (balance <= 0) redirect("/account?error=nothing_due" as Route);
+
+  const { data: departure } = await supabase
+    .from("departures_public")
+    .select("start_date, end_date, tour_id")
+    .eq("id", booking.departure_id)
+    .maybeSingle();
+  const { data: tour } = departure?.tour_id
+    ? await supabase.from("tours").select("name").eq("id", departure.tour_id).maybeSingle()
+    : { data: null };
+  const dates =
+    departure?.start_date && departure.end_date
+      ? formatDateRange(departure.start_date, departure.end_date)
+      : "";
+  const site = publicEnv.NEXT_PUBLIC_SITE_URL;
+
+  let url: string | null = null;
+  try {
+    const session = await getStripe().checkout.sessions.create({
+      mode: "payment",
+      client_reference_id: booking.id,
+      customer_email: user.email ?? undefined,
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: booking.currency.toLowerCase(),
+            unit_amount: balance,
+            product_data: {
+              name: `${tour?.name ?? "Guideless trip"} — Balance`,
+              description: `${dates}${dates ? " · " : ""}${booking.confirmation_number}`,
+            },
+          },
+        },
+      ],
+      metadata: {
+        booking_id: booking.id,
+        confirmation_number: booking.confirmation_number,
+        payment_option: "balance",
+      },
+      payment_intent_data: {
+        metadata: { booking_id: booking.id, confirmation_number: booking.confirmation_number },
+        description: `${booking.confirmation_number} · Balance`,
+      },
+      success_url: `${site}/account?paid=${encodeURIComponent(booking.confirmation_number)}`,
+      cancel_url: `${site}/account`,
+    });
+    url = session.url;
+  } catch (err) {
+    console.error("balance checkout session failed", { bookingId: booking.id, err });
+  }
+  if (!url) redirect("/account?error=unknown" as Route);
+  redirect(url as Route);
+}

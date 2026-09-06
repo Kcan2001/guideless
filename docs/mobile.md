@@ -57,6 +57,13 @@ components/itinerary-item.tsx, sync-badge.tsx, screen-tracker.tsx
   `ScreenTracker`. Ids only, never content or PII.
 - **Crash reporting**: `@sentry/react-native`, enabled only with `EXPO_PUBLIC_SENTRY_DSN`;
   `sendDefaultPii: false`, network bodies dropped from breadcrumbs.
+- **Notifications received**: pushes come from the `notify-dispatch` Edge Function (docs/api.md);
+  the payload's `data.deepLink` is routed by `deepLinkToPath()` (`live_moment` → Group tab).
+  Android channels `operational` (high) and `social` (default) are created at registration.
+- **Store assets**: generated from the brand logo by `node scripts/mobile-assets.mjs` (sharp):
+  `icon.png` (emblem on cloud), Android adaptive foreground / background / monochrome, splash icon
+  (cloud background, ink in dark mode) and favicon. Re-run after replacing
+  `apps/web/public/brand/guideless-logo.webp` and commit the PNGs.
 
 ## Running
 
@@ -72,6 +79,7 @@ On a physical device against local Supabase, replace `127.0.0.1` with your machi
 
 ## Not yet
 
-Maps view, documents tab, photo sharing, offline queue for outgoing messages, E2E tests
-(Detox/Maestro), store assets (icons/splash are still Expo placeholders on ink), Sentry source-map
-upload (`@sentry/react-native/expo` plugin in `app.config.ts`).
+Maps view, documents tab, photo sharing, offline queue for outgoing messages, in-app notification
+inbox (rows exist; the app relies on push + Realtime today), E2E tests (Detox/Maestro), a real
+device/simulator run, Sentry source-map upload (`@sentry/react-native/expo` plugin in
+`app.config.ts`).

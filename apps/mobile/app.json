@@ -8,7 +8,6 @@
     "scheme": "guideless",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.guidelesstours.app",
       "supportsTablet": false,
       "infoPlist": {
@@ -18,7 +17,7 @@
     "android": {
       "package": "com.guidelesstours.app",
       "adaptiveIcon": {
-        "backgroundColor": "#0B2025",
+        "backgroundColor": "#F5F6F2",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -34,9 +33,12 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#0B2025",
+          "backgroundColor": "#F5F6F2",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 96
+          "imageWidth": 160,
+          "dark": {
+            "backgroundColor": "#0B2025"
+          }
         }
       ],
       "expo-secure-store",

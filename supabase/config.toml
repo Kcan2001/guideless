@@ -384,6 +384,14 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# notify-dispatch — pg_cron (pg_net) every minute with `x-cron-secret`, or the service role token.
+# Delivers `notifications` rows by Expo push + Resend email. See docs/api.md → Notifications.
+[functions.notify-dispatch]
+enabled = true
+verify_jwt = false
+import_map = "./functions/notify-dispatch/deno.json"
+entrypoint = "./functions/notify-dispatch/index.ts"
+
 [analytics]
 enabled = true
 port = 54327

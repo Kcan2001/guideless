@@ -104,8 +104,33 @@ body, deep_link, exclude_user)`:
   notifies all members (`operational` / `itinerary_change`, deep link
   `{kind:'itinerary_item', tripId, itemId}`).
 
-Push and email delivery for those rows is the notification worker's job (not yet built); the
-app reads `notifications` directly.
+Lifecycle rows are created by the daily job `run_lifecycle_notifications()` (pg_cron, 06:15 UTC):
+
+- `enqueue_payment_reminders()`: confirmed bookings with a balance, 14 and 3 days before the
+  departure's `balance_due_date` and once a day overdue (`payment_reminder`, deep link
+  `{kind:'payment', bookingId}`).
+- `enqueue_trip_reminders()`: T-30 / T-7 / T-1 (`trip_upcoming`), day of (`trip_started`), day
+  after (`trip_completed`) to every member, and trip status automation (upcoming → active →
+  completed by date).
+- `support_messages_notify` trigger: a staff reply (not an internal note) notifies the customer
+  (`support_response`).
+
+All enqueues are idempotent through `notifications.dedupe_key` (unique), so re-running a job or
+replaying a trigger never duplicates a message.
+
+**Delivery** is the `notify-dispatch` Edge Function (`supabase/functions/notify-dispatch`), called
+every minute by pg_cron → pg_net while undispatched rows exist (`invoke_notify_dispatch()`; URL
+and shared secret in Vault). It calls `claim_pending_notifications(50)` (service role only; marks
+rows `dispatched_at`, skip-locked), then per row:
+
+| Channel | Sent when                                                                                     | Provider                                                                           |
+| ------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| push    | operational always; social / marketing per `notification_preferences` and outside quiet hours | Expo push API; `DeviceNotRegistered` disables the token                            |
+| email   | operational unless opted out; social / marketing only when opted in                           | Resend (generic template: title, body, CTA to the web equivalent of the deep link) |
+
+Every attempt writes one `notification_deliveries` row per channel (`sent` / `skipped` /
+`failed`, provider id, reason). Admins can read it; customers cannot. The app reads
+`notifications` directly (Realtime-enabled) for the in-app channel.
 
 ## Deep links
 

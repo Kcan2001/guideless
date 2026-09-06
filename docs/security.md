@@ -93,6 +93,15 @@ Server Actions carry Next.js origin checks; the Stripe webhook is the only unaut
 Handler and verifies the Stripe signature before touching the database. Playwright asserts the
 CSP and `nosniff` headers on every CI run (`apps/web/e2e/marketing.spec.ts`).
 
+### Notification delivery surface
+
+`claim_pending_notifications()` and the enqueue functions are `security definer` and executable
+by `service_role` only (revoked from `public`, `anon`, `authenticated`; pgTAP asserts a customer
+gets `42501`). The Edge Function accepts the Vault-held `x-cron-secret` or the service role
+bearer token and nothing else. `notification_deliveries` never stores message content, only
+status, provider id and a reason. Emails carry the notification title/body the customer already
+has in-app; never PII beyond their own first name.
+
 ### Security review (Milestone 7, 2026-09-06)
 
 Reviewed: RLS on every table (pgTAP), privilege boundary of the three Supabase clients, Server

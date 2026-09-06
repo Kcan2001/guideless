@@ -15,7 +15,7 @@ export function deepLinkToPath(link: DeepLink): string | null {
     case "support_thread":
       return `/support/${link.threadId}`;
     case "live_moment":
-      return `/itinerary/${link.tripId}`; // Live Moments UI arrives in Phase 2
+      return "/group"; // Live Moments list on the Group tab
     case "payment":
       return null; // handled on the web (/account)
     default:

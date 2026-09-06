@@ -39,6 +39,25 @@ Observability variables (all optional; the features are no-ops when unset):
 Secrets live in Vercel project settings, Supabase project secrets (`supabase secrets set`) and
 EAS secrets. Never in git.
 
+Notification delivery (Edge Function secrets, `supabase secrets set …`):
+
+| Secret                         | Purpose                                                                    |
+| ------------------------------ | -------------------------------------------------------------------------- |
+| `NOTIFY_DISPATCH_SECRET`       | Shared secret pg_cron sends as `x-cron-secret`; also stored in Vault       |
+| `RESEND_API_KEY`, `EMAIL_FROM` | Email channel (skipped, and recorded as skipped, when absent)              |
+| `EXPO_ACCESS_TOKEN`            | Optional; Expo push security ("enhanced security" on the Expo project)     |
+| `SITE_URL`                     | Base for links in notification emails (default https://guidelesstours.com) |
+| `NOTIFY_DRY_RUN=1`             | Claims and records `skipped` without calling Expo or Resend                |
+
+Vault entries the cron job needs (run once per environment in the SQL editor):
+
+```sql
+select vault.create_secret('https://<ref>.supabase.co/functions/v1/notify-dispatch', 'notify_dispatch_url');
+select vault.create_secret('<same value as NOTIFY_DISPATCH_SECRET>', 'notify_dispatch_secret');
+```
+
+Until both exist the minute job is a no-op and rows simply wait with `dispatched_at is null`.
+
 ## CI pipeline (`ci.yml`)
 
 ```
@@ -57,7 +76,15 @@ up, wizard, payment step refused cleanly without Stripe, protected-route redirec
 
 Add when the corresponding code exists: Expo `eas build --profile preview` on release branches;
 `supabase db push` and `supabase functions deploy` on `main` (guarded by the `production`
-GitHub environment).
+GitHub environment). Functions to deploy today: `social-publish`, `notify-dispatch`.
+
+Local smoke test of the dispatcher (Docker edge runtime):
+
+```bash
+supabase functions serve notify-dispatch --no-verify-jwt --env-file <file with NOTIFY_DISPATCH_SECRET=…>
+curl -X POST http://127.0.0.1:54321/functions/v1/notify-dispatch -H "x-cron-secret: …" -d '{}'
+# → {"claimed":n,"push":{...},"email":{...}}; rows appear in notification_deliveries
+```
 
 ## Release flow
 
