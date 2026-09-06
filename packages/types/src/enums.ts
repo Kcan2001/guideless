@@ -139,6 +139,20 @@ export const SUPPORT_THREAD_STATUSES = [
 ] as const;
 export type SupportThreadStatus = (typeof SUPPORT_THREAD_STATUSES)[number];
 
+export const TRANSPORT_TYPES = ["train", "flight", "transfer", "ferry", "bus"] as const;
+export type TransportType = (typeof TRANSPORT_TYPES)[number];
+
+export const ROOM_PREFERENCES = [
+  "single",
+  "shared_twin",
+  "shared_double",
+  "no_preference",
+] as const;
+export type RoomPreference = (typeof ROOM_PREFERENCES)[number];
+
+export const TRANSFER_PREFERENCES = ["group_welcome_transfer", "own_arrangement"] as const;
+export type TransferPreference = (typeof TRANSFER_PREFERENCES)[number];
+
 export const SUPPLIER_SERVICE_STATUSES = [
   "requested",
   "pending",

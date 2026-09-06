@@ -35,7 +35,7 @@ EAS secrets. Never in git.
 ```
 PR / push main
  ├── check:    pnpm install → format:check → lint → typecheck → test → build (web)
- └── database: supabase db start (applies migrations) → supabase db lint
+ └── database: supabase start (migrations + seeds) → supabase db lint → supabase test db (pgTAP)
 ```
 
 Add when the corresponding code exists: Playwright E2E against the Vercel preview; Expo

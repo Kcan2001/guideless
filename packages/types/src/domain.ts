@@ -97,8 +97,8 @@ export interface ItineraryItem {
   optional: boolean;
   status: ItineraryItemStatus;
   visibility: Visibility;
-  /** Staff-only; never returned to customers by RLS. */
-  bookingReference?: string;
+  // Supplier references and costs are NOT on itinerary items; they live in supplier_services,
+  // which has no customer-facing RLS policy.
 }
 
 export interface ItineraryDay {

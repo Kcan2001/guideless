@@ -41,9 +41,23 @@ pnpm dev:web            # Next.js on :3000
 pnpm dev:mobile         # Expo dev server
 pnpm db:start           # local Supabase (needs Docker)
 pnpm db:reset           # re-apply migrations + seed
-pnpm db:types           # regenerate packages/types/src/database.ts
+pnpm db:test            # pgTAP suite in supabase/tests (RLS + invariants) — run after any migration
+pnpm db:types           # regenerate packages/types/src/database.ts — commit the result
 pnpm check              # lint + typecheck + test + build (run before finishing any task)
 ```
+
+## Migration conventions (see docs/database.md)
+
+- One migration per concern: `supabase/migrations/<timestamp>_<name>.sql`. Forward-only.
+- Every table: `enable row level security` + all policies **in the same file**. Wrap helper calls as
+  `(select public.is_staff())` so Postgres caches them per statement.
+- Helpers: `is_staff()`, `is_admin()`, `is_ops_staff()`, `is_content_staff()`, `is_support_staff()`,
+  `is_moderator()`, `is_trip_member(trip_id)`, `is_departure_member(departure_id)`,
+  `is_chat_member(room_id)`, `shares_trip_with(user_id)`, `has_any_role(app_role[])`.
+- New enum value → `alter type … add value` migration **and** `packages/types/src/enums.ts`.
+- Staff-only data (supplier costs, internal notes) goes in its own table or is projected away by a
+  `*_public` view. Never rely on the client to hide a column.
+- Add or extend a pgTAP test in `supabase/tests/` for any new policy or invariant.
 
 ## Non-negotiable engineering rules
 

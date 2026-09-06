@@ -64,8 +64,11 @@ jobs:
         with:
           version: latest
 
-      - name: Start local Supabase and apply migrations
-        run: supabase db start
+      - name: Start local Supabase, apply migrations and seeds
+        run: supabase start -x studio,imgproxy,inbucket,edge-runtime,logflare,vector,supavisor
 
       - name: Lint database
-        run: supabase db lint --level warning
+        run: supabase db lint --level warning --fail-on warning
+
+      - name: Run pgTAP tests (RLS policies, invariants)
+        run: supabase test db

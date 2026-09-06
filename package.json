@@ -22,7 +22,8 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:migration": "supabase migration new",
-    "db:types": "supabase gen types typescript --local > packages/types/src/database.ts",
+    "db:types": "node scripts/gen-types.mjs && prettier --write packages/types/src/database.ts",
+    "db:test": "supabase test db",
     "clean": "turbo run clean && rimraf node_modules"
   },
   "pnpm": {

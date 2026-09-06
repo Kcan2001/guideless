@@ -2,119 +2,124 @@
 
 Derived from the master spec §16–21, §36–43, §56–57, §61–62, §72, §104–109, §117.
 Postgres on Supabase is the **system of record**. Schema changes happen only through
-`supabase/migrations`. Regenerate `packages/types/src/database.ts` with `pnpm db:types`.
+`supabase/migrations`. After any migration run `pnpm db:types` to regenerate
+`packages/types/src/database.ts`, and `pnpm db:test` to run the pgTAP suite.
 
 ## Conventions
 
-- `uuid` primary keys via `gen_random_uuid()`; `created_at`/`updated_at timestamptz` on every
+- `uuid` primary keys via `gen_random_uuid()`; `created_at` / `updated_at timestamptz` on every
   mutable table (`set_updated_at()` trigger from migration 001).
-- Enums are Postgres enum types whose values match `@guideless/types` exactly.
-- Money: `amount bigint` (minor units) + `currency char(3)` with a check against supported codes.
-- Time: `*_at timestamptz` (UTC) plus a `timezone text` (IANA) on every travel event.
-- `snake_case` tables and columns; singular enum type names (`booking_status`), plural tables.
-- Soft-delete only where legally required (financial records); otherwise real deletes with audit.
-- Every table has RLS enabled before it receives data. See [security.md](./security.md).
+- Enums are Postgres enum types (migration 002) whose values match `@guideless/types` exactly.
+- Money: `*_amount bigint` in minor units + `currency public.currency_code` (domain: USD, EUR, GBP).
+- Time: `*_at timestamptz` (UTC) plus a `timezone text` (IANA) on every travel event; itinerary
+  items carry `start_time`/`end_time` as local wall time in their own `timezone`.
+- `snake_case`; singular enum types (`booking_status`), plural tables.
+- Soft-delete only where required (messages, membership); financial rows are never deleted.
+- **Every table has RLS enabled and its policies written in the migration that creates it.**
+  Customer-safe projections (`departures_public`, `bookings_public`) omit `internal_notes`.
+
+## Migrations (all present)
+
+| #   | File                 | Contents                                                                                                                                                                                                    |
+| --- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 001 | `_extensions`        | pgcrypto, citext, pg_trgm, moddatetime; `set_updated_at()`                                                                                                                                                  |
+| 002 | `_enums_and_domains` | All enum types; `currency_code` domain                                                                                                                                                                      |
+| 003 | `_roles`             | `roles`, `user_roles`; `has_any_role()`, `is_staff()`, `is_admin()`                                                                                                                                         |
+| 004 | `_profiles`          | `profiles` (public-facing, no PII); auto-created by `handle_new_user()`                                                                                                                                     |
+| 005 | `_destinations`      | `destinations` with `timezone`, `emergency_numbers`                                                                                                                                                         |
+| 006 | `_tours`             | `tours` (thin identity; `current_version_id`)                                                                                                                                                               |
+| 007 | `_tour_versions`     | `tour_versions`, `tour_version_destinations`, included/excluded items, FAQs; `tour_version_is_public()`, `is_content_staff()`                                                                               |
+| 008 | `_tour_itinerary`    | `tour_days`, `tour_itinerary_items` (template)                                                                                                                                                              |
+| 009 | `_suppliers`         | `suppliers`, `supplier_contacts`, `supplier_services` (**costs, staff-only**); `is_ops_staff()`                                                                                                             |
+| 010 | `_departures`        | `departures` (capacity, price, deposit, `cancellation_policy` jsonb); `refund_percentage_for()`; `departures_public` view                                                                                   |
+| 011 | `_groups`            | `departure_groups`; default "Group A" created by trigger                                                                                                                                                    |
+| 012 | `_travelers`         | `traveler_profiles` (PII), `emergency_contacts`                                                                                                                                                             |
+| 013 | `_bookings`          | `coupons`, `bookings`, `booking_travelers`, `booking_preferences`, `booking_items`; confirmation numbers; capacity guard; `get_departure_availability()`; `release_expired_holds()`; `bookings_public` view |
+| 014 | `_payments`          | `payments`, `refunds`, `webhook_events` (idempotency ledger)                                                                                                                                                |
+| 015 | `_trips`             | `trips`, `trip_members`; `is_trip_member()`, `is_departure_member()`, `shares_trip_with()`; co-member profile policy                                                                                        |
+| 016 | `_trip_itinerary`    | `accommodations`, `transport_segments`, `activities`, `trip_days`, `trip_itinerary_items`, `trip_notes` (staff); `create_trip_for_group()` snapshot                                                         |
+| 017 | `_chat`              | `chat_rooms`, `chat_members`, `messages`, `message_reactions`, `user_blocks`, `reports`; `is_chat_member()`, `is_moderator()`; room + membership sync triggers                                              |
+| 018 | `_notifications`     | `notification_preferences`, `notifications`, `push_tokens`, `email_events`                                                                                                                                  |
+| 019 | `_support`           | `support_threads`, `support_messages` (internal notes staff-only), `support_attachments`, `support_assignments`; `is_support_staff()`                                                                       |
+| 020 | `_live_moments`      | `live_moments`, `live_moment_participants`, `checkins`                                                                                                                                                      |
+| 021 | `_documents`         | `trip_documents`, `booking_documents`; Storage buckets + object policies                                                                                                                                    |
+| 022 | `_system`            | `audit_logs` + `log_audit()` + audit triggers; `feature_flags`; `system_settings`                                                                                                                           |
+| 023 | `_content`           | `recommendations`, `destination_guides`, `cms_pages`, `cms_blocks`                                                                                                                                          |
 
 ## Domain model
 
 ```
-destinations ──< tours ──< tour_versions ──< tour_days ──< tour_itinerary_items
-                              │
-                              └──< departures ──< departure_groups ──< trip_members >── profiles
-                                      │                                     │
-                                      ├──< bookings ──< booking_travelers ──┘
-                                      │        └──< payments, refunds
-                                      └──< trips ──< trip_days ──< trip_itinerary_items
-                                               ├──< trip_documents, trip_notes(staff), live_moments
-                                               └──< chat_rooms ──< chat_members, messages
+destinations ──< tour_version_destinations >── tour_versions >── tours
+                                                   │
+                        tour_days ──< tour_itinerary_items (template)
+                                                   │
+                       departures ──< departure_groups ──< trips ──< trip_members >── auth.users ── profiles
+                            │                                  │
+                            ├──< bookings ──< booking_travelers >── traveler_profiles ──< emergency_contacts
+                            │        ├──< booking_preferences, booking_items, booking_documents
+                            │        └──< payments, refunds
+                            ├──< accommodations, transport_segments, activities  (per departure)
+                            └──< supplier_services >── suppliers                (staff-only)
+                                                               │
+                       trips ──< trip_days ──< trip_itinerary_items ──> accommodation / transport / activity
+                            ├──< trip_documents, trip_notes(staff), live_moments ──< participants, checkins
+                            ├──< chat_rooms ──< chat_members, messages ──< reactions
+                            └──< support_threads ──< support_messages ──< attachments
 ```
 
-### Identity
+## Key mechanics
 
-| Table                 | Notes                                                                                                      |
-| --------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `profiles`            | 1:1 with `auth.users`. Display name, avatar, preferred language, home country, public-visibility flags.    |
-| `roles`, `user_roles` | Role catalogue and assignment. `customer` is implicit for any auth user.                                   |
-| `traveler_profiles`   | Travelers are **not** users. Legal name, DOB, nationality, dietary/room/accessibility. Optional `user_id`. |
-| `emergency_contacts`  | Per traveler.                                                                                              |
+**Versioning (ADR-008).** `tours.current_version_id` drives public pages; each `departure` pins
+`tour_version_id`. Publishing a new version affects only new departures.
 
-### Product (template — edited by content staff)
+**Snapshot (ADR-009).** `create_trip_for_group(group_id)` (service role) creates the trip, copies
+days and items (`public_preview` → `trip_member`), enrolls travelers on confirmed bookings, and
+triggers create the three chat rooms and their memberships. Staff then edit `trip_*` tables.
 
-| Table                                                     | Notes                                                                               |
-| --------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `destinations`                                            | Slug, name, country, `timezone`, emergency numbers, SEO fields.                     |
-| `tours`                                                   | Slug, name, `current_version_id`, group size min/max, activity level.               |
-| `tour_versions`                                           | `status: draft/published/archived`, version number. Content lives here.             |
-| `tour_days`, `tour_itinerary_items`                       | Template itinerary. Items carry `type`, `responsibility`, `optional`, `visibility`. |
-| `tour_included_items`, `tour_excluded_items`, `tour_faqs` | Per version.                                                                        |
+**Inventory.** `get_departure_availability(id)` returns capacity / confirmed / held / available,
+counting travelers on confirmed bookings and on `pending_payment` bookings with an unexpired
+hold. `assert_departure_capacity()` locks the departure row and is fired by triggers whenever a
+traveler is added or a booking starts occupying seats. `release_expired_holds()` (scheduled)
+returns expired holds to `draft`.
 
-### Operations
+**Cancellation.** `departures.cancellation_policy` is a jsonb array of tiers validated by
+`cancellationPolicySchema`; `refund_percentage_for(policy, days_before)` resolves the tier.
 
-| Table                                                             | Notes                                                                                                                                                       |
-| ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `departures`                                                      | `tour_version_id`, start/end dates, `timezone`, price + deposit (minor units), `capacity`, `status`, booking deadline, cancellation policy (`jsonb` tiers). |
-| `departure_groups`                                                | One or more per departure.                                                                                                                                  |
-| `trip_members`                                                    | (`trip_id`, `user_id`) unique. The RLS pivot for everything trip-scoped.                                                                                    |
-| `suppliers`, `supplier_contacts`, `supplier_services`             | Generic supplier model: confirmation number, **cost (staff-only)**, status, cancellation deadline, documents, internal notes.                               |
-| `accommodations`, `transport_segments`, `activities`, `transfers` | Logistics linked from itinerary items and supplier services.                                                                                                |
+**Payments.** `payments`, `refunds`, `bookings.payment_status` change only from the Stripe webhook
+handler (service role). `webhook_events (provider, event_id)` is unique; insert first, process only
+if inserted.
 
-### Booking and payments
+**Audit.** `log_audit()` is the single write path; triggers cover booking create/cancel/payment,
+refunds, itinerary edits, supplier changes, role changes, membership changes, message deletion.
 
-| Table                 | Notes                                                                                                                                                                       |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bookings`            | `status booking_status`, `payment_status payment_status` (separate!), unique `confirmation_number`, totals in minor units, `hold_expires_at`, Stripe customer/checkout ids. |
-| `booking_travelers`   | Booking ↔ traveler_profiles.                                                                                                                                                |
-| `booking_preferences` | Room, dietary, accessibility, transfer, optional experiences.                                                                                                               |
-| `payments`, `refunds` | Mirror Stripe objects by id; state updated **only** from webhooks.                                                                                                          |
-| `coupons`             | Phase 2 schema, present early so pricing code has a home.                                                                                                                   |
+## Access summary
 
-**Inventory** is computed in SQL: `available = capacity - confirmed - held`. Booking creation is
-a single transaction (`create_booking()` function) that checks availability, inserts the booking
-and travelers, and places a hold. Expired holds are released by a scheduled job.
+| Data                                                                       | anon | customer                        | trip_staff / support               | finance    | admin      |
+| -------------------------------------------------------------------------- | ---- | ------------------------------- | ---------------------------------- | ---------- | ---------- |
+| Published tours, versions, preview items, open departures, recommendations | read | read                            | read/write (content_editor writes) | read       | all        |
+| Own profile / travelers / bookings / payments                              | –    | read; write drafts & own PII    | read/write                         | read       | all        |
+| Co-travelers' profiles (public fields)                                     | –    | read while sharing a trip       | read                               | read       | all        |
+| Trip days / items / documents                                              | –    | read own trip, not `staff_only` | read/write                         | read       | all        |
+| Chat rooms / messages                                                      | –    | member only; no announcements   | moderate                           | –          | all        |
+| Supplier services & costs, trip notes, internal notes                      | –    | **never**                       | read/write                         | read/write | all        |
+| Audit logs, webhook events, settings                                       | –    | –                               | –                                  | –          | read/write |
 
-### Trip experience (snapshot — edited by trip staff)
+## Tests
 
-| Table                                      | Notes                                                                   |
-| ------------------------------------------ | ----------------------------------------------------------------------- |
-| `trips`                                    | One per departure group. `status: upcoming/active/completed/cancelled`. |
-| `trip_days`, `trip_itinerary_items`        | Copied from the tour version when the departure is activated.           |
-| `trip_documents`                           | Storage metadata; signed URLs only.                                     |
-| `trip_notes`                               | **Staff-only.**                                                         |
-| `live_moments`, `live_moment_participants` | Phase 2 feature, MVP schema.                                            |
-| `checkins`                                 | Optional presence pings for live moments.                               |
+`supabase/tests/rls_policies.test.sql` (pgTAP, 36 assertions) covers: anon catalogue access,
+customer isolation (bookings, PII, profiles), supplier-cost privacy, capacity guard, held seats,
+hold expiry, refund tiers, trip snapshot, chat membership and announcement rules, access
+revocation on removal, and audit logging. Run with `pnpm db:test` against a freshly reset local DB.
 
-### Social, support, notifications, content, system
+## Seeds (`supabase/seed/`)
 
-`chat_rooms` (type: trip_group / announcements / optional_activities), `chat_members`, `messages`,
-`message_reactions`, `user_blocks`, `reports` · `support_threads`, `support_messages`,
-`support_attachments`, `support_assignments` · `notifications`, `notification_preferences`,
-`push_tokens`, `email_events` · `cms_pages`, `cms_blocks`, `destination_guides`,
-`recommendations`, `recommendation_categories` · `audit_logs`, `feature_flags`,
-`system_settings`, `webhook_events`.
+`010_destinations` (Nice, Avignon, Paris), `020_tour_southern_france` (tour, published v1, 9 days,
+29 items, included/excluded, FAQs), `030_departures` (three open 2027 departures). Dev auth users
+are created in tests, not seeds; add them through Supabase Studio or the Auth API locally.
 
-## Key invariants (enforce in Postgres)
+## Not yet modeled (deliberate)
 
-- `bookings.confirmation_number` unique · `webhook_events (provider, event_id)` unique.
-- `trip_members (trip_id, user_id)` unique.
-- `departures.capacity >= 0`; sum of confirmed + held never exceeds capacity (checked inside `create_booking()` under `SELECT … FOR UPDATE`).
-- Cancellation tiers: distinct `days_before_departure`, `refund_percentage` 0–100.
-- Enum-typed status columns; no free-text statuses.
-
-## Migration order
-
-```
-20260906000000_extensions          ✔ (present)
-..._profiles        ..._roles          ..._destinations    ..._tours
-..._tour_versions   ..._tour_itinerary ..._suppliers       ..._departures
-..._groups          ..._travelers      ..._bookings        ..._payments
-..._trips           ..._trip_itinerary ..._chat            ..._notifications
-..._support         ..._live_moments   ..._documents       ..._audit_logs
-```
-
-Each migration that creates a table also enables RLS and adds its policies in the same file, so
-no table ever exists without policies.
-
-## Retention (decide before launch)
-
-Financial records: retain per legal requirement, anonymize personal fields on account deletion.
-Support threads, chat media, documents, audit logs: define TTLs per master spec §110–111.
+`accommodation_rooms`, `activity_sessions`, `transfers` as separate tables (transfers are
+`transport_segments.type = 'transfer'`), passport/ID document storage (needs a retention decision),
+multi-currency pricing per departure beyond a single `currency`, and pg_cron scheduling of
+`release_expired_holds()` (wired in Milestone 4 with the checkout flow).
