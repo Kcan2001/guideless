@@ -74,7 +74,7 @@ export function AddOnCard({
             icon="add-circle-outline"
             style={{ minHeight: 40, paddingHorizontal: 16 }}
             onPress={() => {
-              track("recommendation_opened", { kind: "add_on_add", add_on_id: addOn.id });
+              track("add_on_add_tapped", { departure_id: addOn.departure_id, add_on_id: addOn.id });
               WebBrowser.openBrowserAsync(purchaseUrl(bookingId, addOn.id, SITE_URL));
             }}
           />

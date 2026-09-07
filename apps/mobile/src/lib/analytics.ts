@@ -24,6 +24,8 @@ export type ProductEvent =
   | "support_started"
   | "document_opened"
   | "trip_completed"
+  | "add_on_viewed" // props: departure_id, add_on_id
+  | "add_on_add_tapped" // props: departure_id, add_on_id
   | "app_opened";
 
 export type EventProps = Record<string, string | number | boolean | undefined>;
