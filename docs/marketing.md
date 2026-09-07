@@ -20,7 +20,10 @@ travelers do in the product"**. Neither is an operational system — those numbe
 
 ## 2. Consent
 
-We sell to EU travelers, so analytics are consent-gated:
+Our core market is US customers traveling to Europe, but we sell to anyone. GDPR is therefore
+not the primary regime, yet EU visitors will book, US state privacy laws keep tightening, and
+Google requires Consent Mode for any EEA traffic. A light consent gate costs little and keeps us
+clean:
 
 - GA4 loads with **Consent Mode v2 defaults = denied** (cookieless pings only). PostHog is not
   initialised until consent. `<ConsentBanner />` stores the choice in `localStorage`
@@ -90,15 +93,28 @@ curl -X POST "$SUPABASE_URL/functions/v1/social-publish" -H "Authorization: Bear
 
 Analytics
 
-- [ ] GA4 property "Guideless Tours" → **web data stream** → `NEXT_PUBLIC_GA_ID` (Vercel).
-      Enable enhanced measurement; mark `purchase` as a key event; link Search Console.
-- [ ] Firebase project linked to the same GA4 property → iOS + Android apps
-      (`com.guidelesstours.app`) → download `GoogleService-Info.plist` / `google-services.json`
-      into `apps/mobile/` (git-ignored) and as EAS file env vars. Build with `eas build` (dev
-      client); Expo Go cannot load Firebase.
-- [ ] PostHog project → `NEXT_PUBLIC_POSTHOG_KEY`, `EXPO_PUBLIC_POSTHOG_KEY`. US or EU cloud:
-      pick EU if most travelers are European (host `https://eu.i.posthog.com`).
-- [ ] Google Search Console (verify via the GA tag), submit `/sitemap.xml`.
+- [x] GA4 account + property **Guideless Tours** (owner kyleacannon@gmail.com, reporting zone
+      America/New_York, USD, industry Travel) → web stream "Guideless Tours website"
+      (`https://guidelesstours.com`, stream id 15730411550) → measurement id **`G-YSBNKPW5Z6`**.
+      Enhanced measurement on. Set `NEXT_PUBLIC_GA_ID=G-YSBNKPW5Z6` in Vercel when the project
+      exists (already in the local `.env.local`). Still to do in GA: mark `purchase` as a key
+      event once the first events arrive; link Search Console.
+- [x] Firebase project **guideless-tours** (Spark plan, Gemini off) linked to the existing GA4
+      property (552977422). Apps registered: **Guideless iOS** (`com.guidelesstours.app`, app id
+      `1:45917505904:ios:5a084a921389e87740e7b5`) and **Guideless Android**
+      (`com.guidelesstours.app`). `GoogleService-Info.plist` + `google-services.json` are in
+      `apps/mobile/` (git-ignored) — `app.config.ts` now includes the Firebase plugins, so the
+      next `eas build` / prebuild ships GA4 in the app. **Still to do:** upload both files as EAS
+      file environment variables so CI builds get them; Expo Go cannot load Firebase (use a dev
+      client).
+- [x] PostHog **US cloud** project id `596884` (owner kyleacannon@gmail.com), project API key
+      `phc_Cod6FWi284wzpmiA2xCDJrBCLPFgjRtPUm6iu8Xuyt6t` (public write-only token, safe in client
+      code). Set as `NEXT_PUBLIC_POSTHOG_KEY` / `EXPO_PUBLIC_POSTHOG_KEY` with host
+      `https://us.i.posthog.com` — done in the local env files; add to Vercel + EAS when they exist.
+- [ ] Google Search Console: **domain property `guidelesstours.com` added (unverified)**. To
+      verify, add this DNS TXT record at the registrar, then press Verify in Search Console:
+      `google-site-verification=QLV3tPOm9qB3xJfYC6Tm7HNvciJsPQ3ZbTUYwmqZWhM`. Afterwards submit
+      `/sitemap.xml` and link the property to GA4 (Admin → Product links).
 - [ ] Google Business Profile for Guideless Tours (reviews + Maps presence).
 
 Instagram / Meta
