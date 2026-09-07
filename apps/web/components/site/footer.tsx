@@ -78,6 +78,16 @@ export function SiteFooter() {
                 <span className="sr-only">(opens Instagram in a new tab)</span>
               </a>
             </li>
+            <li>
+              <Link href="/terms" className="text-muted-foreground no-underline hover:text-link">
+                Terms of Service
+              </Link>
+            </li>
+            <li>
+              <Link href="/privacy" className="text-muted-foreground no-underline hover:text-link">
+                Privacy Policy
+              </Link>
+            </li>
           </ul>
         </nav>
       </div>

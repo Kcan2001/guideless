@@ -18,6 +18,7 @@ import {
   addBookingNoteAction,
   cancelBookingAction,
   recordManualPaymentAction,
+  resolveCancellationRequestAction,
 } from "@/lib/admin/actions/bookings";
 import { getBookingAdmin } from "@/lib/admin/queries";
 import { FINANCE_ROLES, OPS_ROLES, requireStaff } from "@/lib/auth/staff";
@@ -254,6 +255,60 @@ export default async function AdminBookingPage(props: PageProps<"/admin/bookings
               ]}
             />
           </Section>
+
+          {data.cancellationRequests.length > 0 && (
+            <Section
+              id="cancellation"
+              title="Cancellation request"
+              description="What the customer asked for from their account. Cancel the booking below first (that issues the refund), then record the decision here."
+            >
+              <ul className="space-y-3 text-sm">
+                {data.cancellationRequests.map((r) => (
+                  <li key={r.id} className="rounded-lg bg-cloud p-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p>
+                        <StatusBadge kind="generic" status={r.status} />{" "}
+                        <span className="text-muted-foreground">
+                          {formatDate(r.requested_at.slice(0, 10))} · quoted{" "}
+                          {r.refund_percentage_quoted}% refund
+                        </span>
+                      </p>
+                    </div>
+                    <p className="mt-2 whitespace-pre-wrap">{r.reason}</p>
+                    {r.staff_notes && (
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Staff notes: {r.staff_notes}
+                      </p>
+                    )}
+                    {r.status === "pending" && canOps && (
+                      <form action={resolveCancellationRequestAction} className="mt-3 grid gap-2">
+                        <input type="hidden" name="bookingId" value={b.id} />
+                        <input type="hidden" name="requestId" value={r.id} />
+                        <label className={labelClass}>
+                          Note to keep on file (optional)
+                          <input name="staffNotes" className={inputClass} maxLength={2000} />
+                        </label>
+                        <div className="flex gap-2">
+                          <SubmitButton
+                            size="sm"
+                            variant="secondary"
+                            name="status"
+                            value="approved"
+                            confirm="Mark approved? Make sure the booking is cancelled and refunded first."
+                          >
+                            Mark approved
+                          </SubmitButton>
+                          <SubmitButton size="sm" variant="ghost" name="status" value="declined">
+                            Decline
+                          </SubmitButton>
+                        </div>
+                      </form>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </Section>
+          )}
 
           {active && canOps && (
             <Section

@@ -766,6 +766,63 @@ export type Database = {
           },
         ];
       };
+      cancellation_requests: {
+        Row: {
+          booking_id: string;
+          customer_id: string;
+          decided_at: string | null;
+          decided_by: string | null;
+          id: string;
+          reason: string;
+          refund_percentage_quoted: number;
+          requested_at: string;
+          staff_notes: string | null;
+          status: string;
+          updated_at: string;
+        };
+        Insert: {
+          booking_id: string;
+          customer_id: string;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          id?: string;
+          reason: string;
+          refund_percentage_quoted: number;
+          requested_at?: string;
+          staff_notes?: string | null;
+          status?: string;
+          updated_at?: string;
+        };
+        Update: {
+          booking_id?: string;
+          customer_id?: string;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          id?: string;
+          reason?: string;
+          refund_percentage_quoted?: number;
+          requested_at?: string;
+          staff_notes?: string | null;
+          status?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "cancellation_requests_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "cancellation_requests_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings_public";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       chat_members: {
         Row: {
           is_muted: boolean;
@@ -2213,6 +2270,24 @@ export type Database = {
         };
         Relationships: [];
       };
+      rate_limits: {
+        Row: {
+          count: number;
+          key: string;
+          window_start: string;
+        };
+        Insert: {
+          count?: number;
+          key: string;
+          window_start: string;
+        };
+        Update: {
+          count?: number;
+          key?: string;
+          window_start?: string;
+        };
+        Relationships: [];
+      };
       recommendations: {
         Row: {
           address: string | null;
@@ -2894,6 +2969,7 @@ export type Database = {
       };
       support_threads: {
         Row: {
+          assigned_to: string | null;
           booking_id: string | null;
           category: Database["public"]["Enums"]["support_category"];
           context: Json;
@@ -2910,6 +2986,7 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          assigned_to?: string | null;
           booking_id?: string | null;
           category?: Database["public"]["Enums"]["support_category"];
           context?: Json;
@@ -2926,6 +3003,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          assigned_to?: string | null;
           booking_id?: string | null;
           category?: Database["public"]["Enums"]["support_category"];
           context?: Json;
@@ -4270,6 +4348,10 @@ export type Database = {
         Args: { p_departure_id: string };
         Returns: undefined;
       };
+      check_rate_limit: {
+        Args: { p_key: string; p_limit: number; p_window_seconds: number };
+        Returns: boolean;
+      };
       claim_due_social_posts: {
         Args: { p_limit?: number };
         Returns: {
@@ -4441,6 +4523,14 @@ export type Database = {
       };
       release_expired_add_on_holds: { Args: never; Returns: number };
       release_expired_holds: { Args: never; Returns: number };
+      request_cancellation: {
+        Args: { p_booking_id: string; p_reason: string };
+        Returns: string;
+      };
+      resolve_cancellation_request: {
+        Args: { p_notes?: string; p_request_id: string; p_status: string };
+        Returns: undefined;
+      };
       run_lifecycle_notifications: { Args: never; Returns: undefined };
       shares_trip_with: { Args: { p_user_id: string }; Returns: boolean };
       start_add_on_purchase: {
@@ -4461,6 +4551,10 @@ export type Database = {
           first_name: string;
           user_id: string;
         }[];
+      };
+      withdraw_cancellation_request: {
+        Args: { p_request_id: string };
+        Returns: boolean;
       };
     };
     Enums: {

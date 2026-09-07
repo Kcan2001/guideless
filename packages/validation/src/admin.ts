@@ -295,4 +295,52 @@ export const grantRoleSchema = z.object({
   role: z.enum(["trip_staff", "support", "content_editor", "finance", "admin", "super_admin"]),
 });
 
+// ── Support inbox (roadmap launch gap) ──────────────────────────────────────
+export const SUPPORT_PRIORITIES = ["low", "normal", "high", "urgent"] as const;
+export const SUPPORT_THREAD_STATUSES = [
+  "open",
+  "waiting_on_customer",
+  "waiting_on_staff",
+  "resolved",
+  "closed",
+] as const;
+
+export const supportReplySchema = z.object({ body: z.string().trim().min(1).max(8000) });
+export const supportPrioritySchema = z.object({ priority: z.enum(SUPPORT_PRIORITIES) });
+export const supportStatusSchema = z.object({ status: z.enum(SUPPORT_THREAD_STATUSES) });
+
+// ── Trip documents uploaded by staff ────────────────────────────────────────
+export const TRIP_DOCUMENT_KINDS = [
+  "ticket",
+  "voucher",
+  "hotel_confirmation",
+  "insurance",
+  "guide",
+  "map",
+  "other",
+] as const;
+export const TRIP_DOCUMENT_MIME_TYPES = [
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+] as const;
+export const TRIP_DOCUMENT_MAX_BYTES = 52_428_800; // 50 MB, mirrors the bucket limit
+
+/** Metadata recorded after the browser has uploaded the file straight to Storage. */
+export const tripDocumentRecordSchema = z.object({
+  kind: z.enum(TRIP_DOCUMENT_KINDS),
+  title: z.string().trim().min(1).max(200),
+  forUserId: z.preprocess((v) => (v === "" || v === undefined ? null : v), uuidSchema.nullable()),
+  visibility: z.enum(["trip_member", "staff_only"]).default("trip_member"),
+  storagePath: z
+    .string()
+    .min(1)
+    .max(500)
+    .regex(/^trips\/[0-9a-f-]{36}\/[A-Za-z0-9._-]+$/, "Unexpected storage path"),
+  mimeType: z.enum(TRIP_DOCUMENT_MIME_TYPES),
+  sizeBytes: z.coerce.number().int().min(1).max(TRIP_DOCUMENT_MAX_BYTES),
+});
+export type TripDocumentRecord = z.infer<typeof tripDocumentRecordSchema>;
+
 export { nullableText };

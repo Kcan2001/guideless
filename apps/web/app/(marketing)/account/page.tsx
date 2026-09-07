@@ -4,9 +4,17 @@ import { redirect } from "next/navigation";
 import { ArrowRight, CalendarDays } from "lucide-react";
 import { emptyStates } from "@guideless/config";
 import { formatDate, formatDateRange, formatMoney } from "@guideless/utils";
-import type { BookingStatus, PaymentStatus } from "@guideless/types";
+import type { BookingStatus, CancellationTier, Currency, PaymentStatus } from "@guideless/types";
+import { CancelBooking } from "@/components/account/cancel-booking";
 import { OnboardingChecklist } from "@/components/account/onboarding-checklist";
 import { ReferralCard } from "@/components/account/referral-card";
+import { TravelerDetails } from "@/components/account/traveler-details";
+import { previewRefund } from "@/lib/bookings/cancellations";
+import {
+  listEmergencyContacts,
+  listMyCancellationRequests,
+  listRefundableAddOns,
+} from "@/lib/bookings/self-service-data";
 import { getMyReferral, listMyBookingAddOns, type BookingAddOn } from "@/lib/data/add-on-purchases";
 import { signOut } from "@/lib/auth/actions";
 import { Badge } from "@/components/ui/badge";
@@ -70,19 +78,36 @@ export default async function AccountPage(props: PageProps<"/account">) {
     getMyReferral(),
   ]);
   const travelerIds = bookings.flatMap((b) => b.travelers.map((t) => t.id));
-  const [{ data: contacts }, { data: tokens }, bookingAddOns] = await Promise.all([
-    travelerIds.length
-      ? supabase.from("emergency_contacts").select("traveler_id").in("traveler_id", travelerIds)
-      : Promise.resolve({ data: [] as { traveler_id: string }[] }),
+  const bookingIds = bookings.map((b) => b.booking.id);
+  const [
+    contactsByTraveler,
+    { data: tokens },
+    bookingAddOns,
+    cancellationRequests,
+    refundableAddOns,
+  ] = await Promise.all([
+    listEmergencyContacts(travelerIds),
     supabase.from("push_tokens").select("id").is("disabled_at", null).limit(1),
-    listMyBookingAddOns(bookings.map((b) => b.booking.id)),
+    listMyBookingAddOns(bookingIds),
+    listMyCancellationRequests(bookingIds),
+    listRefundableAddOns(bookingIds),
   ]);
+  const { data: leads } = travelerIds.length
+    ? await supabase
+        .from("booking_travelers")
+        .select("booking_id, traveler_id")
+        .in("booking_id", bookingIds)
+        .eq("is_lead", true)
+    : { data: [] as { booking_id: string; traveler_id: string }[] };
+  const leadByBooking = new Map((leads ?? []).map((l) => [l.booking_id, l.traveler_id]));
+  const notice = typeof sp.notice === "string" ? sp.notice : null;
+  const errorMsg = typeof sp.error_msg === "string" ? sp.error_msg : null;
   const addOnsByBooking = new Map<string, BookingAddOn[]>();
   for (const a of bookingAddOns) {
     addOnsByBooking.set(a.booking_id, [...(addOnsByBooking.get(a.booking_id) ?? []), a]);
   }
   const added = sp.added === "1";
-  const contactTravelerIds = new Set((contacts ?? []).map((c) => c.traveler_id));
+  const contactTravelerIds = new Set(contactsByTraveler.keys());
   const appConnected = (tokens ?? []).length > 0;
   const todayISO = new Date().toISOString().slice(0, 10);
   const tripByDeparture = new Map(trips.map((t) => [t.departure_id, t.id]));
@@ -130,6 +155,19 @@ export default async function AccountPage(props: PageProps<"/account">) {
           className="mt-8 rounded-xl border border-warning/40 bg-warning/10 p-4 text-sm"
         >
           {error}
+        </p>
+      )}
+      {notice && (
+        <p role="status" className="mt-8 rounded-xl border border-aqua bg-aqua/10 p-4 text-sm">
+          {notice}
+        </p>
+      )}
+      {errorMsg && (
+        <p
+          role="alert"
+          className="mt-8 rounded-xl border border-warning/40 bg-warning/10 p-4 text-sm"
+        >
+          {errorMsg}
         </p>
       )}
 
@@ -200,6 +238,53 @@ export default async function AccountPage(props: PageProps<"/account">) {
             stripeReady={isStripeConfigured()}
             addOnsByBooking={addOnsByBooking}
           />
+          {upcoming.length > 0 && (
+            <section className="mt-12" id="travelers">
+              <h2 className="text-xl font-semibold">Traveler details</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Hotels and rail operators need these. Names as on the passport are changed through
+                support.
+              </p>
+              {upcoming.map((b) => (
+                <div key={b.booking.id} id={`booking-${b.booking.id}`} className="mt-6">
+                  <p className="font-heading font-semibold">
+                    {b.tour.name} · {b.booking.confirmation_number}
+                  </p>
+                  <TravelerDetails
+                    bookingId={b.booking.id}
+                    travelers={b.travelers}
+                    leadTravelerId={leadByBooking.get(b.booking.id) ?? null}
+                    contacts={contactsByTraveler}
+                  />
+                  {b.booking.status === "confirmed" &&
+                    b.departure.start_date &&
+                    b.departure.end_date && (
+                      <CancelBooking
+                        bookingId={b.booking.id}
+                        currency={b.booking.currency as Currency}
+                        preview={previewRefund({
+                          todayISO,
+                          startDate: b.departure.start_date,
+                          endDate: b.departure.end_date,
+                          policy: (b.departure.cancellation_policy ??
+                            []) as unknown as CancellationTier[],
+                          amountPaid: b.booking.amount_paid,
+                          addOns: refundableAddOns.filter((a) => a.bookingId === b.booking.id),
+                        })}
+                        pending={
+                          cancellationRequests.find(
+                            (r) => r.booking_id === b.booking.id && r.status === "pending",
+                          ) ?? null
+                        }
+                        recent={
+                          cancellationRequests.find((r) => r.booking_id === b.booking.id) ?? null
+                        }
+                      />
+                    )}
+                </div>
+              ))}
+            </section>
+          )}
           <section className="mt-12">
             <h2 className="text-xl font-semibold">Bring a friend</h2>
             <div className="mt-4">
@@ -243,10 +328,7 @@ function BookingList({
   return (
     <section className="mt-12">
       <h2 className="text-xl font-semibold">{title}</h2>
-      <ul
-        id={title === "Upcoming" ? "travelers" : undefined}
-        className="mt-4 divide-y divide-border rounded-xl border border-border bg-surface"
-      >
+      <ul className="mt-4 divide-y divide-border rounded-xl border border-border bg-surface">
         {items.map(({ booking: b, departure, tour, travelers }) => {
           const currency = b.currency as Parameters<typeof formatMoney>[0]["currency"];
           const balance = Math.max(b.total_amount - b.amount_paid, 0);

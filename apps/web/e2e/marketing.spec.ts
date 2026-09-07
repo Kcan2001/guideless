@@ -127,6 +127,17 @@ test.describe("marketing site", () => {
     await expect(page.getByRole("status")).toContainText(/thank you/i);
   });
 
+  test("terms and privacy are published for Guideless LLC", async ({ page }) => {
+    for (const path of ["/terms", "/privacy"]) {
+      const res = await page.goto(path);
+      expect(res?.status()).toBe(200);
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      await expect(page.getByText("Guideless LLC").first()).toBeVisible();
+      await expect(page.getByRole("navigation", { name: "Contents" })).toBeVisible();
+      await expect(page.getByText(/Version 2026-09/)).toBeVisible();
+    }
+  });
+
   test("sitemap and robots are served", async ({ request }) => {
     const sitemap = await request.get("/sitemap.xml");
     expect(sitemap.ok()).toBeTruthy();
@@ -135,6 +146,8 @@ test.describe("marketing site", () => {
     expect(body).toContain("/tours/monaco-grand-prix");
     expect(body).toContain("/meetups");
     expect(body).toContain("/host");
+    expect(body).toContain("/terms");
+    expect(body).toContain("/privacy");
     const robots = await request.get("/robots.txt");
     expect(await robots.text()).toContain("Disallow: /checkout/");
   });

@@ -66,7 +66,7 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
         />
         <Stat
           label="Open support"
-          value={openSupport}
+          value={<Link href="/admin/support">{openSupport}</Link>}
           hint="threads waiting on staff"
           tone={openSupport > 0 ? "warning" : "neutral"}
         />

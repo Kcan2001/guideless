@@ -71,18 +71,19 @@ feature/* ──PR──▶ develop ──(auto)──▶ staging   Supabase pro
    `vercel.json` disables Git deployments, deploys come only from GitHub Actions.
 2. Environment variables (Production, and Preview for staging):
 
-| Variable                                                                   | Production value                               |
-| -------------------------------------------------------------------------- | ---------------------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`                                                 | `https://<prod-ref>.supabase.co`               |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY`                                            | prod anon key                                  |
-| `SUPABASE_SERVICE_ROLE_KEY`                                                | prod service role key (server only)            |
-| `NEXT_PUBLIC_SITE_URL`                                                     | `https://guidelesstravel.com`                  |
-| `STRIPE_SECRET_KEY` / `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`                 | live keys (test keys on Preview)               |
-| `STRIPE_WEBHOOK_SECRET`                                                    | from the webhook endpoint below                |
-| `RESEND_API_KEY`, `EMAIL_FROM`                                             | `Guideless Travel <hello@guidelesstravel.com>` |
-| `NEXT_PUBLIC_GA_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` | analytics (docs/marketing.md)                  |
-| `NEXT_PUBLIC_SENTRY_DSN`                                                   | Sentry web project                             |
-| `NEXT_PUBLIC_GOOGLE_MAPS_KEY`                                              | optional                                       |
+| Variable                                                                   | Production value                                               |
+| -------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`                                                 | `https://<prod-ref>.supabase.co`                               |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`                                            | prod anon key                                                  |
+| `SUPABASE_SERVICE_ROLE_KEY`                                                | prod service role key (server only)                            |
+| `NEXT_PUBLIC_SITE_URL`                                                     | `https://guidelesstravel.com`                                  |
+| `STRIPE_SECRET_KEY` / `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`                 | live keys (test keys on Preview)                               |
+| `STRIPE_WEBHOOK_SECRET`                                                    | from the webhook endpoint below                                |
+| `RESEND_API_KEY`, `EMAIL_FROM`                                             | `Guideless Travel <hello@guidelesstravel.com>`                 |
+| `NEXT_PUBLIC_GA_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` | analytics (docs/marketing.md)                                  |
+| `NEXT_PUBLIC_SENTRY_DSN`                                                   | Sentry web project                                             |
+| `NEXT_PUBLIC_GOOGLE_MAPS_KEY`                                              | optional                                                       |
+| `RATE_LIMIT_SALT`                                                          | random 16+ chars; salts hashed IPs for public-form rate limits |
 
 3. Domains: add `guidelesstravel.com` (primary) and `www.guidelesstravel.com` (redirect to the
    apex). Vercel shows the records to add; they are the ones in §3.
