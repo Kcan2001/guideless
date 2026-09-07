@@ -48,8 +48,10 @@ jobs:
       - name: Test
         run: pnpm test
 
-      - name: Build
-        run: pnpm build --filter=web...
+      # The web app pre-renders catalog pages from the database at build time, so it is built in
+      # the e2e job against a local Supabase (and by deploy.yml against the hosted one).
+      - name: Build (packages)
+        run: pnpm turbo run build --filter=!web --filter=!mobile
 
   database:
     name: Supabase migrations
@@ -66,7 +68,11 @@ jobs:
         run: supabase start -x studio,imgproxy,inbucket,edge-runtime,logflare,vector,supavisor
 
       - name: Lint database
-        run: supabase db lint --level warning --fail-on warning
+        # The CLI's --fail-on flag exits non-zero even when the report is empty; assert emptiness ourselves.
+        run: |
+          out=$(supabase db lint --level warning)
+          echo "$out"
+          [ "$(echo "$out" | tr -d '[:space:]')" = "[]" ] || { echo "database lint reported issues"; exit 1; }
 
       - name: Run pgTAP tests (RLS policies, invariants)
         run: supabase test db

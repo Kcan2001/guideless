@@ -195,6 +195,16 @@ domain can only point one way.
 Propagation is minutes to an hour. Vercel issues the TLS certificate automatically once the A/CNAME
 resolve. Keep Squarespace as the registrar and DNS host; nothing needs to transfer.
 
+## 3b. Pipeline status (2026-09-07)
+
+`deploy.yml` ran green end to end against staging: verify → migrations and functions on
+`zvwkwlvtputdrmqvcquj` → Vercel preview → smoke test. Preview deployments are behind Vercel's
+deployment protection; the pipeline's smoke test sends the automation bypass secret
+(`VERCEL_PROTECTION_BYPASS` in both GitHub environments and in `supabase/.env`). Production PR:
+github.com/Kcan2001/guideless/pull/1 (develop → production). Three CI fixes were needed on the
+way: the pnpm action's duplicate version pin, a CSS module declaration for the mobile typecheck,
+and the anon key missing from Vercel's environments.
+
 ## 4. First production release, step by step
 
 1. Create the GitHub environments and secrets from §1 (Supabase and Vercel at minimum).
