@@ -1,5 +1,7 @@
 "use client";
 
+import type { Route } from "next";
+import Link from "next/link";
 import { useEffect, useMemo, useState, useSyncExternalStore, useTransition } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -79,15 +81,33 @@ type TravelersStepOutput = z.output<typeof travelersStepSchema>;
 
 type PreferencesInput = z.input<typeof bookingPreferencesSchema>;
 
+/** [key, label, linked phrase → page]. The linked phrase stays inside the label so the checkbox's accessible name is unchanged. */
 const TERMS = [
-  ["terms", "I accept the Terms of Service."],
-  ["cancellationPolicy", "I understand the cancellation policy for this departure."],
+  ["terms", "I accept the Terms of Service.", ["Terms of Service", "/terms"]],
+  ["cancellationPolicy", "I understand the cancellation policy for this departure.", null],
   [
     "travelResponsibility",
     "I understand I am responsible for my own flights, insurance and documents.",
+    null,
   ],
-  ["privacyPolicy", "I accept the Privacy Policy."],
+  ["privacyPolicy", "I accept the Privacy Policy.", ["Privacy Policy", "/privacy"]],
 ] as const;
+
+function TermLabel({ label, link }: { label: string; link: readonly [string, string] | null }) {
+  if (!link) return <span>{label}</span>;
+  const [phrase, href] = link;
+  const i = label.indexOf(phrase);
+  if (i < 0) return <span>{label}</span>;
+  return (
+    <span>
+      {label.slice(0, i)}
+      <Link href={href as Route} target="_blank" rel="noopener" className="underline">
+        {phrase}
+      </Link>
+      {label.slice(i + phrase.length)}
+    </span>
+  );
+}
 
 export function CheckoutWizard({
   departure,
@@ -594,7 +614,7 @@ function TermsStep({ onBack, onNext }: { onBack: () => void; onNext: () => void 
         </p>
       </header>
       <ul className="space-y-3 rounded-xl border border-border bg-surface p-6">
-        {TERMS.map(([key, label]) => (
+        {TERMS.map(([key, label, link]) => (
           <li key={key}>
             <label className="flex cursor-pointer items-start gap-3">
               <input
@@ -603,7 +623,7 @@ function TermsStep({ onBack, onNext }: { onBack: () => void; onNext: () => void 
                 checked={Boolean(checked[key])}
                 onChange={(e) => setChecked((c) => ({ ...c, [key]: e.target.checked }))}
               />
-              <span>{label}</span>
+              <TermLabel label={label} link={link} />
             </label>
           </li>
         ))}

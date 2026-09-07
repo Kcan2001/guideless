@@ -3,7 +3,8 @@
 //   node scripts/sort-photos-by-location.mjs --src "C:/Users/me/Pictures/iCloud Photos/Photos" \
 //        --dest guideless_photos/_library [--dry-run]
 //
-// Reads EXIF through sharp (JPEG, HEIC, PNG, WebP, TIFF), parses the GPS IFD ourselves (no extra
+// With --list, only the listed files are scanned (handy for iCloud libraries where most files are
+// cloud placeholders that would download on first read). Reads EXIF through sharp (JPEG, HEIC, PNG, WebP, TIFF), parses the GPS IFD ourselves (no extra
 // dependency), and copies matches into <dest>/<trip>/<region>/<date>_<name>.<ext>. Originals are
 // never modified. HEIC files are copied as-is; run scripts/convert-heic.ps1 afterwards to produce
 // the JPEGs the social import expects. A manifest (index.json) records every copied file with its
@@ -16,7 +17,15 @@
 //   southern-france/paris         Paris and inner suburbs
 //   southern-france/other-france  elsewhere in mainland France (may include border towns)
 
-import { copyFileSync, existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { basename, extname, join } from "node:path";
 import sharp from "sharp";
 
@@ -26,10 +35,13 @@ const opt = (name, fallback) => {
   return i >= 0 ? args[i + 1] : fallback;
 };
 const SRC = opt("src", null);
+const LIST = opt("list", null); // text file, one absolute path per line (e.g. only locally available iCloud files)
 const DEST = opt("dest", "guideless_photos/_library");
 const DRY = args.includes("--dry-run");
-if (!SRC) {
-  console.error("Usage: node scripts/sort-photos-by-location.mjs --src <dir> [--dest <dir>] [--dry-run]");
+if (!SRC && !LIST) {
+  console.error(
+    "Usage: node scripts/sort-photos-by-location.mjs (--src <dir> | --list <file>) [--dest <dir>] [--dry-run]",
+  );
   process.exit(1);
 }
 
@@ -122,10 +134,15 @@ function parseExif(buf) {
 }
 
 // ── Scan ────────────────────────────────────────────────────────────────────────
-const files = readdirSync(SRC)
-  .filter((n) => IMAGE_EXT.has(extname(n).toLowerCase()))
-  .map((n) => join(SRC, n));
-console.log(`${files.length} image files in ${SRC}`);
+const files = LIST
+  ? readFileSync(LIST, "utf8")
+      .split(/\r?\n/)
+      .map((l) => l.replace(/^\uFEFF/, "").trim())
+      .filter((l) => l && IMAGE_EXT.has(extname(l).toLowerCase()))
+  : readdirSync(SRC)
+      .filter((n) => IMAGE_EXT.has(extname(n).toLowerCase()))
+      .map((n) => join(SRC, n));
+console.log(`${files.length} image files in ${LIST ?? SRC}`);
 
 const manifest = [];
 const counts = {};

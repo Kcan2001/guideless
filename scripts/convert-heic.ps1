@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   Converts every .heic under a folder to .jpg using Windows' built-in HEIF codec, honouring the
   EXIF orientation, then removes the .heic (the iCloud original is untouched).
@@ -60,10 +60,9 @@ foreach ($f in $files) {
         [Windows.Graphics.Imaging.ColorManagementMode]::ColorManageToSRgb)) ([Windows.Graphics.Imaging.SoftwareBitmap])
 
     $outStream = New-Object Windows.Storage.Streams.InMemoryRandomAccessStream
-    $props = New-Object Windows.Graphics.Imaging.BitmapPropertySet
-    $q = New-Object Windows.Graphics.Imaging.BitmapTypedValue -ArgumentList ([single]$Quality), ([Windows.Foundation.PropertyType]::Single)
-    $props.Add("ImageQuality", $q)
-    $encoder = Await ([Windows.Graphics.Imaging.BitmapEncoder]::CreateAsync([Windows.Graphics.Imaging.BitmapEncoder]::JpegEncoderId, $outStream, $props)) ([Windows.Graphics.Imaging.BitmapEncoder])
+    # The WinRT property-set overload is not callable from Windows PowerShell; the default JPEG
+    # quality (~0.9) is what we want anyway. $Quality is kept for a future PowerShell 7 path.
+    $encoder = Await ([Windows.Graphics.Imaging.BitmapEncoder]::CreateAsync([Windows.Graphics.Imaging.BitmapEncoder]::JpegEncoderId, $outStream)) ([Windows.Graphics.Imaging.BitmapEncoder])
     $encoder.SetSoftwareBitmap($bitmap)
     AwaitAction ($encoder.FlushAsync())
 
@@ -80,7 +79,7 @@ foreach ($f in $files) {
     if ($ok % 25 -eq 0) { Write-Host "  …$ok converted" }
   } catch {
     $failed++
-    Write-Warning "Failed: $($f.Name) — $($_.Exception.Message.Substring(0, [Math]::Min(120, $_.Exception.Message.Length)))"
+    Write-Warning "Failed: $($f.Name) - $($_.Exception.Message.Substring(0, [Math]::Min(120, $_.Exception.Message.Length)))"
   }
 }
 Write-Host "Converted $ok, failed $failed."
