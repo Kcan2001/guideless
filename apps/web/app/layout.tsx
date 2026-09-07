@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Manrope } from "next/font/google";
 import { brand } from "@guideless/config";
+import { Suspense } from "react";
+import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
+import { ConsentBanner } from "@/components/analytics/consent-banner";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import "./globals.css";
 
@@ -51,6 +54,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         {children}
         <GoogleAnalytics />
+        <Suspense fallback={null}>
+          <AnalyticsProvider />
+        </Suspense>
+        <ConsentBanner />
       </body>
     </html>
   );

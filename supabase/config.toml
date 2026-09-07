@@ -384,6 +384,14 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# Called by pg_cron (pg_net) with an `x-cron-secret` header, not by signed-in users.
+# The function verifies the shared secret or the service role token itself.
+[functions.social-publish]
+enabled = true
+verify_jwt = false
+import_map = "./functions/social-publish/deno.json"
+entrypoint = "./functions/social-publish/index.ts"
+
 # notify-dispatch — pg_cron (pg_net) every minute with `x-cron-secret`, or the service role token.
 # Delivers `notifications` rows by Expo push + Resend email. See docs/api.md → Notifications.
 [functions.notify-dispatch]

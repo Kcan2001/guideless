@@ -1,4 +1,4 @@
-import { brand } from "@guideless/config";
+import { brand, social } from "@guideless/config";
 import type { Tables } from "@guideless/types";
 import type { PublicDeparture, RouteStop } from "@/lib/data/tours";
 
@@ -21,6 +21,7 @@ export function organizationJsonLd() {
     logo: siteUrl("/brand/guideless-logo.webp"),
     slogan: brand.tagline,
     email: brand.supportEmail,
+    sameAs: [social.instagram.url],
   };
 }
 

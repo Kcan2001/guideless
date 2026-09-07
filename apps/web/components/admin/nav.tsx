@@ -5,6 +5,7 @@ import {
   CalendarRange,
   LayoutDashboard,
   Map,
+  Megaphone,
   ReceiptText,
   Users,
   type LucideIcon,
@@ -20,6 +21,7 @@ const NAV: Array<{ href: string; label: string; icon: LucideIcon }> = [
   { href: "/admin/departures", label: "Departures", icon: CalendarRange },
   { href: "/admin/bookings", label: "Bookings", icon: ReceiptText },
   { href: "/admin/customers", label: "Customers", icon: Users },
+  { href: "/admin/social", label: "Social", icon: Megaphone },
 ];
 
 export function AdminNav({ email, roles }: { email: string | null; roles: Role[] }) {

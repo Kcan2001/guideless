@@ -5,7 +5,7 @@ import type { AddOnSelection } from "@guideless/validation";
 import { AddOnPicker } from "@/components/checkout/add-on-picker";
 import type { CheckoutDeparture } from "@/components/checkout/types";
 import { Button } from "@/components/ui/button";
-import { track, type AnalyticsEvent } from "@/lib/analytics";
+import { track } from "@/lib/analytics";
 
 /** Step: Add-ons. Optional by design; the sidebar quote updates as things are toggled. */
 export function AddOnsStep({
@@ -46,7 +46,7 @@ export function AddOnsStep({
         onChange={onChange}
         onToggleEvent={(addOnId, selected) =>
           // Event names live in lib/analytics.ts (owned elsewhere); cast until they are added there.
-          track((selected ? "add_add_on" : "remove_add_on") as AnalyticsEvent, {
+          track(selected ? "add_add_on" : "remove_add_on", {
             departure_id: departure.id,
             add_on_id: addOnId,
           })

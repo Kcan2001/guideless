@@ -17,6 +17,23 @@ export const brand = {
   termsVersion: "2026-09",
 } as const;
 
+/** Public social profiles. Used in the footer, Organization JSON-LD (`sameAs`) and share links. */
+export const social = {
+  instagram: {
+    handle: "guidelesstravel",
+    url: "https://www.instagram.com/guidelesstravel/",
+  },
+} as const;
+
+/**
+ * UTM conventions for every link we control (docs/marketing.md). Keep the vocabulary small so
+ * GA4 reports stay readable: utm_source = platform, utm_medium = channel type, utm_campaign = theme.
+ */
+export const utm = {
+  sources: ["instagram", "newsletter", "google", "partner"],
+  mediums: ["social", "email", "cpc", "referral", "bio"],
+} as const;
+
 /** Preferred product vocabulary. Use these labels in web, mobile, email and admin UI. */
 export const terminology = {
   trip: "Your Trip",
