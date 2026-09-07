@@ -164,7 +164,9 @@ Pinterest
 
 - [x] Business account **@guideless_travel** (2026-09-07; "guidelesstravel" was taken on Pinterest;
       display name "Guideless Travel", type Service provider, website guidelesstravel.com — claim the
-      website in Settings → Claimed accounts once the site is live).
+      website in Settings → Claimed accounts once the site is live). Board **"Europe trips,
+      organized"** (id `1134766574768036100`, `PINTEREST_BOARD_ID` in `supabase/.env`) is the
+      default `metadata.board_id`.
 - [x] Developer app **Guideless Travel Publisher**, app id `1609269`
       (developers.pinterest.com/apps/1609269), trial access requested 2026-09-07 with use case
       "Pin creation & scheduling", personal API access, own Pins/Boards only.
