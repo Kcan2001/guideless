@@ -129,6 +129,18 @@ to "Secret" in the UI if you want them unreadable.
    `STRIPE_WEBHOOK_SECRET`. Repeat with test keys for the staging preview URL.
 3. Checkout branding: logo, ink `#0B2025`, aqua `#60E1BB`.
 
+**Status 2026-09-07:** Kyle's Stripe login also owns an unrelated account ("The Reset Club") —
+leave it alone. Guideless has its own **separate** account `acct_1UD60WBhgWBLSqYp` ("Guideless
+Travel", US), still in test mode / not activated. Test publishable + secret key and the webhook
+signing secret are in `supabase/.env` (`STRIPE_TEST_*`) and in Vercel **Production and Preview** as
+`NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` / `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` (test values on
+both for now). Test-mode endpoint `we_1UD63UBhgWBLSqYpP4OQwhqU` →
+`https://guidelesstravel.com/api/webhooks/stripe` with the six events above. **Still manual
+(Kyle):** step 1 — Stripe only exposes business name, public name and statement descriptor inside
+the activation flow (legal entity Guideless LLC, EIN, bank account, representative identity); when
+you activate, create a *live-mode* endpoint with the same URL/events and replace the three
+Production values with live keys + its signing secret.
+
 ### 2.4 Resend
 
 Add the domain `guidelesstravel.com`; Resend gives DNS records (see §3). Verify, then create the
