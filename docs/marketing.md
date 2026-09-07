@@ -150,13 +150,14 @@ Instagram / Meta
       bio, logo + Nice cover photo set; `FACEBOOK_PAGE_ID` in `supabase/.env`). It is the ad identity
       for Meta Ads later and the Page behind the Instagram account. @guidelesstravel is **linked** to the Page (Page settings → Linked accounts), and both sit in
       the Meta **business portfolio** id `1412763007475543` (`META_BUSINESS_PORTFOLIO_ID`;
-      business.facebook.com/settings) that Meta created during the link. Still to do: vanity
-      username (Meta gates it for new Pages), action button → website, add the developer app
-      1761518544890433 to the portfolio, and business verification with the Guideless LLC papers
-      (needed for Advanced Access / ads at scale). **Kyle:** the portfolio's "Business details" form
-      (business.facebook.com/settings → Business info → Edit) wants the LLC's legal name, street
-      address, phone, website and EIN — fill it in yourself; nothing else can be typed there
-      without inventing data.
+      business.facebook.com/settings) that Meta created during the link. The portfolio owns the developer app 1761518544890433 (Accounts → Apps) and has the Page as
+      its primary Page. Still to do: vanity username (Meta gates it for new Pages), action button →
+      website, business verification when Meta offers it (needed for Advanced Access / ads at
+      scale). Business details are filled in (legal name Guideless LLC, the IRS-registered Philadelphia
+      address, business phone, website, EIN — the EIN lives only in Meta). Meta currently reports
+      "your organization does not need to be verified"; the verification flow appears when the
+      developer app requests Advanced Access, and the Certificate of Formation or the IRS EIN
+      letter (both in ZenBusiness) is the document to upload then.
 
 Email
 
