@@ -49,10 +49,10 @@ feature/* ──PR──▶ develop ──(auto)──▶ staging   Supabase pro
 3. Authentication → URL configuration: Site URL `https://guidelesstravel.com`, redirect URLs
    `https://guidelesstravel.com/**`, `https://*.vercel.app/**` (staging), `guideless://**` (app).
 4. Authentication → SMTP: use Resend (host `smtp.resend.com`, port 465, user `resend`, password =
-   API key, sender `Guideless Tours <hello@guidelesstravel.com>`) so auth emails come from the
+   API key, sender `Guideless Travel <hello@guidelesstravel.com>`) so auth emails come from the
    domain.
 5. Edge Function secrets (`supabase secrets set --project-ref <ref> ...`): `NOTIFY_DISPATCH_SECRET`
-   (random 32+ chars), `RESEND_API_KEY`, `EMAIL_FROM="Guideless Tours <hello@guidelesstravel.com>"`,
+   (random 32+ chars), `RESEND_API_KEY`, `EMAIL_FROM="Guideless Travel <hello@guidelesstravel.com>"`,
    `SITE_URL=https://guidelesstravel.com`, optional `EXPO_ACCESS_TOKEN`; plus the social publishing
    secrets in docs/marketing.md.
 6. Vault (SQL editor, once per project):
@@ -71,18 +71,18 @@ feature/* ──PR──▶ develop ──(auto)──▶ staging   Supabase pro
    `vercel.json` disables Git deployments, deploys come only from GitHub Actions.
 2. Environment variables (Production, and Preview for staging):
 
-| Variable                                                                   | Production value                              |
-| -------------------------------------------------------------------------- | --------------------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`                                                 | `https://<prod-ref>.supabase.co`              |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY`                                            | prod anon key                                 |
-| `SUPABASE_SERVICE_ROLE_KEY`                                                | prod service role key (server only)           |
-| `NEXT_PUBLIC_SITE_URL`                                                     | `https://guidelesstravel.com`                 |
-| `STRIPE_SECRET_KEY` / `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`                 | live keys (test keys on Preview)              |
-| `STRIPE_WEBHOOK_SECRET`                                                    | from the webhook endpoint below               |
-| `RESEND_API_KEY`, `EMAIL_FROM`                                             | `Guideless Tours <hello@guidelesstravel.com>` |
-| `NEXT_PUBLIC_GA_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` | analytics (docs/marketing.md)                 |
-| `NEXT_PUBLIC_SENTRY_DSN`                                                   | Sentry web project                            |
-| `NEXT_PUBLIC_GOOGLE_MAPS_KEY`                                              | optional                                      |
+| Variable                                                                   | Production value                               |
+| -------------------------------------------------------------------------- | ---------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`                                                 | `https://<prod-ref>.supabase.co`               |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`                                            | prod anon key                                  |
+| `SUPABASE_SERVICE_ROLE_KEY`                                                | prod service role key (server only)            |
+| `NEXT_PUBLIC_SITE_URL`                                                     | `https://guidelesstravel.com`                  |
+| `STRIPE_SECRET_KEY` / `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`                 | live keys (test keys on Preview)               |
+| `STRIPE_WEBHOOK_SECRET`                                                    | from the webhook endpoint below                |
+| `RESEND_API_KEY`, `EMAIL_FROM`                                             | `Guideless Travel <hello@guidelesstravel.com>` |
+| `NEXT_PUBLIC_GA_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` | analytics (docs/marketing.md)                  |
+| `NEXT_PUBLIC_SENTRY_DSN`                                                   | Sentry web project                             |
+| `NEXT_PUBLIC_GOOGLE_MAPS_KEY`                                              | optional                                       |
 
 3. Domains: add `guidelesstravel.com` (primary) and `www.guidelesstravel.com` (redirect to the
    apex). Vercel shows the records to add; they are the ones in §3.
@@ -91,7 +91,8 @@ feature/* ──PR──▶ develop ──(auto)──▶ staging   Supabase pro
 
 ### 2.3 Stripe
 
-1. Activate the account; set the statement descriptor to `GUIDELESS`.
+1. Activate the account as **Guideless LLC** (business name, dashboard setting) with the public
+   brand **Guideless Travel**; set the statement descriptor to `GUIDELESS TRAVEL`.
 2. Webhook endpoint `https://guidelesstravel.com/api/webhooks/stripe` with events
    `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
    `checkout.session.expired`, `checkout.session.async_payment_failed`,

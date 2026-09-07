@@ -84,7 +84,7 @@ export function SiteFooter() {
       <div className="border-t border-border">
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 px-6 py-6 text-xs text-muted-foreground">
           <span>
-            © {new Date().getFullYear()} {brand.name}. All rights reserved.
+            © {new Date().getFullYear()} {brand.legalName}. All rights reserved.
           </span>
           <span>Organized, not escorted.</span>
         </div>

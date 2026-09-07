@@ -15,7 +15,7 @@ export function getStripe(): Stripe {
   if (!key) throw new Error("STRIPE_SECRET_KEY is not configured");
   client ??= new Stripe(key, {
     typescript: true,
-    appInfo: { name: "Guideless Tours", url: "https://guidelesstravel.com" },
+    appInfo: { name: "Guideless Travel", url: "https://guidelesstravel.com" },
   });
   return client;
 }

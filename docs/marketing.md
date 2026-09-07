@@ -93,8 +93,8 @@ curl -X POST "$SUPABASE_URL/functions/v1/social-publish" -H "Authorization: Bear
 
 Analytics
 
-- [x] GA4 account + property **Guideless Tours** (owner kyleacannon@gmail.com, reporting zone
-      America/New_York, USD, industry Travel) → web stream "Guideless Tours website"
+- [x] GA4 account + property **Guideless Travel** (owner kyleacannon@gmail.com, reporting zone
+      America/New_York, USD, industry Travel) → web stream "Guideless Travel website"
       (`https://guidelesstravel.com`, stream id 15730411550) → measurement id **`G-YSBNKPW5Z6`**.
       Enhanced measurement on. Set `NEXT_PUBLIC_GA_ID=G-YSBNKPW5Z6` in Vercel when the project
       exists (already in the local `.env.local`). Still to do in GA: mark `purchase` as a key
@@ -121,12 +121,12 @@ Analytics
       is also owned (Squarespace, registered until 2029-09-06) and forwards with a permanent
       301, path preserved, to `https://guidelesstravel.com` (Squarespace Domains → Website → Domain
       Forwarding). Keep both renewals on autopay.
-- [ ] Google Business Profile for Guideless Tours (reviews + Maps presence).
+- [ ] Google Business Profile for Guideless Travel (reviews + Maps presence).
 
 Instagram / Meta
 
 - [x] `@guidelesstravel` is a **Professional (Business)** account (verified 2026-09-06).
-- [x] Meta app **Guideless Tours** — app id `1761518544890433`, Instagram app id
+- [x] Meta app **Guideless Travel** — app id `1761518544890433`, Instagram app id
       `1756467348826660`, use case "Manage messaging & content on Instagram" (Instagram Login
       variant). Permissions ready for testing: `instagram_business_basic`,
       `instagram_business_content_publish`, `instagram_business_manage_messages`.

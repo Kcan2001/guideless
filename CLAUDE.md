@@ -1,6 +1,6 @@
-# Guideless Tours — Engineering Guide for Claude
+# Guideless Travel — Engineering Guide for Claude
 
-Guideless Tours is a "minimal intervention" travel company. We organize the logistics
+Guideless Travel is a "minimal intervention" travel company. We organize the logistics
 (hotels, trains, transfers, selected experiences, small groups); there is no tour guide.
 Tagline: **Travel organized. Explore independently.** / **Everything planned. Nothing forced.**
 

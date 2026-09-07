@@ -27,7 +27,7 @@ values
    'We book the hotels, the trains between Nice and Monaco, and welcome drinks on Thursday night. Race tickets are add-ons so you pay only for the view you want. Couples meet couples, solos meet solos, and everyone compares notes at the harbour on Sunday night.',
    'Nobody else sells the group. Package operators sell luxury; we sell the weekend you actually want, with people to share it.',
    189000, 'USD',
-   'Monaco Grand Prix 2027 Group Trip — Nice or Monaco Hotels | Guideless Tours',
+   'Monaco Grand Prix 2027 Group Trip — Nice or Monaco Hotels | Guideless Travel',
    'A social group trip for the 2027 Monaco Grand Prix: hotels in Nice or Monaco, race viewing tiers as add-ons, welcome drinks, no tour guide.',
    now())
 on conflict (id) do nothing;

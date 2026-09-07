@@ -1,5 +1,5 @@
 /**
- * Guideless Tours design tokens — colors.
+ * Guideless Travel design tokens — colors.
  *
  * Source of truth for every surface (web CSS variables, Tailwind theme, React Native theme).
  * Values are extracted from the brand logo. See docs/design-system.md.

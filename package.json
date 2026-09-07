@@ -2,7 +2,7 @@
   "name": "guideless",
   "private": true,
   "version": "0.1.0",
-  "description": "Guideless Tours — travel organized, explore independently.",
+  "description": "Guideless Travel — travel organized, explore independently.",
   "packageManager": "pnpm@10.0.0",
   "engines": {
     "node": ">=22.13.0"

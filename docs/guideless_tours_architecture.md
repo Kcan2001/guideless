@@ -1,9 +1,9 @@
-# Guideless Tours — Software Architecture & Product Specification
+# Guideless Travel — Software Architecture & Product Specification
 
 **Version:** 0.1
 **Status:** Greenfield / starting from scratch
 **Audience:** Claude Code / engineering team / product / design
-**Primary objective:** Build the first production version of Guideless Tours as a scalable, low-operations travel platform where Guideless organizes the trip but intentionally minimizes traditional tour-guide intervention.
+**Primary objective:** Build the first production version of Guideless Travel as a scalable, low-operations travel platform where Guideless organizes the trip but intentionally minimizes traditional tour-guide intervention.
 
 > This is the master specification. Topic documents in `docs/` and decision records in `docs/adr/` are derived from it. When they disagree, fix the derived document.
 
@@ -13,7 +13,7 @@
 
 ### 1.1 Brand concept
 
-Guideless Tours is a "minimal intervention" travel company.
+Guideless Travel is a "minimal intervention" travel company.
 
 The company handles the hard logistical work:
 
@@ -925,7 +925,7 @@ Prefer "Included: Welcome Experience" over "Mandatory Group Activity"; "Your Gui
 
 ## 101. Core brand copy
 
-**Travel organized. Explore independently.** · **Everything planned. Nothing forced.** · _Guideless Tours takes care of the logistics, so you can experience the destination your way._
+**Travel organized. Explore independently.** · **Everything planned. Nothing forced.** · _Guideless Travel takes care of the logistics, so you can experience the destination your way._
 
 ## 102. North-star metric
 
@@ -1046,7 +1046,7 @@ Philosophy: modular monolith, not microservices · PostgreSQL as source of truth
 
 Primary: **Travel organized. Explore independently.**
 Secondary: **Everything planned. Nothing forced.**
-Explanation: _Guideless Tours organizes the logistics, connects you with a small group, and gives you the tools to explore on your own. No tour guide. No rigid schedule. Just a better way to travel._
+Explanation: _Guideless Travel organizes the logistics, connects you with a small group, and gives you the tools to explore on your own. No tour guide. No rigid schedule. Just a better way to travel._
 
 ## 122. Immediate next step for engineering
 

@@ -2,7 +2,7 @@
   "name": "@guideless/config",
   "version": "0.1.0",
   "private": true,
-  "description": "Design tokens (colors, type scale, brand copy) and shared tsconfig for Guideless Tours.",
+  "description": "Design tokens (colors, type scale, brand copy) and shared tsconfig for Guideless Travel.",
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",

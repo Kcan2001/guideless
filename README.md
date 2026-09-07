@@ -1,8 +1,8 @@
-# Guideless Tours
+# Guideless Travel
 
 **Travel organized. Explore independently.**
 
-Guideless Tours is a minimal-intervention travel company. We book the hotels, the trains, the
+Guideless Travel is a minimal-intervention travel company. We book the hotels, the trains, the
 transfers and a welcome evening for a small group. There is no tour guide; your route lives on
 your phone, everything beyond the basics is optional, and you can see who else is going.
 

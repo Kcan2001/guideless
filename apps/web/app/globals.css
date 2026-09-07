@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
- * Guideless Tours design tokens.
+ * Guideless Travel design tokens.
  * Source of truth: packages/config/src/tokens.ts — keep these values in sync.
  * Ratio: ~70% neutral, ~20% ink, ~10% aqua/cyan accent. Restrained, calm, premium.
  */

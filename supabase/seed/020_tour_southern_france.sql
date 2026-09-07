@@ -15,7 +15,7 @@ values
    'Three cities, three rhythms. Nice for sea and light. Avignon for slow lunches and vineyards. Paris for everything else. Your itinerary lives on your phone: where you are staying, when the train leaves, what is worth a walk — and hours of free time on purpose.',
    'Everything planned. Nothing forced. This is the route we would send a friend on.',
    349500, 'USD',
-   'Southern France Trip — Nice, Avignon, Paris | Guideless Tours',
+   'Southern France Trip — Nice, Avignon, Paris | Guideless Travel',
    'A 9-day small-group trip through Nice, Avignon and Paris with hotels, trains and experiences organized — and no tour guide.',
    now())
 on conflict (id) do nothing;

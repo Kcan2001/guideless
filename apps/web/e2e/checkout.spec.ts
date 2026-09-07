@@ -12,6 +12,9 @@ test("a new customer can sign up and reach the payment step, and is refused clea
   const email = `e2e+${Date.now()}@example.com`;
 
   await page.goto(`/login?next=${encodeURIComponent(`/checkout/${DEPARTURE_ID}`)}`);
+  // The consent banner overlays the bottom of the page until answered; a real visitor answers it once.
+  const consent = page.getByRole("button", { name: "Essential only" });
+  if (await consent.isVisible().catch(() => false)) await consent.click();
   await page.getByRole("tab", { name: "Create account" }).click();
   await page.locator("#su-name").fill("E2E Traveler");
   await page.locator("#su-email").fill(email);

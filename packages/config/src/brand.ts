@@ -1,17 +1,19 @@
 /**
- * Guideless Tours brand copy and product terminology.
+ * Guideless Travel brand copy and product terminology.
  *
  * UI language should be consistent with the brand: organized, not escorted.
  * Prefer "Included: Welcome Experience" over "Mandatory Group Activity".
  * "Your Guide" always refers to the digital itinerary, never a person.
  */
 export const brand = {
-  name: "Guideless Tours",
+  name: "Guideless Travel",
   shortName: "Guideless",
+  /** Legal entity for copyright lines, terms, invoices and the Stripe account business name. */
+  legalName: "Guideless LLC",
   tagline: "Travel organized. Explore independently.",
   taglineSecondary: "Everything planned. Nothing forced.",
   description:
-    "Guideless Tours organizes the logistics, connects you with a small group, and gives you the tools to explore on your own. No tour guide. No rigid schedule. Just a better way to travel.",
+    "Guideless Travel organizes the logistics, connects you with a small group, and gives you the tools to explore on your own. No tour guide. No rigid schedule. Just a better way to travel.",
   supportEmail: "hello@guidelesstravel.com",
   /** Bump when terms / cancellation policy / waiver text changes; stored on each booking. */
   termsVersion: "2026-09",

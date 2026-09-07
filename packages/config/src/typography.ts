@@ -1,5 +1,5 @@
 /**
- * Guideless Tours design tokens — typography.
+ * Guideless Travel design tokens — typography.
  *
  * Inter for UI/body, Manrope for headings. Large, clean, spacious, highly readable.
  * No decorative travel fonts. Mobile scales down naturally.
