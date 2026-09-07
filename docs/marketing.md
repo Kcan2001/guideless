@@ -145,8 +145,18 @@ Instagram / Meta
 - [ ] Request **Advanced Access** for `instagram_business_basic` +
       `instagram_business_content_publish` (app review, screencast of `/admin/social`). Until
       approved, publishing works only for accounts added as testers — which is enough for us.
-- [ ] Optional later: a Facebook Page linked to the account (needed for Meta ads and the
-      "Facebook Login for Business" variant with hashtag search).
+- [x] Facebook Page **Guideless Travel** created 2026-09-07 (id `61594000960629`,
+      facebook.com/profile.php?id=61594000960629; category Travel Company; website, hello@ email,
+      bio, logo + Nice cover photo set; `FACEBOOK_PAGE_ID` in `supabase/.env`). It is the ad identity
+      for Meta Ads later and the Page behind the Instagram account. @guidelesstravel is **linked** to the Page (Page settings → Linked accounts), and both sit in
+      the Meta **business portfolio** id `1412763007475543` (`META_BUSINESS_PORTFOLIO_ID`;
+      business.facebook.com/settings) that Meta created during the link. Still to do: vanity
+      username (Meta gates it for new Pages), action button → website, add the developer app
+      1761518544890433 to the portfolio, and business verification with the Guideless LLC papers
+      (needed for Advanced Access / ads at scale). **Kyle:** the portfolio's "Business details" form
+      (business.facebook.com/settings → Business info → Edit) wants the LLC's legal name, street
+      address, phone, website and EIN — fill it in yourself; nothing else can be typed there
+      without inventing data.
 
 Email
 
