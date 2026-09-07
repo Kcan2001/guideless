@@ -148,9 +148,15 @@ Instagram / Meta
 
 Email
 
-- [ ] Resend: verify `guidelesstravel.com` (SPF, DKIM, DMARC at Squarespace Domains). Create a
-      "Newsletter" audience and set `RESEND_AUDIENCE_ID`; the footer form (§9) then mirrors every
-      subscriber into it and fires `newsletter_signup`.
+- [x] Resend account (kyleacannon@gmail.com). Domain `guidelesstravel.com` added (id
+      `1b70b40a-bc07-43a9-b355-43f8dd8b3b62`, region us-east-1) with DKIM TXT `resend._domainkey`,
+      CNAME `rsend` / `send` → `*.forge.rmta.net` and TXT `_dmarc` (`p=none`) at Squarespace Domains
+      (2026-09-07). Inbound MX deliberately **not** added so the domain stays free for a real
+      mailbox. API key "guideless-web" (full access) → `RESEND_API_KEY`; default audience "General"
+      → `RESEND_AUDIENCE_ID=230d58be-db8a-4077-8be6-83fdaa65f03c`. Both in the local env files;
+      add to Vercel + Supabase function secrets. **Check:** domain status was "pending" right after
+      the records were added — confirm it reads "Verified" in Resend → Domains.
+- [ ] DMARC: once mail flows, tighten `_dmarc` to `p=quarantine; rua=mailto:hello@guidelesstravel.com`.
 
 Pinterest
 
@@ -158,7 +164,7 @@ Pinterest
       **Trial access** (`pins:write`, `boards:read`, `user_accounts:read`) → create a board ("Guideless
       Travel") → OAuth once to get an access + refresh token → insert into `social_accounts`
       (`platform = 'pinterest'`, `external_id` = Pinterest user id, `metadata = {"board_id": "…",
-  "refresh_token": "…"}`) and set `PINTEREST_APP_ID` / `PINTEREST_APP_SECRET` as function secrets.
+"refresh_token": "…"}`) and set `PINTEREST_APP_ID` / `PINTEREST_APP_SECRET` as function secrets.
       Standard access (app review) is only needed to publish for accounts other than our own.
 
 ## 7. Channels and priorities
