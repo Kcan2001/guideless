@@ -138,7 +138,7 @@ both for now). Test-mode endpoint `we_1UD63UBhgWBLSqYpP4OQwhqU` →
 `https://guidelesstravel.com/api/webhooks/stripe` with the six events above. **Still manual
 (Kyle):** step 1 — Stripe only exposes business name, public name and statement descriptor inside
 the activation flow (legal entity Guideless LLC, EIN, bank account, representative identity); when
-you activate, create a *live-mode* endpoint with the same URL/events and replace the three
+you activate, create a _live-mode_ endpoint with the same URL/events and replace the three
 Production values with live keys + its signing secret.
 
 ### 2.4 Resend
