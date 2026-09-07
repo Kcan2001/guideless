@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { ArrowRight, Check, Plane } from "lucide-react";
+import { ArrowRight, CalendarDays, Check, MapPin, Plane } from "lucide-react";
 import { brand, responsibilityLabels } from "@guideless/config";
-import { formatWallTime } from "@guideless/utils";
+import { formatDateRange, formatMoney, formatWallTime } from "@guideless/utils";
+import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { RouteArt } from "@/components/site/route-art";
 import { TourCard } from "@/components/tours/tour-card";
@@ -56,8 +57,10 @@ export default async function HomePage() {
     listPublishedTours(),
     listPublishedDestinations(),
   ]);
-  const featured = tours.slice(0, 3);
-  const sample = tours[0] ? await getTourBySlug(tours[0].tour.slug) : null;
+  const routes = tours.filter((t) => t.tour.kind !== "event");
+  const events = tours.filter((t) => t.tour.kind === "event");
+  const featured = routes.slice(0, 3);
+  const sample = routes[0] ? await getTourBySlug(routes[0].tour.slug) : null;
   const sampleDay = sample?.days.find((d) => d.day_number === 2) ?? sample?.days[0];
 
   return (
@@ -151,6 +154,84 @@ export default async function HomePage() {
           )}
         </div>
       </section>
+
+      {/* Event weekends */}
+      {events.length > 0 && (
+        <section className="mx-auto w-full max-w-6xl px-6 py-24">
+          <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            Event weekends
+          </p>
+          <h2 className="mt-3 text-4xl font-bold md:text-5xl">One weekend, fifty ways to do it.</h2>
+          <p className="mt-3 max-w-xl text-muted-foreground">
+            Big events, one group. Stay where you like, pick your view, meet everyone at the welcome
+            drinks. The event supplies the date; we supply the people and the logistics.
+          </p>
+          <ul className="mt-12 grid gap-6 md:grid-cols-2">
+            {events.map(({ tour, version, destinations: dests, departures }) => {
+              const next = departures[0];
+              return (
+                <li
+                  key={tour.id}
+                  className="flex flex-col justify-between gap-6 rounded-2xl bg-ink p-8 text-cloud"
+                >
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-[0.2em] text-aqua">
+                      {tour.event_name}
+                    </p>
+                    <h3 className="mt-2 font-heading text-3xl font-bold">{tour.name}</h3>
+                    {version.tagline && <p className="mt-3 text-cloud/80">{version.tagline}</p>}
+                    <p className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm text-cloud/80">
+                      {tour.event_starts_on && (
+                        <span className="inline-flex items-center gap-1.5">
+                          <CalendarDays className="h-4 w-4 text-aqua" aria-hidden />
+                          {formatDateRange(
+                            tour.event_starts_on,
+                            tour.event_ends_on ?? tour.event_starts_on,
+                          )}
+                        </span>
+                      )}
+                      {tour.event_location && (
+                        <span className="inline-flex items-center gap-1.5">
+                          <MapPin className="h-4 w-4 text-aqua" aria-hidden /> {tour.event_location}
+                        </span>
+                      )}
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {dests.map((d) => (
+                        <Badge key={d.id} variant="guideless">
+                          Stay in {d.name}
+                        </Badge>
+                      ))}
+                      <Badge variant="guideless">Pick your view</Badge>
+                      <Badge variant="guideless">Welcome drinks night one</Badge>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    {next && (
+                      <p className="text-sm text-cloud/80">
+                        From{" "}
+                        <span className="font-heading text-lg font-bold text-cloud">
+                          {formatMoney(
+                            { amount: next.priceAmount, currency: next.currency },
+                            { compact: true },
+                          )}
+                        </span>{" "}
+                        · own room · {next.capacity} places
+                      </p>
+                    )}
+                    <Link
+                      href={`/tours/${tour.slug}`}
+                      className={buttonVariants({ variant: "inverse" })}
+                    >
+                      See the weekend <ArrowRight className="h-4 w-4" aria-hidden />
+                    </Link>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
       {/* Destinations */}
       {destinations.length > 0 && (

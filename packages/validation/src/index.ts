@@ -9,3 +9,4 @@ export * from "./booking";
 export * from "./auth";
 export * from "./admin";
 export * from "./marketing";
+export * from "./community";

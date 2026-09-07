@@ -16,7 +16,7 @@ import {
   setTripStatusAction,
   updateTripItemAction,
 } from "@/lib/admin/actions/trips";
-import { getTripAdmin } from "@/lib/admin/queries";
+import { getTripAdmin, getTripRooms } from "@/lib/admin/queries";
 import { OPS_ROLES, requireStaff } from "@/lib/auth/staff";
 import { cn } from "@/lib/utils";
 
@@ -28,7 +28,7 @@ export default async function AdminTripPage(
     props.searchParams,
     requireStaff(),
   ]);
-  const data = await getTripAdmin(tripId);
+  const [data, rooms] = await Promise.all([getTripAdmin(tripId), getTripRooms(tripId)]);
   if (!data || data.departure.id !== id) notFound();
   const { trip, departure, tour, days, members, notes, destinations, moments } = data;
   const canOps = ctx.can(OPS_ROLES);
@@ -115,6 +115,36 @@ export default async function AdminTripPage(
                 formatDate(m.joined_at.slice(0, 10)),
               ])}
               empty="No members yet — travelers are enrolled when their booking is confirmed at activation."
+            />
+          </Section>
+
+          <Section
+            id="rooms"
+            title={`Rooms (${rooms.reduce((n, b) => n + b.rooms.length, 0)})`}
+            description="Own room by default; pairs who chose to share appear together. Stay tier per booking."
+          >
+            <Table
+              head={["Booking", "Stay", "Rooms"]}
+              rows={rooms.map((b) => [
+                <Link key="b" href={`/admin/bookings/${b.bookingId}`}>
+                  {b.confirmationNumber}
+                </Link>,
+                b.stayName ?? <span className="text-muted-foreground">Base</span>,
+                <ul key="r" className="space-y-1">
+                  {b.rooms.map((r) => (
+                    <li key={r.index}>
+                      <span className="text-muted-foreground">Room {r.index}:</span>{" "}
+                      {r.names.join(" + ")}
+                      {r.names.length === 2 && (
+                        <Badge variant="optional" className="ml-2">
+                          shared
+                        </Badge>
+                      )}
+                    </li>
+                  ))}
+                </ul>,
+              ])}
+              empty="No confirmed bookings yet."
             />
           </Section>
 

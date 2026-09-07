@@ -4,11 +4,15 @@ import { notFound, redirect } from "next/navigation";
 import { ArrowRight, CalendarDays, Clock, Users } from "lucide-react";
 import { formatDate, formatDateRange, formatMoney, subtract } from "@guideless/utils";
 import { TrackView } from "@/components/analytics/track-view";
+import { AddOnList, ReferralHint, RoomRule, StayTiers } from "@/components/marketing/make-it-yours";
+import { RosterStrip } from "@/components/marketing/roster-strip";
 import { JsonLd } from "@/components/site/json-ld";
 import { availabilityBadge } from "@/components/tours/departure-list";
 import { ResponsibilityList } from "@/components/tours/responsibility-list";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { getRoomRule } from "@/lib/data/community";
+import { getRosterStats, listDepartureExtras } from "@/lib/data/extras";
 import { getDepartureById } from "@/lib/data/tours";
 import { breadcrumbJsonLd } from "@/lib/seo";
 import { cn } from "@/lib/utils";
@@ -42,6 +46,12 @@ export default async function DeparturePage(
   if (detail.tour.slug !== slug) redirect(`/tours/${detail.tour.slug}/departures/${departureId}`);
 
   const { departure: d, tour, route, included, excluded } = detail;
+  const [extras, roster, roomRule] = await Promise.all([
+    listDepartureExtras(d.id),
+    getRosterStats(d.id),
+    getRoomRule(d.id),
+  ]);
+  const hasExtras = extras.stayOptions.length > 0 || extras.addOns.length > 0;
   const money = (amount: number) =>
     formatMoney({ amount, currency: d.currency }, { compact: true });
   const badge = availabilityBadge(d);
@@ -115,6 +125,24 @@ export default async function DeparturePage(
             </div>
           </div>
 
+          <RosterStrip stats={roster} />
+
+          {hasExtras && (
+            <div id="make-it-yours" className="scroll-mt-24 space-y-8">
+              <div>
+                <h2 className="text-2xl font-bold">Make it yours.</h2>
+                <p className="mt-2 text-muted-foreground">
+                  Choose at booking or add later from your account, even during the trip. Add-ons
+                  are paid in full when chosen and never count toward the deposit.
+                </p>
+              </div>
+              <StayTiers options={extras.stayOptions} currency={d.currency} />
+              <AddOnList addOns={extras.addOns} currency={d.currency} />
+              <RoomRule rule={roomRule} />
+              <ReferralHint />
+            </div>
+          )}
+
           <div>
             <h2 className="text-2xl font-bold">Payment schedule</h2>
             <dl className="mt-4 divide-y divide-border rounded-xl border border-border bg-surface">
@@ -134,8 +162,12 @@ export default async function DeparturePage(
                 <dd className="font-semibold">{money(balance.amount)}</dd>
               </div>
               <div className="flex justify-between gap-4 p-4 font-semibold">
-                <dt>Total per traveler</dt>
+                <dt>Total per traveler · own room</dt>
                 <dd>{money(d.priceAmount)}</dd>
+              </div>
+              <div className="flex justify-between gap-4 p-4 text-sm text-muted-foreground">
+                <dt>Add-ons and stay upgrades</dt>
+                <dd>Paid in full when chosen</dd>
               </div>
             </dl>
           </div>
@@ -184,7 +216,9 @@ export default async function DeparturePage(
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">Per traveler</p>
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+              Per traveler · own room
+            </p>
             <p className="mt-1 font-heading text-4xl font-bold">{money(d.priceAmount)}</p>
             {d.depositAmount > 0 && (
               <p className="mt-1 text-sm text-muted-foreground">

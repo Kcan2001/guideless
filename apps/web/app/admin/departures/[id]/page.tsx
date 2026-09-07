@@ -4,6 +4,7 @@ import { AlertTriangle, Info } from "lucide-react";
 import { SUPPLIER_SERVICE_STATUSES } from "@guideless/types";
 import { formatDate, formatDateRange } from "@guideless/utils";
 import { DepartureForm } from "@/components/admin/departure-form";
+import { AddOnForm, StayOptionForm } from "@/components/admin/extras-forms";
 import { Flash } from "@/components/admin/flash";
 import { SubmitButton } from "@/components/admin/submit-button";
 import {
@@ -29,13 +30,14 @@ import {
   updateDepartureAction,
   updateSupplierServiceStatusAction,
 } from "@/lib/admin/actions/departures";
-import { getDepartureAdmin } from "@/lib/admin/queries";
+import { toggleAddOnAction, toggleStayOptionAction } from "@/lib/admin/actions/extras";
+import { getDepartureAdmin, listDepartureExtrasAdmin } from "@/lib/admin/queries";
 import { OPS_ROLES, requireStaff } from "@/lib/auth/staff";
 import { cn } from "@/lib/utils";
 
 export default async function AdminDeparturePage(props: PageProps<"/admin/departures/[id]">) {
   const [{ id }, sp, ctx] = await Promise.all([props.params, props.searchParams, requireStaff()]);
-  const data = await getDepartureAdmin(id);
+  const [data, extras] = await Promise.all([getDepartureAdmin(id), listDepartureExtrasAdmin(id)]);
   if (!data) notFound();
   const {
     departure: d,
@@ -261,6 +263,162 @@ export default async function AdminDeparturePage(props: PageProps<"/admin/depart
               ];
             })}
           />
+        </Section>
+
+        <Section
+          id="stays"
+          title={`Stay options (${extras.stays.length})`}
+          description="Accommodation tiers customers choose at booking. One group, different hotels. Deltas are per traveler."
+        >
+          <div className="space-y-6">
+            {extras.stays.map((st) => (
+              <details key={st.id} className="rounded-lg border border-border p-4" open={false}>
+                <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-3 text-sm">
+                  <span>
+                    <span className="font-medium">{st.name}</span>
+                    {st.star_rating ? (
+                      <span className="ml-1 text-muted-foreground">
+                        {"★".repeat(st.star_rating)}
+                      </span>
+                    ) : null}
+                    {st.is_default && (
+                      <Badge variant="included" className="ml-2">
+                        Default
+                      </Badge>
+                    )}
+                    {!st.is_active && (
+                      <Badge variant="neutral" className="ml-2">
+                        Hidden
+                      </Badge>
+                    )}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {st.price_delta_amount === 0
+                      ? "included"
+                      : `${st.price_delta_amount > 0 ? "+" : "−"}${money(Math.abs(st.price_delta_amount), d.currency)} / traveler`}
+                    {" · "}
+                    {st.taken} booked{st.capacity !== null ? ` of ${st.capacity}` : ""}
+                  </span>
+                </summary>
+                <div className="mt-4 space-y-3">
+                  <StayOptionForm
+                    departureId={d.id}
+                    stay={st}
+                    destinations={extras.destinations}
+                    currency={d.currency}
+                    disabled={!canOps}
+                  />
+                  {canOps && (
+                    <form action={toggleStayOptionAction}>
+                      <input type="hidden" name="departureId" value={d.id} />
+                      <input type="hidden" name="stayOptionId" value={st.id} />
+                      <input type="hidden" name="isActive" value={String(!st.is_active)} />
+                      <SubmitButton size="sm" variant="ghost">
+                        {st.is_active ? "Hide from customers" : "Make bookable"}
+                      </SubmitButton>
+                    </form>
+                  )}
+                </div>
+              </details>
+            ))}
+            {canOps && (
+              <details className="rounded-lg border border-dashed border-border p-4">
+                <summary className="cursor-pointer text-sm font-medium">Add a stay option</summary>
+                <div className="mt-4">
+                  <StayOptionForm
+                    departureId={d.id}
+                    destinations={extras.destinations}
+                    currency={d.currency}
+                  />
+                </div>
+              </details>
+            )}
+            {extras.stays.length === 0 && !canOps && (
+              <p className="text-sm text-muted-foreground">
+                No stay options; everyone books the base hotels.
+              </p>
+            )}
+          </div>
+        </Section>
+
+        <Section
+          id="add-ons"
+          title={`Add-ons (${extras.addOns.length})`}
+          description="Optional extras paid in full at booking or any time later. Each has a manifest for the supplier."
+        >
+          <Table
+            head={["Add-on", "Price", "When", "Booked", "Status", ""]}
+            rows={extras.addOns.map((a) => [
+              <span key="t">
+                <Link href={`/admin/departures/${d.id}/add-ons/${a.id}`} className="font-medium">
+                  {a.title}
+                </Link>
+                {a.tier_group && (
+                  <span className="block text-xs text-muted-foreground">tier: {a.tier_group}</span>
+                )}
+              </span>,
+              `${money(a.price_amount, a.currency)} ${a.pricing_basis === "per_traveler" ? "/ traveler" : "/ booking"}`,
+              a.day_number
+                ? `Day ${a.day_number}${a.start_time ? ` · ${a.start_time.slice(0, 5)}` : ""}`
+                : "Undated",
+              <span key="b">
+                {a.confirmed}
+                {a.held > 0 ? ` (+${a.held} holding)` : ""}
+                {a.capacity !== null ? ` of ${a.capacity}` : ""}
+              </span>,
+              a.is_active ? (
+                <Badge key="s" variant="included">
+                  Bookable
+                </Badge>
+              ) : (
+                <Badge key="s" variant="neutral">
+                  Hidden
+                </Badge>
+              ),
+              <Link key="m" href={`/admin/departures/${d.id}/add-ons/${a.id}`} className="text-sm">
+                Manifest
+              </Link>,
+            ])}
+            empty="No add-ons yet."
+          />
+          <div className="mt-6 space-y-4">
+            {extras.addOns.map((a) => (
+              <details key={a.id} className="rounded-lg border border-border p-4">
+                <summary className="cursor-pointer text-sm font-medium">Edit: {a.title}</summary>
+                <div className="mt-4 space-y-3">
+                  <AddOnForm
+                    departureId={d.id}
+                    addOn={a}
+                    currency={d.currency}
+                    durationDays={tour.duration_days}
+                    disabled={!canOps}
+                  />
+                  {canOps && (
+                    <form action={toggleAddOnAction}>
+                      <input type="hidden" name="departureId" value={d.id} />
+                      <input type="hidden" name="addOnId" value={a.id} />
+                      <input type="hidden" name="isActive" value={String(!a.is_active)} />
+                      <SubmitButton size="sm" variant="ghost">
+                        {a.is_active ? "Hide from customers" : "Make bookable"}
+                      </SubmitButton>
+                    </form>
+                  )}
+                </div>
+              </details>
+            ))}
+            {canOps && (
+              <details className="rounded-lg border border-dashed border-border p-4">
+                <summary className="cursor-pointer text-sm font-medium">Add an add-on</summary>
+                <div className="mt-4">
+                  <AddOnForm
+                    departureId={d.id}
+                    currency={d.currency}
+                    durationDays={tour.duration_days}
+                  />
+                </div>
+              </details>
+            )}
+          </div>
         </Section>
 
         <Section

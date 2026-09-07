@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { useTheme } from "@/hooks/use-theme";
 
-/** Trip · Explore · Group · Support · Profile (spec §22). */
+/** Trip · Map · Explore · Group · Support (spec §22). Profile, documents and the inbox open from Trip. */
 export default function TabsLayout() {
   const c = useTheme();
   return (
@@ -19,6 +19,15 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: "Trip",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="git-branch-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="map"
+        options={{
+          title: "Map",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="map-outline" size={size} color={color} />
           ),
@@ -51,15 +60,7 @@ export default function TabsLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Profile",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-circle-outline" size={size} color={color} />
-          ),
-        }}
-      />
+      <Tabs.Screen name="profile" options={{ href: null, title: "Profile" }} />
     </Tabs>
   );
 }

@@ -93,6 +93,22 @@ Server Actions carry Next.js origin checks; the Stripe webhook is the only unaut
 Handler and verifies the Stripe signature before touching the database. Playwright asserts the
 CSP and `nosniff` headers on every CI run (`apps/web/e2e/marketing.spec.ts`).
 
+### Pricing and community surface (migrations 029–031)
+
+- `quote_booking()` is `security definer` and callable by `anon`: it reads price columns only and
+  returns money, never supplier costs or other customers' data. `create_booking()` re-runs it inside
+  the transaction, so a tampered client total is impossible.
+- `departure_add_ons` / `departure_stay_options`: anyone reads active rows; ops staff write.
+  `booking_add_ons`: customers read their own, writes only through `create_booking`,
+  `start_add_on_purchase` (owner check inside) and `confirm_add_on_purchase` (service role).
+- `departure_roster_stats()` is public but returns aggregates only; the age range is rounded to five
+  years and hidden below four travelers. `trip_add_on_participants()` names people only to members
+  of that trip or staff.
+- `referral_codes` and `account_credits` are readable by their owner (and staff); credit rows are
+  written by triggers, plus a manual admin insert policy. `host_applications` accept anonymous
+  inserts (rate limiting at the edge is a launch task) and are readable by the applicant and staff.
+  `meetups` are public when published; RSVPs are per user.
+
 ### Notification delivery surface
 
 `claim_pending_notifications()` and the enqueue functions are `security definer` and executable

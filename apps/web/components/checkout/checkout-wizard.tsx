@@ -12,26 +12,42 @@ import {
   bookingPreferencesSchema,
   emergencyContactSchema,
   travelerInputSchema,
+  type AddOnSelection,
   type BookingPreferencesInput,
   type EmergencyContactInput,
   type TravelerInput,
 } from "@guideless/validation";
 import { LoginForm } from "@/components/auth/login-form";
+import { AddOnsStep } from "@/components/checkout/add-ons-step";
 import { OrderSummary } from "@/components/checkout/order-summary";
+import { RoomsStep } from "@/components/checkout/rooms-step";
 import { Stepper } from "@/components/checkout/stepper";
 import type { CheckoutDeparture, CheckoutUser } from "@/components/checkout/types";
 import { Button } from "@/components/ui/button";
 import { Field, FormError, Input, Select, Textarea } from "@/components/ui/field";
 import { startCheckout } from "@/lib/bookings/actions";
+import { defaultRooms, fitRooms, fitSelection } from "@/lib/bookings/add-on-selection";
 import { track } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
 // ── Draft persisted in sessionStorage so signing in mid-flow never loses the form ──
 interface Draft {
   travelers: TravelerInput[];
+  /** One 1-based room per traveler; two travelers may share (see lib/bookings/add-on-selection). */
+  roomIndexes: number[];
+  stayOptionId: string | null;
+  addOns: AddOnSelection[];
+  /** Coupon or referral code, applied to the quote. */
+  code: string | null;
   emergencyContact: EmergencyContactInput | null;
   preferences: BookingPreferencesInput | null;
   paymentOption: PaymentOption;
+}
+
+const LAST_STEP = 7;
+
+function travelerNames(travelers: TravelerInput[]): string[] {
+  return travelers.map((t) => t.preferredName?.trim() || t.firstName.trim());
 }
 
 const emptyTraveler = (email = ""): TravelerInput => ({
@@ -85,7 +101,7 @@ export function CheckoutWizard({
   cancelled?: boolean;
 }) {
   const storageKey = `guideless:checkout:${departure.id}`;
-  const [step, setStep] = useState(() => Math.min(Math.max(initialStep, 1), 5));
+  const [step, setStep] = useState(() => Math.min(Math.max(initialStep, 1), LAST_STEP));
   // false on the server and during hydration, true afterwards — without a setState-in-effect.
   const hydrated = useSyncExternalStore(
     () => () => {},
@@ -97,11 +113,17 @@ export function CheckoutWizard({
   const [draft, setDraft] = useState<Draft>(() =>
     loadDraft(storageKey, {
       travelers: [emptyTraveler(user?.email ?? "")],
+      roomIndexes: defaultRooms(1),
+      stayOptionId:
+        departure.stayOptions.find((s) => s.is_default)?.id ?? departure.stayOptions[0]?.id ?? null,
+      addOns: [],
+      code: null,
       emergencyContact: null,
       preferences: null,
       paymentOption: departure.depositAmount > 0 ? "deposit" : "full",
     }),
   );
+  const names = travelerNames(draft.travelers);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -146,35 +168,57 @@ export function CheckoutWizard({
                     ...d,
                     travelers: v.travelers,
                     emergencyContact: v.emergencyContact,
+                    roomIndexes: fitRooms(d.roomIndexes, v.travelers.length),
+                    addOns: fitSelection(d.addOns, departure.addOns, v.travelers.length),
                   }));
                   track("add_traveler", { count: v.travelers.length });
                   setStep(2);
                 }}
               />
             ) : step === 2 ? (
-              <PreferencesStep
-                draft={draft}
+              <RoomsStep
+                departure={departure}
+                travelerNames={names}
+                rooms={draft.roomIndexes}
+                stayOptionId={draft.stayOptionId}
+                onRooms={(roomIndexes) => setDraft((d) => ({ ...d, roomIndexes }))}
+                onStay={(stayOptionId) => setDraft((d) => ({ ...d, stayOptionId }))}
                 onBack={() => setStep(1)}
-                onNext={(v) => {
-                  setDraft((d) => ({ ...d, preferences: v }));
-                  setStep(3);
-                }}
+                onNext={() => setStep(3)}
               />
             ) : step === 3 ? (
-              <AccountStep
-                departureId={departure.id}
-                user={user}
+              <AddOnsStep
+                departure={departure}
+                travelerNames={names}
+                selection={draft.addOns}
+                onChange={(addOns) => setDraft((d) => ({ ...d, addOns }))}
                 onBack={() => setStep(2)}
                 onNext={() => setStep(4)}
               />
             ) : step === 4 ? (
-              <TermsStep onBack={() => setStep(3)} onNext={() => setStep(5)} />
+              <PreferencesStep
+                draft={draft}
+                onBack={() => setStep(3)}
+                onNext={(v) => {
+                  setDraft((d) => ({ ...d, preferences: v }));
+                  setStep(5);
+                }}
+              />
+            ) : step === 5 ? (
+              <AccountStep
+                departureId={departure.id}
+                user={user}
+                onBack={() => setStep(4)}
+                onNext={() => setStep(6)}
+              />
+            ) : step === 6 ? (
+              <TermsStep onBack={() => setStep(5)} onNext={() => setStep(7)} />
             ) : (
               <PaymentStep
                 departure={departure}
                 draft={draft}
                 userSignedIn={Boolean(user)}
-                onBack={() => setStep(4)}
+                onBack={() => setStep(6)}
                 onPaymentOption={(paymentOption) => setDraft((d) => ({ ...d, paymentOption }))}
               />
             )}
@@ -183,8 +227,13 @@ export function CheckoutWizard({
       </div>
       <OrderSummary
         departure={departure}
-        travelerCount={draft.travelers.length}
+        roomIndexes={draft.roomIndexes}
+        stayOptionId={draft.stayOptionId}
+        addOns={draft.addOns}
+        code={draft.code}
         paymentOption={draft.paymentOption}
+        signedIn={Boolean(user)}
+        onCode={(code) => setDraft((d) => ({ ...d, code }))}
       />
     </div>
   );
@@ -411,7 +460,7 @@ function PreferencesStep({
   const form = useForm<PreferencesInput, unknown, BookingPreferencesInput>({
     resolver: zodResolver(bookingPreferencesSchema),
     defaultValues: draft.preferences ?? {
-      roomPreference: draft.travelers.length > 1 ? "shared_double" : "single",
+      roomPreference: "no_preference",
       airportTransfer: "group_welcome_transfer",
       optionalExperienceIds: [],
     },
@@ -423,17 +472,21 @@ function PreferencesStep({
       <header>
         <h1 className="text-3xl font-bold">A few preferences.</h1>
         <p className="mt-2 text-muted-foreground">
-          All optional except rooms. You can change these later from your account.
+          All optional. You can change these later from your account.
         </p>
       </header>
 
       <div className="grid gap-5 rounded-xl border border-border bg-surface p-6 sm:grid-cols-2">
-        <Field id="room" label="Room" error={errors.roomPreference?.message}>
+        <Field
+          id="room"
+          label="Beds in shared rooms"
+          hint="Only matters if two travelers share."
+          error={errors.roomPreference?.message}
+        >
           <Select id="room" {...form.register("roomPreference")}>
-            <option value="single">Single room</option>
-            <option value="shared_double">Shared — one bed</option>
-            <option value="shared_twin">Shared — two beds</option>
             <option value="no_preference">No preference</option>
+            <option value="shared_double">One bed</option>
+            <option value="shared_twin">Two beds</option>
           </Select>
         </Field>
         <Field
@@ -511,7 +564,7 @@ function AccountStep({
         </div>
       ) : (
         <div className="rounded-xl border border-border bg-surface p-6">
-          <LoginForm compact next={`/checkout/${departureId}?step=4`} initialMode="signup" />
+          <LoginForm compact next={`/checkout/${departureId}?step=6`} initialMode="signup" />
         </div>
       )}
       <StepNav onBack={onBack} onNext={user ? onNext : undefined} nextDisabled={!user} />
@@ -581,23 +634,34 @@ function PaymentStep({
     formatMoney({ amount, currency: departure.currency }, { compact: true });
   const canDeposit = departure.depositAmount > 0;
   const n = draft.travelers.length;
+  const chosenAddOns = departure.addOns
+    .map((a) => {
+      const sel = draft.addOns.find((s) => s.addOnId === a.id);
+      const qty = sel ? (sel.travelerIndexes?.length ?? sel.quantity ?? 0) : 0;
+      return qty > 0 ? { title: a.title, qty, total: a.price_amount * qty } : null;
+    })
+    .filter((x): x is { title: string; qty: number; total: number } => x !== null);
+  const stay = departure.stayOptions.find((s) => s.id === draft.stayOptionId);
 
   const options = useMemo(
     () =>
       [
         canDeposit && {
           value: "deposit" as const,
-          title: `Pay the deposit — ${money(departure.depositAmount * n)}`,
-          body: "Balance due before departure.",
+          title: `Pay the deposit today (${money(departure.depositAmount)} per traveler)`,
+          body:
+            chosenAddOns.length > 0
+              ? "Add-ons are paid today too. The balance is due before departure."
+              : "Balance due before departure.",
         },
         {
           value: "full" as const,
-          title: `Pay in full — ${money(departure.priceAmount * n)}`,
+          title: "Pay in full today",
           body: "Nothing more to pay.",
         },
       ].filter(Boolean) as Array<{ value: PaymentOption; title: string; body: string }>,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [canDeposit, departure.depositAmount, departure.priceAmount, n],
+    [canDeposit, departure.depositAmount, n, chosenAddOns.length],
   );
 
   function submit() {
@@ -615,6 +679,10 @@ function PaymentStep({
       const result = await startCheckout({
         departureId: departure.id,
         travelers: draft.travelers,
+        roomIndexes: draft.roomIndexes,
+        stayOptionId: draft.stayOptionId,
+        addOns: draft.addOns,
+        code: draft.code ?? undefined,
         emergencyContact: draft.emergencyContact!,
         preferences: draft.preferences!,
         terms: {
@@ -673,10 +741,39 @@ function PaymentStep({
           {draft.travelers.map((t, i) => (
             <li key={i}>
               {t.firstName} {t.lastName}
-              {t.preferredName ? ` (${t.preferredName})` : ""} · {t.email}
+              {t.preferredName ? ` (${t.preferredName})` : ""} · {t.email} · room{" "}
+              {draft.roomIndexes[i] ?? i + 1}
             </li>
           ))}
         </ul>
+        {stay && (
+          <>
+            <h2 className="mt-5 font-heading text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              Stay
+            </h2>
+            <p className="mt-2">{stay.name}</p>
+          </>
+        )}
+        <h2 className="mt-5 font-heading text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          Add-ons
+        </h2>
+        {chosenAddOns.length === 0 ? (
+          <p className="mt-2 text-muted-foreground">
+            None — you can add some later from your account.
+          </p>
+        ) : (
+          <ul className="mt-2 space-y-1" data-testid="review-add-ons">
+            {chosenAddOns.map((a) => (
+              <li key={a.title} className="flex justify-between gap-4">
+                <span>
+                  {a.title}
+                  {a.qty > 1 ? ` × ${a.qty}` : ""}
+                </span>
+                <span>{money(a.total)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       {!userSignedIn && (

@@ -66,10 +66,75 @@ test.describe("marketing site", () => {
     await expect(page.getByRole("link", { name: /book this departure/i })).toBeVisible();
   });
 
+  test("tour page offers stay tiers, add-ons and the night-one anchor", async ({ page }) => {
+    await page.goto("/tours/southern-france");
+    await expect(page.getByRole("heading", { name: /pay for what you want/i })).toBeVisible();
+    await expect(page.getByText("Well-located 3★ hotels")).toBeVisible();
+    await expect(page.getByText("Boat day along the Riviera")).toBeVisible();
+    await expect(page.getByText(/your own room is the default/i)).toBeVisible();
+    await expect(page.getByTestId("anchor-callout")).toContainText("Welcome drinks");
+    await expect(page.getByText(/friend.s code/i)).toBeVisible();
+  });
+
+  test("event tour shows the event hero, both stay tiers and Event structured data", async ({
+    page,
+  }) => {
+    await page.goto("/tours/monaco-grand-prix");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Monaco Grand Prix Weekend");
+    await expect(page.getByTestId("event-hero")).toContainText("Circuit de Monaco");
+    await expect(
+      page.getByRole("heading", { name: /your hotel, your seat, your call/i }),
+    ).toBeVisible();
+    await expect(page.getByText("Nice, 3★ near the port")).toBeVisible();
+    await expect(page.getByText("Monaco, 5★ in Monte Carlo")).toBeVisible();
+    await expect(page.getByText("Yacht in the harbour (Sun)")).toBeVisible();
+    const ld = await page.locator('script[type="application/ld+json"]').allTextContents();
+    const types = ld.flatMap((t) => JSON.parse(t)).map((d: { "@type": string }) => d["@type"]);
+    expect(types).toEqual(expect.arrayContaining(["TouristTrip", "Event"]));
+  });
+
+  test("departure page shows the anonymized roster and when the group opens", async ({ page }) => {
+    await page.goto("/tours/monaco-grand-prix");
+    await page.getByRole("link", { name: "Details" }).first().click();
+    await expect(page).toHaveURL(/\/departures\//);
+    const roster = page.getByTestId("roster-strip");
+    await expect(roster).toContainText("Your Group");
+    await expect(roster).toContainText(/group opens on|group is open/i);
+    await expect(page.getByRole("heading", { name: /make it yours/i })).toBeVisible();
+    await expect(page.getByText("Paid in full when chosen", { exact: true })).toBeVisible();
+  });
+
+  test("city evenings list the seeded New York evening", async ({ page }) => {
+    await page.goto("/meetups");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Meet the group");
+    await expect(page.getByRole("heading", { name: "New York" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Guideless Evening · New York" })).toBeVisible();
+    await page.getByRole("link", { name: "Guideless Evening · New York" }).click();
+    await expect(page).toHaveURL(/\/meetups\//);
+    await expect(page.getByRole("button", { name: /I.ll be there/i })).toBeVisible();
+  });
+
+  test("host application submits and thanks the applicant", async ({ page }) => {
+    await page.goto("/host");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("travel free");
+    await page.locator("#host-name").fill("E2E Host");
+    await page.locator("#host-email").fill(`host+${Date.now()}@example.com`);
+    await page
+      .locator("#host-community")
+      .fill("A running club of about forty people who travel together twice a year.");
+    await page.locator("#host-size").fill("40");
+    await page.getByRole("button", { name: /send application/i }).click();
+    await expect(page.getByRole("status")).toContainText(/thank you/i);
+  });
+
   test("sitemap and robots are served", async ({ request }) => {
     const sitemap = await request.get("/sitemap.xml");
     expect(sitemap.ok()).toBeTruthy();
-    expect(await sitemap.text()).toContain("/tours/southern-france");
+    const body = await sitemap.text();
+    expect(body).toContain("/tours/southern-france");
+    expect(body).toContain("/tours/monaco-grand-prix");
+    expect(body).toContain("/meetups");
+    expect(body).toContain("/host");
     const robots = await request.get("/robots.txt");
     expect(await robots.text()).toContain("Disallow: /checkout/");
   });

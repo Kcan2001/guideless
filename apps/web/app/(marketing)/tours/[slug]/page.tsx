@@ -1,10 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, Gauge, MoonStar, Users } from "lucide-react";
+import { ArrowRight, CalendarDays, Gauge, MapPin, MoonStar, Sparkles, Users } from "lucide-react";
 import { brand } from "@guideless/config";
-import { formatMoney } from "@guideless/utils";
+import { formatDateRange, formatMoney, formatWallTime } from "@guideless/utils";
 import { TrackView } from "@/components/analytics/track-view";
+import {
+  AddOnList,
+  EventTierMenu,
+  ReferralHint,
+  RoomRule,
+  StayTiers,
+} from "@/components/marketing/make-it-yours";
 import { JsonLd } from "@/components/site/json-ld";
 import { RouteArt } from "@/components/site/route-art";
 import { DepartureList } from "@/components/tours/departure-list";
@@ -12,6 +19,9 @@ import { Faq } from "@/components/tours/faq";
 import { ItineraryTimeline } from "@/components/tours/itinerary-timeline";
 import { ResponsibilityList } from "@/components/tours/responsibility-list";
 import { buttonVariants } from "@/components/ui/button";
+import { tourEventJsonLd } from "@/lib/community/seo";
+import { getRoomRule } from "@/lib/data/community";
+import { listDepartureExtras } from "@/lib/data/extras";
 import { getTourBySlug, listTourSlugs } from "@/lib/data/tours";
 import { tourFromPrice } from "@/lib/data/tour-filters";
 import { breadcrumbJsonLd, faqJsonLd, tourJsonLd } from "@/lib/seo";
@@ -67,6 +77,16 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
     departures,
   });
   const nights = route.reduce((n, r) => n + r.nights, 0);
+  const isEvent = tour.kind === "event";
+  const next = departures[0];
+  const [extras, roomRule] = next
+    ? await Promise.all([listDepartureExtras(next.id), getRoomRule(next.id)])
+    : [null, null];
+  const currency = next?.currency ?? version.starting_price_currency;
+  const anchor = days
+    .flatMap((d) => d.items.map((i) => ({ item: i, day: d })))
+    .find((x) => x.item.is_anchor);
+  const hasExtras = !!extras && (extras.stayOptions.length > 0 || extras.addOns.length > 0);
 
   return (
     <>
@@ -90,11 +110,34 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
             <span>{tour.name}</span>
           </nav>
           <p className="mt-6 text-sm font-medium uppercase tracking-[0.22em] text-aqua">
-            {route.map((r) => r.destination.name).join(" → ")}
+            {isEvent && tour.event_name
+              ? tour.event_name
+              : route.map((r) => r.destination.name).join(" → ")}
           </p>
           <h1 className="mt-3 max-w-3xl text-5xl font-bold leading-[1.02] md:text-7xl">
             {tour.name}
           </h1>
+          {isEvent && tour.event_starts_on && (
+            <p
+              className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-cloud/85"
+              data-testid="event-hero"
+            >
+              <span className="inline-flex items-center gap-1.5">
+                <CalendarDays className="h-4 w-4 text-aqua" aria-hidden />
+                {tour.event_ends_on && tour.event_ends_on !== tour.event_starts_on
+                  ? formatDateRange(tour.event_starts_on, tour.event_ends_on)
+                  : formatDateRange(tour.event_starts_on, tour.event_starts_on)}
+              </span>
+              {tour.event_location && (
+                <span className="inline-flex items-center gap-1.5">
+                  <MapPin className="h-4 w-4 text-aqua" aria-hidden /> {tour.event_location}
+                </span>
+              )}
+              <span className="text-cloud/70">
+                · {route.map((r) => r.destination.name).join(" & ")}
+              </span>
+            </p>
+          )}
           {version.tagline && (
             <p className="mt-6 max-w-xl text-lg text-cloud/80 md:text-xl">{version.tagline}</p>
           )}
@@ -184,6 +227,46 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
         </aside>
       </section>
 
+      {/* Make it yours */}
+      {hasExtras && extras && (
+        <section id="make-it-yours" className="scroll-mt-24 bg-surface py-20">
+          <div className="mx-auto w-full max-w-6xl px-6">
+            <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              {isEvent ? "Race weekend, your way" : "Make it yours"}
+            </p>
+            <h2 className="mt-3 text-3xl font-bold md:text-4xl">
+              {isEvent
+                ? "Your hotel, your seat, your call."
+                : "Pay for what you want. Skip what you don't."}
+            </h2>
+            <p className="mt-2 max-w-xl text-muted-foreground">
+              The base trip is the hotels, the trains and the welcome drinks. Everything below is
+              optional, chosen at booking or any time later, even mid-trip. You always see who else
+              is in.
+            </p>
+            <div className="mt-10">
+              {isEvent ? (
+                <EventTierMenu
+                  stayOptions={extras.stayOptions}
+                  addOns={extras.addOns}
+                  currency={currency}
+                  eventName={tour.event_name ?? tour.name}
+                />
+              ) : (
+                <div className="grid gap-10 lg:grid-cols-2">
+                  <StayTiers options={extras.stayOptions} currency={currency} />
+                  <AddOnList addOns={extras.addOns} currency={currency} featuredOnly />
+                </div>
+              )}
+            </div>
+            <div className="mt-8 space-y-2">
+              <RoomRule rule={roomRule} />
+              <ReferralHint />
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Included / excluded */}
       <section className="mx-auto w-full max-w-6xl px-6 pb-20">
         <h2 className="text-3xl font-bold md:text-4xl">Who handles what.</h2>
@@ -204,6 +287,31 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
             <span className="font-medium text-foreground">Optional</span> is exactly that. The
             dashed blocks are free time — on purpose.
           </p>
+          {anchor && (
+            <aside
+              className="mt-10 max-w-3xl rounded-2xl border border-aqua bg-aqua/10 p-6"
+              aria-labelledby="night-one"
+              data-testid="anchor-callout"
+            >
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Night one · Day {anchor.day.day_number}
+              </p>
+              <h3
+                id="night-one"
+                className="mt-1 flex items-center gap-2 font-heading text-2xl font-semibold"
+              >
+                <Sparkles className="h-5 w-5 text-teal" aria-hidden /> {anchor.item.title}
+                {anchor.item.start_time ? ` · ${formatWallTime(anchor.item.start_time)}` : ""}
+              </h3>
+              {anchor.item.description && (
+                <p className="mt-2 text-muted-foreground">{anchor.item.description}</p>
+              )}
+              <p className="mt-3 text-sm text-muted-foreground">
+                Everyone is invited, nobody is obliged. In the app you see who&rsquo;s coming, and
+                the group opens weeks before you fly.
+              </p>
+            </aside>
+          )}
           <div className="mt-10 max-w-3xl">
             <ItineraryTimeline days={days} />
           </div>
@@ -234,6 +342,21 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
 
       <TrackView event="view_tour" params={{ tour_id: tour.id, tour_slug: tour.slug }} />
       <JsonLd data={tourJsonLd({ tour, version, route, departures, days })} />
+      {isEvent && tour.event_name && tour.event_starts_on && (
+        <JsonLd
+          data={tourEventJsonLd({
+            name: tour.name,
+            slug: tour.slug,
+            eventName: tour.event_name,
+            startsOn: tour.event_starts_on,
+            endsOn: tour.event_ends_on,
+            location: tour.event_location,
+            description: version.summary,
+            priceAmount: price?.amount ?? null,
+            currency: price?.currency ?? null,
+          })}
+        />
+      )}
       <JsonLd data={faqJsonLd(faqs)} />
       <JsonLd
         data={breadcrumbJsonLd([

@@ -155,3 +155,68 @@ export type DeepLink =
   | { kind: "support_thread"; threadId: UUID }
   | { kind: "live_moment"; tripId: UUID; momentId: UUID }
   | { kind: "payment"; bookingId: UUID };
+
+// ── Pricing quote (public.quote_booking) ─────────────────────────────────────
+export type QuoteProblemCode =
+  | "traveler_count"
+  | "invalid_payment_option"
+  | "departure_not_found"
+  | "room_index"
+  | "room_capacity"
+  | "stay_option_unknown"
+  | "stay_option_full"
+  | "add_on_unknown"
+  | "add_on_closed"
+  | "add_on_sold_out"
+  | "tier_conflict"
+  | "code_invalid"
+  | "code_own_referral"
+  | "code_currency";
+
+export interface QuoteProblem {
+  code: QuoteProblemCode;
+  addOnId?: UUID;
+  roomIndex?: number;
+  tierGroup?: string;
+  available?: number;
+}
+
+export interface QuoteLine {
+  kind: "base" | "add_on" | "discount";
+  title: string;
+  quantity: number;
+  unit_amount: number;
+  total_amount: number;
+  add_on_id?: UUID;
+  pricing_basis?: "per_traveler" | "per_booking";
+  traveler_indexes?: number[] | null;
+  tier_group?: string | null;
+  day_number?: number | null;
+  coupon_id?: UUID;
+  referrer_id?: UUID;
+  referral_code?: string;
+  credit_applied?: number;
+}
+
+/** Money is integer minor units in `currency`; the database is the only place that computes it. */
+export interface BookingQuoteResult {
+  departure_id: UUID;
+  currency: Currency;
+  travelers: number;
+  rooms: { index: number; occupancy: number }[];
+  stay_option_id: UUID | null;
+  stay_option_name: string | null;
+  lines: QuoteLine[];
+  base_amount: number;
+  add_ons_amount: number;
+  subtotal_amount: number;
+  discount_amount: number;
+  discount_kind: "coupon" | "referral" | null;
+  credit_amount: number;
+  total_amount: number;
+  deposit_amount: number;
+  due_now_amount: number;
+  balance_amount: number;
+  payment_option: "deposit" | "full";
+  problems: QuoteProblem[];
+}

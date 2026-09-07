@@ -1,8 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Constants from "expo-constants";
 import { useState } from "react";
-import { Linking, Switch, View } from "react-native";
+import { Linking, Pressable, Share, Switch, Text, View } from "react-native";
 import { brand } from "@guideless/config";
+import { INTERESTS, TRAVEL_STYLES, groupProfileSchema } from "@guideless/validation";
+import { formatMoney } from "@guideless/utils";
 import {
   Button,
   Card,
@@ -24,6 +26,8 @@ import { useSession } from "@/lib/auth/session";
 import { profileService, type Profile } from "@/lib/profile/service";
 import { tripCache } from "@/lib/trips/cache";
 
+const STYLE_LABEL = { relaxed: "Relaxed", balanced: "Balanced", active: "Active" } as const;
+
 export default function ProfileScreen() {
   const c = useTheme();
   const { user } = useSession();
@@ -39,6 +43,11 @@ export default function ProfileScreen() {
     queryKey: ["prefs", userId],
     enabled: !!userId,
     queryFn: () => profileService.getPrefs(userId),
+  });
+  const referral = useQuery({
+    queryKey: ["referral", userId],
+    enabled: !!userId,
+    queryFn: () => profileService.referral(userId),
   });
 
   const togglePref = useMutation({
@@ -58,6 +67,34 @@ export default function ProfileScreen() {
       ) : (
         // Keyed by updated_at so a fresh server copy re-seeds the form without effects.
         <ProfileForm key={profile.data.updated_at} userId={userId} profile={profile.data} />
+      )}
+
+      {referral.data?.code && (
+        <Card tone="accent">
+          <Eyebrow>Bring a friend</Eyebrow>
+          <H2>{referral.data.code}</H2>
+          <Muted style={{ fontSize: 14 }}>
+            A friend books with your code and gets 5% off the trip. You earn credit toward your next
+            one once they&rsquo;ve paid.
+          </Muted>
+          {referral.data.credit > 0 && (
+            <Muted>
+              Credit available:{" "}
+              {formatMoney({ amount: referral.data.credit, currency: "USD" }, { compact: true })} —
+              applied automatically at checkout.
+            </Muted>
+          )}
+          <Button
+            title="Share your code"
+            variant="secondary"
+            icon="share-outline"
+            onPress={() =>
+              Share.share({
+                message: `Come on a Guideless trip with me. Use ${referral.data!.code} at guidelesstours.com for 5% off.`,
+              })
+            }
+          />
+        </Card>
       )}
 
       <Card>
@@ -111,7 +148,7 @@ export default function ProfileScreen() {
         <H2>Account</H2>
         <Row
           icon="receipt-outline"
-          title="Bookings & payments"
+          title="Bookings, add-ons & payments"
           subtitle="Managed on the website"
           onPress={() => Linking.openURL("https://guidelesstours.com/account")}
         />
@@ -144,29 +181,67 @@ export default function ProfileScreen() {
   );
 }
 
-/** Editable public profile. State is seeded once from props; the parent re-keys on server changes. */
+/** Editable group profile. State is seeded once from props; the parent re-keys on server changes. */
 function ProfileForm({ userId, profile }: { userId: string; profile: Profile }) {
   const c = useTheme();
   const qc = useQueryClient();
   const [displayName, setDisplayName] = useState(profile.display_name);
   const [bio, setBio] = useState(profile.bio ?? "");
   const [homeCountry, setHomeCountry] = useState(profile.home_country ?? "");
+  const [interests, setInterests] = useState<string[]>(profile.interests ?? []);
+  const [travelStyle, setTravelStyle] = useState<string | null>(profile.travel_style ?? null);
+  const [languages, setLanguages] = useState((profile.languages ?? []).join(", "));
+  const [error, setError] = useState<string | null>(null);
 
   const save = useMutation({
-    mutationFn: () =>
-      profileService.updateProfile(userId, {
-        display_name: displayName.trim().slice(0, 80),
-        bio: bio.trim() ? bio.trim().slice(0, 500) : null,
-        home_country: homeCountry.trim() ? homeCountry.trim().toUpperCase().slice(0, 2) : null,
-      }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["profile", userId] }),
+    mutationFn: async () => {
+      const parsed = groupProfileSchema.safeParse({
+        displayName,
+        bio,
+        homeCountry,
+        interests,
+        travelStyle,
+        languages: languages
+          .split(",")
+          .map((l) => l.trim())
+          .filter(Boolean),
+        showHomeCountry: profile.show_home_country,
+        showBio: profile.show_bio,
+        showInterests: profile.show_interests,
+      });
+      if (!parsed.success) {
+        throw new Error(parsed.error.issues[0]?.message ?? "Check your details");
+      }
+      const v = parsed.data;
+      await profileService.updateProfile(userId, {
+        display_name: v.displayName,
+        bio: v.bio ?? null,
+        home_country: v.homeCountry ?? null,
+        interests: v.interests,
+        travel_style: v.travelStyle,
+        languages: v.languages,
+      });
+    },
+    onSuccess: () => {
+      setError(null);
+      qc.invalidateQueries({ queryKey: ["profile", userId] });
+    },
+    onError: (e: Error) => setError(e.message || "Couldn't save. Try again."),
   });
 
   const toggleVisibility = useMutation({
-    mutationFn: (patch: { show_home_country?: boolean; show_bio?: boolean }) =>
-      profileService.updateProfile(userId, patch),
+    mutationFn: (patch: {
+      show_home_country?: boolean;
+      show_bio?: boolean;
+      show_interests?: boolean;
+    }) => profileService.updateProfile(userId, patch),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["profile", userId] }),
   });
+
+  const toggleInterest = (i: string) =>
+    setInterests((cur) =>
+      cur.includes(i) ? cur.filter((x) => x !== i) : cur.length >= 12 ? cur : [...cur, i],
+    );
 
   return (
     <Card>
@@ -194,7 +269,37 @@ function ProfileForm({ userId, profile }: { userId: string; profile: Profile }) 
           maxLength={2}
         />
       </View>
-      <ErrorNote message={save.isError ? "Couldn't save. Try again." : null} />
+      <View style={{ gap: 6 }}>
+        <Label>Travel style</Label>
+        <View style={{ flexDirection: "row", gap: 8 }}>
+          {TRAVEL_STYLES.map((s) => (
+            <Chip
+              key={s}
+              label={STYLE_LABEL[s]}
+              active={travelStyle === s}
+              onPress={() => setTravelStyle(travelStyle === s ? null : s)}
+            />
+          ))}
+        </View>
+      </View>
+      <View style={{ gap: 6 }}>
+        <Label>Into (pick up to 12)</Label>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+          {INTERESTS.map((i) => (
+            <Chip
+              key={i}
+              label={i.replace(/_/g, " ")}
+              active={interests.includes(i)}
+              onPress={() => toggleInterest(i)}
+            />
+          ))}
+        </View>
+      </View>
+      <View>
+        <Label>Languages (comma-separated)</Label>
+        <Input value={languages} onChangeText={setLanguages} placeholder="English, some French" />
+      </View>
+      <ErrorNote message={error} />
       <Button
         title={save.isPending ? "Saving…" : "Save"}
         loading={save.isPending}
@@ -221,10 +326,51 @@ function ProfileForm({ userId, profile }: { userId: string; profile: Profile }) 
             />
           }
         />
+        <Row
+          title="Show interests and travel style"
+          right={
+            <Switch
+              value={profile.show_interests}
+              onValueChange={(v) => toggleVisibility.mutate({ show_interests: v })}
+              trackColor={{ true: c.accent }}
+            />
+          }
+        />
       </View>
       <Muted style={{ fontSize: 13 }}>
         Email, phone, passport and date of birth are never shown to other travelers.
       </Muted>
     </Card>
+  );
+}
+
+function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+  const c = useTheme();
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
+      style={{
+        paddingHorizontal: 12,
+        minHeight: 36,
+        justifyContent: "center",
+        borderRadius: 999,
+        borderWidth: 1,
+        backgroundColor: active ? c.primary : c.backgroundElement,
+        borderColor: active ? c.primary : c.border,
+      }}
+    >
+      <Text
+        style={{
+          fontFamily: "Inter_500Medium",
+          fontSize: 13,
+          color: active ? c.primaryText : c.text,
+          textTransform: "capitalize",
+        }}
+      >
+        {label}
+      </Text>
+    </Pressable>
   );
 }

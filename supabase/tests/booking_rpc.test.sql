@@ -62,7 +62,7 @@ select is((select user_id from public.traveler_profiles tp join public.booking_t
 select is((select count(*)::int from public.emergency_contacts ec join public.traveler_profiles tp on tp.id = ec.traveler_id
            where tp.owner_user_id = 'd0000000-0000-4000-8000-00000000000d'), 1, 'emergency contact stored on the lead traveler');
 select is((select room_preference::text from public.booking_preferences where booking_id = (select booking_id from tmp_result)),
-          'shared_double', 'preferences stored');
+          'single', 'room preference follows the room layout (two travelers, own rooms by default)');
 
 -- Held seats count against availability.
 select results_eq(

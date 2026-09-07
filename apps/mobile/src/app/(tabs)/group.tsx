@@ -4,8 +4,9 @@ import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { emptyStates } from "@guideless/config";
-import { formatInZone } from "@guideless/utils";
+import { formatDate, formatDateRange, formatInZone, formatWallTime } from "@guideless/utils";
 import {
+  Body,
   Button,
   Card,
   EmptyState,
@@ -24,6 +25,7 @@ import { useCurrentTrip } from "@/hooks/use-trip";
 import { track } from "@/lib/analytics";
 import { useSession } from "@/lib/auth/session";
 import { chatService } from "@/lib/chat/service";
+import { groupService, rosterLine, type ItemRsvpStatus } from "@/lib/group/service";
 import { momentsService } from "@/lib/moments/service";
 import { supabase } from "@/lib/supabase";
 
@@ -37,13 +39,14 @@ const ROOM_HINT = {
   announcements: "Updates from Guideless. Read-only.",
   optional_activities: "Who's up for what.",
 } as const;
+const STYLE_LABEL = { relaxed: "Relaxed pace", balanced: "Balanced", active: "Active" } as const;
 
 export default function GroupScreen() {
   const c = useTheme();
   const router = useRouter();
   const qc = useQueryClient();
   const { user } = useSession();
-  const { detail } = useCurrentTrip();
+  const { detail, trips } = useCurrentTrip();
   const tripId = detail?.trip.id ?? null;
 
   const rooms = useQuery({
@@ -57,6 +60,32 @@ export default function GroupScreen() {
     queryKey: ["moments", tripId],
     enabled: !!tripId && !!user,
     queryFn: () => momentsService.list(tripId!, user!.id),
+  });
+
+  // Before the trip exists: the booking's departure and its anonymized roster.
+  const upcoming = useQuery({
+    queryKey: ["upcoming-booking", user?.id],
+    enabled: !!user && !tripId && !trips.isPending,
+    queryFn: () => groupService.upcomingBooking(),
+  });
+
+  const anchor = detail?.days.flatMap((d) => d.items).find((i) => i.is_anchor) ?? null;
+  const anchorDay = anchor ? detail?.days.find((d) => d.id === anchor.trip_day_id) : null;
+  const rsvps = useQuery({
+    queryKey: ["rsvps", anchor?.id, user?.id],
+    enabled: !!anchor && !!user,
+    queryFn: async () => ({
+      counts: await groupService.rsvpCounts([anchor!.id]),
+      mine: await groupService.myRsvps([anchor!.id], user!.id),
+    }),
+  });
+  const rsvp = useMutation({
+    mutationFn: (status: ItemRsvpStatus) => groupService.rsvp(anchor!.id, user!.id, status),
+    onSuccess: (_, status) => {
+      if (status === "going")
+        track("live_moment_joined", { kind: "anchor_rsvp", item_id: anchor!.id });
+      qc.invalidateQueries({ queryKey: ["rsvps", anchor?.id, user?.id] });
+    },
   });
 
   useEffect(() => {
@@ -82,26 +111,116 @@ export default function GroupScreen() {
   });
 
   if (!detail) {
+    const up = upcoming.data;
     return (
       <Screen>
         <Eyebrow>Your group</Eyebrow>
         <H1>Group</H1>
-        <EmptyState
-          icon="people-outline"
-          title="No group yet"
-          body="Your group appears once your trip is activated."
-        />
+        {upcoming.isPending || trips.isPending ? (
+          <Loading />
+        ) : up ? (
+          <>
+            <Card tone="accent">
+              <Eyebrow>{up.tourName}</Eyebrow>
+              <H2>
+                {up.stats?.groupOpen
+                  ? "Your group is opening"
+                  : `Opens ${formatDate(up.stats?.groupOpensOn ?? up.startDate, "en-US", { month: "long", day: "numeric" })}`}
+              </H2>
+              <Body>
+                {up.stats?.groupOpen
+                  ? "Your route and chat are being prepared. Pull to refresh in a moment."
+                  : "Chat, the roster and the welcome plan open together so nobody arrives to an empty room. Until then, here's who's coming."}
+              </Body>
+            </Card>
+            {up.stats && (
+              <Card>
+                <Eyebrow>Who&rsquo;s coming</Eyebrow>
+                <H2>{rosterLine(up.stats)}</H2>
+                <Muted>
+                  {formatDateRange(up.startDate, up.endDate)}
+                  {up.stats.spotsLeft > 0 ? ` · ${up.stats.spotsLeft} spots left` : " · Full"}
+                </Muted>
+                <Muted style={{ fontSize: 13 }}>
+                  Names and profiles appear when the group opens. Solo means booked alone; pairs are
+                  two travelers on one booking.
+                </Muted>
+              </Card>
+            )}
+          </>
+        ) : (
+          <EmptyState
+            icon="people-outline"
+            title="No group yet"
+            body="Your group appears once you have a confirmed booking."
+          />
+        )}
       </Screen>
     );
   }
 
   const members = detail.members.filter((m) => !m.removed_at);
+  const anchorCounts = anchor ? rsvps.data?.counts.get(anchor.id) : null;
+  const myRsvp = anchor ? rsvps.data?.mine.get(anchor.id) : undefined;
 
   return (
     <Screen>
       <Eyebrow>Your group</Eyebrow>
       <H1>{members.length} travelers</H1>
       <Muted>Social, but optional. Say hello — or don&rsquo;t.</Muted>
+
+      {anchor && (
+        <Card tone="accent">
+          <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap" }}>
+            <Pill tone="accent">Everyone&rsquo;s invited</Pill>
+            {anchorDay && (
+              <Pill>
+                {formatDate(anchorDay.date, "en-US", {
+                  weekday: "short",
+                  month: "short",
+                  day: "numeric",
+                })}
+              </Pill>
+            )}
+          </View>
+          <H2>{anchor.title}</H2>
+          <Muted>
+            {anchor.start_time ? formatWallTime(anchor.start_time) : "Time to follow"}
+            {anchor.location_name ? ` · ${anchor.location_name}` : ""}
+          </Muted>
+          {anchor.description && <Muted style={{ fontSize: 14 }}>{anchor.description}</Muted>}
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 8,
+              marginTop: 4,
+            }}
+          >
+            <Muted style={{ fontSize: 13 }}>
+              {anchorCounts?.going ?? 0} going
+              {anchorCounts?.maybe ? ` · ${anchorCounts.maybe} maybe` : ""}
+            </Muted>
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              <Button
+                title={myRsvp === "going" ? "I'll be there ✓" : "I'll be there"}
+                variant={myRsvp === "going" ? "secondary" : "primary"}
+                disabled={rsvp.isPending}
+                onPress={() => rsvp.mutate(myRsvp === "going" ? "not_going" : "going")}
+                style={{ minHeight: 40, paddingHorizontal: 14 }}
+              />
+              <Button
+                title={myRsvp === "maybe" ? "Maybe ✓" : "Maybe"}
+                variant="ghost"
+                disabled={rsvp.isPending}
+                onPress={() => rsvp.mutate(myRsvp === "maybe" ? "not_going" : "maybe")}
+                style={{ minHeight: 40, paddingHorizontal: 10 }}
+              />
+            </View>
+          </View>
+        </Card>
+      )}
 
       <View style={{ gap: Spacing.two }}>
         <View
@@ -202,6 +321,8 @@ export default function GroupScreen() {
         <Card>
           {members.map((m, i) => {
             const name = m.profile?.display_name || "Traveler";
+            const p = m.profile;
+            const interests = p?.show_interests && p.interests?.length ? p.interests : [];
             return (
               <View
                 key={m.user_id}
@@ -212,17 +333,28 @@ export default function GroupScreen() {
                     {name.slice(0, 1).toUpperCase()}
                   </Text>
                 </View>
-                <View style={{ flex: 1 }}>
+                <View style={{ flex: 1, gap: 2 }}>
                   <H2 style={{ fontSize: 16, lineHeight: 20 }}>
                     {name}
                     {m.user_id === user?.id ? " (you)" : ""}
                   </H2>
-                  {m.profile?.show_home_country && m.profile.home_country ? (
-                    <Muted style={{ fontSize: 13 }}>{m.profile.home_country}</Muted>
+                  {p?.show_home_country && p.home_country ? (
+                    <Muted style={{ fontSize: 13 }}>{p.home_country}</Muted>
                   ) : null}
-                  {m.profile?.show_bio && m.profile.bio ? (
-                    <Muted style={{ fontSize: 13 }}>{m.profile.bio}</Muted>
-                  ) : null}
+                  {p?.show_bio && p.bio ? <Muted style={{ fontSize: 13 }}>{p.bio}</Muted> : null}
+                  {(interests.length > 0 || (p?.show_interests && p.travel_style)) && (
+                    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 4, marginTop: 2 }}>
+                      {p?.show_interests && p.travel_style ? (
+                        <Pill>
+                          {STYLE_LABEL[p.travel_style as keyof typeof STYLE_LABEL] ??
+                            p.travel_style}
+                        </Pill>
+                      ) : null}
+                      {interests.slice(0, 5).map((it) => (
+                        <Pill key={it}>{it.replace(/_/g, " ")}</Pill>
+                      ))}
+                    </View>
+                  )}
                 </View>
                 {m.member_role === "staff" && <Pill>Guideless</Pill>}
               </View>

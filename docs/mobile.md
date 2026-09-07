@@ -60,6 +60,35 @@ components/itinerary-item.tsx, sync-badge.tsx, screen-tracker.tsx
 - **Notifications received**: pushes come from the `notify-dispatch` Edge Function (docs/api.md);
   the payload's `data.deepLink` is routed by `deepLinkToPath()` (`live_moment` → Group tab).
   Android channels `operational` (high) and `social` (default) are created at registration.
+- **Map tab** (`(tabs)/map.tsx`, `react-native-maps`): hotels, route items with coordinates, the
+  welcome anchor (highlighted), Live Moments with a place, add-ons and Explore recommendations for
+  the current destination, filtered by day (All / Today / each day). Tapping a callout opens native
+  directions (`map_opened`, `source: "map_tab"`). Marker building, day filtering and the fitted
+  region are pure helpers in `src/lib/map/markers.ts` (Jest-tested). iOS uses Apple Maps; Android
+  needs a Google Maps key before a production build (see Store and device builds).
+- **Documents** (`documents/index.tsx`, from Trip home): `trip_documents` grouped by kind, opened
+  through five-minute signed Storage URLs in the in-app browser (`document_opened`). The list is
+  cached in AsyncStorage so it opens offline; files need signal.
+- **Inbox** (`notifications/index.tsx`, bell on Trip home with unread count): the user's
+  `notifications` rows, unread first, Realtime refresh on inserts, mark-read on open, mark-all-read,
+  taps routed by `deepLinkToPath()`. Pure sorting and relative-time helpers live in
+  `src/lib/notifications/inbox-helpers.ts`.
+- **Add-ons in the trip** (`components/add-on-card.tsx`, on Trip home "today" and under each
+  itinerary day): the departure's active `departure_add_ons` with price, time, place, "N going"
+  (`add_on_headcounts`) and who from your group is on it (`trip_add_on_participants`; "Maya, Tom
+  and 4 others"). "You're in" when your booking holds it (`booking_add_ons`); "Add" opens the web
+  purchase page `…/account/bookings/{bookingId}/add-ons?add={addOnId}` in the in-app browser; the
+  app never takes card details. Closed once past `bookable_until_days_before`; Full at capacity.
+- **Group before the trip** (Group tab without a trip): the customer's next confirmed booking and
+  its anonymized roster from `departure_roster_stats` ("11 booked · 5 solo · 2 pairs · 4
+  countries"), with the date the group opens (`departures.group_opens_days_before`). Once the trip
+  exists the welcome anchor item (`is_anchor`) is pinned at the top with "I'll be there / Maybe"
+  (`item_rsvps`, counts from `item_rsvp_counts`), and member cards show interests and travel style
+  when a traveler has `show_interests` on.
+- **Profile**: display name, bio, home country, interests (chips from `INTERESTS`), travel style,
+  languages and the three visibility toggles, validated with `groupProfileSchema`; the traveler's
+  referral code (`referral_codes`) with a share sheet and any earned credit
+  (`account_credit_balance`).
 - **Store assets**: generated from the brand logo by `node scripts/mobile-assets.mjs` (sharp):
   `icon.png` (emblem on cloud), Android adaptive foreground / background / monochrome, splash icon
   (cloud background, ink in dark mode) and favicon. Re-run after replacing
@@ -77,9 +106,38 @@ pnpm --filter mobile typecheck
 On a physical device against local Supabase, replace `127.0.0.1` with your machine's LAN IP in
 `.env` and in `supabase/config.toml` `[api] external_url` / `site_url` as needed.
 
+## Store and device builds (EAS)
+
+`react-native-maps` and `expo-notifications` need a development build; Expo Go is no longer enough.
+`apps/mobile/eas.json` defines `development` (dev client, internal), `preview` (internal, Android
+APK) and `production` profiles with the `EXPO_PUBLIC_*` values as placeholders per profile.
+
+First internal build, once:
+
+```bash
+npm i -g eas-cli
+cd apps/mobile
+eas login                                  # Expo account that owns the app
+eas init                                   # writes extra.eas.projectId into app.json (needed for push tokens)
+# fill the env placeholders in eas.json (staging Supabase URL / anon key, site URL, Sentry, PostHog)
+eas build --profile development --platform ios      # or android
+eas build --profile development --platform android
+```
+
+Install the build from the link EAS prints (TestFlight-free internal distribution), then run
+`pnpm dev:mobile` and open the project from the dev client. Later builds: `eas build --profile
+preview` for testers, `eas build --profile production` + `eas submit` for the stores.
+
+Android maps: add the Google Maps key to `app.json` before an Android build:
+`"android": { "config": { "googleMaps": { "apiKey": "<key>" } } }` (restrict the key to the
+package `com.guidelesstours.app`). iOS uses Apple Maps and needs nothing. `app.config.ts` is owned
+by the marketing/analytics work; if the key should come from an env var, add it there.
+
+Verification on 2026-09-06: `npx expo-doctor` → 21/21 checks passed; `npx expo export --platform
+ios --platform android` bundled both Hermes entries (7 MB / 7.3 MB) with no errors.
+
 ## Not yet
 
-Maps view, documents tab, photo sharing, offline queue for outgoing messages, in-app notification
-inbox (rows exist; the app relies on push + Realtime today), E2E tests (Detox/Maestro), a real
-device/simulator run, Sentry source-map upload (`@sentry/react-native/expo` plugin in
-`app.config.ts`).
+Photo sharing, offline queue for outgoing messages, E2E tests (Detox/Maestro), a real
+device/simulator run (`eas build --profile development`, see above), Google Maps key for Android,
+Sentry source-map upload (`@sentry/react-native/expo` plugin in `app.config.ts`).

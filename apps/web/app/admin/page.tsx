@@ -29,6 +29,18 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
             >
               New tour
             </Link>
+            <Link
+              href="/admin/hosts"
+              className={buttonVariants({ variant: "secondary", size: "sm" })}
+            >
+              Host applications
+            </Link>
+            <Link
+              href="/admin/meetups"
+              className={buttonVariants({ variant: "secondary", size: "sm" })}
+            >
+              City evenings
+            </Link>
           </>
         }
       />

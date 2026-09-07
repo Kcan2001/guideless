@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { TrackView } from "@/components/analytics/track-view";
 import { CheckoutWizard } from "@/components/checkout/checkout-wizard";
 import type { CheckoutDeparture } from "@/components/checkout/types";
+import { listDepartureExtras } from "@/lib/data/extras";
 import { getDepartureById } from "@/lib/data/tours";
 import { createClient } from "@/lib/supabase/server";
 
@@ -21,7 +22,11 @@ export default async function CheckoutPage(props: PageProps<"/checkout/[departur
   const [{ departureId }, sp] = await Promise.all([props.params, props.searchParams]);
   if (!UUID.test(departureId)) notFound();
 
-  const [detail, supabase] = await Promise.all([getDepartureById(departureId), createClient()]);
+  const [detail, supabase, extras] = await Promise.all([
+    getDepartureById(departureId),
+    createClient(),
+    listDepartureExtras(departureId),
+  ]);
   if (!detail) notFound();
   const {
     data: { user },
@@ -38,12 +43,15 @@ export default async function CheckoutPage(props: PageProps<"/checkout/[departur
     timezone: d.timezone,
     priceAmount: d.priceAmount,
     depositAmount: d.depositAmount,
+    sharedRoomDiscountAmount: extras.sharedRoomDiscountAmount,
     currency: d.currency,
     capacity: d.capacity,
     available: d.availability.available,
     bookingDeadline: d.bookingDeadline,
     balanceDueDate: d.balanceDueDate,
     cancellationPolicy: d.cancellationPolicy,
+    stayOptions: extras.stayOptions,
+    addOns: extras.addOns,
   };
 
   const stepParam = Number(typeof sp.step === "string" ? sp.step : 1);

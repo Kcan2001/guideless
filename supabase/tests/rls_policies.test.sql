@@ -61,8 +61,8 @@ select is((select display_name from public.profiles where id = 'a0000000-0000-40
 
 -- ── 2. Public catalogue ──────────────────────────────────────────────────────
 select tests.authenticate_anon();
-select is((select count(*)::int from public.tours), 1, 'anon can read the published tour');
-select is((select count(*)::int from public.departures where status = 'open'), 3, 'anon can read open departures');
+select is((select count(*)::int from public.tours), 2, 'anon can read the published tours (Southern France, Monaco GP)');
+select is((select count(*)::int from public.departures where status = 'open'), 4, 'anon can read open departures');
 select is((select count(*)::int from public.tour_itinerary_items where visibility <> 'public_preview'), 0,
   'anon cannot see non-preview itinerary items');
 select ok((select count(*) from public.tour_itinerary_items where visibility = 'public_preview') > 20,

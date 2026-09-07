@@ -32,15 +32,30 @@ test("a new customer can sign up and reach the payment step, and is refused clea
   await page.locator("#ec-phone").fill("+1 415 555 0123");
   await page.getByRole("button", { name: "Continue" }).click();
 
-  // Step 3 — preferences (defaults)
+  // Step 3 — rooms & stay (own room by default, default tier preselected)
+  await expect(page.getByRole("heading", { name: /rooms and stay/i })).toBeVisible();
+  await expect(page.getByText(/Room 1 · own room/)).toBeVisible();
+  const summary = page.getByTestId("order-summary");
+  await expect(summary.getByTestId("quote-due-now")).toHaveText(/\$750/);
+  await page.getByRole("button", { name: "Continue" }).click();
+
+  // Step 4 — add-ons: the seeded boat for the traveler raises today's total by $145
+  await expect(page.getByRole("heading", { name: /make it yours/i })).toBeVisible();
+  const boat = page.getByRole("article", { name: /boat day along the riviera/i });
+  await boat.getByText("E2E", { exact: true }).click();
+  await expect(summary.getByTestId("quote-due-now")).toHaveText(/\$895/);
+  await expect(summary.getByText("Boat day along the Riviera")).toBeVisible();
+  await page.getByRole("button", { name: "Continue" }).click();
+
+  // Step 5 — preferences (defaults)
   await expect(page.getByRole("heading", { name: /a few preferences/i })).toBeVisible();
   await page.getByRole("button", { name: "Continue" }).click();
 
-  // Step 4 — account (already signed in)
+  // Step 6 — account (already signed in)
   await expect(page.getByText(`Signed in as ${email}`)).toBeVisible();
   await page.getByRole("button", { name: "Continue" }).click();
 
-  // Step 5 — terms
+  // Step 7 — terms
   for (const label of [
     "I accept the Terms of Service.",
     "I understand the cancellation policy for this departure.",
@@ -51,9 +66,10 @@ test("a new customer can sign up and reach the payment step, and is refused clea
   }
   await page.getByRole("button", { name: "Continue to payment" }).click();
 
-  // Step 6 — review & pay
+  // Step 8 — review & pay: the add-on is listed
   await expect(page.getByRole("heading", { name: /review and pay/i })).toBeVisible();
   await expect(page.getByText("E2E Traveler")).toBeVisible();
+  await expect(page.getByTestId("review-add-ons")).toContainText("Boat day along the Riviera");
   await page.getByRole("button", { name: /continue to secure payment/i }).click();
   await expect(page.getByText(/online payment isn.t switched on yet/i)).toBeVisible();
 

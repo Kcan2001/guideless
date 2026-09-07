@@ -188,6 +188,98 @@ export const liveMomentFormSchema = z.object({
 });
 export type LiveMomentForm = z.infer<typeof liveMomentFormSchema>;
 
+// ── Stay options and add-ons (spec §103, roadmap M9–M10) ──────────────────────
+const flag = (fallback: boolean) =>
+  z.preprocess(
+    (v) => (v === undefined ? fallback : v === "on" || v === true || v === "true"),
+    z.boolean(),
+  );
+const nullableInt = (min: number, max: number) =>
+  z.preprocess((v) => (v === "" || v === undefined ? null : v), intField(min, max).nullable());
+const nullableNumber = (min: number, max: number) =>
+  z.preprocess(
+    (v) => (v === "" || v === undefined ? null : v),
+    z.coerce.number().min(min).max(max).nullable(),
+  );
+
+export const stayOptionFormSchema = z.object({
+  name: z.string().trim().min(2).max(120),
+  description: optionalText(2000),
+  hotelName: optionalText(200),
+  area: optionalText(200),
+  starRating: nullableInt(1, 5),
+  destinationId: z.preprocess((v) => (v === "" ? null : v), uuidSchema.nullable()),
+  /** Per traveler, major units; may be negative for a cheaper tier. */
+  priceDelta: z.coerce.number().min(-100000).max(100000).default(0),
+  /** Per traveler, major units; blank inherits the departure's discount. */
+  sharedRoomDiscount: nullableNumber(0, 100000),
+  capacity: nullableInt(0, 500),
+  position: intField(1, 50).default(1),
+  isDefault: flag(false),
+  isActive: flag(true),
+});
+export type StayOptionForm = z.infer<typeof stayOptionFormSchema>;
+
+export const ADD_ON_KINDS = [
+  "activity",
+  "ticket",
+  "transfer",
+  "dinner",
+  "extra_night",
+  "room_upgrade",
+  "other",
+] as const;
+
+export const addOnFormSchema = z.object({
+  title: z.string().trim().min(2).max(120),
+  description: optionalText(2000),
+  kind: z.enum(ADD_ON_KINDS).default("activity"),
+  /** Major units in the departure currency. */
+  price: z.coerce.number().min(0).max(1000000),
+  pricingBasis: z.enum(["per_traveler", "per_booking"]).default("per_traveler"),
+  capacity: nullableInt(0, 10000),
+  dayNumber: nullableInt(1, 60),
+  startTime: z.preprocess((v) => (v === "" ? null : v), localTimeSchema.nullable()).optional(),
+  endTime: z.preprocess((v) => (v === "" ? null : v), localTimeSchema.nullable()).optional(),
+  locationName: optionalText(200),
+  address: optionalText(300),
+  latitude: nullableNumber(-90, 90),
+  longitude: nullableNumber(-180, 180),
+  bookableUntilDaysBefore: intField(0, 365).default(1),
+  cancellableUntilDaysBefore: intField(0, 365).default(7),
+  tierGroup: optionalText(40),
+  supplierServiceId: z.preprocess((v) => (v === "" ? null : v), uuidSchema.nullable()),
+  position: intField(1, 100).default(1),
+  isFeatured: flag(false),
+  isActive: flag(true),
+});
+export type AddOnForm = z.infer<typeof addOnFormSchema>;
+
+// ── Meetups (roadmap M13) ─────────────────────────────────────────────────────
+export const meetupFormSchema = z.object({
+  title: z.string().trim().min(2).max(120),
+  description: optionalText(2000),
+  city: z.string().trim().min(1).max(120),
+  countryCode: z.preprocess(
+    (v) => (v === "" ? null : v),
+    z.string().length(2).toUpperCase().nullable(),
+  ),
+  venueName: optionalText(200),
+  address: optionalText(300),
+  date: isoDateSchema,
+  startTime: localTimeSchema,
+  endTime: z.preprocess((v) => (v === "" ? null : v), localTimeSchema.nullable()).optional(),
+  timezone: z.string().min(1).max(64),
+  capacity: nullableInt(0, 1000),
+  isPublished: flag(false),
+});
+export type MeetupForm = z.infer<typeof meetupFormSchema>;
+
+export const hostApplicationDecisionSchema = z.object({
+  status: z.enum(["pending", "approved", "declined"]),
+  staffNotes: optionalText(2000),
+});
+
 // ── Bookings ──────────────────────────────────────────────────────────────────
 export const cancelBookingSchema = z.object({
   reason: z.string().trim().min(3).max(1000),

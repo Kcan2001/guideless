@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { brand, emptyStates } from "@guideless/config";
 import { formatDate, formatDateRange, formatWallTime } from "@guideless/utils";
+import { AddOnCard } from "@/components/add-on-card";
 import { ItineraryItemRow, timeLabel } from "@/components/itinerary-item";
 import { SyncBadge } from "@/components/sync-badge";
 import {
@@ -28,7 +29,9 @@ import {
   Pill,
 } from "@/components/ui";
 import { Spacing } from "@/constants/theme";
+import { useInbox } from "@/hooks/use-inbox";
 import { useTheme } from "@/hooks/use-theme";
+import { useTripAddOns } from "@/hooks/use-add-ons";
 import { useCurrentTrip } from "@/hooks/use-trip";
 import { track } from "@/lib/analytics";
 import {
@@ -45,6 +48,8 @@ export default function TripHomeScreen() {
   const c = useTheme();
   const router = useRouter();
   const { trips, current, detail, offline, syncedAt, isPending, refetch } = useCurrentTrip();
+  const inbox = useInbox();
+  const { addOns, bookingId } = useTripAddOns(detail);
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 60_000);
@@ -67,7 +72,8 @@ export default function TripHomeScreen() {
   if (!current || !detail) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: c.background }}>
-        <View style={{ padding: Spacing.three, gap: Spacing.three, marginTop: Spacing.five }}>
+        <View style={{ padding: Spacing.three, gap: Spacing.three }}>
+          <HeaderActions unread={inbox.unread} />
           <H1>{brand.taglineSecondary}</H1>
           <EmptyState
             title={emptyStates.noTrips.title}
@@ -116,6 +122,7 @@ export default function TripHomeScreen() {
           <RefreshControl refreshing={false} onRefresh={() => refetch()} tintColor={c.accent} />
         }
       >
+        <HeaderActions unread={inbox.unread} />
         <View style={{ gap: 4 }}>
           <Eyebrow>
             {phase === "during"
@@ -211,6 +218,17 @@ export default function TripHomeScreen() {
           </Card>
         )}
 
+        {day && addOns.some((a) => a.date === day.date) && (
+          <View style={{ gap: Spacing.one }}>
+            <Eyebrow>Add-ons today · optional</Eyebrow>
+            {addOns
+              .filter((a) => a.date === day.date)
+              .map((a) => (
+                <AddOnCard key={a.id} addOn={a} bookingId={bookingId} todayISO={todayISO} />
+              ))}
+          </View>
+        )}
+
         {optionalLater.length > 0 && (
           <View style={{ gap: Spacing.one }}>
             <Eyebrow>Later today · optional</Eyebrow>
@@ -247,6 +265,22 @@ export default function TripHomeScreen() {
           </View>
         </Card>
 
+        <Link href="/documents" asChild>
+          <Pressable
+            style={({ pressed }) => [
+              styles.routeLink,
+              { borderColor: c.border, opacity: pressed ? 0.7 : 1 },
+            ]}
+            accessibilityRole="link"
+          >
+            <Ionicons name="document-text-outline" size={20} color={c.accent} />
+            <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 16, color: c.text, flex: 1 }}>
+              Documents · tickets, vouchers, confirmations
+            </Text>
+            <Ionicons name="chevron-forward" size={18} color={c.textSecondary} />
+          </Pressable>
+        </Link>
+
         <Link href={`/itinerary/${trip.id}`} asChild>
           <Pressable
             style={({ pressed }) => [
@@ -267,8 +301,60 @@ export default function TripHomeScreen() {
   );
 }
 
+/** Inbox bell with unread count and the profile entry; the tab bar stays five wide. */
+function HeaderActions({ unread }: { unread: number }) {
+  const c = useTheme();
+  const router = useRouter();
+  return (
+    <View style={styles.headerActions}>
+      <Pressable
+        onPress={() => router.push("/notifications")}
+        accessibilityRole="button"
+        accessibilityLabel={unread > 0 ? `Inbox, ${unread} unread` : "Inbox"}
+        style={[styles.iconButton, { borderColor: c.border, backgroundColor: c.backgroundElement }]}
+      >
+        <Ionicons name="notifications-outline" size={20} color={c.text} />
+        {unread > 0 && (
+          <View style={[styles.badge, { backgroundColor: c.accent }]}>
+            <Text style={styles.badgeText}>{unread > 9 ? "9+" : unread}</Text>
+          </View>
+        )}
+      </Pressable>
+      <Pressable
+        onPress={() => router.push("/profile")}
+        accessibilityRole="button"
+        accessibilityLabel="Profile"
+        style={[styles.iconButton, { borderColor: c.border, backgroundColor: c.backgroundElement }]}
+      >
+        <Ionicons name="person-circle-outline" size={20} color={c.text} />
+      </Pressable>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   inlineLink: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 4 },
+  headerActions: { flexDirection: "row", justifyContent: "flex-end", gap: 8 },
+  iconButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  badge: {
+    position: "absolute",
+    top: -2,
+    right: -2,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    paddingHorizontal: 4,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  badgeText: { fontFamily: "Inter_600SemiBold", fontSize: 11, color: "#0B2025" },
   routeLink: {
     flexDirection: "row",
     alignItems: "center",

@@ -3,7 +3,12 @@
 import type { Route } from "next";
 import { redirect } from "next/navigation";
 import { brand } from "@guideless/config";
-import { createBookingSchema, type CreateBookingInput } from "@guideless/validation";
+import {
+  addOnPurchaseSchema,
+  createBookingSchema,
+  type AddOnPurchaseInput,
+  type CreateBookingInput,
+} from "@guideless/validation";
 import { formatDateRange } from "@guideless/utils";
 import { publicEnv } from "@/lib/env";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
@@ -12,6 +17,11 @@ import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 export interface CheckoutActionResult {
   error?: string;
   code?: "auth_required" | "sold_out" | "closed" | "invalid" | "payments_unavailable" | "unknown";
+}
+
+export interface PurchaseActionResult {
+  error?: string;
+  code?: "auth_required" | "invalid" | "payments_unavailable" | "unknown";
 }
 
 const HINT_MESSAGES: Record<string, { code: CheckoutActionResult["code"]; error: string }> = {
@@ -29,6 +39,43 @@ const HINT_MESSAGES: Record<string, { code: CheckoutActionResult["code"]; error:
   },
   auth_required: { code: "auth_required", error: "Please sign in to continue." },
   traveler_count: { code: "invalid", error: "A booking can include 1 to 8 travelers." },
+  room_capacity: {
+    code: "invalid",
+    error: "A room holds at most two travelers. Nothing was charged.",
+  },
+  stay_option_unknown: {
+    code: "invalid",
+    error: "That stay option is no longer offered. Pick another. Nothing was charged.",
+  },
+  stay_option_full: {
+    code: "sold_out",
+    error: "That stay option just filled up for your group size. Nothing was charged.",
+  },
+  add_on_unknown: {
+    code: "invalid",
+    error:
+      "One of your add-ons is no longer offered. Remove it and try again. Nothing was charged.",
+  },
+  add_on_closed: {
+    code: "closed",
+    error: "One add-on can no longer be booked for its date. Nothing was charged.",
+  },
+  add_on_sold_out: {
+    code: "sold_out",
+    error: "An add-on just sold out. Adjust your selection; nothing was charged.",
+  },
+  tier_conflict: {
+    code: "invalid",
+    error: "Pick one option per traveler in that group. Nothing was charged.",
+  },
+  code_invalid: { code: "invalid", error: "We don't recognise that code. Nothing was charged." },
+  code_own_referral: {
+    code: "invalid",
+    error: "Your own referral code can't be used on your booking. Nothing was charged.",
+  },
+  code_currency: { code: "invalid", error: "That code is for a different currency." },
+  not_payable: { code: "invalid", error: "This booking can't take add-ons right now." },
+  nothing_selected: { code: "invalid", error: "Pick at least one add-on." },
 };
 
 /**
@@ -58,13 +105,17 @@ export async function startCheckout(input: CreateBookingInput): Promise<Checkout
   if (!user) return HINT_MESSAGES.auth_required!;
 
   // 1. Atomic booking + hold, as the signed-in user (security definer RPC).
+  const rooms = data.roomIndexes ?? data.travelers.map((_, i) => i + 1);
   const { data: rows, error: rpcError } = await supabase.rpc("create_booking", {
     p_departure_id: data.departureId,
-    p_travelers: data.travelers,
+    p_travelers: data.travelers.map((t, i) => ({ ...t, roomIndex: rooms[i] ?? i + 1 })),
     p_emergency_contact: data.emergencyContact,
     p_preferences: data.preferences,
     p_payment_option: data.paymentOption,
     p_terms_version: brand.termsVersion,
+    p_stay_option_id: data.stayOptionId ?? undefined,
+    p_add_ons: data.addOns as unknown as never,
+    p_code: data.code ?? undefined,
   });
   if (rpcError) {
     const hint = (rpcError as { hint?: string }).hint ?? "";
@@ -94,8 +145,16 @@ export async function startCheckout(input: CreateBookingInput): Promise<Checkout
     departure?.start_date && departure.end_date
       ? formatDateRange(departure.start_date, departure.end_date)
       : "";
-  const label =
-    data.paymentOption === "full" || booking.deposit_amount === 0 ? "Full payment" : "Deposit";
+  const addOnCount = data.addOns.reduce(
+    (n, a) => n + (a.travelerIndexes?.length ?? a.quantity ?? 0),
+    0,
+  );
+  const label = [
+    data.paymentOption === "full" || booking.deposit_amount === 0 ? "Full payment" : "Deposit",
+    addOnCount > 0 ? `${addOnCount} add-on${addOnCount === 1 ? "" : "s"}` : null,
+  ]
+    .filter(Boolean)
+    .join(" + ");
 
   let checkoutUrl: string | null = null;
   try {
@@ -250,5 +309,107 @@ export async function payBalance(formData: FormData): Promise<void> {
     console.error("balance checkout session failed", { bookingId: booking.id, err });
   }
   if (!url) redirect("/account?error=unknown" as Route);
+  redirect(url as Route);
+}
+
+/**
+ * Account / app → "Add to your trip": add-ons bought after booking, any time up to each add-on's
+ * sales window (even mid-trip). `start_add_on_purchase` prices and holds the rows for 30 minutes;
+ * the Stripe webhook confirms them through `confirm_add_on_purchase`.
+ */
+export async function startAddOnPurchase(input: AddOnPurchaseInput): Promise<PurchaseActionResult> {
+  const parsed = addOnPurchaseSchema.safeParse(input);
+  if (!parsed.success) return { code: "invalid", error: "Pick at least one add-on." };
+  const data = parsed.data;
+
+  if (!isStripeConfigured()) {
+    return {
+      code: "payments_unavailable",
+      error: `Online payment isn't switched on yet. Email ${brand.supportEmail} and we'll add it for you.`,
+    };
+  }
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { code: "auth_required", error: "Please sign in to continue." };
+
+  const { data: rows, error: rpcError } = await supabase.rpc("start_add_on_purchase", {
+    p_booking_id: data.bookingId,
+    p_add_ons: data.addOns as unknown as never,
+  });
+  if (rpcError) {
+    const hint = (rpcError as { hint?: string }).hint ?? "";
+    const known = HINT_MESSAGES[hint];
+    if (known)
+      return {
+        code: known.code === "auth_required" ? "auth_required" : "invalid",
+        error: known.error,
+      };
+    console.error("start_add_on_purchase failed", {
+      code: rpcError.code,
+      message: rpcError.message,
+    });
+    return { code: "unknown", error: "We couldn't reserve those add-ons. Nothing was charged." };
+  }
+  const purchase = rows?.[0];
+  if (!purchase)
+    return { code: "unknown", error: "We couldn't reserve those add-ons. Nothing was charged." };
+
+  const { data: booking } = await supabase
+    .from("bookings")
+    .select("confirmation_number, departure_id")
+    .eq("id", data.bookingId)
+    .maybeSingle();
+  const site = publicEnv.NEXT_PUBLIC_SITE_URL;
+  let url: string | null = null;
+  try {
+    const session = await getStripe().checkout.sessions.create({
+      mode: "payment",
+      client_reference_id: data.bookingId,
+      customer_email: user.email ?? undefined,
+      expires_at: Math.floor(Date.now() / 1000) + 30 * 60 + 5,
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: purchase.currency.toLowerCase(),
+            unit_amount: purchase.amount,
+            product_data: {
+              name: "Guideless add-ons",
+              description: `${purchase.summary} · ${booking?.confirmation_number ?? ""}`.trim(),
+            },
+          },
+        },
+      ],
+      metadata: {
+        booking_id: data.bookingId,
+        add_on_purchase_id: purchase.purchase_id,
+        payment_option: "add_on",
+      },
+      payment_intent_data: {
+        metadata: { booking_id: data.bookingId, add_on_purchase_id: purchase.purchase_id },
+        description: `${booking?.confirmation_number ?? "Booking"} · Add-ons`,
+      },
+      success_url: `${site}/account?added=1`,
+      cancel_url: `${site}/account/bookings/${data.bookingId}/add-ons?cancelled=1`,
+    });
+    url = session.url;
+  } catch (err) {
+    console.error("add-on checkout session failed", { bookingId: data.bookingId, err });
+    // Release the hold right away rather than waiting for the cron.
+    const admin = createServiceRoleClient();
+    await admin
+      .from("booking_add_ons")
+      .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
+      .eq("purchase_id", purchase.purchase_id)
+      .eq("status", "pending");
+    return {
+      code: "unknown",
+      error: "We couldn't reach our payment provider. Nothing was charged.",
+    };
+  }
+  if (!url)
+    return { code: "unknown", error: "We couldn't open the payment page. Nothing was charged." };
   redirect(url as Route);
 }

@@ -14,6 +14,21 @@ const DEFAULT_PREFS: Omit<NotificationPrefs, "user_id" | "updated_at"> = {
   quiet_hours_end: null,
 };
 
+export type ProfilePatch = Partial<
+  Pick<
+    Profile,
+    | "display_name"
+    | "bio"
+    | "home_country"
+    | "interests"
+    | "travel_style"
+    | "languages"
+    | "show_home_country"
+    | "show_bio"
+    | "show_interests"
+  >
+>;
+
 export const profileService = {
   async getProfile(userId: string): Promise<Profile | null> {
     const { data, error } = await supabase
@@ -25,12 +40,7 @@ export const profileService = {
     return data;
   },
 
-  async updateProfile(
-    userId: string,
-    patch: Partial<
-      Pick<Profile, "display_name" | "bio" | "home_country" | "show_home_country" | "show_bio">
-    >,
-  ): Promise<void> {
+  async updateProfile(userId: string, patch: ProfilePatch): Promise<void> {
     const { error } = await supabase.from("profiles").update(patch).eq("id", userId);
     if (error) throw error;
   },
@@ -53,5 +63,17 @@ export const profileService = {
       .from("notification_preferences")
       .upsert({ user_id: userId, ...patch }, { onConflict: "user_id" });
     if (error) throw error;
+  },
+
+  /** Your GL-XXXXXX code (created with the profile) and earned credit in the given currency. */
+  async referral(
+    userId: string,
+    currency = "USD",
+  ): Promise<{ code: string | null; credit: number }> {
+    const [{ data: code }, { data: credit }] = await Promise.all([
+      supabase.from("referral_codes").select("code").eq("user_id", userId).maybeSingle(),
+      supabase.rpc("account_credit_balance", { p_user_id: userId, p_currency: currency }),
+    ]);
+    return { code: code?.code ?? null, credit: Number(credit ?? 0) };
   },
 };

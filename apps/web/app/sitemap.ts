@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { listUpcomingMeetups } from "@/lib/data/community";
 import { listDestinationSlugs } from "@/lib/data/destinations";
 import { listTourSlugs, listUpcomingDepartureRefs } from "@/lib/data/tours";
 import { siteUrl } from "@/lib/seo";
@@ -6,10 +7,11 @@ import { siteUrl } from "@/lib/seo";
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [tours, destinations, departures] = await Promise.all([
+  const [tours, destinations, departures, meetups] = await Promise.all([
     listTourSlugs(),
     listDestinationSlugs(),
     listUpcomingDepartureRefs(),
+    listUpcomingMeetups(),
   ]);
   const now = new Date();
 
@@ -18,6 +20,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: siteUrl("/tours"), lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: siteUrl("/destinations"), lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: siteUrl("/how-it-works"), lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+    { url: siteUrl("/host"), lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+    { url: siteUrl("/meetups"), lastModified: now, changeFrequency: "weekly", priority: 0.5 },
+    ...meetups.map((m) => ({
+      url: siteUrl(`/meetups/${m.id}`),
+      lastModified: new Date(m.updated_at),
+      changeFrequency: "weekly" as const,
+      priority: 0.4,
+    })),
     ...tours.map((slug) => ({
       url: siteUrl(`/tours/${slug}`),
       lastModified: now,

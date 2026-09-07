@@ -1,10 +1,12 @@
 import { useLocalSearchParams } from "expo-router";
 import { View } from "react-native";
 import { formatDate } from "@guideless/utils";
+import { AddOnCard } from "@/components/add-on-card";
 import { ItineraryItemRow } from "@/components/itinerary-item";
 import { SyncBadge } from "@/components/sync-badge";
 import { EmptyState, Eyebrow, H1, H2, Loading, Muted, Screen } from "@/components/ui";
 import { Spacing } from "@/constants/theme";
+import { useTripAddOns } from "@/hooks/use-add-ons";
 import { useTrip } from "@/hooks/use-trip";
 import { currentDay } from "@/lib/trips/next-up";
 
@@ -12,6 +14,8 @@ import { currentDay } from "@/lib/trips/next-up";
 export default function ItineraryScreen() {
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
   const { detail, isPending, offline, syncedAt } = useTrip(tripId ?? null);
+  const { addOns, bookingId } = useTripAddOns(detail);
+  const todayISO = new Date().toISOString().slice(0, 10);
 
   if (isPending && !detail) {
     return (
@@ -59,6 +63,11 @@ export default function ItineraryScreen() {
           ) : (
             day.items.map((item) => <ItineraryItemRow key={item.id} item={item} />)
           )}
+          {addOns
+            .filter((a) => a.date === day.date)
+            .map((a) => (
+              <AddOnCard key={a.id} addOn={a} bookingId={bookingId} todayISO={todayISO} />
+            ))}
         </View>
       ))}
     </Screen>

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, BedDouble, Check, Users } from "lucide-react";
 import { brand } from "@guideless/config";
 import { buttonVariants } from "@/components/ui/button";
 import { JsonLd } from "@/components/site/json-ld";
@@ -69,6 +69,86 @@ export default function HowItWorksPage() {
             </li>
           ))}
         </ol>
+
+        <div className="mt-20 grid gap-12 lg:grid-cols-2">
+          <div id="pricing" className="scroll-mt-24">
+            <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              Pricing
+            </p>
+            <h2 className="mt-3 text-3xl font-bold md:text-4xl">Pay only for what you do.</h2>
+            <p className="mt-3 text-muted-foreground">
+              Guided tours bundle everything and charge for the guide. We split it the other way: a
+              base trip, then a short list of optional add-ons you choose at booking or later, even
+              mid-trip.
+            </p>
+            <ul className="mt-6 space-y-3 text-sm">
+              {[
+                "The base trip: hotels, trains between cities, the welcome drinks and your Guide in the app.",
+                "Add-ons are optional and priced one by one: a boat day, a wine afternoon, race tickets, an extra night. You see how many of your group are in before you decide.",
+                "Your own room is the default. Two travelers can share one room and each pay less. Never more than two.",
+                "Reserve with a deposit; the balance is due before departure. Add-ons are paid in full when you choose them.",
+                "Cancellation tiers are published on every departure page before you book.",
+              ].map((t) => (
+                <li key={t} className="flex gap-3">
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden /> {t}
+                </li>
+              ))}
+            </ul>
+            <Link href="/tours" className={cn(buttonVariants({ variant: "link" }), "mt-4 px-0")}>
+              See a departure&rsquo;s full price breakdown{" "}
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+          </div>
+          <div id="solo" className="scroll-mt-24">
+            <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              Travelling solo
+            </p>
+            <h2 className="mt-3 text-3xl font-bold md:text-4xl">Come alone. Leave with a group.</h2>
+            <p className="mt-3 text-muted-foreground">
+              Most of our travelers book alone. The trip is built so that never feels like a
+              compromise.
+            </p>
+            <ul className="mt-6 space-y-4 text-sm">
+              <li className="flex gap-3">
+                <BedDouble className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden />
+                <span>
+                  <span className="font-medium text-foreground">No single supplement games.</span>{" "}
+                  Your own room is the price on the page. Sharing is a choice, not a default.
+                </span>
+              </li>
+              <li className="flex gap-3">
+                <Users className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden />
+                <span>
+                  <span className="font-medium text-foreground">
+                    See who&rsquo;s going before you book.
+                  </span>{" "}
+                  Every departure shows how many are booked, how many are solo, how many countries.
+                  Numbers, never names.
+                </span>
+              </li>
+              <li className="flex gap-3">
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden />
+                <span>
+                  <span className="font-medium text-foreground">Welcome drinks on night one.</span>{" "}
+                  The first round is on us. You will know faces by breakfast.
+                </span>
+              </li>
+              <li className="flex gap-3">
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden />
+                <span>
+                  <span className="font-medium text-foreground">
+                    Your Group opens 30 to 45 days out.
+                  </span>{" "}
+                  Chat, the roster and Live Moments switch on together, so nobody is alone in an
+                  empty room.
+                </span>
+              </li>
+            </ul>
+            <Link href="/meetups" className={cn(buttonVariants({ variant: "link" }), "mt-4 px-0")}>
+              Meet travelers at a city evening first <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+          </div>
+        </div>
 
         <div className="mt-16 grid gap-6 rounded-2xl bg-ink p-10 text-cloud md:grid-cols-[1fr_auto] md:items-center">
           <div>

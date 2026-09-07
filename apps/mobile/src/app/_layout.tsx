@@ -134,6 +134,8 @@ function RootLayout() {
                   name="moments/new"
                   options={{ title: "Suggest a moment", presentation: "modal" }}
                 />
+                <Stack.Screen name="documents/index" options={{ title: "Documents" }} />
+                <Stack.Screen name="notifications/index" options={{ title: "Inbox" }} />
               </Stack>
             </AuthGate>
           </ThemeProvider>

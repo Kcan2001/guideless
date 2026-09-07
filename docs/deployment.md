@@ -35,6 +35,7 @@ Observability variables (all optional; the features are no-ops when unset):
 | `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT`   | web (CI/Vercel) | Source-map upload at build time; skipped when the token is absent |
 | `EXPO_PUBLIC_SENTRY_DSN`                              | mobile          | Enables `@sentry/react-native` (wraps the root layout)            |
 | `NEXT_PUBLIC_POSTHOG_KEY` / `EXPO_PUBLIC_POSTHOG_KEY` | web / mobile    | Product analytics (see docs/api.md, Analytics events)             |
+| `EXPO_PUBLIC_SITE_URL`                                | mobile          | Web origin the app opens for add-on purchases and the account     |
 
 Secrets live in Vercel project settings, Supabase project secrets (`supabase secrets set`) and
 EAS secrets. Never in git.

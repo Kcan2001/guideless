@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 export const CHECKOUT_STEPS = [
   "Departure",
   "Travelers",
+  "Rooms & stay",
+  "Add-ons",
   "Preferences",
   "Account",
   "Terms",

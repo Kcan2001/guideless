@@ -55,22 +55,45 @@ Supabase Realtime (Postgres changes / broadcast) for `messages`, `live_moments`,
 `trip_itinerary_items`, `notifications`. Subscribers receive only rows RLS allows. Chat presence
 uses Realtime presence channels keyed by room.
 
-## Checkout (Milestone 4, implemented)
+## Checkout (Milestones 4 and 9, implemented)
 
 ```
 /checkout/[departureId]  (client wizard, draft in sessionStorage)
-  travelers → preferences → account (inline LoginForm, next=?step=4) → terms → review & pay
-       │
+  travelers → rooms & stay → add-ons → preferences → account (LoginForm, next=?step=6) → terms → review & pay
+       │                                   ▲
+       │   live quote: browser rpc quote_booking(p_room_indexes, p_stay_option_id, p_add_ons, p_code,
+       │   p_payment_option, p_apply_credit) debounced 300 ms (apps/web/lib/quote-client.ts). The
+       │   sidebar renders the lines the database returns; the client never computes money.
        ▼ startCheckout() Server Action  (apps/web/lib/bookings/actions.ts)
-  1. Zod: createBookingSchema            4. stripe.checkout.sessions.create (amount_due_now,
-  2. refuse if Stripe not configured        metadata.booking_id, expires_at = hold)
-  3. rpc create_booking(...)  ──────────► 5. service role: bookings.stripe_checkout_session_id
-     (security definer; pending_payment    6. redirect → Stripe
-      + 30-min hold; capacity trigger)
-                                          on Stripe error: hold released immediately (→ draft)
+  1. Zod: createBookingSchema (travelers,  4. stripe.checkout.sessions.create (amount_due_now,
+     roomIndexes, stayOptionId, addOns, code)  metadata.booking_id, expires_at = hold)
+  2. refuse if Stripe not configured        5. service role: bookings.stripe_checkout_session_id
+  3. rpc create_booking(… p_stay_option_id, 6. redirect → Stripe
+     p_add_ons, p_code) — re-quotes inside   on Stripe error: hold released immediately (→ draft)
+     the transaction, stores line items,
+     booking_add_ons (pending, same hold)
 /checkout/[departureId]/confirmation?booking=…   reads via RLS; shows "processing" until the
                                                   webhook lands; fires GA4 purchase when confirmed
 ```
+
+Pricing rules live in migration 031 (`quote_booking`): own room by default and a per-traveler
+shared-room discount for pairs (two per room max), a stay-tier delta per traveler, add-ons paid in
+full today and never part of the deposit, one coupon **or** referral code (GL-XXXXXX) off the base
+trip, and a signed-in customer's account credit applied automatically. Problems come back as
+`problems[]` codes (`room_capacity`, `stay_option_full`, `add_on_sold_out`, `add_on_closed`,
+`tier_conflict`, `code_invalid`, `code_own_referral`, …) which the UI maps to plain copy
+(`apps/web/lib/bookings/add-on-selection.ts`).
+
+**Add-ons after booking** (account page → `/account/bookings/[bookingId]/add-ons`, also linked
+from the app with `?add=<addOnId>`; allowed until each add-on's sales window closes, even
+mid-trip): `startAddOnPurchase()` → rpc `start_add_on_purchase(p_booking_id, p_add_ons)` (prices via
+`quote_booking` on the booking's own room layout, no codes or credit; rows pending with a 30-minute
+hold) → Stripe Checkout with `metadata: { booking_id, add_on_purchase_id, payment_option: 'add_on' }`
+→ webhook `checkout.session.completed` calls `confirm_add_on_purchase(purchase_id, amount_total,
+payment_intent, session_id)` (service role; idempotent on the payment intent; records a payment of
+kind `add_on`, confirms the rows, writes line items, raises the booking totals). `checkout.session.expired`
+on such a session cancels the pending rows; the 5-minute cron `release_expired_add_on_holds()` is
+the backstop.
 
 Auth: `/login` (magic link default, password, sign-up, Google), `/auth/callback` exchanges the
 code, `signOut` Server Action. `proxy.ts` refreshes sessions and gates /account, /trips, /admin.

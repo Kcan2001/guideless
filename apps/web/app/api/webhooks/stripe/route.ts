@@ -125,6 +125,7 @@ async function loadBooking(
 
 async function handleCheckoutPaid(admin: Admin, session: Stripe.Checkout.Session) {
   if (session.payment_status !== "paid") return "skipped";
+  if (session.metadata?.add_on_purchase_id) return handleAddOnPurchasePaid(admin, session);
   const booking = await loadBooking(
     admin,
     session.metadata?.booking_id ?? session.client_reference_id,
@@ -187,7 +188,41 @@ async function handleCheckoutPaid(admin: Admin, session: Stripe.Checkout.Session
   return "processed";
 }
 
+/**
+ * Add-ons bought after the booking (account page or app). `confirm_add_on_purchase` is atomic and
+ * idempotent on the payment intent: it records the payment, confirms the rows, writes line items
+ * and raises the booking totals in one transaction.
+ */
+async function handleAddOnPurchasePaid(admin: Admin, session: Stripe.Checkout.Session) {
+  const purchaseId = session.metadata?.add_on_purchase_id;
+  const paymentIntentId =
+    typeof session.payment_intent === "string"
+      ? session.payment_intent
+      : session.payment_intent?.id;
+  const amount = session.amount_total ?? 0;
+  if (!purchaseId || !paymentIntentId || amount <= 0)
+    throw new Error(`add-on session ${session.id} is missing purchase, intent or amount`);
+  const { data, error } = await admin.rpc("confirm_add_on_purchase", {
+    p_purchase_id: purchaseId,
+    p_amount: amount,
+    p_payment_intent_id: paymentIntentId,
+    p_session_id: session.id,
+  });
+  if (error) throw error;
+  return data ? "processed" : "skipped";
+}
+
 async function handleCheckoutAbandoned(admin: Admin, session: Stripe.Checkout.Session) {
+  if (session.metadata?.add_on_purchase_id) {
+    // Release the add-on hold now instead of waiting for the 5-minute cron.
+    const { error } = await admin
+      .from("booking_add_ons")
+      .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
+      .eq("purchase_id", session.metadata.add_on_purchase_id)
+      .eq("status", "pending");
+    if (error) throw error;
+    return "processed";
+  }
   const booking = await loadBooking(
     admin,
     session.metadata?.booking_id ?? session.client_reference_id,

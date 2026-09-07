@@ -628,3 +628,158 @@ export async function listTravelers(q?: string) {
       .map((b) => b.bookings?.status ?? "draft"),
   }));
 }
+
+// ── Stay options, add-ons, manifests, rooms (roadmap M9–M10) ──────────────────
+
+export async function listDepartureExtrasAdmin(departureId: string) {
+  const sb = await createClient();
+  const [
+    { data: stays },
+    { data: addOns },
+    { data: availability },
+    { data: headcounts },
+    { data: destinations },
+  ] = await Promise.all([
+    sb.from("departure_stay_options").select("*").eq("departure_id", departureId).order("position"),
+    sb.from("departure_add_ons").select("*").eq("departure_id", departureId).order("position"),
+    sb.from("add_on_availability").select("*"),
+    sb.from("add_on_headcounts").select("*"),
+    sb.from("destinations").select("id, name").order("name"),
+  ]);
+  const availById = new Map((availability ?? []).map((a) => [a.add_on_id, a]));
+  const goingById = new Map((headcounts ?? []).map((h) => [h.add_on_id, h.going ?? 0]));
+  const stayTaken = new Map<string, number>();
+  if ((stays ?? []).length) {
+    const { data: taken } = await sb
+      .from("bookings")
+      .select("stay_option_id, status, booking_travelers(traveler_id)")
+      .eq("departure_id", departureId)
+      .in("status", ["confirmed", "pending_payment"]);
+    for (const b of taken ?? []) {
+      if (!b.stay_option_id) continue;
+      stayTaken.set(
+        b.stay_option_id,
+        (stayTaken.get(b.stay_option_id) ?? 0) + (b.booking_travelers?.length ?? 0),
+      );
+    }
+  }
+  return {
+    stays: (stays ?? []).map((st) => ({ ...st, taken: stayTaken.get(st.id) ?? 0 })),
+    addOns: (addOns ?? []).map((a) => ({
+      ...a,
+      confirmed: availById.get(a.id)?.confirmed ?? 0,
+      held: availById.get(a.id)?.held ?? 0,
+      going: goingById.get(a.id) ?? 0,
+    })),
+    destinations: destinations ?? [],
+  };
+}
+
+export interface ManifestRow {
+  id: string;
+  status: string;
+  quantity: number;
+  total_amount: number;
+  currency: string;
+  created_at: string;
+  confirmation_number: string;
+  booking_id: string;
+  traveler_name: string | null;
+  dietary_requirements: string | null;
+  accessibility_notes: string | null;
+  customer_email: string | null;
+}
+
+/** Who is on an add-on: one row per booking_add_ons row, with the traveler's needs for the supplier. */
+export async function getAddOnManifest(departureId: string, addOnId: string) {
+  const sb = await createClient();
+  const [{ data: addOn }, { data: departure }, { data: rows }] = await Promise.all([
+    sb
+      .from("departure_add_ons")
+      .select("*")
+      .eq("id", addOnId)
+      .eq("departure_id", departureId)
+      .maybeSingle(),
+    sb.from("departures").select("*").eq("id", departureId).maybeSingle(),
+    sb
+      .from("booking_add_ons")
+      .select(
+        "id, status, quantity, total_amount, currency, created_at, booking_id, bookings(confirmation_number, customer_id), traveler_profiles(first_name, last_name, preferred_name, dietary_requirements, accessibility_notes, email)",
+      )
+      .eq("add_on_id", addOnId)
+      .order("created_at"),
+  ]);
+  if (!addOn || !departure) return null;
+  const { data: tour } = await sb
+    .from("tours")
+    .select("name")
+    .eq("id", departure.tour_id)
+    .maybeSingle();
+  const manifest: ManifestRow[] = (rows ?? []).map((r) => {
+    const t = r.traveler_profiles as unknown as {
+      first_name: string;
+      last_name: string;
+      preferred_name: string | null;
+      dietary_requirements: string | null;
+      accessibility_notes: string | null;
+      email: string | null;
+    } | null;
+    const b = r.bookings as unknown as { confirmation_number: string; customer_id: string } | null;
+    return {
+      id: r.id,
+      status: r.status,
+      quantity: r.quantity,
+      total_amount: r.total_amount,
+      currency: r.currency,
+      created_at: r.created_at,
+      confirmation_number: b?.confirmation_number ?? "—",
+      booking_id: r.booking_id,
+      traveler_name: t
+        ? `${t.first_name} ${t.last_name}${t.preferred_name ? ` (${t.preferred_name})` : ""}`
+        : null,
+      dietary_requirements: t?.dietary_requirements ?? null,
+      accessibility_notes: t?.accessibility_notes ?? null,
+      customer_email: t?.email ?? null,
+    };
+  });
+  return { addOn, departure, tourName: tour?.name ?? "", manifest };
+}
+
+/** Room layout for a trip: travelers grouped by booking and room, with the chosen stay option. */
+export async function getTripRooms(tripId: string) {
+  const sb = await createClient();
+  const { data: trip } = await sb
+    .from("trips")
+    .select("departure_id")
+    .eq("id", tripId)
+    .maybeSingle();
+  if (!trip) return [];
+  const { data: bookings } = await sb
+    .from("bookings")
+    .select(
+      "id, confirmation_number, status, stay_option_id, departure_stay_options(name), booking_travelers(room_index, is_lead, traveler_profiles(first_name, last_name, room_preference))",
+    )
+    .eq("departure_id", trip.departure_id)
+    .eq("status", "confirmed")
+    .order("created_at");
+  return (bookings ?? []).map((b) => {
+    const rooms = new Map<number, string[]>();
+    for (const bt of b.booking_travelers ?? []) {
+      const tp = bt.traveler_profiles as unknown as {
+        first_name: string;
+        last_name: string;
+      } | null;
+      const name = tp ? `${tp.first_name} ${tp.last_name}` : "Traveler";
+      rooms.set(bt.room_index, [...(rooms.get(bt.room_index) ?? []), name]);
+    }
+    const stay = b.departure_stay_options as unknown as { name: string } | null;
+    return {
+      bookingId: b.id,
+      confirmationNumber: b.confirmation_number,
+      stayName: stay?.name ?? null,
+      rooms: [...rooms.entries()]
+        .sort(([a], [c]) => a - c)
+        .map(([index, names]) => ({ index, names })),
+    };
+  });
+}

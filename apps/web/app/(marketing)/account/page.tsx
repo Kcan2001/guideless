@@ -6,6 +6,8 @@ import { emptyStates } from "@guideless/config";
 import { formatDate, formatDateRange, formatMoney } from "@guideless/utils";
 import type { BookingStatus, PaymentStatus } from "@guideless/types";
 import { OnboardingChecklist } from "@/components/account/onboarding-checklist";
+import { ReferralCard } from "@/components/account/referral-card";
+import { getMyReferral, listMyBookingAddOns, type BookingAddOn } from "@/lib/data/add-on-purchases";
 import { signOut } from "@/lib/auth/actions";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -62,14 +64,24 @@ export default async function AccountPage(props: PageProps<"/account">) {
   ] = await Promise.all([supabase.auth.getUser(), props.searchParams]);
   if (!user) redirect("/login?next=/account");
 
-  const [bookings, trips] = await Promise.all([listMyBookings(), listMyTrips()]);
+  const [bookings, trips, referral] = await Promise.all([
+    listMyBookings(),
+    listMyTrips(),
+    getMyReferral(),
+  ]);
   const travelerIds = bookings.flatMap((b) => b.travelers.map((t) => t.id));
-  const [{ data: contacts }, { data: tokens }] = await Promise.all([
+  const [{ data: contacts }, { data: tokens }, bookingAddOns] = await Promise.all([
     travelerIds.length
       ? supabase.from("emergency_contacts").select("traveler_id").in("traveler_id", travelerIds)
       : Promise.resolve({ data: [] as { traveler_id: string }[] }),
     supabase.from("push_tokens").select("id").is("disabled_at", null).limit(1),
+    listMyBookingAddOns(bookings.map((b) => b.booking.id)),
   ]);
+  const addOnsByBooking = new Map<string, BookingAddOn[]>();
+  for (const a of bookingAddOns) {
+    addOnsByBooking.set(a.booking_id, [...(addOnsByBooking.get(a.booking_id) ?? []), a]);
+  }
+  const added = sp.added === "1";
   const contactTravelerIds = new Set((contacts ?? []).map((c) => c.traveler_id));
   const appConnected = (tokens ?? []).length > 0;
   const todayISO = new Date().toISOString().slice(0, 10);
@@ -101,6 +113,12 @@ export default async function AccountPage(props: PageProps<"/account">) {
         </form>
       </div>
 
+      {added && (
+        <p role="status" className="mt-8 rounded-xl border border-aqua bg-aqua/10 p-4 text-sm">
+          Added. Your new add-ons are being confirmed and will show under the booking within a
+          minute. Your group can see who&rsquo;s in.
+        </p>
+      )}
       {paid && (
         <p role="status" className="mt-8 rounded-xl border border-aqua bg-aqua/10 p-4 text-sm">
           Thank you. Your payment for {paid} is being confirmed and will show below within a minute.
@@ -176,9 +194,30 @@ export default async function AccountPage(props: PageProps<"/account">) {
                 </section>
               );
             })}
-          <BookingList title="Upcoming" items={upcoming} stripeReady={isStripeConfigured()} />
+          <BookingList
+            title="Upcoming"
+            items={upcoming}
+            stripeReady={isStripeConfigured()}
+            addOnsByBooking={addOnsByBooking}
+          />
+          <section className="mt-12">
+            <h2 className="text-xl font-semibold">Bring a friend</h2>
+            <div className="mt-4">
+              <ReferralCard
+                code={referral.code}
+                balances={referral.balances}
+                earnedCount={referral.earnedCount}
+                pendingCount={referral.pendingCount}
+              />
+            </div>
+          </section>
           {other.length > 0 && (
-            <BookingList title="Past and cancelled" items={other} stripeReady={false} />
+            <BookingList
+              title="Past and cancelled"
+              items={other}
+              stripeReady={false}
+              addOnsByBooking={addOnsByBooking}
+            />
           )}
         </>
       )}
@@ -190,10 +229,12 @@ function BookingList({
   title,
   items,
   stripeReady,
+  addOnsByBooking,
 }: {
   title: string;
   items: Awaited<ReturnType<typeof listMyBookings>>;
   stripeReady: boolean;
+  addOnsByBooking: Map<string, BookingAddOn[]>;
 }) {
   if (items.length === 0) return null;
   const firstPayable = items.find(
@@ -210,6 +251,7 @@ function BookingList({
           const currency = b.currency as Parameters<typeof formatMoney>[0]["currency"];
           const balance = Math.max(b.total_amount - b.amount_paid, 0);
           const status = STATUS[b.status];
+          const addOns = addOnsByBooking.get(b.id) ?? [];
           return (
             <li key={b.id} className="flex flex-wrap items-center gap-4 p-5">
               <div className="min-w-0 flex-1">
@@ -226,6 +268,33 @@ function BookingList({
                   </span>
                   <span>{b.confirmation_number}</span>
                 </p>
+                {b.status === "confirmed" && (
+                  <div className="mt-3 text-sm">
+                    {addOns.length > 0 && (
+                      <ul className="flex flex-wrap gap-2" aria-label="Add-ons on this booking">
+                        {addOns.map((a) => (
+                          <li key={a.id}>
+                            <Badge variant={a.status === "confirmed" ? "included" : "optional"}>
+                              {a.add_on?.title ?? "Add-on"}
+                              {a.traveler
+                                ? ` · ${a.traveler.preferred_name || a.traveler.first_name}`
+                                : a.quantity > 1
+                                  ? ` × ${a.quantity}`
+                                  : ""}
+                              {a.status === "pending" ? " · confirming" : ""}
+                            </Badge>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <Link
+                      href={`/account/bookings/${b.id}/add-ons`}
+                      className="mt-2 inline-block text-link no-underline hover:underline"
+                    >
+                      {addOns.length > 0 ? "Add more to your trip" : "Add to your trip"} →
+                    </Link>
+                  </div>
+                )}
               </div>
               <div className="text-right text-sm">
                 <Badge variant={status.variant}>{status.label}</Badge>

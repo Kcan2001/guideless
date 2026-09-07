@@ -53,21 +53,70 @@ export const termsAcceptanceSchema = z.object({
 });
 export type TermsAcceptanceInput = z.infer<typeof termsAcceptanceSchema>;
 
-export const createBookingSchema = z.object({
-  departureId: uuidSchema,
-  travelers: z.array(travelerInputSchema).min(1).max(8),
-  emergencyContact: emergencyContactSchema,
-  preferences: bookingPreferencesSchema,
-  terms: termsAcceptanceSchema,
-  couponCode: z
+/** One chosen add-on: per-traveler add-ons name 1-based traveler indexes, per-booking ones a quantity. */
+export const addOnSelectionSchema = z.object({
+  addOnId: uuidSchema,
+  travelerIndexes: z.array(z.number().int().min(1).max(8)).max(8).optional(),
+  quantity: z.number().int().min(1).max(8).optional(),
+});
+export type AddOnSelection = z.infer<typeof addOnSelectionSchema>;
+
+/** Room layout: one 1-based room number per traveler; at most two travelers share a room. */
+export const roomIndexesSchema = z
+  .array(z.number().int().min(1).max(8))
+  .min(1)
+  .max(8)
+  .refine((rooms) => rooms.every((r) => rooms.filter((x) => x === r).length <= 2), {
+    message: "A room holds at most two travelers",
+  });
+
+export const promoCodeInputSchema = z.preprocess(
+  (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
+  z
     .string()
     .trim()
     .toUpperCase()
     .regex(/^[A-Z0-9_-]{3,32}$/)
     .optional(),
+);
+
+export const createBookingSchema = z
+  .object({
+    departureId: uuidSchema,
+    travelers: z.array(travelerInputSchema).min(1).max(8),
+    /** Defaults to one room per traveler when omitted. */
+    roomIndexes: roomIndexesSchema.optional(),
+    stayOptionId: uuidSchema.nullable().optional(),
+    addOns: z.array(addOnSelectionSchema).max(20).default([]),
+    emergencyContact: emergencyContactSchema,
+    preferences: bookingPreferencesSchema,
+    terms: termsAcceptanceSchema,
+    /** Coupon or a friend's referral code (GL-XXXXXX). */
+    code: promoCodeInputSchema,
+    paymentOption: z.enum(["deposit", "full"]).default("deposit"),
+  })
+  .refine((b) => !b.roomIndexes || b.roomIndexes.length === b.travelers.length, {
+    message: "Every traveler needs a room",
+    path: ["roomIndexes"],
+  });
+export type CreateBookingInput = z.infer<typeof createBookingSchema>;
+
+/** Input for the live quote (checkout sidebar) and for add-ons bought after booking. */
+export const quoteRequestSchema = z.object({
+  departureId: uuidSchema,
+  roomIndexes: roomIndexesSchema,
+  stayOptionId: uuidSchema.nullable().optional(),
+  addOns: z.array(addOnSelectionSchema).max(20).default([]),
+  code: promoCodeInputSchema,
   paymentOption: z.enum(["deposit", "full"]).default("deposit"),
 });
-export type CreateBookingInput = z.infer<typeof createBookingSchema>;
+export type QuoteRequest = z.infer<typeof quoteRequestSchema>;
+
+export const addOnPurchaseSchema = z.object({
+  bookingId: uuidSchema,
+  addOns: z.array(addOnSelectionSchema).min(1).max(20),
+});
+export type AddOnPurchaseInput = z.infer<typeof addOnPurchaseSchema>;
 
 /** Cancellation policy tiers, validated when staff edit them in admin. */
 export const cancellationTierSchema = z.object({
