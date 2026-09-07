@@ -106,14 +106,16 @@ Analytics
       `1:45917505904:ios:5a084a921389e87740e7b5`) and **Guideless Android**
       (`com.guidelesstours.app`). `GoogleService-Info.plist` + `google-services.json` are in
       `apps/mobile/` (git-ignored) — `app.config.ts` now includes the Firebase plugins, so the
-      next `eas build` / prebuild ships GA4 in the app. **Still to do:** upload both files as EAS
-      file environment variables so CI builds get them; Expo Go cannot load Firebase (use a dev
-      client).
+      next `eas build` / prebuild ships GA4 in the app. Both files are uploaded as EAS **file**
+      environment variables `GOOGLE_SERVICES_JSON` / `GOOGLE_SERVICE_INFO_PLIST` (development,
+      preview, production; `app.config.ts` reads the path from the variable first). Expo Go cannot
+      load Firebase (use a dev client).
 - [x] PostHog **US cloud** project "Guideless Travel", id `596884` (owner kyleacannon@gmail.com),
       project API key
       `phc_Cod6FWi284wzpmiA2xCDJrBCLPFgjRtPUm6iu8Xuyt6t` (public write-only token, safe in client
       code). Set as `NEXT_PUBLIC_POSTHOG_KEY` / `EXPO_PUBLIC_POSTHOG_KEY` with host
-      `https://us.i.posthog.com` — done in the local env files; add to Vercel + EAS when they exist.
+      `https://us.i.posthog.com` — set in the local env files, in Vercel, and as EAS environment
+      variables (`EXPO_PUBLIC_POSTHOG_KEY` / `EXPO_PUBLIC_POSTHOG_HOST`, all three environments).
 - [x] Google Search Console: domain property **`guidelesstravel.com` verified** (2026-09-06) via a
       TXT record at Squarespace Domains (`@` →
       `google-site-verification=T6AyZ03KwM1YjNV_uE0nJO0rI9H4sbCwMR--55YeMl8`; do not delete it).
@@ -160,12 +162,23 @@ Email
 
 Pinterest
 
-- [ ] Business account for Guideless Travel → developers.pinterest.com → create an app → request
-      **Trial access** (`pins:write`, `boards:read`, `user_accounts:read`) → create a board ("Guideless
-      Travel") → OAuth once to get an access + refresh token → insert into `social_accounts`
-      (`platform = 'pinterest'`, `external_id` = Pinterest user id, `metadata = {"board_id": "…",
-"refresh_token": "…"}`) and set `PINTEREST_APP_ID` / `PINTEREST_APP_SECRET` as function secrets.
-      Standard access (app review) is only needed to publish for accounts other than our own.
+- [x] Business account **@guideless_travel** (2026-09-07; "guidelesstravel" was taken on Pinterest;
+      display name "Guideless Travel", type Service provider, website guidelesstravel.com — claim the
+      website in Settings → Claimed accounts once the site is live).
+- [x] Developer app **Guideless Travel Publisher**, app id `1609269`
+      (developers.pinterest.com/apps/1609269), trial access requested 2026-09-07 with use case
+      "Pin creation & scheduling", personal API access, own Pins/Boards only.
+- [ ] **Waiting on Pinterest:** while trial access is *pending* the app secret and the redirect-URI
+      field are locked. When it is approved: add redirect URIs `http://localhost:8765/callback`
+      (one-time token script) and `https://guidelesstravel.com/api/social/pinterest/callback`,
+      copy the secret into `supabase/.env` (`PINTEREST_APP_SECRET`) and the function secrets
+      (`PINTEREST_APP_ID` / `PINTEREST_APP_SECRET`), run the OAuth flow once with scopes
+      `pins:write boards:read user_accounts:read` to get an access + refresh token, then insert
+      the `social_accounts` row (`platform = .pinterest.`, `external_id` = Pinterest user id,
+      `metadata = {"board_id": "…", "refresh_token": "…"}`).
+- [ ] Trial-access Pins are **visible only to our own account** (Pinterest rule). Request
+      **Standard access** from the app page once a few Pins have been published through the API;
+      until then Pinterest is a staging channel, not a reach channel.
 
 ## 7. Channels and priorities
 

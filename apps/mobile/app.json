@@ -53,6 +53,14 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "firebaseAnalytics": true,
+      "router": {},
+      "eas": {
+        "projectId": "992a1489-97e2-4534-b832-18a51c312df7"
+      }
+    },
+    "owner": "guideless-travel"
   }
 }

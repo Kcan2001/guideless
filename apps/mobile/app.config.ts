@@ -9,8 +9,10 @@ import type { ConfigContext, ExpoConfig } from "expo/config";
  * the next prebuild / EAS build. Without them the app builds exactly as before and
  * src/lib/analytics.ts skips the Firebase sink. See docs/marketing.md.
  */
-const ANDROID_SERVICES = "./google-services.json";
-const IOS_SERVICES = "./GoogleService-Info.plist";
+// On EAS the files arrive as *file* environment variables: the variable holds a path to a temp
+// file, so honour it before falling back to the local copies.
+const ANDROID_SERVICES = process.env.GOOGLE_SERVICES_JSON ?? "./google-services.json";
+const IOS_SERVICES = process.env.GOOGLE_SERVICE_INFO_PLIST ?? "./GoogleService-Info.plist";
 
 export default ({ config }: ConfigContext): ExpoConfig => {
   const hasAndroid = existsSync(resolve(__dirname, ANDROID_SERVICES));

@@ -110,16 +110,21 @@ On a physical device against local Supabase, replace `127.0.0.1` with your machi
 
 `react-native-maps` and `expo-notifications` need a development build; Expo Go is no longer enough.
 `apps/mobile/eas.json` defines `development` (dev client, internal), `preview` (internal, Android
-APK) and `production` profiles with the `EXPO_PUBLIC_*` values as placeholders per profile.
+APK) and `production` profiles. Public config lives in **EAS environment variables** (Expo project
+`guideless`, id `992a1489-97e2-4534-b832-18a51c312df7`, account `@guidelesstravel`), not in
+`eas.json`: `EXPO_PUBLIC_POSTHOG_KEY`, `EXPO_PUBLIC_POSTHOG_HOST` and the two Firebase file
+variables `GOOGLE_SERVICES_JSON` / `GOOGLE_SERVICE_INFO_PLIST` exist in development, preview and
+production (`eas env:list --environment production`). Still to add there: `EXPO_PUBLIC_SUPABASE_URL`,
+`EXPO_PUBLIC_SUPABASE_ANON_KEY` (hosted projects) and `EXPO_PUBLIC_SENTRY_DSN`; `eas.json` must not
+contain empty-string env values (the CLI rejects them).
 
 First internal build, once:
 
 ```bash
 npm i -g eas-cli
 cd apps/mobile
-eas login                                  # Expo account that owns the app
-eas init                                   # writes extra.eas.projectId into app.json (needed for push tokens)
-# fill the env placeholders in eas.json (staging Supabase URL / anon key, site URL, Sentry, PostHog)
+eas login                                  # already done: @guidelesstravel; extra.eas.projectId is committed in app.json
+eas env:list --environment development     # PostHog + Firebase files are there; add Supabase URL/anon key + Sentry DSN with `eas env:create`
 eas build --profile development --platform ios      # or android
 eas build --profile development --platform android
 ```
