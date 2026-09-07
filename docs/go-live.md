@@ -156,14 +156,24 @@ EMAIL_FROM` on each hosted project for `notify-dispatch`.
 Create the web and mobile Sentry projects (DSNs into Vercel / EAS), the PostHog project and the
 GA4 property (docs/marketing.md has the GA4/PostHog steps already done for the marketing work).
 
+**Status 2026-09-07:** Sentry org **guideless-travel** (US region; Kyle's login also belongs to the
+unrelated org "levantr", scheduled for deletion) with projects `guideless-web` (javascript-nextjs)
+and `guideless-mobile` (react-native). DSNs are in `supabase/.env` (`SENTRY_WEB_DSN` /
+`SENTRY_MOBILE_DSN`), in Vercel Production+Preview as `NEXT_PUBLIC_SENTRY_DSN` and in EAS
+(development/preview/production) as `EXPO_PUBLIC_SENTRY_DSN`. Org token "github-actions-sourcemaps"
+(scope org:ci) is `SENTRY_AUTH_TOKEN` in `supabase/.env` and, with `SENTRY_ORG=guideless-travel` /
+`SENTRY_PROJECT=guideless-web`, in Vercel; the same three values still need to go into the GitHub
+`staging` and `production` environments for deploy.yml's source-map upload. PostHog and GA4 were
+done earlier (docs/marketing.md §6).
+
 ### 2.6 Expo / EAS (app)
 
 **Status 2026-09-07:** `eas login` / `eas init` done (Expo account @guidelesstravel, org
 `guideless-travel`, project id `992a1489-97e2-4534-b832-18a51c312df7`). EAS environment variables
 exist for development/preview/production: `EXPO_PUBLIC_POSTHOG_KEY/HOST` and the Firebase file vars
-`GOOGLE_SERVICES_JSON` / `GOOGLE_SERVICE_INFO_PLIST`. Still to add there once the hosted Supabase
-projects exist: `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`, and `EXPO_PUBLIC_SENTRY_DSN`
-when the Sentry project exists.
+`GOOGLE_SERVICES_JSON` / `GOOGLE_SERVICE_INFO_PLIST`, plus (since the hosted projects exist)
+`EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY` (production → guideless-prod, preview and
+development → guideless-staging) and `EXPO_PUBLIC_SENTRY_DSN`. No device build has run yet.
 
 `docs/mobile.md` → "First device build": `eas login`, `eas init`, fill `eas.json` env values with
 the **production** Supabase URL/anon key and `EXPO_PUBLIC_SITE_URL=https://guidelesstravel.com`,
