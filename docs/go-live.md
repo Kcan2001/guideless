@@ -90,6 +90,21 @@ feature/* ──PR──▶ develop ──(auto)──▶ staging   Supabase pro
 4. `vercel link` locally in `apps/web` once to obtain `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID` for
    GitHub secrets. Create a token for `VERCEL_TOKEN`.
 
+**Status 2026-09-07:** done except Supabase/Stripe/Sentry values. Team `guideless` (Pro trial),
+project `guideless-web` (`prj_U5s3QRK70kLY6u7KNI5xoK48Q8aj`, team `team_TMUggdckZ9Vk9SFOwjWecChU`),
+Vercel GitHub app installed for this repo only. Set for Production + Preview:
+`NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_GA_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST`,
+`EMAIL_FROM`, `RESEND_API_KEY`, `RESEND_AUDIENCE_ID`, `RATE_LIMIT_SALT`. Repo secrets
+`VERCEL_TOKEN` (expires 2027-09-07), `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` are in GitHub, so the
+`web` job runs as soon as the `database` job has its Supabase secrets. Builds fail until
+`NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` exist.
+Domains `guidelesstravel.com` and `www.guidelesstravel.com` are added to the project (both
+"Production" for now — set www to a 308 redirect to the apex in the Vercel UI on launch day; the
+edit form rejected it via automation). DNS at Squarespace still points at Squarespace: switch the
+apex A record and the `www` CNAME to Vercel's values (§3) only when the first production deploy is
+green. Vercel env vars RESEND_API_KEY and RATE_LIMIT_SALT were created as "Config" type; flip them
+to "Secret" in the UI if you want them unreadable.
+
 ### 2.3 Stripe
 
 1. Activate the account as **Guideless LLC** (business name, dashboard setting) with the public
@@ -105,6 +120,11 @@ feature/* ──PR──▶ develop ──(auto)──▶ staging   Supabase pro
 
 Add the domain `guidelesstravel.com`; Resend gives DNS records (see §3). Verify, then create the
 API key used by Vercel and the Edge Function.
+
+**Status 2026-09-07:** done. Domain verified (DKIM + SPF CNAMEs + DMARC `p=none` at Squarespace;
+inbound MX intentionally skipped), API key `guideless-web` set in Vercel and the local env files,
+default audience "General" = `RESEND_AUDIENCE_ID`. Remaining: `supabase secrets set RESEND_API_KEY
+EMAIL_FROM` on each hosted project for `notify-dispatch`.
 
 ### 2.5 Sentry, PostHog, GA4
 
