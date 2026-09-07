@@ -68,11 +68,13 @@ jobs:
         run: supabase start -x studio,imgproxy,inbucket,edge-runtime,logflare,vector,supavisor
 
       - name: Lint database
-        # The CLI's --fail-on flag exits non-zero even when the report is empty; assert emptiness ourselves.
+        # The CLI's --fail-on flag exits non-zero even when the report is empty, and the empty report
+        # is printed as either [] or {"results":[]} depending on the version; every real finding
+        # carries a "function" key, so fail on that.
         run: |
           out=$(supabase db lint --level warning)
           echo "$out"
-          [ "$(echo "$out" | tr -d '[:space:]')" = "[]" ] || { echo "database lint reported issues"; exit 1; }
+          if echo "$out" | grep -q '"function"'; then echo "database lint reported issues"; exit 1; fi
 
       - name: Run pgTAP tests (RLS policies, invariants)
         run: supabase test db
@@ -103,7 +105,8 @@ jobs:
         id: supabase
         run: |
           supabase start -x studio,imgproxy,inbucket,edge-runtime,logflare,vector,supavisor
-          supabase status -o env >> "$GITHUB_OUTPUT"
+          # status -o env quotes every value; GITHUB_OUTPUT takes them literally, so strip the quotes.
+          supabase status -o env | sed 's/"//g' >> "$GITHUB_OUTPUT"
 
       - name: Install Playwright browser
         run: pnpm --filter web exec playwright install --with-deps chromium
