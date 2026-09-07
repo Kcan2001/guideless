@@ -116,7 +116,7 @@ export const terms: LegalDocument = {
       id: "law-and-disputes",
       title: "11. Governing law and disputes",
       paragraphs: [
-        "These terms are governed by the laws of [State of formation], United States, without regard to conflict-of-law rules, and any court proceedings take place there unless consumer protection law where you live gives you additional rights, which these terms do not remove.",
+        "These terms are governed by the laws of Delaware, United States, without regard to conflict-of-law rules, and any court proceedings take place there unless consumer protection law where you live gives you additional rights, which these terms do not remove.",
         "If something goes wrong, tell us first. Most issues are resolved by email within a few days, and we would rather fix a trip than argue about one.",
       ],
     },
