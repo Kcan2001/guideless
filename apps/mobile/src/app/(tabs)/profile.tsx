@@ -90,7 +90,7 @@ export default function ProfileScreen() {
             icon="share-outline"
             onPress={() =>
               Share.share({
-                message: `Come on a Guideless trip with me. Use ${referral.data!.code} at guidelesstours.com for 5% off.`,
+                message: `Come on a Guideless trip with me. Use ${referral.data!.code} at guidelesstravel.com for 5% off.`,
               })
             }
           />
@@ -150,13 +150,13 @@ export default function ProfileScreen() {
           icon="receipt-outline"
           title="Bookings, add-ons & payments"
           subtitle="Managed on the website"
-          onPress={() => Linking.openURL("https://guidelesstours.com/account")}
+          onPress={() => Linking.openURL("https://guidelesstravel.com/account")}
         />
         <Row
           icon="document-text-outline"
           title="Terms & privacy"
           subtitle={`Terms version ${brand.termsVersion}`}
-          onPress={() => Linking.openURL("https://guidelesstours.com/how-it-works")}
+          onPress={() => Linking.openURL("https://guidelesstravel.com/how-it-works")}
         />
         <Row
           icon="mail-outline"

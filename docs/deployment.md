@@ -2,6 +2,12 @@
 
 Derived from the master spec §68–69, §113.
 
+## Branches and go-live
+
+`develop` (default) deploys to staging, `production` deploys live; both through
+`.github/workflows/deploy.yml` (database first, then Vercel). The ordered account, secret and DNS
+setup for guidelesstravel.com is in [`docs/go-live.md`](go-live.md).
+
 ## Targets
 
 | Component                                  | Platform       | Trigger                                                                            |
@@ -42,13 +48,13 @@ EAS secrets. Never in git.
 
 Notification delivery (Edge Function secrets, `supabase secrets set …`):
 
-| Secret                         | Purpose                                                                    |
-| ------------------------------ | -------------------------------------------------------------------------- |
-| `NOTIFY_DISPATCH_SECRET`       | Shared secret pg_cron sends as `x-cron-secret`; also stored in Vault       |
-| `RESEND_API_KEY`, `EMAIL_FROM` | Email channel (skipped, and recorded as skipped, when absent)              |
-| `EXPO_ACCESS_TOKEN`            | Optional; Expo push security ("enhanced security" on the Expo project)     |
-| `SITE_URL`                     | Base for links in notification emails (default https://guidelesstours.com) |
-| `NOTIFY_DRY_RUN=1`             | Claims and records `skipped` without calling Expo or Resend                |
+| Secret                         | Purpose                                                                     |
+| ------------------------------ | --------------------------------------------------------------------------- |
+| `NOTIFY_DISPATCH_SECRET`       | Shared secret pg_cron sends as `x-cron-secret`; also stored in Vault        |
+| `RESEND_API_KEY`, `EMAIL_FROM` | Email channel (skipped, and recorded as skipped, when absent)               |
+| `EXPO_ACCESS_TOKEN`            | Optional; Expo push security ("enhanced security" on the Expo project)      |
+| `SITE_URL`                     | Base for links in notification emails (default https://guidelesstravel.com) |
+| `NOTIFY_DRY_RUN=1`             | Claims and records `skipped` without calling Expo or Resend                 |
 
 Vault entries the cron job needs (run once per environment in the SQL editor):
 

@@ -25,7 +25,7 @@ interface SendEmailInput {
  */
 export async function sendEmail(admin: Admin, input: SendEmailInput): Promise<void> {
   const apiKey = getServerEnv().RESEND_API_KEY;
-  const from = getServerEnv().EMAIL_FROM ?? `${brand.name} <hello@guidelesstours.com>`;
+  const from = getServerEnv().EMAIL_FROM ?? `${brand.name} <hello@guidelesstravel.com>`;
 
   const { data: row } = await admin
     .from("email_events")

@@ -20,15 +20,15 @@ const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const CRON_SECRET = Deno.env.get("NOTIFY_DISPATCH_SECRET") ?? "";
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
 const EXPO_ACCESS_TOKEN = Deno.env.get("EXPO_ACCESS_TOKEN") ?? "";
-const EMAIL_FROM = Deno.env.get("EMAIL_FROM") ?? "Guideless Tours <hello@guidelesstours.com>";
-const SITE_URL = (Deno.env.get("SITE_URL") ?? "https://guidelesstours.com").replace(/\/$/, "");
+const EMAIL_FROM = Deno.env.get("EMAIL_FROM") ?? "Guideless Tours <hello@guidelesstravel.com>";
+const SITE_URL = (Deno.env.get("SITE_URL") ?? "https://guidelesstravel.com").replace(/\/$/, "");
 const DRY_RUN = Deno.env.get("NOTIFY_DRY_RUN") === "1";
 const BATCH = 50;
 
 const BRAND = {
   name: "Guideless Tours",
   tagline: "Travel organized. Explore independently.",
-  supportEmail: "hello@guidelesstours.com",
+  supportEmail: "hello@guidelesstravel.com",
 };
 
 type Category = "operational" | "social" | "marketing";

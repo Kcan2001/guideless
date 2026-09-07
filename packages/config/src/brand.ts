@@ -12,7 +12,7 @@ export const brand = {
   taglineSecondary: "Everything planned. Nothing forced.",
   description:
     "Guideless Tours organizes the logistics, connects you with a small group, and gives you the tools to explore on your own. No tour guide. No rigid schedule. Just a better way to travel.",
-  supportEmail: "hello@guidelesstours.com",
+  supportEmail: "hello@guidelesstravel.com",
   /** Bump when terms / cancellation policy / waiver text changes; stored on each booking. */
   termsVersion: "2026-09",
 } as const;

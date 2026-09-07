@@ -59,7 +59,7 @@ Every link we control carries UTMs so GA4 attribution is readable (`utm` in `pac
 | `utm_campaign` | theme or departure, kebab-case                              | `southern-france-2027`        |
 | `utm_content`  | optional creative id                                        | `carousel-nice-day3`          |
 
-Instagram bio link: `https://guidelesstours.com/?utm_source=instagram&utm_medium=bio`.
+Instagram bio link: `https://guidelesstravel.com/?utm_source=instagram&utm_medium=bio`.
 
 ## 5. Instagram pipeline
 
@@ -117,8 +117,8 @@ Analytics
       Still to do once the site is live: submit `/sitemap.xml`, link the property to GA4 (Admin →
       Product links).
 - [ ] **Domain.** The registered domain is `guidelesstravel.com` (Squarespace Domains, Google
-      Cloud DNS). `guidelesstours.com` is not registered. Code, env defaults, GA stream URL,
-      Stripe appInfo, email `from`, EAS site URLs and docs still say `guidelesstours.com` — rename
+      Cloud DNS). `guidelesstravel.com` is not registered. Code, env defaults, GA stream URL,
+      Stripe appInfo, email `from`, EAS site URLs and docs still say `guidelesstravel.com` — rename
       repo-wide (or register the second domain and redirect) before launch.
 - [ ] Google Business Profile for Guideless Tours (reviews + Maps presence).
 
@@ -143,7 +143,7 @@ Instagram / Meta
 
 Email
 
-- [ ] Resend: verify `guidelesstours.com` (SPF, DKIM, DMARC). Create a "Newsletter" audience;
+- [ ] Resend: verify `guidelesstravel.com` (SPF, DKIM, DMARC). Create a "Newsletter" audience;
       the site's opt-in form writes to it and fires `newsletter_signup`.
 
 ## 7. Channels and priorities

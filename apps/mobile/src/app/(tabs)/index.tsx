@@ -82,7 +82,7 @@ export default function TripHomeScreen() {
               <Button
                 title={emptyStates.noTrips.cta}
                 variant="secondary"
-                onPress={() => Linking.openURL("https://guidelesstours.com/tours")}
+                onPress={() => Linking.openURL("https://guidelesstravel.com/tours")}
               />
             }
           />

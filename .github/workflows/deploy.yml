@@ -1,0 +1,162 @@
+name: Deploy
+
+# Branch model (docs/go-live.md):
+#   develop     → staging: migrations + functions to the staging Supabase project, Vercel preview
+#   production  → live:    migrations + functions to the production Supabase project, Vercel production
+# Order matters: the database moves first, then the web build that expects the new schema.
+# Every step that needs an account is skipped (not failed) until its secrets exist, so the
+# pipeline can be adopted one service at a time.
+
+on:
+  push:
+    branches: [develop, production]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  TURBO_TELEMETRY_DISABLED: 1
+  NEXT_TELEMETRY_DISABLED: 1
+
+jobs:
+  target:
+    name: Resolve target
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.pick.outputs.environment }}
+      vercel_prod_flag: ${{ steps.pick.outputs.vercel_prod_flag }}
+    steps:
+      - id: pick
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "production" ]; then
+            echo "environment=production" >> "$GITHUB_OUTPUT"
+            echo "vercel_prod_flag=--prod" >> "$GITHUB_OUTPUT"
+          else
+            echo "environment=staging" >> "$GITHUB_OUTPUT"
+            echo "vercel_prod_flag=" >> "$GITHUB_OUTPUT"
+          fi
+
+  verify:
+    name: Lint · Typecheck · Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+
+  database:
+    name: Supabase migrations and functions
+    needs: [target, verify]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: ${{ needs.target.outputs.environment }}
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check secrets
+        id: gate
+        run: |
+          if [ -z "$SUPABASE_ACCESS_TOKEN" ] || [ -z "$SUPABASE_PROJECT_REF" ] || [ -z "$SUPABASE_DB_PASSWORD" ]; then
+            echo "Supabase secrets not configured for ${{ needs.target.outputs.environment }}; skipping database deploy."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: supabase/setup-cli@v1
+        if: steps.gate.outputs.ready == 'true'
+        with:
+          version: latest
+      - name: Link project
+        if: steps.gate.outputs.ready == 'true'
+        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
+      - name: Push migrations (forward-only, dry run first)
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          supabase db push --dry-run
+          supabase db push
+      - name: Deploy Edge Functions
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          supabase functions deploy notify-dispatch --no-verify-jwt
+          supabase functions deploy social-publish --no-verify-jwt
+
+  web:
+    name: Vercel deploy
+    needs: [target, verify, database]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: ${{ needs.target.outputs.environment }}
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+      SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check secrets
+        id: gate
+        run: |
+          if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
+            echo "Vercel secrets not configured for ${{ needs.target.outputs.environment }}; skipping web deploy."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: pnpm/action-setup@v4
+        if: steps.gate.outputs.ready == 'true'
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        if: steps.gate.outputs.ready == 'true'
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - if: steps.gate.outputs.ready == 'true'
+        run: pnpm install --frozen-lockfile
+      - name: Pull Vercel environment
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          pnpm dlx vercel@latest pull --yes \
+            --environment=${{ needs.target.outputs.environment == 'production' && 'production' || 'preview' }} \
+            --token="$VERCEL_TOKEN"
+      - name: Build
+        if: steps.gate.outputs.ready == 'true'
+        run: pnpm dlx vercel@latest build ${{ needs.target.outputs.vercel_prod_flag }} --token="$VERCEL_TOKEN"
+      - name: Deploy
+        if: steps.gate.outputs.ready == 'true'
+        id: deploy
+        run: |
+          url=$(pnpm dlx vercel@latest deploy --prebuilt ${{ needs.target.outputs.vercel_prod_flag }} --token="$VERCEL_TOKEN")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Deployed: $url" >> "$GITHUB_STEP_SUMMARY"
+      - name: Smoke test
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          url="${{ steps.deploy.outputs.url }}"
+          for path in / /tours /sitemap.xml; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" -H "x-vercel-protection-bypass: ${{ secrets.VERCEL_PROTECTION_BYPASS }}" "$url$path")
+            echo "$path → $code"
+            [ "$code" = "200" ] || exit 1
+          done

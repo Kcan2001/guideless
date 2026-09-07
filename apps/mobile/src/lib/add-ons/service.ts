@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase";
 export * from "@/lib/add-ons/helpers";
 
 /** Where the web app lives; add-on purchases happen there. */
-export const SITE_URL = process.env.EXPO_PUBLIC_SITE_URL ?? "https://guidelesstours.com";
+export const SITE_URL = process.env.EXPO_PUBLIC_SITE_URL ?? "https://guidelesstravel.com";
 
 /**
  * Optional add-ons for the trip's departure: the catalog is public (RLS: active rows), head-counts
