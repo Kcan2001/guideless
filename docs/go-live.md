@@ -65,6 +65,19 @@ feature/* ──PR──▶ develop ──(auto)──▶ staging   Supabase pro
 8. Storage buckets `trip-documents` and `support-attachments` exist from migrations; confirm they
    are private.
 
+**Status 2026-09-07:** done. Organization `Guideless Travel` (`sehmvsmschxnbrzgfkiq`), projects
+`guideless-prod` (`xxvmiugkmxgaoosycsei`) and `guideless-staging` (`zvwkwlvtputdrmqvcquj`), both
+us-east-1, Postgres 17. On both: all 38 migrations pushed, `notify-dispatch` and `social-publish`
+deployed, function secrets set (NOTIFY_DISPATCH_SECRET, SOCIAL_PUBLISH_SECRET, SITE_URL,
+EMAIL_FROM, RESEND_API_KEY, META_IG_ACCESS_TOKEN), the four Vault secrets created, the catalog
+seeded (2 tours, 4 departures, 20 add-ons, 3 meetups, photos), auth Site URL + redirect list +
+Resend SMTP configured. Access token, DB passwords and dispatch secrets live in `supabase/.env`
+(git-ignored). Vercel has `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and
+`SUPABASE_SERVICE_ROLE_KEY` for Production (prod project) and Preview (staging project). GitHub
+environments `staging` and `production` carry `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_REF`,
+`SUPABASE_DB_PASSWORD`. Still to do by hand: grant the first admin role (§2.1 step 7) after the
+first sign-up on the live site.
+
 ### 2.2 Vercel (one project: `guideless-web`)
 
 1. Import `Kcan2001/guideless`, **Root Directory** `apps/web`, framework Next.js, Node 24. Because
