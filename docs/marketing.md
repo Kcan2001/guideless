@@ -95,7 +95,7 @@ Analytics
 
 - [x] GA4 account + property **Guideless Tours** (owner kyleacannon@gmail.com, reporting zone
       America/New_York, USD, industry Travel) → web stream "Guideless Tours website"
-      (`https://guidelesstours.com`, stream id 15730411550) → measurement id **`G-YSBNKPW5Z6`**.
+      (`https://guidelesstravel.com`, stream id 15730411550) → measurement id **`G-YSBNKPW5Z6`**.
       Enhanced measurement on. Set `NEXT_PUBLIC_GA_ID=G-YSBNKPW5Z6` in Vercel when the project
       exists (already in the local `.env.local`). Still to do in GA: mark `purchase` as a key
       event once the first events arrive; link Search Console.
@@ -111,10 +111,15 @@ Analytics
       `phc_Cod6FWi284wzpmiA2xCDJrBCLPFgjRtPUm6iu8Xuyt6t` (public write-only token, safe in client
       code). Set as `NEXT_PUBLIC_POSTHOG_KEY` / `EXPO_PUBLIC_POSTHOG_KEY` with host
       `https://us.i.posthog.com` — done in the local env files; add to Vercel + EAS when they exist.
-- [ ] Google Search Console: **domain property `guidelesstours.com` added (unverified)**. To
-      verify, add this DNS TXT record at the registrar, then press Verify in Search Console:
-      `google-site-verification=QLV3tPOm9qB3xJfYC6Tm7HNvciJsPQ3ZbTUYwmqZWhM`. Afterwards submit
-      `/sitemap.xml` and link the property to GA4 (Admin → Product links).
+- [x] Google Search Console: domain property **`guidelesstravel.com` verified** (2026-09-06) via a
+      TXT record at Squarespace Domains (`@` →
+      `google-site-verification=T6AyZ03KwM1YjNV_uE0nJO0rI9H4sbCwMR--55YeMl8`; do not delete it).
+      Still to do once the site is live: submit `/sitemap.xml`, link the property to GA4 (Admin →
+      Product links).
+- [ ] **Domain.** The registered domain is `guidelesstravel.com` (Squarespace Domains, Google
+      Cloud DNS). `guidelesstours.com` is not registered. Code, env defaults, GA stream URL,
+      Stripe appInfo, email `from`, EAS site URLs and docs still say `guidelesstours.com` — rename
+      repo-wide (or register the second domain and redirect) before launch.
 - [ ] Google Business Profile for Guideless Tours (reviews + Maps presence).
 
 Instagram / Meta
