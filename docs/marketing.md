@@ -116,10 +116,11 @@ Analytics
       `google-site-verification=T6AyZ03KwM1YjNV_uE0nJO0rI9H4sbCwMR--55YeMl8`; do not delete it).
       Still to do once the site is live: submit `/sitemap.xml`, link the property to GA4 (Admin →
       Product links).
-- [ ] **Domain.** The registered domain is `guidelesstravel.com` (Squarespace Domains, Google
-      Cloud DNS). `guidelesstravel.com` is not registered. Code, env defaults, GA stream URL,
-      Stripe appInfo, email `from`, EAS site URLs and docs still say `guidelesstravel.com` — rename
-      repo-wide (or register the second domain and redirect) before launch.
+- [x] **Domain.** Canonical domain is **`guidelesstravel.com`** (Squarespace Domains, Google Cloud
+      DNS, matches the Instagram handle); the repo was renamed to it in de489e5. **`guidelesstours.com`**
+      is also owned (Squarespace, registered until 2029-09-06) and forwards with a permanent
+      301, path preserved, to `https://guidelesstravel.com` (Squarespace Domains → Website → Domain
+      Forwarding). Keep both renewals on autopay.
 - [ ] Google Business Profile for Guideless Tours (reviews + Maps presence).
 
 Instagram / Meta
