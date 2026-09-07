@@ -31,7 +31,8 @@ clean:
 - "Essential only" keeps sign-in, checkout and Stripe working; nothing else is set.
 - Mobile: PostHog + Firebase run by default (no cookies), with `setEnabled(false)` wired for a
   future "share usage data" toggle in Settings. Store listings must declare analytics collection.
-- The banner links to `/privacy` — that page is still to be written (Milestone 7 legal pages).
+- The banner links to `/privacy`; `/terms` and `/privacy` are static pages with copy in
+  `apps/web/content/legal/` (entity: Guideless LLC, version = `brand.termsVersion`).
 
 ## 3. Events
 
@@ -147,25 +148,35 @@ Instagram / Meta
 
 Email
 
-- [ ] Resend: verify `guidelesstravel.com` (SPF, DKIM, DMARC). Create a "Newsletter" audience;
-      the site's opt-in form writes to it and fires `newsletter_signup`.
+- [ ] Resend: verify `guidelesstravel.com` (SPF, DKIM, DMARC at Squarespace Domains). Create a
+      "Newsletter" audience and set `RESEND_AUDIENCE_ID`; the footer form (§9) then mirrors every
+      subscriber into it and fires `newsletter_signup`.
+
+Pinterest
+
+- [ ] Business account for Guideless Travel → developers.pinterest.com → create an app → request
+      **Trial access** (`pins:write`, `boards:read`, `user_accounts:read`) → create a board ("Guideless
+      Travel") → OAuth once to get an access + refresh token → insert into `social_accounts`
+      (`platform = 'pinterest'`, `external_id` = Pinterest user id, `metadata = {"board_id": "…",
+  "refresh_token": "…"}`) and set `PINTEREST_APP_ID` / `PINTEREST_APP_SECRET` as function secrets.
+      Standard access (app review) is only needed to publish for accounts other than our own.
 
 ## 7. Channels and priorities
 
-| Channel                 | Why                                                                                                                             | When                                  |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| Instagram               | Visual, travel-native, where the audience already plans trips                                                                   | Now                                   |
-| Pinterest               | Trip planning intent; pins live for months; links straight to tours; same photo pipeline (add `pinterest` to `social_platform`) | Next                                  |
-| Email newsletter        | Owned channel; "new departures" announcements convert best                                                                      | Next (needs form + Resend Broadcasts) |
-| SEO / destination pages | Long-tail "small group trip France" searches; CMS tables exist                                                                  | Continuous                            |
-| Google Business Profile | Trust + reviews + Maps                                                                                                          | Now (free)                            |
-| Reels / TikTok          | Reach, but requires video from trips                                                                                            | When we have footage                  |
-| YouTube                 | "A day with Guideless" long-form; strong SEO                                                                                    | Later                                 |
-| Facebook                | Only as the Page behind Instagram + ads retargeting                                                                             | With paid                             |
-| Paid search / Meta ads  | Branded + high-intent terms once the funnel converts                                                                            | After first departures                |
-| Referral credit         | Small groups sell by word of mouth; travelers invite friends                                                                    | Phase 2 (coupons/referrals in spec)   |
-| Partnerships            | Slow-travel newsletters and bloggers with affiliate codes                                                                       | Phase 2                               |
-| Reviews                 | Google / Trustpilot request from the app after `trip_completed`                                                                 | Phase 2                               |
+| Channel                 | Why                                                                                                                                                            | When                                  |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| Instagram               | Visual, travel-native, where the audience already plans trips                                                                                                  | Now                                   |
+| Pinterest               | Trip planning intent; pins live for months; links straight to tours; same photo pipeline (`platform = pinterest`, "Also post to Pinterest" in `/admin/social`) | Built — needs the account (§6)        |
+| Email newsletter        | Owned channel; "new departures" announcements convert best                                                                                                     | Next (needs form + Resend Broadcasts) |
+| SEO / destination pages | Long-tail "small group trip France" searches; CMS tables exist                                                                                                 | Continuous                            |
+| Google Business Profile | Trust + reviews + Maps                                                                                                                                         | Now (free)                            |
+| Reels / TikTok          | Reach, but requires video from trips                                                                                                                           | When we have footage                  |
+| YouTube                 | "A day with Guideless" long-form; strong SEO                                                                                                                   | Later                                 |
+| Facebook                | Only as the Page behind Instagram + ads retargeting                                                                                                            | With paid                             |
+| Paid search / Meta ads  | Branded + high-intent terms once the funnel converts                                                                                                           | After first departures                |
+| Referral credit         | Small groups sell by word of mouth; travelers invite friends                                                                                                   | Phase 2 (coupons/referrals in spec)   |
+| Partnerships            | Slow-travel newsletters and bloggers with affiliate codes                                                                                                      | Phase 2                               |
+| Reviews                 | Google / Trustpilot request from the app after `trip_completed`                                                                                                | Phase 2                               |
 
 Skip for now: X, Threads, LinkedIn (unless we sell corporate retreats).
 
@@ -176,3 +187,35 @@ Brand voice: calm, specific, never salesy. Show the _day_, not the logo. Termino
 Always: alt text, location context, one soft call to action ("Departures for spring are open").
 Never: traveler faces without consent, passport/booking documents, hotel room numbers, exact
 live locations of an active group (post live moments after the day, not during).
+
+## 9. Newsletter
+
+The list lives in Postgres (`newsletter_subscribers`, migration 036); Resend Broadcasts sends to a
+mirrored audience. Never edit the Resend audience by hand — it is a projection.
+
+```
+footer <NewsletterForm />  ──►  subscribeNewsletterAction (Zod, honeypot, rate limit 5/h per IP)
+                                    └─► rpc subscribe_newsletter(email, source)   [security definer]
+                                    └─► POST resend.com/audiences/{id}/contacts  (optional, soft-fail)
+newsletter email footer  ──►  /newsletter/unsubscribe?token=…  ──►  rpc unsubscribe_newsletter(token)
+                                                                └─► PATCH Resend contact unsubscribed
+```
+
+- **Single opt-in** with clear purpose text ("one email when a new trip or date opens") and a
+  one-click unsubscribe token in every send (also use it as the `List-Unsubscribe` header).
+  Switch to double opt-in later by adding a `confirmed_at` gate in the RPC if EU volume grows.
+- Sources: `footer`, `checkout`, `account`, `admin`, `import`. Signed-in subscribers are linked by
+  `user_id`. `profiles.marketing_opt_in` (migration 003) is legacy; treat this table as the truth
+  and fold the profile flag into it when the account page gets a newsletter toggle.
+- Sending: Resend Broadcasts from the "Newsletter" audience, from
+  `Guideless Travel <hello@guidelesstravel.com>`, plain and short, one departure or theme per email,
+  every link with `utm_source=newsletter&utm_medium=email&utm_campaign=<theme>`.
+- Staff can see and export the list in Supabase (content roles); an admin screen is not needed yet.
+
+## 10. Pinterest
+
+Same queue as Instagram. A post's `platform` decides the adapter in `social-publish`; pins add a
+`title` (≤100) and a destination `link_url` (defaults to the site with Pinterest UTMs). Carousel
+posts become multi-image pins. Tokens last 30 days and are refreshed with the stored
+`refresh_token` and the app credentials. Use "Also post to Pinterest" on any Instagram post to
+create the Pinterest draft with the same media; give it a search-friendly title and a tour link.

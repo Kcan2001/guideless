@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { brand, social } from "@guideless/config";
+import { NewsletterForm } from "@/components/site/newsletter-form";
 
 /** Instagram glyph (lucide dropped brand icons in v1). */
 function InstagramIcon({ className }: { className?: string }) {
@@ -29,6 +30,13 @@ export function SiteFooter() {
           <p className="font-heading text-lg font-bold">{brand.name}</p>
           <p className="mt-3 max-w-sm text-muted-foreground">{brand.tagline}</p>
           <p className="mt-1 max-w-sm text-sm text-muted-foreground">{brand.taglineSecondary}</p>
+          <div className="mt-6 max-w-sm">
+            <p className="text-sm font-semibold">New departures, first.</p>
+            <p className="mb-3 mt-1 text-xs text-muted-foreground">
+              One email when a new trip or date opens. No weekly noise. Unsubscribe in one click.
+            </p>
+            <NewsletterForm source="footer" />
+          </div>
         </div>
         <nav aria-label="Footer — trips" className="text-sm">
           <p className="font-semibold">Trips</p>

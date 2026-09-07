@@ -43,6 +43,8 @@ const serverSchema = z.object({
   STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
   RESEND_API_KEY: z.string().min(1).optional(),
   EMAIL_FROM: z.string().optional(),
+  /** Resend audience that mirrors newsletter_subscribers for Broadcasts (lib/marketing/newsletter.ts). */
+  RESEND_AUDIENCE_ID: z.string().min(1).optional(),
   /** Salts the hashed caller id used by public-form rate limits (lib/rate-limit.ts). */
   RATE_LIMIT_SALT: z.string().min(8).optional(),
 });

@@ -1,7 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { socialPostFormSchema, socialScheduleFormSchema, uuidSchema } from "@guideless/validation";
+import {
+  socialDuplicateFormSchema,
+  socialPostFormSchema,
+  socialScheduleFormSchema,
+  uuidSchema,
+} from "@guideless/validation";
 import { zonedToUtc } from "@guideless/utils";
 import { CONTENT_ROLES, requireStaff } from "@/lib/auth/staff";
 import { dbErrorMessage, flash, parseForm, returnTo } from "@/lib/admin/form";
@@ -45,9 +50,12 @@ export async function updateSocialPostAction(fd: FormData): Promise<void> {
   const { error } = await sb
     .from("social_posts")
     .update({
+      platform: p.platform,
       caption: p.caption,
       hashtags: p.hashtags,
       alt_texts: altTexts,
+      title: p.platform === "pinterest" ? (p.title ?? null) : null,
+      link_url: p.platform === "pinterest" ? (p.linkUrl ?? null) : null,
       tour_id: p.tourId ?? null,
       destination_id: p.destinationId ?? null,
     })
@@ -55,6 +63,46 @@ export async function updateSocialPostAction(fd: FormData): Promise<void> {
   if (error) flash(back, "error", dbErrorMessage(error));
   revalidate(id);
   flash(back, "ok", "Post saved.");
+}
+
+/** "Also post to …": copies media, caption and tags into a new draft for another platform. */
+export async function duplicateSocialPostAction(fd: FormData): Promise<void> {
+  const ctx = await requireStaff(CONTENT_ROLES);
+  const parsed = parseForm(socialDuplicateFormSchema, fd);
+  if (!parsed.ok) flash("/admin/social", "error", parsed.error);
+  const { postId: id, platform } = parsed.data;
+  const sb = await createClient();
+  const { data: src } = await sb.from("social_posts").select("*").eq("id", id).maybeSingle();
+  if (!src) flash("/admin/social", "error", "That post no longer exists.");
+  const { data: copy, error } = await sb
+    .from("social_posts")
+    .insert({
+      platform,
+      kind: src.kind,
+      caption: src.caption,
+      hashtags: src.hashtags,
+      media_paths: src.media_paths,
+      alt_texts: src.alt_texts,
+      source_files: src.source_files,
+      title:
+        platform === "pinterest"
+          ? (src.title ?? src.caption.split("\n")[0]?.slice(0, 100) ?? null)
+          : null,
+      link_url: platform === "pinterest" ? src.link_url : null,
+      tour_id: src.tour_id,
+      destination_id: src.destination_id,
+      status: "draft",
+      created_by: ctx.user.id,
+    })
+    .select("id")
+    .single();
+  if (error) flash(`/admin/social/${id}`, "error", dbErrorMessage(error));
+  revalidatePath("/admin/social");
+  flash(
+    `/admin/social/${copy.id}`,
+    "ok",
+    `Draft created for ${platform}. Review the caption and schedule it.`,
+  );
 }
 
 export async function scheduleSocialPostAction(fd: FormData): Promise<void> {

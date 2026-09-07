@@ -1984,6 +1984,48 @@ export type Database = {
           },
         ];
       };
+      newsletter_subscribers: {
+        Row: {
+          consent_at: string;
+          created_at: string;
+          email: string;
+          id: string;
+          resend_contact_id: string | null;
+          source: string;
+          status: string;
+          unsubscribe_token: string;
+          unsubscribed_at: string | null;
+          updated_at: string;
+          user_id: string | null;
+        };
+        Insert: {
+          consent_at?: string;
+          created_at?: string;
+          email: string;
+          id?: string;
+          resend_contact_id?: string | null;
+          source?: string;
+          status?: string;
+          unsubscribe_token?: string;
+          unsubscribed_at?: string | null;
+          updated_at?: string;
+          user_id?: string | null;
+        };
+        Update: {
+          consent_at?: string;
+          created_at?: string;
+          email?: string;
+          id?: string;
+          resend_contact_id?: string | null;
+          source?: string;
+          status?: string;
+          unsubscribe_token?: string;
+          unsubscribed_at?: string | null;
+          updated_at?: string;
+          user_id?: string | null;
+        };
+        Relationships: [];
+      };
       notification_deliveries: {
         Row: {
           attempted_at: string;
@@ -2577,6 +2619,7 @@ export type Database = {
           external_id: string;
           id: string;
           is_active: boolean;
+          metadata: Json;
           platform: Database["public"]["Enums"]["social_platform"];
           token_expires_at: string | null;
           token_refreshed_at: string | null;
@@ -2589,6 +2632,7 @@ export type Database = {
           external_id: string;
           id?: string;
           is_active?: boolean;
+          metadata?: Json;
           platform: Database["public"]["Enums"]["social_platform"];
           token_expires_at?: string | null;
           token_refreshed_at?: string | null;
@@ -2601,6 +2645,7 @@ export type Database = {
           external_id?: string;
           id?: string;
           is_active?: boolean;
+          metadata?: Json;
           platform?: Database["public"]["Enums"]["social_platform"];
           token_expires_at?: string | null;
           token_refreshed_at?: string | null;
@@ -2624,6 +2669,7 @@ export type Database = {
           id: string;
           kind: Database["public"]["Enums"]["social_media_kind"];
           last_error: string | null;
+          link_url: string | null;
           media_paths: string[];
           permalink: string | null;
           platform: Database["public"]["Enums"]["social_platform"];
@@ -2631,6 +2677,7 @@ export type Database = {
           scheduled_at: string | null;
           source_files: string[];
           status: Database["public"]["Enums"]["social_post_status"];
+          title: string | null;
           tour_id: string | null;
           updated_at: string;
         };
@@ -2648,6 +2695,7 @@ export type Database = {
           id?: string;
           kind?: Database["public"]["Enums"]["social_media_kind"];
           last_error?: string | null;
+          link_url?: string | null;
           media_paths?: string[];
           permalink?: string | null;
           platform?: Database["public"]["Enums"]["social_platform"];
@@ -2655,6 +2703,7 @@ export type Database = {
           scheduled_at?: string | null;
           source_files?: string[];
           status?: Database["public"]["Enums"]["social_post_status"];
+          title?: string | null;
           tour_id?: string | null;
           updated_at?: string;
         };
@@ -2672,6 +2721,7 @@ export type Database = {
           id?: string;
           kind?: Database["public"]["Enums"]["social_media_kind"];
           last_error?: string | null;
+          link_url?: string | null;
           media_paths?: string[];
           permalink?: string | null;
           platform?: Database["public"]["Enums"]["social_platform"];
@@ -2679,6 +2729,7 @@ export type Database = {
           scheduled_at?: string | null;
           source_files?: string[];
           status?: Database["public"]["Enums"]["social_post_status"];
+          title?: string | null;
           tour_id?: string | null;
           updated_at?: string;
         };
@@ -4368,6 +4419,7 @@ export type Database = {
           id: string;
           kind: Database["public"]["Enums"]["social_media_kind"];
           last_error: string | null;
+          link_url: string | null;
           media_paths: string[];
           permalink: string | null;
           platform: Database["public"]["Enums"]["social_platform"];
@@ -4375,6 +4427,7 @@ export type Database = {
           scheduled_at: string | null;
           source_files: string[];
           status: Database["public"]["Enums"]["social_post_status"];
+          title: string | null;
           tour_id: string | null;
           updated_at: string;
         }[];
@@ -4542,6 +4595,10 @@ export type Database = {
           summary: string;
         }[];
       };
+      subscribe_newsletter: {
+        Args: { p_email: string; p_source?: string };
+        Returns: string;
+      };
       tour_version_is_public: { Args: { version_id: string }; Returns: boolean };
       trip_add_on_participants: {
         Args: { p_trip_id: string };
@@ -4552,6 +4609,7 @@ export type Database = {
           user_id: string;
         }[];
       };
+      unsubscribe_newsletter: { Args: { p_token: string }; Returns: boolean };
       withdraw_cancellation_request: {
         Args: { p_request_id: string };
         Returns: boolean;
@@ -4636,7 +4694,7 @@ export type Database = {
       responsibility: "guideless" | "traveler";
       room_preference: "single" | "shared_twin" | "shared_double" | "no_preference";
       social_media_kind: "image" | "carousel";
-      social_platform: "instagram";
+      social_platform: "instagram" | "pinterest";
       social_post_status:
         "draft" | "scheduled" | "publishing" | "published" | "failed" | "cancelled";
       supplier_service_status: "requested" | "pending" | "confirmed" | "cancelled" | "failed";
@@ -4871,7 +4929,7 @@ export const Constants = {
       responsibility: ["guideless", "traveler"],
       room_preference: ["single", "shared_twin", "shared_double", "no_preference"],
       social_media_kind: ["image", "carousel"],
-      social_platform: ["instagram"],
+      social_platform: ["instagram", "pinterest"],
       social_post_status: ["draft", "scheduled", "publishing", "published", "failed", "cancelled"],
       supplier_service_status: ["requested", "pending", "confirmed", "cancelled", "failed"],
       support_category: [
