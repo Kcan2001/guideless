@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
 import { ConsentBanner } from "@/components/analytics/consent-banner";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
+import { siteVerification } from "@/lib/site-verification";
 import "./globals.css";
 
 const inter = Inter({
@@ -40,6 +41,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
   },
   robots: { index: true, follow: true },
+  verification: siteVerification(),
 };
 
 export const viewport: Viewport = {

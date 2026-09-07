@@ -180,3 +180,35 @@ export async function recordManualPaymentAction(fd: FormData): Promise<void> {
   revalidatePath("/admin/bookings");
   flash(back, "ok", "Payment recorded.");
 }
+
+/**
+ * Records the decision on a customer's cancellation request and notifies them. Approving does
+ * not cancel by itself: staff cancel the booking with `cancelBookingAction` (which computes and
+ * issues the refund) and then mark the request approved, so money and the ticket stay separate.
+ */
+export async function resolveCancellationRequestAction(fd: FormData): Promise<void> {
+  await requireStaff(OPS_ROLES);
+  const bookingId = id(fd, "bookingId");
+  const requestId = id(fd, "requestId");
+  const back = `/admin/bookings/${bookingId}#cancellation`;
+  const status = fd.get("status");
+  if (status !== "approved" && status !== "declined")
+    flash(back, "error", "Choose approve or decline.");
+  const notes = String(fd.get("staffNotes") ?? "").trim();
+  if (notes.length > 2000) flash(back, "error", "Notes are limited to 2000 characters.");
+  const sb = await createClient();
+  const { error } = await sb.rpc("resolve_cancellation_request", {
+    p_request_id: requestId,
+    p_status: status,
+    p_notes: notes || undefined,
+  });
+  if (error) flash(back, "error", dbErrorMessage(error));
+  revalidatePath(`/admin/bookings/${bookingId}`);
+  flash(
+    back,
+    "ok",
+    status === "approved"
+      ? "Request approved; the customer has been told."
+      : "Request declined; the customer has been told.",
+  );
+}

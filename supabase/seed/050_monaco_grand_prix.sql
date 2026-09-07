@@ -23,8 +23,8 @@ insert into public.tour_versions
 values
   ('21000000-0000-4000-8000-000000000002', '20000000-0000-4000-8000-000000000002', 1, 'published',
    'Race weekend with a group. Your hotel, your seat, your call.',
-   'Four nights on the Riviera for the Monaco Grand Prix. Stay in Nice for value or in Monaco for the full show. Pick your race view — grandstand, terrace or yacht — and meet fifty people doing the same weekend fifty different ways.',
-   'We book the hotels, the trains between Nice and Monaco, and welcome drinks on Thursday night. Race tickets are add-ons so you pay only for the view you want. Couples meet couples, solos meet solos, and everyone compares notes at the harbour on Sunday night.',
+   'Four nights on the Riviera for the Monaco Grand Prix, 3 to 7 June 2027. Stay in Nice for value or in Monaco for the full show. Pick your race view, grandstand, terrace or yacht, and meet up to fifty people doing the same weekend fifty different ways.',
+   'We book the hotels, your train pass between Nice and Monaco, and welcome drinks on Thursday night. Practice is Friday, qualifying Saturday, the race Sunday at 3 pm. Race viewing is an add-on, so you pay only for the view you want. Couples meet couples, solos meet solos, and everyone compares notes at the harbour on Sunday night.',
    'Nobody else sells the group. Package operators sell luxury; we sell the weekend you actually want, with people to share it.',
    189000, 'USD',
    'Monaco Grand Prix 2027 Group Trip — Nice or Monaco Hotels | Guideless Travel',
@@ -41,10 +41,17 @@ insert into public.tour_version_destinations (tour_version_id, destination_id, p
 on conflict do nothing;
 
 insert into public.tour_included_items (tour_version_id, position, title, description) values
-  ('21000000-0000-4000-8000-000000000002', 1, '4 nights in Nice or Monaco', 'Choose your tier at booking. Breakfast included either way.'),
+  ('21000000-0000-4000-8000-000000000002', 1, '4 nights in Nice or Monaco', 'Choose your tier at booking: a 3-star by the port in Nice or a 5-star in Monte Carlo. Breakfast included either way, your own room unless you choose to share.'),
   ('21000000-0000-4000-8000-000000000002', 2, 'Welcome drinks Thursday', 'First round on us at a harbour bar. Meet the group before the noise starts.'),
-  ('21000000-0000-4000-8000-000000000002', 3, 'Train passes Nice ↔ Monaco', 'Unlimited TER travel Friday to Sunday; the trains beat every road.'),
-  ('21000000-0000-4000-8000-000000000002', 4, 'Your Guide in the app', 'Timings, gates, where the group is, and what to do on Saturday morning.')
+  ('21000000-0000-4000-8000-000000000002', 3, 'Train passes Nice ↔ Monaco', 'Unlimited regional trains Friday to Sunday. Twenty minutes each way; the trains beat every road that weekend.'),
+  ('21000000-0000-4000-8000-000000000002', 4, 'Your Guide, in the app', 'Session timings, which gate, where Your Group is, and what to do with Saturday morning.')
+on conflict do nothing;
+
+insert into public.tour_faqs (tour_version_id, position, question, answer) values
+  ('21000000-0000-4000-8000-000000000002', 1, 'Are race tickets included?', 'No. Race viewing is an add-on so you pay only for the view you want: a grandstand seat, a harbour terrace with lunch, or a berthed yacht on race day. Each covers the sessions listed on it. Pick one per traveler at booking or later in the app while seats last.'),
+  ('21000000-0000-4000-8000-000000000002', 2, 'Nice or Monaco: which should I choose?', 'Nice is the value tier: a good 3-star by the port, twenty minutes by train from the circuit, and where the welcome drinks are. Monaco is the full show: four nights in a 5-star in Monte Carlo, walking distance to the track. One group, two prices; everyone meets at the harbour on Sunday night.'),
+  ('21000000-0000-4000-8000-000000000002', 3, 'I am coming alone. Will I be on my own all weekend?', 'Only if you want to be. You get your own room by default, welcome drinks on Thursday bring everyone together, the app shows who from Your Group chose the same race view, and the harbour debrief on Sunday is open to all. Nothing is mandatory.'),
+  ('21000000-0000-4000-8000-000000000002', 4, 'Do I need a car?', 'No. Your train pass covers Nice to Monaco and back all weekend, and the circuit is a walk from Monaco station. If you land late, a private airport transfer is an optional add-on.')
 on conflict do nothing;
 
 insert into public.tour_excluded_items (tour_version_id, position, title, description) values
@@ -54,11 +61,11 @@ insert into public.tour_excluded_items (tour_version_id, position, title, descri
 on conflict do nothing;
 
 insert into public.tour_days (id, tour_version_id, day_number, destination_id, title, summary) values
-  ('22000000-0000-4000-8000-000000000011', '21000000-0000-4000-8000-000000000002', 1, '10000000-0000-4000-8000-000000000001', 'Arrive on the Riviera', 'Land in Nice, check in wherever you chose to stay, welcome drinks at 8.'),
-  ('22000000-0000-4000-8000-000000000012', '21000000-0000-4000-8000-000000000002', 2, '10000000-0000-4000-8000-000000000004', 'Practice day', 'Free practice in Monaco, or a slow day on the coast. Trains run every 20 minutes.'),
-  ('22000000-0000-4000-8000-000000000013', '21000000-0000-4000-8000-000000000002', 3, '10000000-0000-4000-8000-000000000004', 'Qualifying', 'Saturday in Monaco: qualifying, the harbour, the terraces.'),
-  ('22000000-0000-4000-8000-000000000014', '21000000-0000-4000-8000-000000000002', 4, '10000000-0000-4000-8000-000000000004', 'Race day', 'Your seat, your view. Group debrief at the harbour afterwards, optional as ever.'),
-  ('22000000-0000-4000-8000-000000000015', '21000000-0000-4000-8000-000000000002', 5, '10000000-0000-4000-8000-000000000001', 'Home', 'Check out. Late flights: we hold your bags.')
+  ('22000000-0000-4000-8000-000000000011', '21000000-0000-4000-8000-000000000002', 1, '10000000-0000-4000-8000-000000000001', 'Arrive on the Riviera', 'Land in Nice by five, check in wherever you chose to stay, welcome drinks at 8 pm at the harbour in Nice.'),
+  ('22000000-0000-4000-8000-000000000012', '21000000-0000-4000-8000-000000000002', 2, '10000000-0000-4000-8000-000000000004', 'Practice day', 'Friday: free practice in Monaco if your race view includes it, or a slow day on the coast. Trains run every 20 minutes.'),
+  ('22000000-0000-4000-8000-000000000013', '21000000-0000-4000-8000-000000000002', 3, '10000000-0000-4000-8000-000000000004', 'Qualifying', 'Saturday in Monaco: qualifying at 4 pm, the harbour, the terraces. Leave Nice by 9:30 to beat the queues.'),
+  ('22000000-0000-4000-8000-000000000014', '21000000-0000-4000-8000-000000000002', 4, '10000000-0000-4000-8000-000000000004', 'Race day', 'Sunday, lights out at 3 pm. Your seat, your view. Group debrief at the harbour afterwards, optional as ever.'),
+  ('22000000-0000-4000-8000-000000000015', '21000000-0000-4000-8000-000000000002', 5, '10000000-0000-4000-8000-000000000001', 'Home', 'Check out by 11. Late flight? We hold your bags at the Nice hotel until 6 pm.')
 on conflict (id) do nothing;
 
 insert into public.tour_itinerary_items
@@ -67,12 +74,12 @@ values
   ('22000000-0000-4000-8000-000000000011', 1, 'flight',      'Arrive at Nice Côte d''Azur (NCE)', 'Land by 17:00 to make welcome drinks.', null, '17:00', 'Europe/Paris', 'Nice Côte d''Azur Airport', 'traveler', false, 'public_preview', false),
   ('22000000-0000-4000-8000-000000000011', 2, 'check_in',    'Check in', 'Nice or Monaco, whichever you chose.', '15:00', null, 'Europe/Paris', 'Your hotel', 'guideless', false, 'public_preview', false),
   ('22000000-0000-4000-8000-000000000011', 3, 'live_moment', 'Welcome drinks', 'First round on us at a harbour bar in Nice, 8 pm. Fifty people, one weekend, no agenda.', '20:00', '22:30', 'Europe/Paris', 'Port Lympia, Nice', 'guideless', true, 'public_preview', true),
-  ('22000000-0000-4000-8000-000000000012', 1, 'free_time',   'Free practice or free day', 'Trains to Monaco every 20 minutes with your pass. Or Villefranche and a swim.', null, null, 'Europe/Paris', null, 'traveler', true, 'public_preview', false),
+  ('22000000-0000-4000-8000-000000000012', 1, 'free_time',   'Free practice or free day', 'Trains to Monaco every 20 minutes with your pass; grandstand and terrace add-ons cover Saturday and Sunday, so Friday is yours. Or Villefranche and a swim.', null, null, 'Europe/Paris', null, 'traveler', true, 'public_preview', false),
   ('22000000-0000-4000-8000-000000000013', 1, 'train',       'Nice → Monaco', 'Any TER with your pass. Leave by 09:30 to beat the queues.', '09:30', '10:00', 'Europe/Paris', 'Nice-Ville station', 'guideless', false, 'public_preview', false),
   ('22000000-0000-4000-8000-000000000013', 2, 'activity',    'Qualifying', 'Your race-view add-on covers Saturday too.', '16:00', '17:00', 'Europe/Monaco', 'Circuit de Monaco', 'traveler', true, 'public_preview', false),
   ('22000000-0000-4000-8000-000000000014', 1, 'train',       'Nice → Monaco', 'Race day trains are busy. The group meets at the station café at 09:00 if you want company.', '09:15', '09:45', 'Europe/Paris', 'Nice-Ville station', 'guideless', false, 'public_preview', false),
-  ('22000000-0000-4000-8000-000000000014', 2, 'activity',    'Race', 'Lights out 15:00. Your view depends on your add-on.', '15:00', '17:00', 'Europe/Monaco', 'Circuit de Monaco', 'traveler', true, 'public_preview', false),
-  ('22000000-0000-4000-8000-000000000014', 3, 'live_moment', 'Harbour debrief', 'Whoever wants to, at the harbour after the podium.', '19:30', '22:00', 'Europe/Monaco', 'Port Hercule', 'guideless', true, 'public_preview', false),
+  ('22000000-0000-4000-8000-000000000014', 2, 'activity',    'Race', 'Lights out at 15:00. Your view depends on your add-on: grandstand K, the harbour terrace or the yacht.', '15:00', '17:00', 'Europe/Monaco', 'Circuit de Monaco', 'traveler', true, 'public_preview', false),
+  ('22000000-0000-4000-8000-000000000014', 3, 'live_moment', 'Harbour debrief', 'Whoever wants to, at the harbour after the podium. Your Group, one last time.', '19:30', '22:00', 'Europe/Monaco', 'Port Hercule', 'guideless', true, 'public_preview', false),
   ('22000000-0000-4000-8000-000000000015', 1, 'check_out',   'Check out', 'By 11:00. We hold bags at the Nice hotel until 18:00.', null, '11:00', 'Europe/Paris', 'Your hotel', 'guideless', false, 'public_preview', false)
 on conflict do nothing;
 
@@ -102,13 +109,13 @@ insert into public.departure_add_ons
    location_name, latitude, longitude, bookable_until_days_before, cancellable_until_days_before, tier_group, position, is_featured)
 values
   ('32000000-0000-4000-8000-000000000001', '30000000-0000-4000-8000-000000000004', 'Grandstand K (Sat + Sun)',
-   'Reserved seats over the swimming-pool section for qualifying and the race. The classic view and the loudest one.',
+   'Reserved seats over the swimming-pool section for Saturday qualifying and Sunday''s race. The classic view and the loudest one.',
    'ticket', 129000, 'USD', 'per_traveler', 30, 4, '15:00', '17:00', 'Grandstand K, Circuit de Monaco', 43.7346, 7.4229, 14, 30, 'race_view', 1, true),
   ('32000000-0000-4000-8000-000000000002', '30000000-0000-4000-8000-000000000004', 'Terrace with lunch (Sat + Sun)',
-   'A private terrace above the harbour chicane with lunch and an open bar both days. Sit down when you want to.',
+   'A private terrace above the harbour chicane for Saturday and Sunday, with lunch and an open bar both days. Sit down when you want to.',
    'ticket', 349000, 'USD', 'per_traveler', 20, 4, '11:00', '18:00', 'Harbour terrace, Port Hercule', 43.7355, 7.4266, 14, 30, 'race_view', 2, true),
   ('32000000-0000-4000-8000-000000000003', '30000000-0000-4000-8000-000000000004', 'Yacht in the harbour (Sun)',
-   'Race day on a circuit-berthed yacht: brunch, bar, the cars at eye level. Shared with the group members who choose it.',
+   'Sunday on a circuit-berthed yacht: brunch, bar, the cars at eye level. Shared with the members of Your Group who choose it.',
    'ticket', 595000, 'USD', 'per_traveler', 12, 4, '10:00', '18:00', 'Port Hercule berth', 43.7361, 7.4270, 14, 45, 'race_view', 3, true),
   ('32000000-0000-4000-8000-000000000004', '30000000-0000-4000-8000-000000000004', 'Friday coast boat to Monaco',
    'Skip the train once: a group boat from Nice along the coast into the harbour for practice day, with a swim stop off Cap Ferrat.',

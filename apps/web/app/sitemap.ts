@@ -22,6 +22,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: siteUrl("/how-it-works"), lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: siteUrl("/host"), lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: siteUrl("/meetups"), lastModified: now, changeFrequency: "weekly", priority: 0.5 },
+    { url: siteUrl("/terms"), lastModified: now, changeFrequency: "yearly", priority: 0.3 },
+    { url: siteUrl("/privacy"), lastModified: now, changeFrequency: "yearly", priority: 0.3 },
     ...meetups.map((m) => ({
       url: siteUrl(`/meetups/${m.id}`),
       lastModified: new Date(m.updated_at),

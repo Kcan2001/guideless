@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { hostApplicationSchema, meetupRsvpSchema } from "@guideless/validation";
 import { formToObject } from "@/lib/admin/form";
+import { RATE_LIMITED_MESSAGE, withinRateLimit } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -18,6 +19,9 @@ export async function applyToHost(fd: FormData): Promise<void> {
     redirect(
       `/host?error=${encodeURIComponent(first?.message ?? "Please check the form.")}#apply` as Route,
     );
+  }
+  if (!(await withinRateLimit("host_application", 5, 3600))) {
+    redirect(`/host?error=${encodeURIComponent(RATE_LIMITED_MESSAGE)}#apply` as Route);
   }
   const a = parsed.data;
   const sb = await createClient();
@@ -59,6 +63,7 @@ export async function rsvpMeetup(fd: FormData): Promise<void> {
     data: { user },
   } = await sb.auth.getUser();
   if (!user) redirect(`/login?next=${encodeURIComponent(safeBack)}` as Route);
+  if (!(await withinRateLimit("meetup_rsvp", 30, 3600))) redirect(safeBack as Route);
   const { error } = await sb
     .from("meetup_rsvps")
     .upsert(

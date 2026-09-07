@@ -65,29 +65,58 @@ feature/* ──PR──▶ develop ──(auto)──▶ staging   Supabase pro
 8. Storage buckets `trip-documents` and `support-attachments` exist from migrations; confirm they
    are private.
 
+**Status 2026-09-07:** done. Organization `Guideless Travel` (`sehmvsmschxnbrzgfkiq`), projects
+`guideless-prod` (`xxvmiugkmxgaoosycsei`) and `guideless-staging` (`zvwkwlvtputdrmqvcquj`), both
+us-east-1, Postgres 17. On both: all 38 migrations pushed, `notify-dispatch` and `social-publish`
+deployed, function secrets set (NOTIFY_DISPATCH_SECRET, SOCIAL_PUBLISH_SECRET, SITE_URL,
+EMAIL_FROM, RESEND_API_KEY, META_IG_ACCESS_TOKEN), the four Vault secrets created, the catalog
+seeded (2 tours, 4 departures, 20 add-ons, 3 meetups, photos), auth Site URL + redirect list +
+Resend SMTP configured. Access token, DB passwords and dispatch secrets live in `supabase/.env`
+(git-ignored). Vercel has `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and
+`SUPABASE_SERVICE_ROLE_KEY` for Production (prod project) and Preview (staging project). GitHub
+environments `staging` and `production` carry `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_REF`,
+`SUPABASE_DB_PASSWORD`. Still to do by hand: grant the first admin role (§2.1 step 7) after the
+first sign-up on the live site.
+
 ### 2.2 Vercel (one project: `guideless-web`)
 
 1. Import `Kcan2001/guideless`, **Root Directory** `apps/web`, framework Next.js, Node 24. Because
    `vercel.json` disables Git deployments, deploys come only from GitHub Actions.
 2. Environment variables (Production, and Preview for staging):
 
-| Variable                                                                   | Production value                               |
-| -------------------------------------------------------------------------- | ---------------------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`                                                 | `https://<prod-ref>.supabase.co`               |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY`                                            | prod anon key                                  |
-| `SUPABASE_SERVICE_ROLE_KEY`                                                | prod service role key (server only)            |
-| `NEXT_PUBLIC_SITE_URL`                                                     | `https://guidelesstravel.com`                  |
-| `STRIPE_SECRET_KEY` / `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`                 | live keys (test keys on Preview)               |
-| `STRIPE_WEBHOOK_SECRET`                                                    | from the webhook endpoint below                |
-| `RESEND_API_KEY`, `EMAIL_FROM`                                             | `Guideless Travel <hello@guidelesstravel.com>` |
-| `NEXT_PUBLIC_GA_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` | analytics (docs/marketing.md)                  |
-| `NEXT_PUBLIC_SENTRY_DSN`                                                   | Sentry web project                             |
-| `NEXT_PUBLIC_GOOGLE_MAPS_KEY`                                              | optional                                       |
+| Variable                                                                   | Production value                                               |
+| -------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`                                                 | `https://<prod-ref>.supabase.co`                               |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`                                            | prod anon key                                                  |
+| `SUPABASE_SERVICE_ROLE_KEY`                                                | prod service role key (server only)                            |
+| `NEXT_PUBLIC_SITE_URL`                                                     | `https://guidelesstravel.com`                                  |
+| `STRIPE_SECRET_KEY` / `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`                 | live keys (test keys on Preview)                               |
+| `STRIPE_WEBHOOK_SECRET`                                                    | from the webhook endpoint below                                |
+| `RESEND_API_KEY`, `EMAIL_FROM`                                             | `Guideless Travel <hello@guidelesstravel.com>`                 |
+| `NEXT_PUBLIC_GA_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` | analytics (docs/marketing.md)                                  |
+| `NEXT_PUBLIC_SENTRY_DSN`                                                   | Sentry web project                                             |
+| `NEXT_PUBLIC_GOOGLE_MAPS_KEY`                                              | optional                                                       |
+| `RATE_LIMIT_SALT`                                                          | random 16+ chars; salts hashed IPs for public-form rate limits |
 
 3. Domains: add `guidelesstravel.com` (primary) and `www.guidelesstravel.com` (redirect to the
    apex). Vercel shows the records to add; they are the ones in §3.
 4. `vercel link` locally in `apps/web` once to obtain `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID` for
    GitHub secrets. Create a token for `VERCEL_TOKEN`.
+
+**Status 2026-09-07:** done except Supabase/Stripe/Sentry values. Team `guideless` (Pro trial),
+project `guideless-web` (`prj_U5s3QRK70kLY6u7KNI5xoK48Q8aj`, team `team_TMUggdckZ9Vk9SFOwjWecChU`),
+Vercel GitHub app installed for this repo only. Set for Production + Preview:
+`NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_GA_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST`,
+`EMAIL_FROM`, `RESEND_API_KEY`, `RESEND_AUDIENCE_ID`, `RATE_LIMIT_SALT`. Repo secrets
+`VERCEL_TOKEN` (expires 2027-09-07), `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` are in GitHub, so the
+`web` job runs as soon as the `database` job has its Supabase secrets. Builds fail until
+`NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` exist.
+Domains `guidelesstravel.com` and `www.guidelesstravel.com` are added to the project (both
+"Production" for now — set www to a 308 redirect to the apex in the Vercel UI on launch day; the
+edit form rejected it via automation). DNS at Squarespace still points at Squarespace: switch the
+apex A record and the `www` CNAME to Vercel's values (§3) only when the first production deploy is
+green. Vercel env vars RESEND_API_KEY and RATE_LIMIT_SALT were created as "Config" type; flip them
+to "Secret" in the UI if you want them unreadable.
 
 ### 2.3 Stripe
 
@@ -100,17 +129,51 @@ feature/* ──PR──▶ develop ──(auto)──▶ staging   Supabase pro
    `STRIPE_WEBHOOK_SECRET`. Repeat with test keys for the staging preview URL.
 3. Checkout branding: logo, ink `#0B2025`, aqua `#60E1BB`.
 
+**Status 2026-09-07:** Kyle's Stripe login also owns an unrelated account ("The Reset Club") —
+leave it alone. Guideless has its own **separate** account `acct_1UD60WBhgWBLSqYp` ("Guideless
+Travel", US), still in test mode / not activated. Test publishable + secret key and the webhook
+signing secret are in `supabase/.env` (`STRIPE_TEST_*`) and in Vercel **Production and Preview** as
+`NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` / `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` (test values on
+both for now). Test-mode endpoint `we_1UD63UBhgWBLSqYpP4OQwhqU` →
+`https://guidelesstravel.com/api/webhooks/stripe` with the six events above. **Still manual
+(Kyle):** step 1 — Stripe only exposes business name, public name and statement descriptor inside
+the activation flow (legal entity Guideless LLC, EIN, bank account, representative identity); when
+you activate, create a _live-mode_ endpoint with the same URL/events and replace the three
+Production values with live keys + its signing secret.
+
 ### 2.4 Resend
 
 Add the domain `guidelesstravel.com`; Resend gives DNS records (see §3). Verify, then create the
 API key used by Vercel and the Edge Function.
+
+**Status 2026-09-07:** done. Domain verified (DKIM + SPF CNAMEs + DMARC `p=none` at Squarespace;
+inbound MX intentionally skipped), API key `guideless-web` set in Vercel and the local env files,
+default audience "General" = `RESEND_AUDIENCE_ID`. Remaining: `supabase secrets set RESEND_API_KEY
+EMAIL_FROM` on each hosted project for `notify-dispatch`.
 
 ### 2.5 Sentry, PostHog, GA4
 
 Create the web and mobile Sentry projects (DSNs into Vercel / EAS), the PostHog project and the
 GA4 property (docs/marketing.md has the GA4/PostHog steps already done for the marketing work).
 
+**Status 2026-09-07:** Sentry org **guideless-travel** (US region; Kyle's login also belongs to the
+unrelated org "levantr", scheduled for deletion) with projects `guideless-web` (javascript-nextjs)
+and `guideless-mobile` (react-native). DSNs are in `supabase/.env` (`SENTRY_WEB_DSN` /
+`SENTRY_MOBILE_DSN`), in Vercel Production+Preview as `NEXT_PUBLIC_SENTRY_DSN` and in EAS
+(development/preview/production) as `EXPO_PUBLIC_SENTRY_DSN`. Org token "github-actions-sourcemaps"
+(scope org:ci) is `SENTRY_AUTH_TOKEN` in `supabase/.env` and, with `SENTRY_ORG=guideless-travel` /
+`SENTRY_PROJECT=guideless-web`, in Vercel; the same three values still need to go into the GitHub
+`staging` and `production` environments for deploy.yml's source-map upload. PostHog and GA4 were
+done earlier (docs/marketing.md §6).
+
 ### 2.6 Expo / EAS (app)
+
+**Status 2026-09-07:** `eas login` / `eas init` done (Expo account @guidelesstravel, org
+`guideless-travel`, project id `992a1489-97e2-4534-b832-18a51c312df7`). EAS environment variables
+exist for development/preview/production: `EXPO_PUBLIC_POSTHOG_KEY/HOST` and the Firebase file vars
+`GOOGLE_SERVICES_JSON` / `GOOGLE_SERVICE_INFO_PLIST`, plus (since the hosted projects exist)
+`EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY` (production → guideless-prod, preview and
+development → guideless-staging) and `EXPO_PUBLIC_SENTRY_DSN`. No device build has run yet.
 
 `docs/mobile.md` → "First device build": `eas login`, `eas init`, fill `eas.json` env values with
 the **production** Supabase URL/anon key and `EXPO_PUBLIC_SITE_URL=https://guidelesstravel.com`,
@@ -142,24 +205,41 @@ domain can only point one way.
 Propagation is minutes to an hour. Vercel issues the TLS certificate automatically once the A/CNAME
 resolve. Keep Squarespace as the registrar and DNS host; nothing needs to transfer.
 
+## 3b. Pipeline status (2026-09-07)
+
+`deploy.yml` ran green end to end against staging: verify → migrations and functions on
+`zvwkwlvtputdrmqvcquj` → Vercel preview → smoke test. Preview deployments are behind Vercel's
+deployment protection; the pipeline's smoke test sends the automation bypass secret
+(`VERCEL_PROTECTION_BYPASS` in both GitHub environments and in `supabase/.env`). Production PR:
+github.com/Kcan2001/guideless/pull/1 (develop → production). Three CI fixes were needed on the
+way: the pnpm action's duplicate version pin, a CSS module declaration for the mobile typecheck,
+and the anon key missing from Vercel's environments.
+
 ## 4. First production release, step by step
 
 1. Create the GitHub environments and secrets from §1 (Supabase and Vercel at minimum).
 2. Set `develop` as the default branch and protect `production` (GitHub → Settings).
-3. Merge a PR from `develop` into `production`. Watch **Actions → Deploy**: database pushes 33
+3. Merge a PR from `develop` into `production`. Watch **Actions → Deploy**: database pushes the
    migrations, both Edge Functions deploy, Vercel builds and deploys, smoke test returns 200s.
-4. Add the DNS records (§3) and the domains in Vercel; wait for the certificate.
-5. Sign up on the live site, grant yourself `admin`, create the first tour, version, departure,
-   stay options and add-ons in `/admin`, publish.
-6. Test a real booking with a 100% coupon or a $1 test departure, confirm the webhook marks it
+4. Seed the catalog once (destinations, both tours with departures, stay tiers, add-ons, meetups,
+   photos): `node scripts/seed-catalog.mjs --db-url "<Supabase → Settings → Database → URI>"`.
+   The files are idempotent and contain no users, bookings or payments; `--dry-run` lists them,
+   `--only 020,050` limits the run. Needs `psql` on PATH or the `pg` dev dependency (installed).
+5. Add the DNS records (§3) and the domains in Vercel; wait for the certificate.
+6. Sign up on the live site, grant yourself `admin`, and review the seeded tours in `/admin`
+   (copy, prices, dates, capacity) before publishing anything new.
+7. Test a real booking with a 100% coupon or a $1 test departure, confirm the webhook marks it
    paid, the confirmation email arrives from `hello@guidelesstravel.com`, and the notification
    dispatcher delivers (Vault secrets set).
-7. Switch Stripe to live keys in Vercel when ready to take money.
+8. Switch Stripe to live keys in Vercel when ready to take money.
+9. Set `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` in Vercel, redeploy, verify the property in Search
+   Console and submit `https://guidelesstravel.com/sitemap.xml` (checklist in docs/growth.md).
 
 ## 5. What is intentionally not automated yet
 
-- Mobile builds (`eas build` needs an interactive login the first time; add `EXPO_TOKEN` and an
-  `eas build --non-interactive` job later).
-- Seeding production (tours are authored in admin).
+- Mobile builds in CI: an `EXPO_TOKEN` (personal access token) already exists; adding it as a GitHub
+  secret and an `eas build --non-interactive --profile preview` job to `deploy.yml` is the remaining
+  step.
+- Seeding production beyond the one-time catalog script (later tours are authored in admin).
 - Rollbacks: Vercel keeps every deployment (promote a previous one in the dashboard); database
   migrations are forward-only, so write a new migration to undo.

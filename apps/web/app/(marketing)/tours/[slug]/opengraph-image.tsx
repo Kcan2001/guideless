@@ -3,6 +3,7 @@ import { brand } from "@guideless/config";
 import { formatMoney } from "@guideless/utils";
 import { getTourBySlug } from "@/lib/data/tours";
 import { tourFromPrice } from "@/lib/data/tour-filters";
+import { ogPhotoDataUrl } from "@/lib/og-photo";
 
 export const alt = "Guideless trip";
 export const size = { width: 1200, height: 630 };
@@ -16,6 +17,7 @@ export default async function TourOpenGraphImage({
 }) {
   const { slug } = await params;
   const detail = await getTourBySlug(slug);
+  const photo = await ogPhotoDataUrl(detail?.version.hero_image_url);
   const title = detail?.tour.name ?? brand.name;
   const route = detail?.route.map((r) => r.destination.name).join("  →  ") ?? brand.tagline;
   const price = detail
@@ -50,11 +52,41 @@ export default async function TourOpenGraphImage({
         fontFamily: "Inter, system-ui, sans-serif",
       }}
     >
+      {photo && (
+        // Satori (next/og) renders plain <img>; next/image does not apply here.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={photo}
+          alt=""
+          width={1200}
+          height={630}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: 1200,
+            height: 630,
+            objectFit: "cover",
+          }}
+        />
+      )}
+      {photo && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: 1200,
+            height: 630,
+            background: "linear-gradient(180deg, rgba(11,32,37,0.15) 0%, rgba(11,32,37,0.85) 100%)",
+          }}
+        />
+      )}
       <svg
         width="1200"
         height="630"
         viewBox="0 0 1200 630"
-        style={{ position: "absolute", top: 0, left: 0 }}
+        style={{ position: "absolute", top: 0, left: 0, opacity: photo ? 0 : 1 }}
       >
         <path
           d="M 80 360 C 320 360, 320 200, 560 200 S 800 400, 1120 280"

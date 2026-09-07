@@ -73,9 +73,27 @@ by `anon` (read-only, security definer); the checkout sidebar calls it from the 
   distinct countries, an age range rounded to five years shown only from four travelers up, spots
   left, `groupOpensOn`, `groupOpen`. Never names.
 
+## Cancellations (customer self-service)
+
+- The account page shows, per confirmed booking, today's refund before anyone commits:
+  `refund_percentage_for(policy, days_before)` on what was paid toward the base trip, plus each
+  confirmed add-on refunded in full until its own `cancellable_until_days_before` deadline
+  (`apps/web/lib/bookings/cancellations.ts` mirrors the SQL for the preview).
+- `request_cancellation(booking_id, reason)` (owner only, confirmed bookings, trip not started)
+  opens one `cancellation_requests` row per booking (partial unique index on pending), quotes the
+  tier on that day and writes a `cancellation_requested` notification. Customers can
+  `withdraw_cancellation_request()` while it is pending.
+- Staff resolve requests from `/admin/bookings/[id]`: perform the cancellation with the existing
+  admin action (which computes and issues the refund), then call
+  `resolve_cancellation_request(request_id, 'approved' | 'declined', notes)`, which records the
+  decision and notifies the customer. Wiring that button in admin is a small follow-up.
+- Money never moves from the request itself; the request is a ticket with the quote attached.
+
 ## Tests
 
 `supabase/tests/pricing_and_community.test.sql` (28 tests): quote math for rooms, tiers and
 add-ons, capacity and tier conflicts, referral discount and self-referral refusal, booking
 creation with all of the above, confirmation side effects, head-counts, credit application,
-roster privacy, group opening and RLS on the catalog.
+roster privacy, group opening and RLS on the catalog. `supabase/tests/cancellations.test.sql`
+(14 tests): ownership, status and reason checks, one open request per booking, notifications,
+withdraw and re-request, staff-only resolution, and the rate limiter's fixed window.

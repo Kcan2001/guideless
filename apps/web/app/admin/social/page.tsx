@@ -90,7 +90,7 @@ export default async function AdminSocialPage(props: PageProps<"/admin/social">)
 
       <Section title={`${posts.length} post${posts.length === 1 ? "" : "s"}`}>
         <Table
-          head={["Media", "Caption", "Kind", "Status", "Scheduled", "Published", ""]}
+          head={["Media", "Caption", "Platform", "Status", "Scheduled", "Published", ""]}
           empty={
             <>
               No posts yet. Add photos to <code>guideless_photos/</code> and run{" "}
@@ -128,7 +128,9 @@ export default async function AdminSocialPage(props: PageProps<"/admin/social">)
                 </p>
               )}
             </div>,
-            p.kind,
+            <span key="p" className="whitespace-nowrap">
+              {p.platform} · {p.kind}
+            </span>,
             <Badge key="s" variant={SOCIAL_STATUS_VARIANT[p.status]}>
               {p.status}
             </Badge>,

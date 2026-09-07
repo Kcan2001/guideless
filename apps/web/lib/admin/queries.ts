@@ -558,6 +558,7 @@ export async function getBookingAdmin(id: string) {
     { data: refunds },
     { data: notes },
     { data: preferences },
+    { data: cancellationRequests },
   ] = await Promise.all([
     sb.from("profiles").select("*").eq("id", booking.customer_id).maybeSingle(),
     sb.from("departures").select("*").eq("id", booking.departure_id).maybeSingle(),
@@ -574,6 +575,11 @@ export async function getBookingAdmin(id: string) {
       .eq("booking_id", id)
       .order("created_at", { ascending: false }),
     sb.from("booking_preferences").select("*").eq("booking_id", id).maybeSingle(),
+    sb
+      .from("cancellation_requests")
+      .select("*")
+      .eq("booking_id", id)
+      .order("requested_at", { ascending: false }),
   ]);
   const { data: tour } = departure
     ? await sb.from("tours").select("*").eq("id", departure.tour_id).maybeSingle()
@@ -598,6 +604,7 @@ export async function getBookingAdmin(id: string) {
     items: items ?? [],
     payments: payments ?? [],
     refunds: refunds ?? [],
+    cancellationRequests: cancellationRequests ?? [],
     notes: notes ?? [],
     preferences,
   };
@@ -782,4 +789,231 @@ export async function getTripRooms(tripId: string) {
         .map(([index, names]) => ({ index, names })),
     };
   });
+}
+
+// ── Support inbox ─────────────────────────────────────────────────────────────
+export type SupportThread = Tables<"support_threads">;
+export type SupportMessage = Tables<"support_messages">;
+export type SupportAttachment = Tables<"support_attachments">;
+
+export type SupportFilter = "needs_reply" | "open" | "resolved" | "all";
+
+export interface SupportThreadRow extends SupportThread {
+  customer: Profile | null;
+  tripName: string | null;
+  lastMessage: Pick<SupportMessage, "body" | "created_at" | "is_from_staff"> | null;
+  /** Most recent customer message, for "waiting since". */
+  lastCustomerAt: string | null;
+  assignee: Profile | null;
+}
+
+const NEEDS_REPLY_STATUSES: SupportThread["status"][] = ["open", "waiting_on_staff"];
+
+/**
+ * Staff view of support threads (RLS: is_support_staff). Filters run in SQL; the last message and
+ * the customer's last message are pulled in one extra query and folded per thread.
+ */
+export async function listSupportThreads(opts: {
+  filter?: SupportFilter;
+  priority?: string | null;
+  tripId?: string | null;
+  assignedTo?: string | null;
+}): Promise<SupportThreadRow[]> {
+  const sb = await createClient();
+  let q = sb
+    .from("support_threads")
+    .select("*")
+    .order("last_message_at", { ascending: false })
+    .limit(200);
+  const filter = opts.filter ?? "needs_reply";
+  if (filter === "needs_reply") q = q.in("status", NEEDS_REPLY_STATUSES);
+  else if (filter === "open")
+    q = q.in("status", ["open", "waiting_on_staff", "waiting_on_customer"]);
+  else if (filter === "resolved") q = q.in("status", ["resolved", "closed"]);
+  if (opts.priority) q = q.eq("priority", opts.priority);
+  if (opts.tripId) q = q.eq("trip_id", opts.tripId);
+  if (opts.assignedTo) q = q.eq("assigned_to", opts.assignedTo);
+  const { data: threads, error } = await q;
+  if (error) throw error;
+  if (!threads || threads.length === 0) return [];
+
+  const threadIds = threads.map((t) => t.id);
+  const userIds = [
+    ...new Set(
+      threads.flatMap((t) => [t.customer_id, t.assigned_to]).filter((x): x is string => !!x),
+    ),
+  ];
+  const tripIds = [...new Set(threads.map((t) => t.trip_id).filter((x): x is string => !!x))];
+  const [{ data: messages }, { data: profiles }, { data: trips }] = await Promise.all([
+    sb
+      .from("support_messages")
+      .select("thread_id, body, created_at, is_from_staff, is_internal_note")
+      .in("thread_id", threadIds)
+      .eq("is_internal_note", false)
+      .order("created_at", { ascending: false }),
+    sb.from("profiles").select("*").in("id", userIds),
+    tripIds.length
+      ? sb.from("trips").select("id, name").in("id", tripIds)
+      : Promise.resolve({ data: [] as { id: string; name: string }[] }),
+  ]);
+  const profileById = new Map((profiles ?? []).map((p) => [p.id, p]));
+  const tripById = new Map((trips ?? []).map((t) => [t.id, t.name]));
+  const lastByThread = new Map<string, SupportThreadRow["lastMessage"]>();
+  const lastCustomerByThread = new Map<string, string>();
+  for (const m of messages ?? []) {
+    if (!lastByThread.has(m.thread_id)) {
+      lastByThread.set(m.thread_id, {
+        body: m.body,
+        created_at: m.created_at,
+        is_from_staff: m.is_from_staff,
+      });
+    }
+    if (!m.is_from_staff && !lastCustomerByThread.has(m.thread_id)) {
+      lastCustomerByThread.set(m.thread_id, m.created_at);
+    }
+  }
+  return threads.map((t) => ({
+    ...t,
+    customer: profileById.get(t.customer_id) ?? null,
+    assignee: t.assigned_to ? (profileById.get(t.assigned_to) ?? null) : null,
+    tripName: t.trip_id ? (tripById.get(t.trip_id) ?? null) : null,
+    lastMessage: lastByThread.get(t.id) ?? null,
+    lastCustomerAt: lastCustomerByThread.get(t.id) ?? null,
+  }));
+}
+
+export interface SupportAttachmentWithUrl extends SupportAttachment {
+  url: string | null;
+}
+
+export interface SupportMessageAdmin extends SupportMessage {
+  sender: Profile | null;
+  attachments: SupportAttachmentWithUrl[];
+}
+
+export async function getSupportThreadAdmin(threadId: string) {
+  const sb = await createClient();
+  const { data: thread, error } = await sb
+    .from("support_threads")
+    .select("*")
+    .eq("id", threadId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!thread) return null;
+
+  const [{ data: messages, error: mErr }, { data: trip }, { data: booking }] = await Promise.all([
+    sb.from("support_messages").select("*").eq("thread_id", threadId).order("created_at"),
+    thread.trip_id
+      ? sb
+          .from("trips")
+          .select("id, name, departure_id, timezone")
+          .eq("id", thread.trip_id)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    thread.booking_id
+      ? sb
+          .from("bookings")
+          .select("id, confirmation_number, status, departure_id")
+          .eq("id", thread.booking_id)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
+  if (mErr) throw mErr;
+  const messageIds = (messages ?? []).map((m) => m.id);
+  const senderIds = [
+    ...new Set(
+      [thread.customer_id, thread.assigned_to, ...(messages ?? []).map((m) => m.sender_id)].filter(
+        (x): x is string => !!x,
+      ),
+    ),
+  ];
+  const [{ data: attachments }, { data: profiles }] = await Promise.all([
+    messageIds.length
+      ? sb.from("support_attachments").select("*").in("message_id", messageIds)
+      : Promise.resolve({ data: [] as SupportAttachment[] }),
+    sb.from("profiles").select("*").in("id", senderIds),
+  ]);
+  const profileById = new Map((profiles ?? []).map((p) => [p.id, p]));
+
+  // Short-lived signed URLs; staff read is allowed by the bucket policy.
+  const withUrls: SupportAttachmentWithUrl[] = await Promise.all(
+    (attachments ?? []).map(async (a) => {
+      const { data } = await sb.storage.from(a.bucket).createSignedUrl(a.storage_path, 600);
+      return { ...a, url: data?.signedUrl ?? null };
+    }),
+  );
+  const attachmentsByMessage = new Map<string, SupportAttachmentWithUrl[]>();
+  for (const a of withUrls) {
+    const list = attachmentsByMessage.get(a.message_id) ?? [];
+    list.push(a);
+    attachmentsByMessage.set(a.message_id, list);
+  }
+
+  // Itinerary item named in the context, if any, so staff see where the traveler was.
+  const ctx = (thread.context ?? {}) as {
+    itineraryItemId?: string;
+    latitude?: number;
+    longitude?: number;
+    appVersion?: string;
+  };
+  const { data: contextItem } = ctx.itineraryItemId
+    ? await sb
+        .from("trip_itinerary_items")
+        .select("id, title, type, location_name")
+        .eq("id", ctx.itineraryItemId)
+        .maybeSingle()
+    : { data: null };
+
+  return {
+    thread,
+    customer: profileById.get(thread.customer_id) ?? null,
+    assignee: thread.assigned_to ? (profileById.get(thread.assigned_to) ?? null) : null,
+    trip,
+    booking,
+    context: ctx,
+    contextItem,
+    messages: (messages ?? []).map((m): SupportMessageAdmin => ({
+      ...m,
+      sender: m.sender_id ? (profileById.get(m.sender_id) ?? null) : null,
+      attachments: attachmentsByMessage.get(m.id) ?? [],
+    })),
+  };
+}
+
+// ── Trip documents ────────────────────────────────────────────────────────────
+export type TripDocument = Tables<"trip_documents">;
+
+export interface TripDocumentAdmin extends TripDocument {
+  url: string | null;
+  uploader: Profile | null;
+  forUser: Profile | null;
+}
+
+export async function listTripDocumentsAdmin(tripId: string): Promise<TripDocumentAdmin[]> {
+  const sb = await createClient();
+  const { data: docs, error } = await sb
+    .from("trip_documents")
+    .select("*")
+    .eq("trip_id", tripId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  if (!docs || docs.length === 0) return [];
+  const userIds = [
+    ...new Set(docs.flatMap((d) => [d.uploaded_by, d.for_user_id]).filter((x): x is string => !!x)),
+  ];
+  const { data: profiles } = userIds.length
+    ? await sb.from("profiles").select("*").in("id", userIds)
+    : { data: [] as Profile[] };
+  const profileById = new Map((profiles ?? []).map((p) => [p.id, p]));
+  return Promise.all(
+    docs.map(async (d) => {
+      const { data } = await sb.storage.from(d.bucket).createSignedUrl(d.storage_path, 600);
+      return {
+        ...d,
+        url: data?.signedUrl ?? null,
+        uploader: d.uploaded_by ? (profileById.get(d.uploaded_by) ?? null) : null,
+        forUser: d.for_user_id ? (profileById.get(d.for_user_id) ?? null) : null,
+      };
+    }),
+  );
 }

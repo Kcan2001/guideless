@@ -5,6 +5,7 @@ import { formatDate, formatDateRange, formatInZone } from "@guideless/utils";
 import { Flash } from "@/components/admin/flash";
 import { ItineraryEditor } from "@/components/admin/itinerary-editor";
 import { SubmitButton } from "@/components/admin/submit-button";
+import { TripDocumentUpload } from "@/components/admin/trip-document-upload";
 import { PageHeader, Section, StatusBadge, Table, inputClass } from "@/components/admin/ui";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -16,7 +17,8 @@ import {
   setTripStatusAction,
   updateTripItemAction,
 } from "@/lib/admin/actions/trips";
-import { getTripAdmin, getTripRooms } from "@/lib/admin/queries";
+import { deleteTripDocumentAction } from "@/lib/admin/actions/documents";
+import { getTripAdmin, getTripRooms, listTripDocumentsAdmin } from "@/lib/admin/queries";
 import { OPS_ROLES, requireStaff } from "@/lib/auth/staff";
 import { cn } from "@/lib/utils";
 
@@ -28,7 +30,11 @@ export default async function AdminTripPage(
     props.searchParams,
     requireStaff(),
   ]);
-  const [data, rooms] = await Promise.all([getTripAdmin(tripId), getTripRooms(tripId)]);
+  const [data, rooms, documents] = await Promise.all([
+    getTripAdmin(tripId),
+    getTripRooms(tripId),
+    listTripDocumentsAdmin(tripId),
+  ]);
   if (!data || data.departure.id !== id) notFound();
   const { trip, departure, tour, days, members, notes, destinations, moments } = data;
   const canOps = ctx.can(OPS_ROLES);
@@ -292,6 +298,74 @@ export default async function AdminTripPage(
               ))}
               {moments.length === 0 && (
                 <li className="text-muted-foreground">Nothing planned yet.</li>
+              )}
+            </ul>
+          </Section>
+
+          <Section
+            id="documents"
+            title={`Documents (${documents.length})`}
+            description="Tickets, vouchers and confirmations travelers open from the app. Uploading notifies the people the file is for."
+          >
+            {canOps && (
+              <TripDocumentUpload
+                tripId={trip.id}
+                members={members
+                  .filter((m) => !m.removed_at)
+                  .map((m) => ({
+                    userId: m.user_id,
+                    label: m.profile?.display_name || "Traveler",
+                  }))}
+              />
+            )}
+            <ul className="space-y-2 text-sm">
+              {documents.map((d) => (
+                <li
+                  key={d.id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-cloud p-3"
+                >
+                  <div className="min-w-0">
+                    <p className="font-medium">
+                      {d.url ? (
+                        <a href={d.url} target="_blank" rel="noreferrer">
+                          {d.title}
+                        </a>
+                      ) : (
+                        d.title
+                      )}{" "}
+                      <Badge variant={d.visibility === "staff_only" ? "guideless" : "optional"}>
+                        {d.visibility === "staff_only" ? "Staff only" : d.kind.replace(/_/g, " ")}
+                      </Badge>
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {d.forUser ? `For ${d.forUser.display_name || "one traveler"}` : "Everyone"} ·{" "}
+                      {Math.max(1, Math.round(d.size_bytes / 1024))} KB ·{" "}
+                      {formatDate(d.created_at.slice(0, 10))}
+                      {d.uploader?.display_name ? ` · ${d.uploader.display_name}` : ""}
+                    </p>
+                  </div>
+                  {canOps && (
+                    <form action={deleteTripDocumentAction}>
+                      <input type="hidden" name="documentId" value={d.id} />
+                      <input
+                        type="hidden"
+                        name="returnTo"
+                        value={`/admin/departures/${departure.id}/trips/${trip.id}`}
+                      />
+                      <SubmitButton
+                        size="sm"
+                        variant="ghost"
+                        confirm="Remove this document for everyone? The file is deleted."
+                        pendingText="Removing…"
+                      >
+                        Remove
+                      </SubmitButton>
+                    </form>
+                  )}
+                </li>
+              ))}
+              {documents.length === 0 && (
+                <li className="text-muted-foreground">No documents yet.</li>
               )}
             </ul>
           </Section>

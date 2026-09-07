@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { JsonLd } from "@/components/site/json-ld";
-import { RouteArt } from "@/components/site/route-art";
+import { PhotoBackdrop } from "@/components/site/photo-hero";
 import { listPublishedDestinations } from "@/lib/data/destinations";
 import { breadcrumbJsonLd } from "@/lib/seo";
 
@@ -43,10 +43,13 @@ export default async function DestinationsPage() {
                   className="group flex h-full flex-col overflow-hidden rounded-xl border border-border bg-surface no-underline transition-shadow hover:shadow-lg"
                 >
                   <div className="relative aspect-[3/2] overflow-hidden">
-                    <RouteArt
+                    <PhotoBackdrop
+                      src={d.hero_image_url}
+                      fallbackAlt={`${d.name}, ${d.country_name}`}
                       stops={2 + (i % 3)}
                       tone={i % 2 === 0 ? "ink" : "sand"}
-                      className="transition-transform duration-500 group-hover:scale-[1.03]"
+                      sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                      imgClassName="transition-transform duration-500 group-hover:scale-[1.03]"
                     />
                   </div>
                   <div className="flex flex-1 flex-col p-5">

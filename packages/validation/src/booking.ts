@@ -137,3 +137,34 @@ export const cancellationPolicySchema = z
     { message: "Each tier must have a distinct daysBeforeDeparture" },
   );
 export type CancellationPolicyInput = z.infer<typeof cancellationPolicySchema>;
+
+// ── Account self-service ──────────────────────────────────────────────────────
+const blankToUndefined = (v: unknown) => (typeof v === "string" && v.trim() === "" ? undefined : v);
+
+/** Editable traveler fields on /account; names as on the passport are changed via support. */
+export const travelerUpdateSchema = z.object({
+  preferredName: z.preprocess(blankToUndefined, z.string().trim().max(80).optional()),
+  email: z.preprocess(blankToUndefined, emailSchema.optional()),
+  phone: z.preprocess(blankToUndefined, phoneSchema.optional()),
+  dateOfBirth: isoDateSchema.refine(
+    (d) => new Date(d) < new Date(),
+    "Date of birth must be in the past",
+  ),
+  nationality: countryCodeSchema,
+  dietaryRequirements: z.preprocess(blankToUndefined, z.string().trim().max(500).optional()),
+  accessibilityNotes: z.preprocess(blankToUndefined, z.string().trim().max(500).optional()),
+});
+export type TravelerUpdateInput = z.infer<typeof travelerUpdateSchema>;
+
+export const emergencyContactUpdateSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  relationship: z.string().trim().min(1).max(80),
+  phone: phoneSchema,
+  email: z.preprocess(blankToUndefined, emailSchema.optional()),
+});
+
+export const cancellationRequestSchema = z.object({
+  bookingId: uuidSchema,
+  reason: z.string().trim().min(3, "Tell us briefly why").max(2000),
+});
+export type CancellationRequestInput = z.infer<typeof cancellationRequestSchema>;

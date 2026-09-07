@@ -79,3 +79,27 @@ see RSVPs at `/admin/meetups` (content or ops roles). Seeded: New York, London, 
 
 Brand terms only: Your Trip, Your Route, Your Group, Live Moments, Included, Optional. Calm and
 concrete; every optional thing says it is optional. Never "mandatory", never "tour guide".
+
+## Launch SEO checklist
+
+What is already in the code: canonical URLs and Open Graph tags on every public page, `TouristTrip`,
+`FAQPage`, `BreadcrumbList` and `Organization` JSON-LD on tours, `Event` JSON-LD on event tours
+and meetups, `sitemap.xml` (tours, departures, destinations, host, meetups, legal) and `robots.txt`
+that blocks checkout, account, trips, admin and API. Images and an image sitemap arrive with the
+photo pass.
+
+Do once, in this order, after the first production deploy:
+
+1. **Google Search Console**: add `guidelesstravel.com` as a Domain property (DNS TXT at
+   Squarespace) or as a URL-prefix property using the meta tag: set
+   `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` in Vercel (root layout reads it via
+   `lib/site-verification.ts`), redeploy, verify. Submit `/sitemap.xml`. Request indexing for the
+   home page and both tour pages.
+2. **Bing Webmaster Tools**: import from Search Console, or set `NEXT_PUBLIC_BING_SITE_VERIFICATION`.
+3. **Google Business Profile** for Guideless Travel (Guideless LLC): category "Tour operator" /
+   "Travel agency", website with `?utm_source=google&utm_medium=referral&utm_campaign=gbp`.
+4. **Instagram bio link**: `https://guidelesstravel.com/?utm_source=instagram&utm_medium=bio&utm_campaign=profile`
+   (UTM vocabulary in `packages/config/src/brand.ts`).
+5. **Rich results test** on one tour page and the Monaco event page after deploy; fix any warnings.
+6. Watch Search Console for the first two weeks: coverage errors, Core Web Vitals (the LCP is the
+   hero image once photos land), and the queries that bring people to `/tours`.

@@ -155,6 +155,19 @@ Every attempt writes one `notification_deliveries` row per channel (`sent` / `sk
 `failed`, provider id, reason). Admins can read it; customers cannot. The app reads
 `notifications` directly (Realtime-enabled) for the in-app channel.
 
+## Support and trip documents (admin)
+
+- Staff work threads in `/admin/support`. A staff reply is a plain `support_messages` insert with
+  `is_from_staff = true`: the `support_message_touch_thread` trigger stamps `first_response_at`,
+  moves the thread to `waiting_on_customer`, and `support_messages_notify` writes the traveler's
+  `support_response` notification. Internal notes (`is_internal_note`) never reach the customer
+  (RLS). `support_threads.assigned_to` is the live owner; `support_assignments` keeps the history.
+- Trip documents: the browser uploads directly to the private `trip-documents` bucket under
+  `trips/{tripId}/{uuid}-{name}` (Storage RLS: ops staff write, members read their own), then
+  `recordTripDocumentAction` inserts the `trip_documents` row. The `trip_documents_notify` trigger
+  writes a `document_added` notification to the traveler the file is for, or to every member,
+  and nothing for `staff_only`. The app's Documents screen and inbox read those rows directly.
+
 ## Deep links
 
 `guideless://trip/{tripId}` · `guideless://trip/{tripId}/itinerary/{itemId}` ·

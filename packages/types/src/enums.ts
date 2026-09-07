@@ -208,7 +208,7 @@ export const WEBHOOK_EVENT_STATUSES = ["received", "processed", "failed", "skipp
 export type WebhookEventStatus = (typeof WEBHOOK_EVENT_STATUSES)[number];
 
 // ── Marketing / social publishing (migration 025) ────────────────────────────
-export const SOCIAL_PLATFORMS = ["instagram"] as const;
+export const SOCIAL_PLATFORMS = ["instagram", "pinterest"] as const;
 export type SocialPlatform = (typeof SOCIAL_PLATFORMS)[number];
 
 export const SOCIAL_MEDIA_KINDS = ["image", "carousel"] as const;

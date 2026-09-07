@@ -1,7 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { INSTAGRAM_CAPTION_MAX, INSTAGRAM_HASHTAG_MAX } from "@guideless/validation";
+import { SOCIAL_PLATFORMS } from "@guideless/types";
+import {
+  INSTAGRAM_CAPTION_MAX,
+  INSTAGRAM_HASHTAG_MAX,
+  PINTEREST_TITLE_MAX,
+} from "@guideless/validation";
 import { Flash } from "@/components/admin/flash";
 import { LocalTimeZoneInput } from "@/components/admin/local-time-zone-input";
 import { SubmitButton } from "@/components/admin/submit-button";
@@ -11,6 +16,7 @@ import { CONTENT_ROLES, requireStaff } from "@/lib/auth/staff";
 import {
   cancelSocialPostAction,
   deleteSocialPostAction,
+  duplicateSocialPostAction,
   publishSocialPostNowAction,
   scheduleSocialPostAction,
   unscheduleSocialPostAction,
@@ -63,10 +69,11 @@ export default async function SocialPostPage(props: PageProps<"/admin/social/[id
         description={
           <span className="inline-flex items-center gap-2">
             <Badge variant={SOCIAL_STATUS_VARIANT[post.status]}>{post.status}</Badge>
+            <Badge variant="guideless">{post.platform}</Badge>
             {post.kind} · {post.media_paths.length} image{post.media_paths.length === 1 ? "" : "s"}
             {post.permalink && (
               <a href={post.permalink} target="_blank" rel="noopener noreferrer">
-                View on Instagram
+                View on {post.platform === "pinterest" ? "Pinterest" : "Instagram"}
               </a>
             )}
           </span>
@@ -121,6 +128,47 @@ export default async function SocialPostPage(props: PageProps<"/admin/social/[id
             <form action={updateSocialPostAction} className="grid gap-4">
               <input type="hidden" name="postId" value={post.id} />
               <input type="hidden" name="returnTo" value={back} />
+              <label className={labelClass}>
+                Platform
+                <select
+                  name="platform"
+                  defaultValue={post.platform}
+                  disabled={!editable}
+                  className={inputClass}
+                >
+                  {SOCIAL_PLATFORMS.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {post.platform === "pinterest" && (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className={labelClass}>
+                    Pin title (≤{PINTEREST_TITLE_MAX})
+                    <input
+                      name="title"
+                      defaultValue={post.title ?? ""}
+                      maxLength={PINTEREST_TITLE_MAX}
+                      disabled={!editable}
+                      className={inputClass}
+                      placeholder="Old town Nice at golden hour"
+                    />
+                  </label>
+                  <label className={labelClass}>
+                    Destination link (defaults to the site)
+                    <input
+                      name="linkUrl"
+                      type="url"
+                      defaultValue={post.link_url ?? ""}
+                      disabled={!editable}
+                      className={inputClass}
+                      placeholder="https://guidelesstravel.com/tours/southern-france?utm_source=pinterest&utm_medium=social"
+                    />
+                  </label>
+                </div>
+              )}
               <label className={labelClass}>
                 Caption ({post.caption.length}/{INSTAGRAM_CAPTION_MAX})
                 <textarea
@@ -302,6 +350,19 @@ export default async function SocialPostPage(props: PageProps<"/admin/social/[id
                     confirm="Delete this post and its uploaded images? This cannot be undone."
                   >
                     Delete
+                  </SubmitButton>
+                </form>
+              )}
+              {post.media_paths.length > 0 && (
+                <form action={duplicateSocialPostAction}>
+                  <input type="hidden" name="postId" value={post.id} />
+                  <input
+                    type="hidden"
+                    name="platform"
+                    value={post.platform === "pinterest" ? "instagram" : "pinterest"}
+                  />
+                  <SubmitButton size="sm" variant="secondary" pendingText="Copying…">
+                    Also post to {post.platform === "pinterest" ? "Instagram" : "Pinterest"}
                   </SubmitButton>
                 </form>
               )}

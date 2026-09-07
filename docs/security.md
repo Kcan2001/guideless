@@ -109,6 +109,15 @@ CSP and `nosniff` headers on every CI run (`apps/web/e2e/marketing.spec.ts`).
   inserts (rate limiting at the edge is a launch task) and are readable by the applicant and staff.
   `meetups` are public when published; RSVPs are per user.
 
+### Public forms and rate limits
+
+Host applications (anonymous inserts), meetup RSVPs and cancellation requests are throttled by
+`check_rate_limit(key, limit, window)` (migration 034): a fixed-window counter in `rate_limits`
+keyed by form name plus a salted SHA-256 of the caller's IP (`RATE_LIMIT_SALT`; no IP is stored).
+Limits: 5 host applications, 30 RSVPs and 10 cancellation requests per hour per caller. The
+wrapper (`apps/web/lib/rate-limit.ts`) fails open on infrastructure errors and logs them, since
+these forms create low-risk rows, not money. Set `RATE_LIMIT_SALT` in Vercel for production.
+
 ### Notification delivery surface
 
 `claim_pending_notifications()` and the enqueue functions are `security definer` and executable
