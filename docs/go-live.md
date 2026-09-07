@@ -205,15 +205,25 @@ domain can only point one way.
 Propagation is minutes to an hour. Vercel issues the TLS certificate automatically once the A/CNAME
 resolve. Keep Squarespace as the registrar and DNS host; nothing needs to transfer.
 
-## 3b. Pipeline status (2026-09-07)
+## 3b. Pipeline and launch status (2026-09-07)
 
-`deploy.yml` ran green end to end against staging: verify → migrations and functions on
-`zvwkwlvtputdrmqvcquj` → Vercel preview → smoke test. Preview deployments are behind Vercel's
-deployment protection; the pipeline's smoke test sends the automation bypass secret
-(`VERCEL_PROTECTION_BYPASS` in both GitHub environments and in `supabase/.env`). Production PR:
-github.com/Kcan2001/guideless/pull/1 (develop → production). Three CI fixes were needed on the
-way: the pnpm action's duplicate version pin, a CSS module declaration for the mobile typecheck,
-and the anon key missing from Vercel's environments.
+- `deploy.yml` is green end to end on both branches. Staging (`develop` → Supabase
+  `zvwkwlvtputdrmqvcquj` → Vercel preview) and production (`production` → `xxvmiugkmxgaoosycsei` →
+  Vercel production, run 34157645639) both pass the smoke test. Preview deployments sit behind
+  Vercel deployment protection, so the smoke test sends the automation bypass secret
+  (`VERCEL_PROTECTION_BYPASS` in both GitHub environments and in `supabase/.env`).
+- PR #1 (develop → production) was merged as the first release. Release from now on = merge
+  `develop` into `production`.
+- CI fixes needed on the way: the pnpm action's duplicate version pin, a CSS module declaration for
+  the mobile typecheck, the anon key missing from Vercel, quoted values from `supabase status -o env`
+  in the e2e job, a version-independent empty-report check for `supabase db lint`, and migration
+  `20260906003800_plpgsql_lint_fixes.sql` for three plpgsql_check warnings.
+- DNS switched at Squarespace: the "Squarespace Defaults" preset was deleted and custom records
+  `A @ 76.76.21.21` and `CNAME www cname.vercel-dns.com` added; Resend, DMARC and Google
+  site-verification records were left in place. `www` 308-redirects to the apex in Vercel.
+- Still to do by hand: first sign-up on the live site and the admin grant (§4 step 6), Stripe
+  account activation and live keys (test keys are deliberately in Vercel until then), Pinterest
+  trial-access re-application once `guidelesstravel.com/privacy` resolves.
 
 ## 4. First production release, step by step
 
