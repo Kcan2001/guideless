@@ -170,17 +170,23 @@ Pinterest
 - [x] Developer app **Guideless Travel Publisher**, app id `1609269`
       (developers.pinterest.com/apps/1609269), trial access requested 2026-09-07 with use case
       "Pin creation & scheduling", personal API access, own Pins/Boards only.
-- [ ] **Waiting on Pinterest:** while trial access is *pending* the app secret and the redirect-URI
-      field are locked. When it is approved: add redirect URIs `http://localhost:8765/callback`
+- [ ] **Trial access was DENIED** on 2026-09-07, within the hour (reason arrives by email to
+      kyleacannon@gmail.com). Pinterest lists two denial reasons: "Privacy policy is inaccurate or
+      not accessible" and "App description is incomplete or unclear". Ours is the first:
+      guidelesstravel.com still points at Squarespace and returns 404, so the privacy-policy URL on
+      the application could not be opened. Re-apply once the site is live (appeal via a Help Center
+      ticket, or Details tab → Save / Connect app again; one open request at a time). While
+      denied/pending the app secret and the redirect-URI field are locked. When it is approved: add redirect URIs `http://localhost:8765/callback`
       (one-time token script) and `https://guidelesstravel.com/api/social/pinterest/callback`,
       copy the secret into `supabase/.env` (`PINTEREST_APP_SECRET`) and the function secrets
       (`PINTEREST_APP_ID` / `PINTEREST_APP_SECRET`), run the OAuth flow once with scopes
       `pins:write boards:read user_accounts:read` to get an access + refresh token, then insert
       the `social_accounts` row (`platform = .pinterest.`, `external_id` = Pinterest user id,
       `metadata = {"board_id": "…", "refresh_token": "…"}`).
-- [ ] Trial-access Pins are **visible only to our own account** (Pinterest rule). Request
-      **Standard access** from the app page once a few Pins have been published through the API;
-      until then Pinterest is a staging channel, not a reach channel.
+- [ ] Trial-access Pins are **sandbox entities visible only to their creator** (Pinterest rule), so
+      the publisher cannot reach anyone until **Standard access** is granted. That upgrade is
+      requested from the app dashboard and needs a short video demonstrating the OAuth flow and
+      the integration; plan it right after trial access is approved.
 
 ## 7. Channels and priorities
 
