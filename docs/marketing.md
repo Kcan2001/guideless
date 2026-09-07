@@ -99,7 +99,8 @@ Analytics
       Enhanced measurement on. Set `NEXT_PUBLIC_GA_ID=G-YSBNKPW5Z6` in Vercel when the project
       exists (already in the local `.env.local`). Still to do in GA: mark `purchase` as a key
       event once the first events arrive; link Search Console.
-- [x] Firebase project **guideless-tours** (Spark plan, Gemini off) linked to the existing GA4
+- [x] Firebase project **Guideless Travel** (project id `guideless-tours` — immutable; Spark plan,
+      Gemini off) linked to the existing GA4
       property (552977422). Apps registered: **Guideless iOS** (`com.guidelesstours.app`, app id
       `1:45917505904:ios:5a084a921389e87740e7b5`) and **Guideless Android**
       (`com.guidelesstours.app`). `GoogleService-Info.plist` + `google-services.json` are in
@@ -107,7 +108,8 @@ Analytics
       next `eas build` / prebuild ships GA4 in the app. **Still to do:** upload both files as EAS
       file environment variables so CI builds get them; Expo Go cannot load Firebase (use a dev
       client).
-- [x] PostHog **US cloud** project id `596884` (owner kyleacannon@gmail.com), project API key
+- [x] PostHog **US cloud** project "Guideless Travel", id `596884` (owner kyleacannon@gmail.com),
+      project API key
       `phc_Cod6FWi284wzpmiA2xCDJrBCLPFgjRtPUm6iu8Xuyt6t` (public write-only token, safe in client
       code). Set as `NEXT_PUBLIC_POSTHOG_KEY` / `EXPO_PUBLIC_POSTHOG_KEY` with host
       `https://us.i.posthog.com` — done in the local env files; add to Vercel + EAS when they exist.
@@ -126,7 +128,8 @@ Analytics
 Instagram / Meta
 
 - [x] `@guidelesstravel` is a **Professional (Business)** account (verified 2026-09-06).
-- [x] Meta app **Guideless Travel** — app id `1761518544890433`, Instagram app id
+- [x] Meta app **Guideless Travel** (Instagram sub-app label still reads "Guideless Tours-IG";
+      cosmetic, use "Sync app name" on the API setup page) — app id `1761518544890433`, Instagram app id
       `1756467348826660`, use case "Manage messaging & content on Instagram" (Instagram Login
       variant). Permissions ready for testing: `instagram_business_basic`,
       `instagram_business_content_publish`, `instagram_business_manage_messages`.
