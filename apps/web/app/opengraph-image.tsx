@@ -1,12 +1,15 @@
 import { ImageResponse } from "next/og";
 import { brand } from "@guideless/config";
+import { ogPhotoDataUrl } from "@/lib/og-photo";
+import { sitePhotos } from "@/lib/photos";
 
 export const alt = `${brand.name} — ${brand.tagline}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 /** Default social card: ink ground, aqua route line, the tagline. */
-export default function OpenGraphImage() {
+export default async function OpenGraphImage() {
+  const photo = await ogPhotoDataUrl(sitePhotos.home);
   return new ImageResponse(
     <div
       style={{
@@ -21,11 +24,41 @@ export default function OpenGraphImage() {
         fontFamily: "Inter, system-ui, sans-serif",
       }}
     >
+      {photo && (
+        // Satori (next/og) renders plain <img>; next/image does not apply here.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={photo}
+          alt=""
+          width={1200}
+          height={630}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: 1200,
+            height: 630,
+            objectFit: "cover",
+          }}
+        />
+      )}
+      {photo && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: 1200,
+            height: 630,
+            background: "linear-gradient(180deg, rgba(11,32,37,0.15) 0%, rgba(11,32,37,0.85) 100%)",
+          }}
+        />
+      )}
       <svg
         width="1200"
         height="630"
         viewBox="0 0 1200 630"
-        style={{ position: "absolute", top: 0, left: 0 }}
+        style={{ position: "absolute", top: 0, left: 0, opacity: photo ? 0 : 1 }}
       >
         <path
           d="M 80 380 C 320 380, 320 220, 560 220 S 800 420, 1120 300"

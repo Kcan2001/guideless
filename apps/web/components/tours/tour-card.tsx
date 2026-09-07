@@ -2,7 +2,7 @@ import Link from "next/link";
 import { formatMoney } from "@guideless/utils";
 import { formatDate } from "@guideless/utils";
 import { Badge } from "@/components/ui/badge";
-import { RouteArt } from "@/components/site/route-art";
+import { PhotoBackdrop } from "@/components/site/photo-hero";
 import { tourFromPrice, type TourListItem } from "@/lib/data/tour-filters";
 
 const LEVEL_LABEL = { relaxed: "Relaxed", moderate: "Moderate", active: "Active" } as const;
@@ -25,9 +25,12 @@ export function TourCard({
         href={`/tours/${tour.slug}`}
         className="relative block aspect-[4/3] overflow-hidden no-underline"
       >
-        <RouteArt
+        <PhotoBackdrop
+          src={version.hero_image_url}
+          fallbackAlt={tour.name}
           stops={destinations.length || 3}
-          className="transition-transform duration-500 group-hover:scale-[1.03]"
+          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+          imgClassName="transition-transform duration-500 group-hover:scale-[1.03]"
         />
         <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 bg-gradient-to-t from-ink/80 to-transparent p-5 text-cloud">
           <div>

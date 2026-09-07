@@ -22,6 +22,8 @@ const publicSchema = z.object({
   NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(),
   NEXT_PUBLIC_POSTHOG_HOST: z.url().optional(),
   NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
+  NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: z.string().optional(),
+  NEXT_PUBLIC_BING_SITE_VERIFICATION: z.string().optional(),
 });
 
 // NEXT_PUBLIC_* values are inlined at build time only when referenced literally.
@@ -35,6 +37,8 @@ export const publicEnv = publicSchema.parse({
   NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
   NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
   NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+  NEXT_PUBLIC_BING_SITE_VERIFICATION: process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION,
 });
 
 const serverSchema = z.object({

@@ -21,7 +21,7 @@ insert into public.departure_stay_options
 select gen_random_uuid(), d.id, s.name, s.description, s.hotel_name, s.area, s.star_rating, s.delta, s.shared, s.position, s.is_default
 from public.departures d
 cross join (values
-  ('Well-located 3★ hotels', 'Three comfortable hotels close to the centre of each city. Breakfast included. This is the trip most people book.', null, 'Old town Nice · intramuros Avignon · Marais Paris', 3, 0::bigint, null::bigint, 1, true),
+  ('Well-located 3★ hotels', 'Three comfortable hotels a short walk from the centre of each city. Breakfast included. This is the trip most people book.', null, 'Old town Nice · intramuros Avignon · Marais Paris', 3, 0::bigint, null::bigint, 1, true),
   ('Boutique 4★ upgrade', 'Design-led boutique hotels in the same neighbourhoods: rooftop pool in Nice, a converted mansion in Avignon, a Marais townhouse in Paris.', null, 'Same neighbourhoods, nicer rooms', 4, 85000::bigint, 40000::bigint, 2, false)
 ) as s(name, description, hotel_name, area, star_rating, delta, shared, position, is_default)
 where d.tour_id = '20000000-0000-4000-8000-000000000001'
@@ -36,15 +36,15 @@ select gen_random_uuid(), d.id, a.title, a.description, a.kind, a.price, d.curre
        a.location_name, a.lat, a.lng, a.bookable, a.cancellable, a.position, a.featured
 from public.departures d
 cross join (values
-  ('Boat day along the Riviera', 'A shared boat from the old port to Villefranche and Cap Ferrat with swim stops. Skipper, snorkels, lunch on board. Whoever from the group is in, is in.',
+  ('Boat day along the Riviera', 'A shared boat from the old port to Villefranche and Cap Ferrat with swim stops. Skipper, snorkels and lunch on board. Day 2, 10 am; the app shows who from Your Group is in.',
    'activity', 14500::bigint, 'per_traveler', 12, 2, '10:00'::time, '16:00'::time, 'Port Lympia, Nice', 43.6955, 7.2851, 1, 7, 1, true),
-  ('Châteauneuf-du-Pape cellar afternoon', 'A second tasting with the winemaker after the included lunch, then the village on foot. Small group, own pace.',
+  ('Châteauneuf-du-Pape cellar afternoon', 'After the included tasting and lunch on day 5: a second tasting in the winemaker''s cellar, then the village on foot. Small group, own pace.',
    'activity', 9500::bigint, 'per_traveler', 10, 5, '15:00'::time, '18:30'::time, 'Châteauneuf-du-Pape', 44.0564, 4.8322, 2, 7, 2, true),
   ('Private airport transfer', 'Your own car from Nice airport to the hotel instead of the shared welcome drive. Handy if you land late.',
    'transfer', 9000::bigint, 'per_booking', null, 1, null, null, 'Nice Côte d''Azur Airport', null, null, 2, 3, 3, false),
   ('Extra night in Paris', 'Stay one more night in the same hotel after the trip ends. Breakfast included.',
    'extra_night', 21000::bigint, 'per_traveler', 6, 9, null, null, 'Your Paris hotel', null, null, 7, 7, 4, false),
-  ('Farewell dinner', 'A long table at a neighbourhood bistro on the last evening. Optional, like everything else.',
+  ('Farewell dinner', 'One long table at a neighbourhood bistro in the Marais on the last evening, 8 pm. Optional, like everything else.',
    'dinner', 8500::bigint, 'per_traveler', 20, 8, '20:00'::time, '23:00'::time, 'Le Marais, Paris', 48.8575, 2.3622, 1, 3, 5, false)
 ) as a(title, description, kind, price, basis, capacity, day_number, start_time, end_time, location_name, lat, lng, bookable, cancellable, position, featured)
 where d.tour_id = '20000000-0000-4000-8000-000000000001'

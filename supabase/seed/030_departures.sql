@@ -1,4 +1,5 @@
--- Seed: open departures for Southern France v1. Prices in USD minor units ($3,495 / $750 deposit).
+-- Seed: open departures for Southern France v1. Prices in USD minor units ($3,495 / $750 deposit),
+-- per traveler in their own room; seed 040 adds the shared-room saving, stay tiers and add-ons.
 -- The default group is created automatically by trigger.
 insert into public.departures
   (id, tour_id, tour_version_id, status, start_date, end_date, timezone, capacity, minimum_travelers,

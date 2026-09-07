@@ -103,3 +103,13 @@ loyalty, more currencies, CRM.
 **Successful independent trips**: booked → itinerary accessed → logistics delivered → completed
 → few critical support incidents → satisfied. Supporting: booking/checkout conversion, app
 activation, trip engagement, live-moment participation, support rate, repeat booking, NPS.
+
+## Copy refresh (2026-09-07)
+
+The seeded catalog copy (`supabase/seed/010`–`060`) had a customer-eyes pass: the welcome drinks are
+consistently 8 pm on night one at a bar in the old town (the anchor Live Moment), the farewell dinner
+is an optional add-on rather than "included", the Châteauneuf wine afternoon is "included, optional
+to join" with the cellar visit as the paid extension, Monaco's weekend states practice Friday,
+qualifying Saturday and the race Sunday at 3 pm, both tours gained FAQs about rooms, add-ons and
+when Your Group opens, and every mention of the brand is Guideless Travel. Seeds are the source of
+truth until the first production seeding (`scripts/seed-catalog.mjs`); after that, edit in `/admin`.

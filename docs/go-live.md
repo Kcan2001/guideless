@@ -133,6 +133,13 @@ GA4 property (docs/marketing.md has the GA4/PostHog steps already done for the m
 
 ### 2.6 Expo / EAS (app)
 
+**Status 2026-09-07:** `eas login` / `eas init` done (Expo account @guidelesstravel, org
+`guideless-travel`, project id `992a1489-97e2-4534-b832-18a51c312df7`). EAS environment variables
+exist for development/preview/production: `EXPO_PUBLIC_POSTHOG_KEY/HOST` and the Firebase file vars
+`GOOGLE_SERVICES_JSON` / `GOOGLE_SERVICE_INFO_PLIST`. Still to add there once the hosted Supabase
+projects exist: `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`, and `EXPO_PUBLIC_SENTRY_DSN`
+when the Sentry project exists.
+
 `docs/mobile.md` → "First device build": `eas login`, `eas init`, fill `eas.json` env values with
 the **production** Supabase URL/anon key and `EXPO_PUBLIC_SITE_URL=https://guidelesstravel.com`,
 `eas build --profile production`, then `eas submit`. Deep links use `guideless://`; add
@@ -167,20 +174,27 @@ resolve. Keep Squarespace as the registrar and DNS host; nothing needs to transf
 
 1. Create the GitHub environments and secrets from §1 (Supabase and Vercel at minimum).
 2. Set `develop` as the default branch and protect `production` (GitHub → Settings).
-3. Merge a PR from `develop` into `production`. Watch **Actions → Deploy**: database pushes 33
+3. Merge a PR from `develop` into `production`. Watch **Actions → Deploy**: database pushes the
    migrations, both Edge Functions deploy, Vercel builds and deploys, smoke test returns 200s.
-4. Add the DNS records (§3) and the domains in Vercel; wait for the certificate.
-5. Sign up on the live site, grant yourself `admin`, create the first tour, version, departure,
-   stay options and add-ons in `/admin`, publish.
-6. Test a real booking with a 100% coupon or a $1 test departure, confirm the webhook marks it
+4. Seed the catalog once (destinations, both tours with departures, stay tiers, add-ons, meetups,
+   photos): `node scripts/seed-catalog.mjs --db-url "<Supabase → Settings → Database → URI>"`.
+   The files are idempotent and contain no users, bookings or payments; `--dry-run` lists them,
+   `--only 020,050` limits the run. Needs `psql` on PATH or the `pg` dev dependency (installed).
+5. Add the DNS records (§3) and the domains in Vercel; wait for the certificate.
+6. Sign up on the live site, grant yourself `admin`, and review the seeded tours in `/admin`
+   (copy, prices, dates, capacity) before publishing anything new.
+7. Test a real booking with a 100% coupon or a $1 test departure, confirm the webhook marks it
    paid, the confirmation email arrives from `hello@guidelesstravel.com`, and the notification
    dispatcher delivers (Vault secrets set).
-7. Switch Stripe to live keys in Vercel when ready to take money.
+8. Switch Stripe to live keys in Vercel when ready to take money.
+9. Set `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` in Vercel, redeploy, verify the property in Search
+   Console and submit `https://guidelesstravel.com/sitemap.xml` (checklist in docs/growth.md).
 
 ## 5. What is intentionally not automated yet
 
-- Mobile builds (`eas build` needs an interactive login the first time; add `EXPO_TOKEN` and an
-  `eas build --non-interactive` job later).
-- Seeding production (tours are authored in admin).
+- Mobile builds in CI: an `EXPO_TOKEN` (personal access token) already exists; adding it as a GitHub
+  secret and an `eas build --non-interactive --profile preview` job to `deploy.yml` is the remaining
+  step.
+- Seeding production beyond the one-time catalog script (later tours are authored in admin).
 - Rollbacks: Vercel keeps every deployment (promote a previous one in the dashboard); database
   migrations are forward-only, so write a new migration to undo.

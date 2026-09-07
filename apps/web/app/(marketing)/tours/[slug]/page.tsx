@@ -13,7 +13,8 @@ import {
   StayTiers,
 } from "@/components/marketing/make-it-yours";
 import { JsonLd } from "@/components/site/json-ld";
-import { RouteArt } from "@/components/site/route-art";
+import { PhotoBackdrop } from "@/components/site/photo-hero";
+import { PhotoGallery } from "@/components/tours/photo-gallery";
 import { DepartureList } from "@/components/tours/departure-list";
 import { Faq } from "@/components/tours/faq";
 import { ItineraryTimeline } from "@/components/tours/itinerary-timeline";
@@ -92,11 +93,19 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
     <>
       {/* Hero */}
       <section className="relative overflow-hidden bg-ink text-cloud">
-        <div className="absolute inset-0 opacity-70">
-          <RouteArt stops={route.length || 3} />
-        </div>
+        <PhotoBackdrop
+          src={version.hero_image_url}
+          fallbackAlt={`${tour.name}: ${route.map((r) => r.destination.name).join(", ")}`}
+          stops={route.length || 3}
+          priority
+          className={version.hero_image_url ? undefined : "opacity-70"}
+        />
         <div
-          className="absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/30"
+          className={
+            version.hero_image_url
+              ? "absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/70 to-ink/20"
+              : "absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/30"
+          }
           aria-hidden
         />
         <div className="relative mx-auto w-full max-w-6xl px-6 pt-20 pb-16 md:pt-28 md:pb-20">
@@ -187,6 +196,18 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
           </div>
         </div>
       </section>
+
+      {version.gallery_image_urls.length > 0 && (
+        <section
+          aria-labelledby="gallery-heading"
+          className="mx-auto w-full max-w-6xl px-6 pt-12 md:pt-16"
+        >
+          <h2 id="gallery-heading" className="sr-only">
+            Photos from {tour.name}
+          </h2>
+          <PhotoGallery images={version.gallery_image_urls} subject={tour.name} />
+        </section>
+      )}
 
       {/* Overview */}
       <section className="mx-auto grid w-full max-w-6xl gap-12 px-6 py-20 md:grid-cols-[1.4fr_1fr]">

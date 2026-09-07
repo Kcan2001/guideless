@@ -5,7 +5,7 @@ import { ArrowRight, MapPin, Phone } from "lucide-react";
 import { emptyStates } from "@guideless/config";
 import { TrackView } from "@/components/analytics/track-view";
 import { JsonLd } from "@/components/site/json-ld";
-import { RouteArt } from "@/components/site/route-art";
+import { PhotoBackdrop } from "@/components/site/photo-hero";
 import { TourCard } from "@/components/tours/tour-card";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -51,11 +51,19 @@ export default async function DestinationPage(props: PageProps<"/destinations/[s
   return (
     <>
       <section className="relative overflow-hidden bg-ink text-cloud">
-        <div className="absolute inset-0 opacity-70">
-          <RouteArt stops={2} />
-        </div>
+        <PhotoBackdrop
+          src={d.hero_image_url}
+          fallbackAlt={`${d.name}, ${d.country_name}`}
+          stops={2}
+          priority
+          className={d.hero_image_url ? undefined : "opacity-70"}
+        />
         <div
-          className="absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/30"
+          className={
+            d.hero_image_url
+              ? "absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/70 to-ink/20"
+              : "absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/30"
+          }
           aria-hidden
         />
         <div className="relative mx-auto w-full max-w-6xl px-6 pt-20 pb-16 md:pt-28">

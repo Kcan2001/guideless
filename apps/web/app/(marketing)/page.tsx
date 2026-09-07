@@ -4,7 +4,8 @@ import { brand, responsibilityLabels } from "@guideless/config";
 import { formatDateRange, formatMoney, formatWallTime } from "@guideless/utils";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import { RouteArt } from "@/components/site/route-art";
+import { PhotoBackdrop } from "@/components/site/photo-hero";
+import { sitePhotos } from "@/lib/photos";
 import { TourCard } from "@/components/tours/tour-card";
 import { Faq } from "@/components/tours/faq";
 import { JsonLd } from "@/components/site/json-ld";
@@ -67,11 +68,14 @@ export default async function HomePage() {
     <>
       {/* Hero */}
       <section className="relative overflow-hidden bg-ink text-cloud">
-        <div className="absolute inset-0 opacity-70">
-          <RouteArt stops={3} />
-        </div>
+        <PhotoBackdrop
+          src={sitePhotos.home}
+          fallbackAlt="The Riviera at dusk"
+          priority
+          position="center 55%"
+        />
         <div
-          className="absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/30"
+          className="absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/70 to-ink/20"
           aria-hidden
         />
         <div className="relative mx-auto flex w-full max-w-6xl flex-col px-6 py-28 md:py-40">
@@ -172,9 +176,22 @@ export default async function HomePage() {
               return (
                 <li
                   key={tour.id}
-                  className="flex flex-col justify-between gap-6 rounded-2xl bg-ink p-8 text-cloud"
+                  className="relative flex flex-col justify-between gap-6 overflow-hidden rounded-2xl bg-ink p-8 text-cloud"
                 >
-                  <div>
+                  {version.hero_image_url && (
+                    <>
+                      <PhotoBackdrop
+                        src={version.hero_image_url}
+                        fallbackAlt={tour.name}
+                        sizes="(min-width: 768px) 50vw, 100vw"
+                      />
+                      <div
+                        className="absolute inset-0 bg-gradient-to-t from-ink via-ink/85 to-ink/40"
+                        aria-hidden
+                      />
+                    </>
+                  )}
+                  <div className="relative">
                     <p className="text-xs font-medium uppercase tracking-[0.2em] text-aqua">
                       {tour.event_name}
                     </p>
@@ -206,7 +223,7 @@ export default async function HomePage() {
                       <Badge variant="guideless">Welcome drinks night one</Badge>
                     </div>
                   </div>
-                  <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div className="relative flex flex-wrap items-center justify-between gap-4">
                     {next && (
                       <p className="text-sm text-cloud/80">
                         From{" "}
