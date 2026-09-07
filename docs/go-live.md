@@ -172,16 +172,11 @@ done earlier (docs/marketing.md §6).
 
 ### 2.5b App store accounts (Apple Developer Program, Google Play Console)
 
-Both organization enrollments require a **D-U-N-S number** for Guideless LLC. D&B has none on file
-(checked 2026-09-07 for ZIP 19128 and 19901). The free application was **submitted 2026-09-07** via MyD&B
-(kyleacannon@gmail.com), case `DFC-671905`: Corporation/LLC, managing member Kyle Cannon, 646 Rector
-St Philadelphia PA 19128, SIC 4724 Travel agencies, with the EIN letter and the Delaware Certificate
-of Formation attached. Expedite ($229, 8 business days) was declined; normal processing is up to 30
-business days and D&B may call to verify. Play Console signup (organization → company) and the
-Apple enrollment page are parked until the number arrives. Alternative if speed matters more than
-the publisher name: enroll as an individual (shows "Kyle Cannon" as the developer). Google also
-recommends an organization email (e.g. a Workspace mailbox on guidelesstravel.com) to reduce
-verification steps.
+Both organization enrollments require a **D-U-N-S number** for Guideless LLC. **Assigned 2026-09-07:
+`149931168`** (free D&B request, case DFC-671905, issued within the hour; stored as `DUNS_NUMBER` in
+`supabase/.env`). Play Console signup (organization → company) and the Apple Developer Program
+enrollment can now proceed; Google recommends an organization email (Workspace mailbox on
+guidelesstravel.com) to reduce verification steps — see `docs/business-readiness.md` §1.
 
 ### 2.6 Expo / EAS (app)
 
