@@ -135,11 +135,15 @@ Travel", US), still in test mode / not activated. Test publishable + secret key 
 signing secret are in `supabase/.env` (`STRIPE_TEST_*`) and in Vercel **Production and Preview** as
 `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` / `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` (test values on
 both for now). Test-mode endpoint `we_1UD63UBhgWBLSqYpP4OQwhqU` →
-`https://guidelesstravel.com/api/webhooks/stripe` with the six events above. **Still manual
-(Kyle):** step 1 — Stripe only exposes business name, public name and statement descriptor inside
-the activation flow (legal entity Guideless LLC, EIN, bank account, representative identity); when
-you activate, create a _live-mode_ endpoint with the same URL/events and replace the three
-Production values with live keys + its signing secret.
+`https://guidelesstravel.com/api/webhooks/stripe` with the six events above. **Activation (2026-09-07 evening):** every section of the live-account activation is filled in —
+single-member LLC, EIN + legal name `GUIDELESS LLC`, business address 646 Rector Street
+Philadelphia PA 19128, public name Guideless Travel, category Travel agencies, support phone
+(hidden on receipts), statement descriptor `GUIDELESS TRAVEL`, Radar Lite, no Stripe Tax, no Climate
+— except **Account representative** (Kyle's home address + SSN last 4) and the final "Agree and
+submit", followed by a payout bank account. Once live keys exist: create a *live-mode* webhook
+endpoint with the same URL/events and replace the three Production values in Vercel with live keys
++ its signing secret. Kyle's login also owned two old "Reset Club" accounts; the 2026 one is closed
+and the 2021 one (`acct_1Ja1HE2SQ0KlVgLK`) is being closed on Kyle's instruction.
 
 ### 2.4 Resend
 
@@ -165,6 +169,17 @@ and `guideless-mobile` (react-native). DSNs are in `supabase/.env` (`SENTRY_WEB_
 `SENTRY_PROJECT=guideless-web`, in Vercel; the same three values still need to go into the GitHub
 `staging` and `production` environments for deploy.yml's source-map upload. PostHog and GA4 were
 done earlier (docs/marketing.md §6).
+
+### 2.5b App store accounts (Apple Developer Program, Google Play Console)
+
+Both organization enrollments require a **D-U-N-S number** for Guideless LLC. D&B has none on file
+(checked 2026-09-07 for ZIP 19128 and 19901). A free request was started at my.dnb.com (MyD&B
+account for kyleacannon@gmail.com; Kyle sets the password and verifies the email); normal processing
+is up to 30 business days, expedited is paid. Play Console signup (organization → company) and the
+Apple enrollment page are parked until the number arrives. Alternative if speed matters more than
+the publisher name: enroll as an individual (shows "Kyle Cannon" as the developer). Google also
+recommends an organization email (e.g. a Workspace mailbox on guidelesstravel.com) to reduce
+verification steps.
 
 ### 2.6 Expo / EAS (app)
 
