@@ -118,6 +118,23 @@ apex A record and the `www` CNAME to Vercel's values (§3) only when the first p
 green. Vercel env vars RESEND_API_KEY and RATE_LIMIT_SALT were created as "Config" type; flip them
 to "Secret" in the UI if you want them unreadable.
 
+**Staging alias, 2026-09-08.** `https://guideless-staging.vercel.app` is a stable address for the
+newest preview deployment; the deploy workflow re-points it after every `develop` deploy, so a
+preview URL never has to be copied by hand again. It sits behind Vercel deployment protection, and
+protection accepts the bypass as the query string `?x-vercel-protection-bypass=<token>`
+(`VERCEL_PROTECTION_BYPASS` in `supabase/.env`) as well as a header, which is what lets Stripe reach
+it. Two rules follow, and both are already set:
+
+- `NEXT_PUBLIC_SITE_URL` is **per environment**, never shared. Preview is the staging alias,
+  Production is `https://guidelesstravel.com`. Sharing it sends preview Stripe redirects to
+  production, where the booking does not exist.
+- Preview and Production must each hold the Supabase keys and Stripe webhook secret **of their own
+  project and mode**. Preview once held a service role key that did not authenticate against the
+  staging project, which failed silently on every service-role write (§2.3).
+
+Removing an env var scoped to both environments removes it from both, whatever environment is named
+on the command line. Re-add Production first, then Preview.
+
 ### 2.3 Stripe
 
 1. Activate the account as **Guideless LLC** (business name, dashboard setting) with the public
@@ -169,19 +186,17 @@ After the fixes the whole chain verifies on staging: `bookings` → `confirmed` 
 `email_events` row for `booking-confirmed` sent through Resend with a provider message id — which
 confirms the verified Resend domain at the same time.
 
-**Two open items that need a decision.**
+**Both open items are now closed** by the `guideless-staging.vercel.app` alias (see §2.2).
 
-- `NEXT_PUBLIC_SITE_URL` is a single variable shared by Preview and Production, so Stripe's
-  `success_url` and `cancel_url` on a _preview_ checkout point at `guidelesstravel.com`, which reads
-  the production database. A preview test booking therefore lands on a confirmation page that cannot
-  find it. Either give Preview its own value (a stable branch alias) or accept that preview
-  checkouts finish in the wrong environment.
-- The **test-mode** endpoint still points at `guidelesstravel.com`, which now runs live keys, so
-  test-mode events can never verify there and sit as failed deliveries. Test-mode webhooks need a
-  deployment that carries test keys. That means either a permanent staging deployment (its URL is
-  behind Vercel deployment protection, so the endpoint would have to carry the bypass token) or
-  `stripe listen --forward-to` against a local server. Until one is chosen, a test payment's webhook
-  has to be delivered by hand, signed with the Preview secret.
+- `NEXT_PUBLIC_SITE_URL` used to be one variable covering Preview and Production, so Stripe's
+  `success_url` on a _preview_ checkout pointed at `guidelesstravel.com` and read the production
+  database. It is now two separate values: Preview is the staging alias, Production is the apex.
+- The test-mode endpoint that pointed at production (which runs live keys, so test events could
+  never verify) is **disabled**. Test mode now has its own endpoint
+  `we_1UDOKoBhgWBLSqYprJcbdPI5` → `https://guideless-staging.vercel.app/api/webhooks/stripe`
+  carrying the protection-bypass token as a query string. Its secret is
+  `STRIPE_TEST_WEBHOOK_SECRET` in `supabase/.env` and Preview's `STRIPE_WEBHOOK_SECRET`. Verified:
+  a test-signed POST returns 200 and writes the staging ledger row.
 
 There is no in-app notification on payment: `notifications` rows are written only by
 `notificationService`, and neither the webhook nor `lib/bookings/payments.ts` calls it. A paid
