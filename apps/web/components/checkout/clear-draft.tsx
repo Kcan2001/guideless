@@ -1,15 +1,14 @@
 "use client";
 
 import { useEffect } from "react";
+import { clearSessionDraft } from "@/components/builder/draft";
+import { clearBuilderDraft } from "@/lib/bookings/drafts";
 
-/** Drops the sessionStorage draft once a booking exists so a later visit starts fresh. */
+/** Once a booking exists, drop the local and saved builder drafts so a later visit starts fresh. */
 export function ClearDraft({ departureId }: { departureId: string }) {
   useEffect(() => {
-    try {
-      sessionStorage.removeItem(`guideless:checkout:${departureId}`);
-    } catch {
-      /* storage unavailable */
-    }
+    clearSessionDraft(departureId);
+    void clearBuilderDraft(departureId);
   }, [departureId]);
   return null;
 }

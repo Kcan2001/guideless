@@ -237,10 +237,10 @@ export default async function DeparturePage(
                 </span>
               ) : (
                 <Link
-                  href={`/checkout/${d.id}`}
+                  href={`/tours/${tour.slug}/build?departure=${d.id}`}
                   className={cn(buttonVariants({ size: "lg" }), "w-full")}
                 >
-                  Book this departure <ArrowRight className="h-4 w-4" aria-hidden />
+                  Build my trip <ArrowRight className="h-4 w-4" aria-hidden />
                 </Link>
               )}
               <Link

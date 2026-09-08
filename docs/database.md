@@ -52,6 +52,9 @@ Postgres on Supabase is the **system of record**. Schema changes happen only thr
 | 038 | `_plpgsql_lint_fixes`   | `create_booking`, `start_add_on_purchase`, `confirm_add_on_purchase` re-declared with typed empty-array initialisers and without a never-read local; behaviour unchanged                                                                                                                                                                                                                                                                                 |
 | 039 | `_catalog_presentation` | Enums `option_label` (best_value, most_popular, social, luxury) and `add_on_kind` (old kinds + group_moment, insurance, extension; `departure_add_ons.kind` converted). Stay tiers gain `tagline`, `image_urls`, `includes`, `excludes`, `details` jsonb, `label`, `why_price_note`; add-ons gain `image_urls`, `includes`, `excludes`, `label`, `why_price_note`, `meeting_point`, `min_age`. Pricing untouched. Tests: `catalog_presentation.test.sql` |
 | 040 | `_option_tiers`         | Enum `option_tier` (explorer, classic, premium, elite) and a nullable `tier` column on `departure_stay_options` and `departure_add_ons`. Public level shown as a badge; separate from the marketing `label`; pricing untouched. Tests: `option_tiers.test.sql`                                                                                                                                                                                           |
+| 041 | `_booking_snapshots`    | `booking_add_ons.title_snapshot` (backfilled), `booking_items.kind` gains `stay` (tier as its own line, base lines reduced by the same total), `notify_booking_paid()` for the webhook, `confirm_add_on_purchase` notifies "Added to your trip"; both snapshot titles. Tests: `booking_snapshots.test.sql`                                                                                                                                               |
+| 042 | `_group_codes`          | `group_codes` (owner-read RLS, no direct writes), `bookings.group_code_id`, `create_group_code(booking)` (one per booking, `KYLE-MONACO-27`), `check_group_code(code, departure)` (anon), `create_booking` v3 with `p_group_code` — links the booking and increments `uses`; never prices. Tests: `group_codes.test.sql`                                                                                                                                 |
+| 043 | `_builder_drafts`       | `builder_drafts (user_id, departure_id) → draft jsonb ≤ 32 KB, step 0–7`, owner-only RLS, `purge_stale_builder_drafts()` on a daily cron (30 days). Tests: `builder_drafts.test.sql`                                                                                                                                                                                                                                                                     |
 
 ## Domain model
 
@@ -95,6 +98,14 @@ returns expired holds to `draft`.
 **Payments.** `payments`, `refunds`, `bookings.payment_status` change only from the Stripe webhook
 handler (service role). `webhook_events (provider, event_id)` is unique; insert first, process only
 if inserted.
+
+**Snapshots of what was sold.** `booking_items` (`base` / `stay` / `add_on` / `discount`) and
+`booking_add_ons.title_snapshot` are written at booking time and never re-read from the catalog;
+admin edits to tours, tiers and add-ons change future bookings only.
+
+**Group codes.** `group_codes` is a social link, not a price: a friend booking with a code lands on
+the same departure (and so in the same operational group) as its own financially independent
+booking. Only `create_group_code()` inserts and only `create_booking()` increments `uses`.
 
 **Audit.** `log_audit()` is the single write path; triggers cover booking create/cancel/payment,
 refunds, itinerary edits, supplier changes, role changes, membership changes, message deletion.

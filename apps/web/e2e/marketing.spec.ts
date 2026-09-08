@@ -65,7 +65,9 @@ test.describe("marketing site", () => {
     await expect(page.getByRole("heading", { name: /payment schedule/i })).toBeVisible();
     await expect(page.getByRole("heading", { name: /cancellation policy/i })).toBeVisible();
     await expect(page.getByText("100%")).toBeVisible();
-    await expect(page.getByRole("link", { name: /book this departure/i })).toBeVisible();
+    const build = page.getByRole("link", { name: /build my trip/i }).first();
+    await expect(build).toBeVisible();
+    await expect(build).toHaveAttribute("href", /\/build\?departure=/);
   });
 
   test("tour page offers stay tiers, add-ons and the night-one anchor", async ({ page }) => {
@@ -89,7 +91,9 @@ test.describe("marketing site", () => {
     await page.goto("/tours/monaco-grand-prix");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Monaco Grand Prix Weekend");
     await expect(page.getByTestId("event-hero")).toContainText("Circuit de Monaco");
-    await expect(page.getByRole("link", { name: /build my trip/i }).first()).toBeVisible();
+    const build = page.getByRole("link", { name: /build my trip/i }).first();
+    await expect(build).toBeVisible();
+    await expect(build).toHaveAttribute("href", /\/tours\/monaco-grand-prix\/build\?departure=/);
     await expect(page.getByTestId("compare-block")).toContainText(/traditional .* package/i);
     await expect(page.getByRole("heading", { name: /how you watch/i })).toBeVisible();
     const stays = page.getByTestId("stay-tiers");

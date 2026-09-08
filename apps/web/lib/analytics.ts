@@ -22,7 +22,18 @@ export type AnalyticsEvent =
   | "social_link_click"
   | "cta_click" // props: placement, target
   | "faq_expanded" // props: question (the id, never free text)
-  | "compare_viewed"; // props: section
+  | "compare_viewed" // props: section
+  // Trip Builder (plan v2 §45). Ids and amounts only; never names, emails or code values.
+  | "departure_selected" // props: tour_id, departure_id
+  | "builder_started" // props: tour_id, departure_id
+  | "builder_step_viewed" // props: departure_id, step
+  | "stay_selected" // props: departure_id, stay_option_id, tier
+  | "race_option_selected" // props: departure_id, add_on_id, tier
+  | "addon_viewed" // props: departure_id, add_on_id
+  | "quote_updated" // props: departure_id, total, due_now, currency
+  | "group_code_entered" // props: departure_id, valid
+  | "post_booking_addon_viewed" // props: booking_id
+  | "post_booking_addon_added"; // props: booking_id, add_on_id
 
 export type AnalyticsParams = Record<string, string | number | boolean | undefined>;
 

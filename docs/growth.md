@@ -21,7 +21,7 @@ Monaco 5★, grandstand / terrace / yacht, welcome drinks Thursday.
 
 The tour page (`/tours/[slug]`) sells the shape of the purchase before the itinerary, in this
 order: hero with the promise, next dates, length, group size and "from" price and a **Build my
-trip** CTA (the existing checkout until the Trip Builder lands) → **Base trip includes** (the
+trip** CTA (the Trip Builder at `/tours/[slug]/build?departure=…`, see `docs/booking.md`) → **Base trip includes** (the
 version's included items plus the app, the group with its opening date from
 `group_opens_days_before`, and support) → a two-column **compare block** (one package or one
 guided itinerary vs. Guideless essentials plus choices) → **stay tier cards**
@@ -65,13 +65,16 @@ alone in an empty room.
 ## Referrals
 
 - Every profile gets a `referral_codes` row (`GL-XXXXXX`) at creation.
-- A friend enters the code at checkout: `referral_discount_percent` (system setting, default 5)
+- A friend enters the code in the builder's summary panel ("Have a code?"): `referral_discount_percent` (system setting, default 5)
   off the **base** trip, shown as a quote line. Self-referral and unknown codes are rejected.
 - When that booking is confirmed the referrer earns `referral_reward_amount` (default 7500 minor
   units = $75) as `account_credits`, applied automatically to their next quote. Refunded or
   cancelled bookings void the pending referral.
 - Marketing surfaces only hint ("Booking with a friend's code? Enter it at checkout for 5% off");
   the code and balance live on the account page.
+- Distinct from referral codes: **trip codes** (`KYLE-MONACO-27`, migration 042) put separate
+  bookings in the same departure group without any discount. Travelers find theirs on `/account`
+  ("Bring friends along") and enter a friend's on the builder's travelers step.
 
 ## Host program ("bring 8, travel free")
 

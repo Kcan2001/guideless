@@ -74,6 +74,16 @@ const HINT_MESSAGES: Record<string, { code: CheckoutActionResult["code"]; error:
     error: "Your own referral code can't be used on your booking. Nothing was charged.",
   },
   code_currency: { code: "invalid", error: "That code is for a different currency." },
+  group_code_invalid: {
+    code: "invalid",
+    error:
+      "We don't recognise that trip code. Remove it or check with your friend. Nothing was charged.",
+  },
+  group_code_wrong_departure: {
+    code: "invalid",
+    error: "That trip code is for different dates. Nothing was charged.",
+  },
+  group_code_full: { code: "invalid", error: "That group is full. Nothing was charged." },
   not_payable: { code: "invalid", error: "This booking can't take add-ons right now." },
   nothing_selected: { code: "invalid", error: "Pick at least one add-on." },
 };
@@ -84,12 +94,21 @@ const HINT_MESSAGES: Record<string, { code: CheckoutActionResult["code"]; error:
  * Order matters: we refuse early if payments are not configured so we never leave a hold behind.
  * Payment state is NOT touched here — the Stripe webhook is authoritative (ADR-004).
  */
-export async function startCheckout(input: CreateBookingInput): Promise<CheckoutActionResult> {
+export type StartCheckoutInput = CreateBookingInput & {
+  /** For the Stripe cancel URL back into the builder. */
+  tourSlug?: string;
+};
+
+export async function startCheckout(input: StartCheckoutInput): Promise<CheckoutActionResult> {
   const parsed = createBookingSchema.safeParse(input);
   if (!parsed.success) {
     return { code: "invalid", error: "Some details need another look. Nothing was charged." };
   }
   const data = parsed.data;
+  const tourSlug =
+    typeof input.tourSlug === "string" && /^[a-z0-9-]+$/.test(input.tourSlug)
+      ? input.tourSlug
+      : null;
 
   if (!isStripeConfigured()) {
     return {
@@ -116,6 +135,7 @@ export async function startCheckout(input: CreateBookingInput): Promise<Checkout
     p_stay_option_id: data.stayOptionId ?? undefined,
     p_add_ons: data.addOns as unknown as never,
     p_code: data.code ?? undefined,
+    p_group_code: data.groupCode ?? undefined,
   });
   if (rpcError) {
     const hint = (rpcError as { hint?: string }).hint ?? "";
@@ -192,7 +212,9 @@ export async function startCheckout(input: CreateBookingInput): Promise<Checkout
         description: `${booking.confirmation_number} · ${label}`,
       },
       success_url: `${site}/checkout/${data.departureId}/confirmation?booking=${booking.booking_id}`,
-      cancel_url: `${site}/checkout/${data.departureId}?cancelled=1`,
+      cancel_url: tourSlug
+        ? `${site}/tours/${tourSlug}/build?departure=${data.departureId}&cancelled=1`
+        : `${site}/checkout/${data.departureId}?cancelled=1`,
     });
     checkoutUrl = session.url;
 

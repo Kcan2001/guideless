@@ -104,8 +104,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
   const experiences = (extras?.addOns ?? []).filter((a) => !a.tier_group);
   const hasExtras = stayOptions.length > 0 || viewing.length > 0 || experiences.length > 0;
   const bookable = !!next && next.availability.available > 0;
-  // The builder route arrives in Milestone 2; until then "Build my trip" opens the existing checkout.
-  const buildHref = bookable ? (`/checkout/${next.id}` as Route) : null;
+  const buildHref = bookable ? (`/tours/${tour.slug}/build?departure=${next.id}` as Route) : null;
   const eventShortName = tour.event_name?.replace(/^Formula 1 /, "") ?? null;
 
   return (
