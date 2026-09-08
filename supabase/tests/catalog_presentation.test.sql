@@ -69,7 +69,7 @@ select tests.clear_auth();
 
 -- ── Pricing is untouched ─────────────────────────────────────────────────────
 -- One traveler, default Nice tier, Grandstand K + Friday boat + private transfer, deposit.
--- Expected: 189000 (base) + 129000 + 21000 + 12000 = 351000.
+-- The expected total is read from the catalog, not restated here. Prices move; the sum does not.
 select is(
   ((public.quote_booking(
       '30000000-0000-4000-8000-000000000004', array[1], null,
@@ -77,7 +77,11 @@ select is(
         {"addOnId":"32000000-0000-4000-8000-000000000004","travelerIndexes":[1]},
         {"addOnId":"32000000-0000-4000-8000-000000000005","quantity":1}]'::jsonb,
       null, 'deposit', false)) ->> 'total_amount')::bigint,
-  351000::bigint,
+  ((select price_amount from public.departures where id = '30000000-0000-4000-8000-000000000004')
+   + (select sum(price_amount) from public.departure_add_ons
+      where id in ('32000000-0000-4000-8000-000000000001',
+                   '32000000-0000-4000-8000-000000000004',
+                   '32000000-0000-4000-8000-000000000005')))::bigint,
   'quote_booking total for the Monaco example is unchanged by the presentation columns');
 
 select * from finish();

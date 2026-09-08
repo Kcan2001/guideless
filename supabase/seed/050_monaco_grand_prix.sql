@@ -1,6 +1,7 @@
 -- Seed: "Monaco Grand Prix Weekend" — the event-anchored product. One group of up to 50, two stay
--- tiers (Nice 3★ or Monaco 5★), race viewing as mutually exclusive ticket tiers, welcome drinks on
--- night one. Race weekend 4–6 June 2027; trip Thu 3 → Mon 7 June. Prices in USD minor units.
+-- tiers (Nice or Monte Carlo), race viewing as mutually exclusive ticket tiers, welcome drinks on
+-- night one. Race weekend 4–6 June 2027; trip Wed 2 → Mon 7 June. Prices in USD minor units.
+-- Dates and prices were set from research at the foot of this file; read that before changing them.
 
 insert into public.destinations
   (id, slug, name, country_code, country_name, region, timezone, latitude, longitude, summary, emergency_numbers, is_published)
@@ -244,3 +245,235 @@ update public.departure_add_ons
 set cancellable_until_days_before = null
 where departure_id = '30000000-0000-4000-8000-000000000004'
   and tier_group = 'race_view';
+
+-- ── Real dates, real prices, and the yacht (2026-09-08) ──────────────────────
+-- The 2027 Grand Prix runs Friday 4 to Sunday 6 June, the race at 15:00 Sunday. Kyle set the trip
+-- Wednesday to Monday, so it is 2–7 June 2027: five nights, arriving two days before the track
+-- opens and leaving the morning after the race. That adds a night and a whole free Thursday.
+--
+-- Every price below replaces a placeholder. They are built from published figures: 2026 grandstand
+-- face values plus about 9% into 2027, Amber Lounge's own per-day yacht rates, race-week room rates
+-- in Nice and Monte Carlo, and the TER fare. Two assumptions run through all of it, both recorded
+-- in docs/pricing.md: roughly 1.09 USD to the euro, and no trade discount agreed with any supplier
+-- yet, so these are retail costs with our margin on top.
+
+update public.tours
+set duration_days = 6
+where id = '20000000-0000-4000-8000-000000000002';
+
+update public.tour_versions set
+  summary = 'Five nights on the Riviera for the Monaco Grand Prix, 2 to 7 June 2027. Stay in Nice for value or in Monaco for the full show. Pick your race view, grandstand, terrace or yacht, and meet up to fifty people doing the same weekend fifty different ways.',
+  description = 'We book the hotels, your train pass between Nice and Monaco, and welcome drinks on Wednesday night. You get a free Thursday on the coast before the track opens. Practice is Friday, qualifying Saturday, the race Sunday at 3 pm. Race viewing is an add-on, so you pay only for the view you want. Couples meet couples, solos meet solos, and everyone compares notes at the harbour on Sunday night.',
+  starting_price_amount = 245000
+where id = '21000000-0000-4000-8000-000000000002';
+
+update public.tour_version_destinations set nights = 5
+where tour_version_id = '21000000-0000-4000-8000-000000000002'
+  and destination_id = '10000000-0000-4000-8000-000000000001';
+
+update public.tour_included_items
+set title = '5 nights in Nice or Monaco'
+where tour_version_id = '21000000-0000-4000-8000-000000000002' and position = 1;
+
+update public.tour_included_items
+set title = 'Welcome drinks Wednesday',
+    description = 'First round on us at a harbour bar the night everyone lands. Meet the group two days before the noise starts.'
+where tour_version_id = '21000000-0000-4000-8000-000000000002' and position = 2;
+
+update public.tour_included_items
+set description = 'Unlimited regional trains Thursday to Sunday. Twenty minutes each way; the trains beat every road that weekend.'
+where tour_version_id = '21000000-0000-4000-8000-000000000002' and position = 3;
+
+update public.tour_faqs
+set answer = 'Nice is the value tier: a comfortable hotel by the port, twenty minutes by train from the circuit, and where the welcome drinks are. Monaco is the full show: five nights in Monte Carlo, walking distance to the track, at race-week prices. One group, two prices; everyone meets at the harbour on Sunday night. Hotels are named in your confirmation.'
+where tour_version_id = '21000000-0000-4000-8000-000000000002'
+  and question = 'Nice or Monaco: which should I choose?';
+
+update public.tour_faqs
+set answer = 'Your train pass covers Nice to Monaco and back from Thursday to Sunday, and the circuit is a walk from Monaco station. If you land late, a private airport transfer is an optional add-on. The one thing trains will not do is bring you home from an evening party in the harbour, so plan a taxi if you book one of those.'
+where tour_version_id = '21000000-0000-4000-8000-000000000002'
+  and question = 'Do I need a car?';
+
+-- Six days now. Renumber downward first so nothing collides, then Thursday drops into the gap.
+update public.tour_days set day_number = 6 where id = '22000000-0000-4000-8000-000000000015';
+update public.tour_days set day_number = 5 where id = '22000000-0000-4000-8000-000000000014';
+update public.tour_days set day_number = 4 where id = '22000000-0000-4000-8000-000000000013';
+update public.tour_days set day_number = 3 where id = '22000000-0000-4000-8000-000000000012';
+
+insert into public.tour_days (id, tour_version_id, day_number, destination_id, title, summary) values
+  ('22000000-0000-4000-8000-000000000016', '21000000-0000-4000-8000-000000000002', 2,
+   '10000000-0000-4000-8000-000000000001', 'A day before it starts',
+   'Thursday, before the track opens. Villefranche, Eze or the old town, and the harbour filling with boats while you watch.')
+on conflict (id) do nothing;
+
+insert into public.tour_itinerary_items
+  (tour_day_id, position, type, title, description, start_time, end_time, timezone, location_name, responsibility, is_optional, visibility, is_anchor)
+values
+  ('22000000-0000-4000-8000-000000000016', 1, 'free_time', 'The Riviera, before the noise',
+   'The quietest day of the weekend and the best one for the coast. Trains along the corniche run all day on your pass, and Monaco is still walkable on a Thursday.',
+   null, null, 'Europe/Paris', null, 'traveler', true, 'public_preview', false)
+on conflict do nothing;
+
+update public.tour_days
+set title = 'Arrive on the Riviera',
+    summary = 'Wednesday. Land in Nice by five, check in wherever you chose to stay, welcome drinks at 8 pm at the harbour in Nice.'
+where id = '22000000-0000-4000-8000-000000000011';
+
+update public.tour_days
+set summary = 'Friday: free practice in Monaco if your race view covers it, or a slow day on the coast. Trains run every 20 minutes.'
+where id = '22000000-0000-4000-8000-000000000012';
+
+update public.tour_itinerary_items
+set description = 'Trains to Monaco every 20 minutes with your pass. The three-day grandstand pass covers Friday; the terrace and yacht days start Saturday. Or Villefranche and a swim.'
+where tour_day_id = '22000000-0000-4000-8000-000000000012' and position = 1;
+
+update public.tour_itinerary_items
+set description = 'Land by 17:00 on Wednesday to make welcome drinks.'
+where tour_day_id = '22000000-0000-4000-8000-000000000011' and position = 1;
+
+update public.tour_itinerary_items
+set description = 'First round on us at a harbour bar in Nice, 8 pm Wednesday. Fifty people, one weekend, no agenda.'
+where tour_day_id = '22000000-0000-4000-8000-000000000011' and position = 3;
+
+-- ── The departure ────────────────────────────────────────────────────────────
+-- Five nights near the port in Nice during race week costs about EUR 280 a night, plus the regional
+-- train pass, the welcome round and the ops behind it: roughly USD 1,650 landed. $2,450 is that with
+-- our margin. The old $1,890 was a four-night placeholder and did not cover the fifth night.
+update public.departures
+set start_date = '2027-06-02',
+    end_date = '2027-06-07',
+    price_amount = 245000,
+    deposit_amount = 60000,
+    shared_room_discount_amount = 45000,
+    balance_due_date = '2027-03-24'
+where id = '30000000-0000-4000-8000-000000000004';
+
+update public.departure_stay_options set
+  shared_room_discount_amount = 45000,
+  description = 'A comfortable hotel in the port quarter, the group''s base for drinks and a short hop to Nice-Ville for the train to the circuit. A fraction of Monaco race-week prices.',
+  includes = array['5 nights', 'Breakfast', 'Train pass Nice to Monaco', 'Property named at booking'],
+  details = jsonb_build_object(
+    'neighborhood', 'Port Lympia / Old Town',
+    'station_distance', '10–15 min to Nice-Ville by tram or taxi',
+    'train_time', '20–25 min Nice to Monaco',
+    'breakfast', 'Included',
+    'room_type', 'Double or twin',
+    'hotel_confirmed', false)
+where id = '31000000-0000-4000-8000-000000000001';
+
+-- Monte Carlo runs EUR 900–1,200 a night in race week against EUR 280 in Nice: five nights is a
+-- landed difference of about USD 3,900. $4,450 is that difference with margin.
+update public.departure_stay_options set
+  price_delta_amount = 445000,
+  shared_room_discount_amount = 190000,
+  description = 'Five nights in Monte Carlo during race week, walking distance to the circuit. No train in the morning, and the harbour at your door at night.',
+  includes = array['5 nights in Monte Carlo', 'Breakfast', 'Walk to the circuit', 'Property confirmed at booking'],
+  why_price_note = 'Five nights in Monte Carlo during race week, walking distance to the circuit, at race-week hotel pricing.',
+  details = jsonb_build_object(
+    'neighborhood', 'Monte Carlo',
+    'station_distance', 'Walking distance to the circuit; Monaco-Monte-Carlo station nearby',
+    'train_time', 'None needed on race days',
+    'breakfast', 'Included',
+    'room_type', 'Double or twin',
+    'hotel_confirmed', false)
+where id = '31000000-0000-4000-8000-000000000002';
+
+-- ── Race viewing, repriced ───────────────────────────────────────────────────
+-- Monaco sells grandstand seats as three-day passes. There is no Saturday-and-Sunday ticket, so the
+-- old title described a product that does not exist. K1–K2 face value was EUR 1,420 for 2026; at
+-- about 9% into 2027 that is EUR 1,548, roughly USD 1,690 before we have an allocation of our own.
+update public.departure_add_ons set
+  title = 'Grandstand K (three-day pass)',
+  description = 'Reserved seats over the swimming-pool section for all three days: practice Friday, qualifying Saturday, the race Sunday. The classic view and the loudest one. Monaco sells this as a three-day pass; there is no single-day version of this seat.',
+  price_amount = 219000,
+  day_number = 3,
+  includes = array['Reserved seat Friday, Saturday and Sunday', 'The same seat all three days'],
+  excludes = array['Food and drinks', 'Transfers to the circuit'],
+  why_price_note = 'Official three-day grandstand seating over the swimming-pool section, at face value plus our booking. We hold no allocation of our own, so this moves with what the circuit charges.'
+where id = '32000000-0000-4000-8000-000000000001';
+
+update public.departure_add_ons set
+  price_amount = 545000,
+  day_number = 4,
+  description = 'A private terrace above the harbour chicane for Saturday and Sunday, with lunch and an open bar both days. Sit down when you want to.'
+where id = '32000000-0000-4000-8000-000000000002';
+
+-- The yacht is Amber Lounge's, at their published day rate. Their quotes exclude 20% French VAT and
+-- a 3% card fee, which is why Sunday lands near USD 6,000 a head at cost and the old $5,950 was
+-- below what we would pay for it. See docs/pricing.md: we have no trade rate, so a traveler can
+-- currently buy this direct for less than we sell it.
+update public.departure_add_ons set
+  title = 'Amber Lounge yacht, race day',
+  description = 'Sunday on a yacht berthed on the circuit at Tabac: breakfast, lunch, unlimited champagne and the cars at eye level from late morning until the podium. Tender transfers from the quay. Shared with whoever in Your Group chooses it.',
+  price_amount = 675000,
+  day_number = 5,
+  capacity = 12,
+  includes = array['Breakfast, lunch and afternoon tea', 'Unlimited champagne and open bar', 'Tender transfers from the quay', 'The race from the mooring'],
+  excludes = array['Getting to Monaco', 'Saturday qualifying', 'The evening parties'],
+  meeting_point = 'Quai Antoine 1er, tender from 10:30',
+  why_price_note = 'Amber Lounge charge a per-person day rate for race day and add 20% French VAT and a 3% card fee on top. This is that, plus our booking. It is the most expensive seat in Monaco and the price reflects it.'
+where id = '32000000-0000-4000-8000-000000000003';
+
+insert into public.departure_add_ons
+  (id, departure_id, title, description, kind, price_amount, currency, pricing_basis, capacity, day_number, start_time, end_time,
+   location_name, latitude, longitude, bookable_until_days_before, cancellable_until_days_before, tier_group, position, is_featured,
+   includes, excludes, meeting_point, label, tier, why_price_note, image_urls)
+values
+  ('32000000-0000-4000-8000-000000000006', '30000000-0000-4000-8000-000000000004', 'Amber Lounge yacht, qualifying day',
+   'Saturday on the same yacht at a fraction of Sunday''s price. Qualifying in Monaco is the session people argue matters more than the race, because nobody overtakes here.',
+   'ticket', 495000, 'USD', 'per_traveler', 12, 4, '11:00', '18:30', 'Port Hercule berth', 43.7361, 7.4270, 21, null, 'race_view', 6, false,
+   array['Breakfast, lunch and afternoon tea', 'Unlimited champagne and open bar', 'Tender transfers from the quay', 'Qualifying from the mooring'],
+   array['Getting to Monaco', 'Sunday race day', 'The evening parties'],
+   'Quai Antoine 1er, tender from 10:30', null, 'premium',
+   'Saturday costs less than Sunday because the yacht charges less for it, not because it is a lesser day. Same boat, same catering.',
+   array['/photos/monaco-harbour-yachts.jpg']),
+
+  ('32000000-0000-4000-8000-000000000007', '30000000-0000-4000-8000-000000000004', 'Amber Lounge yacht, both days',
+   'Saturday and Sunday on the yacht. Two days aboard for less than two single days cost, because that is how the boat prices the pair.',
+   'ticket', 1140000, 'USD', 'per_traveler', 8, 4, '11:00', '18:30', 'Port Hercule berth', 43.7361, 7.4270, 21, null, 'race_view', 7, true,
+   array['Both days aboard', 'Breakfast, lunch and afternoon tea each day', 'Unlimited champagne and open bar', 'Tender transfers from the quay'],
+   array['Getting to Monaco', 'The evening parties'],
+   'Quai Antoine 1er, tender from 10:30', 'luxury', 'elite',
+   'Both yacht days bought together. It saves about $300 against booking the two days separately, and it is the only way to keep the same spot on the boat across the weekend.',
+   array['/photos/monaco-harbour-yachts.jpg', '/photos/monaco-yacht-deck-view.jpg']),
+
+  ('32000000-0000-4000-8000-000000000008', '30000000-0000-4000-8000-000000000004', 'Friday night on the water',
+   'The Friday party on a superyacht in the harbour: DJs, cocktails and canapes, 9 pm until 1 am. It is separate from race viewing, so you can come without buying a yacht day.',
+   'ticket', 169000, 'USD', 'per_traveler', 20, 3, '21:00', null, 'Port Hercule', 43.7361, 7.4270, 21, null, null, 8, false,
+   array['Superyacht venue in Port Hercule', 'Signature cocktails and spirits', 'Canapes', 'Resident DJs'],
+   array['Getting back to Nice'],
+   'Quai Antoine 1er, from 20:45', 'social', 'premium',
+   'The venue price plus our booking. Worth knowing before you buy: the last train to Nice leaves well before this ends, so budget for a taxi or stay in Monaco.',
+   array['/photos/monaco-harbour-yachts.jpg']),
+
+  ('32000000-0000-4000-8000-000000000009', '30000000-0000-4000-8000-000000000004', 'Sunday night after the flag',
+   'The closing party once the podium is done: live artists, international DJs and champagne on a superyacht in the harbour, 9 pm until 2 am. The last thing that happens all weekend.',
+   'ticket', 229000, 'USD', 'per_traveler', 20, 5, '21:00', null, 'Port Hercule', 43.7361, 7.4270, 21, null, null, 9, false,
+   array['Superyacht venue in Port Hercule', 'Live artists and international DJs', 'Premium champagne and cocktails'],
+   array['Getting back to Nice'],
+   'Quai Antoine 1er, from 20:45', null, 'elite',
+   'The most expensive night in Monaco, and this is what it costs. Same warning as Friday: no train home, plan a taxi or stay in Monaco.',
+   array['/photos/monaco-harbour-yachts.jpg'])
+on conflict (id) do nothing;
+
+-- The Friday boat now falls on day 3, and a private car on the Riviera has never cost $120.
+update public.departure_add_ons
+set day_number = 3
+where id = '32000000-0000-4000-8000-000000000004';
+
+update public.departure_add_ons set
+  price_amount = 15000,
+  why_price_note = 'One car per booking, so it costs the same whether you travel alone or as a pair. A private car from Nice airport runs EUR 90 to 140 depending on the vehicle; this is that, not a markup on a shared shuttle.'
+where id = '32000000-0000-4000-8000-000000000005';
+
+-- Everything in race_view is bought in a traveler's name months ahead and no supplier takes it
+-- back, the yacht least of all. Re-run here so the new rows inherit it too.
+update public.departure_add_ons
+set cancellable_until_days_before = null
+where departure_id = '30000000-0000-4000-8000-000000000004'
+  and tier_group = 'race_view';
+
+-- The two parties are the same kind of commitment: a named guest list, paid up front.
+update public.departure_add_ons
+set cancellable_until_days_before = null
+where id in ('32000000-0000-4000-8000-000000000008', '32000000-0000-4000-8000-000000000009');

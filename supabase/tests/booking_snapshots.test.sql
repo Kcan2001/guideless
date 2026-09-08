@@ -52,16 +52,25 @@ select * from public.create_booking(
     {"addOnId":"32000000-0000-4000-8000-000000000005","quantity":1}]'::jsonb,
   null, null);
 
-select is((select total_amount from snap_booking), 725000::bigint,
-  'total = base 1,890 + Monaco tier 3,950 + Grandstand K 1,290 + transfer 120');
+-- Read the catalog rather than restating it. Prices are a business decision that changes; the
+-- arithmetic between them is the invariant this file exists to protect.
+select is((select total_amount from snap_booking),
+  ((select price_amount from public.departures where id = '30000000-0000-4000-8000-000000000004')
+   + (select price_delta_amount from public.departure_stay_options where id = '31000000-0000-4000-8000-000000000002')
+   + (select price_amount from public.departure_add_ons where id = '32000000-0000-4000-8000-000000000001')
+   + (select price_amount from public.departure_add_ons where id = '32000000-0000-4000-8000-000000000005'))::bigint,
+  'total = departure price + Monaco tier delta + grandstand + transfer');
 
 select is(
   (select unit_amount from public.booking_items where booking_id = (select booking_id from snap_booking) and kind = 'base'),
-  189000::bigint, 'base line carries the departure price without the tier delta');
+  (select price_amount from public.departures where id = '30000000-0000-4000-8000-000000000004')::bigint,
+  'base line carries the departure price without the tier delta');
 select is(
   (select row(kind, quantity, unit_amount, total_amount)::text from public.booking_items
    where booking_id = (select booking_id from snap_booking) and kind = 'stay'),
-  '(stay,1,395000,395000)', 'stay line = delta × travelers');
+  (select format('(stay,1,%s,%s)', price_delta_amount, price_delta_amount)
+   from public.departure_stay_options where id = '31000000-0000-4000-8000-000000000002'),
+  'stay line = delta × travelers');
 select is(
   (select metadata ->> 'stay_option_id' from public.booking_items where booking_id = (select booking_id from snap_booking) and kind = 'stay'),
   '31000000-0000-4000-8000-000000000002', 'stay line remembers the option');
@@ -83,7 +92,10 @@ select is(
 -- ── Catalog edits never rewrite what was sold ────────────────────────────────
 select tests.clear_auth();
 update public.departure_add_ons set title = 'Grandstand K (renamed after sale)' where id = '32000000-0000-4000-8000-000000000001';
-update public.bookings set status = 'confirmed', payment_status = 'deposit_paid', amount_paid = 50000 + 129000 + 12000
+update public.bookings set status = 'confirmed', payment_status = 'deposit_paid',
+  amount_paid = (select deposit_amount from public.departures where id = '30000000-0000-4000-8000-000000000004')
+              + (select price_amount from public.departure_add_ons where id = '32000000-0000-4000-8000-000000000001')
+              + (select price_amount from public.departure_add_ons where id = '32000000-0000-4000-8000-000000000005')
 where id = (select booking_id from snap_booking);
 
 select is(
@@ -105,13 +117,16 @@ select * from public.create_booking(
   '[{"firstName":"Kyle","lastName":"Tester","dateOfBirth":"1987-08-23","nationality":"US"}]'::jsonb,
   '{"name":"Pat","relationship":"Friend","phone":"+14155550123"}'::jsonb, '{}'::jsonb,
   'deposit', 'v1', '31000000-0000-4000-8000-000000000001', '[]'::jsonb, null, null);
-select is((select total_amount from snap_nice), 189000::bigint, 'Nice tier: total = base price');
+select is((select total_amount from snap_nice),
+  (select price_amount from public.departures where id = '30000000-0000-4000-8000-000000000004')::bigint,
+  'Nice tier: total = base price');
 select is(
   (select row(quantity, unit_amount, total_amount)::text from public.booking_items where booking_id = (select booking_id from snap_nice) and kind = 'stay'),
   '(1,0,0)', 'included tier still gets a zero stay line for the record');
 select is(
   (select unit_amount from public.booking_items where booking_id = (select booking_id from snap_nice) and kind = 'base'),
-  189000::bigint, 'base line unchanged when the tier is included');
+  (select price_amount from public.departures where id = '30000000-0000-4000-8000-000000000004')::bigint,
+  'base line unchanged when the tier is included');
 
 -- ── Payment notifications ────────────────────────────────────────────────────
 select tests.clear_auth();
