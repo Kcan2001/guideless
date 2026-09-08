@@ -135,16 +135,13 @@ Travel", US), still in test mode / not activated. Test publishable + secret key 
 signing secret are in `supabase/.env` (`STRIPE_TEST_*`) and in Vercel **Production and Preview** as
 `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` / `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` (test values on
 both for now). Test-mode endpoint `we_1UD63UBhgWBLSqYpP4OQwhqU` →
-`https://guidelesstravel.com/api/webhooks/stripe` with the six events above. **Activation (2026-09-07 evening):** every section of the live-account activation is filled in —
-single-member LLC, EIN + legal name `GUIDELESS LLC`, business address 646 Rector Street
-Philadelphia PA 19128, public name Guideless Travel, category Travel agencies, support phone
-(hidden on receipts), statement descriptor `GUIDELESS TRAVEL`, Radar Lite, no Stripe Tax, no Climate
-— except **Account representative** (Kyle's home address + SSN last 4) and the final "Agree and
-submit", followed by a payout bank account. Once live keys exist: create a _live-mode_ webhook
-endpoint with the same URL/events and replace the three Production values in Vercel with live keys
-
-- its signing secret. Kyle's login also owned two old "Reset Club" accounts; the 2026 one is closed
-  and the 2021 one (`acct_1Ja1HE2SQ0KlVgLK`) is being closed on Kyle's instruction.
+`https://guidelesstravel.com/api/webhooks/stripe` with the six events above. **Activated 2026-09-07:** charges and payouts enabled, statement descriptor `GUIDELESS TRAVEL`.
+Live publishable/secret keys and the live webhook signing secret are in `supabase/.env`
+(`STRIPE_LIVE_*`); live-mode endpoint `we_1UDDN9BhgWBLSqYpckusvsSq` →
+`https://guidelesstravel.com/api/webhooks/stripe` with the six events. **Vercel Production now runs
+live keys**; Preview keeps the test keys and the test-mode endpoint. Kyle's login also owned two old
+"Reset Club" accounts; the 2026 one is closed, the 2021 one (`acct_1Ja1HE2SQ0KlVgLK`) was being
+closed on Kyle's instruction.
 
 ### 2.4 Resend
 
