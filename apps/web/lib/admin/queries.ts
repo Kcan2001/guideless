@@ -2,6 +2,7 @@ import "server-only";
 
 import type { Tables } from "@guideless/types";
 import { daysBetween } from "@guideless/utils";
+import { listHotelsForSelect } from "@/lib/hotels/catalog";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -670,7 +671,10 @@ export async function listDepartureExtrasAdmin(departureId: string) {
       );
     }
   }
+  // Curated hotels for the stay-option form; empty until migration 0044 exists on this database.
+  const hotels = await listHotelsForSelect().catch(() => []);
   return {
+    hotels,
     stays: (stays ?? []).map((st) => ({ ...st, taken: stayTaken.get(st.id) ?? 0 })),
     addOns: (addOns ?? []).map((a) => ({
       ...a,

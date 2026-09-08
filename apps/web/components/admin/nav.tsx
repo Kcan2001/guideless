@@ -2,13 +2,17 @@ import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import {
+  BedDouble,
   CalendarRange,
+  Coins,
+  HandHeart,
   LayoutDashboard,
   LifeBuoy,
   Map,
   Megaphone,
   ReceiptText,
   Users,
+  Wine,
   type LucideIcon,
 } from "lucide-react";
 import { brand } from "@guideless/config";
@@ -22,6 +26,10 @@ const NAV: Array<{ href: string; label: string; icon: LucideIcon }> = [
   { href: "/admin/departures", label: "Departures", icon: CalendarRange },
   { href: "/admin/bookings", label: "Bookings", icon: ReceiptText },
   { href: "/admin/customers", label: "Customers", icon: Users },
+  { href: "/admin/hotels", label: "Hotels", icon: BedDouble },
+  { href: "/admin/pricing", label: "Pricing", icon: Coins },
+  { href: "/admin/hosts", label: "Hosts", icon: HandHeart },
+  { href: "/admin/meetups", label: "Meetups", icon: Wine },
   { href: "/admin/support", label: "Support", icon: LifeBuoy },
   { href: "/admin/social", label: "Social", icon: Megaphone },
 ];

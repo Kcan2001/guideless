@@ -1,0 +1,171 @@
+{
+  "hotels": [
+    {
+      "supplierHotelId": "mock_nice_port",
+      "name": "Hôtel du Port (mock)",
+      "description": "Comfortable three-star by Port Lympia, ten minutes from Nice-Ville.",
+      "address": "12 Quai Papacino",
+      "city": "Nice",
+      "country": "FR",
+      "latitude": 43.6963,
+      "longitude": 7.2853,
+      "starRating": 3,
+      "images": ["/photos/nice-old-town-evening.jpg"],
+      "raceWeekMultiplier": 1.6,
+      "rooms": [
+        {
+          "name": "Classic Double",
+          "bedType": "1× double",
+          "maxAdults": 2,
+          "rates": [
+            {
+              "id": "mock_nice_port_classic_flex_bb",
+              "currency": "EUR",
+              "nightlyNet": 16500,
+              "taxesPerNight": 400,
+              "feesPerNight": 0,
+              "refundable": true,
+              "refundableUntilDaysBefore": 3,
+              "breakfastIncluded": true,
+              "paymentType": "pay_now",
+              "available": true
+            },
+            {
+              "id": "mock_nice_port_classic_nrf_ro",
+              "currency": "EUR",
+              "nightlyNet": 13900,
+              "taxesPerNight": 400,
+              "feesPerNight": 0,
+              "refundable": false,
+              "breakfastIncluded": false,
+              "paymentType": "pay_now",
+              "available": true
+            }
+          ]
+        },
+        {
+          "name": "Superior Sea View",
+          "bedType": "1× king",
+          "maxAdults": 2,
+          "rates": [
+            {
+              "id": "mock_nice_port_superior_flex_bb",
+              "currency": "EUR",
+              "nightlyNet": 21500,
+              "taxesPerNight": 400,
+              "feesPerNight": 0,
+              "refundable": true,
+              "refundableUntilDaysBefore": 3,
+              "breakfastIncluded": true,
+              "paymentType": "pay_now",
+              "available": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "supplierHotelId": "mock_nice_massena",
+      "name": "Maison Masséna (mock)",
+      "description": "Boutique four-star off Place Masséna with a rooftop pool.",
+      "address": "5 Rue Masséna",
+      "city": "Nice",
+      "country": "FR",
+      "latitude": 43.6975,
+      "longitude": 7.2686,
+      "starRating": 4,
+      "images": ["/photos/nice-place-massena.jpg"],
+      "raceWeekMultiplier": 1.7,
+      "rooms": [
+        {
+          "name": "Deluxe King",
+          "bedType": "1× king",
+          "maxAdults": 2,
+          "rates": [
+            {
+              "id": "mock_nice_massena_deluxe_flex_bb",
+              "currency": "EUR",
+              "nightlyNet": 29500,
+              "taxesPerNight": 500,
+              "feesPerNight": 800,
+              "refundable": true,
+              "refundableUntilDaysBefore": 7,
+              "breakfastIncluded": true,
+              "paymentType": "pay_now",
+              "available": true
+            },
+            {
+              "id": "mock_nice_massena_deluxe_pay_at_hotel",
+              "currency": "EUR",
+              "nightlyNet": 30500,
+              "taxesPerNight": 500,
+              "feesPerNight": 0,
+              "refundable": true,
+              "refundableUntilDaysBefore": 1,
+              "breakfastIncluded": false,
+              "paymentType": "pay_at_property",
+              "available": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "supplierHotelId": "mock_monaco_carlo",
+      "name": "Résidence Monte-Carlo (mock)",
+      "description": "Five-star on the hill above the harbour, walking distance to the circuit.",
+      "address": "1 Avenue de Grande Bretagne",
+      "city": "Monaco",
+      "country": "MC",
+      "latitude": 43.7402,
+      "longitude": 7.4275,
+      "starRating": 5,
+      "images": ["/photos/monaco-casino-square.jpg"],
+      "raceWeekMultiplier": 2.4,
+      "rooms": [
+        {
+          "name": "Harbour View King",
+          "bedType": "1× king",
+          "maxAdults": 2,
+          "rates": [
+            {
+              "id": "mock_monaco_carlo_harbour_flex_bb",
+              "currency": "EUR",
+              "nightlyNet": 78000,
+              "taxesPerNight": 1500,
+              "feesPerNight": 2500,
+              "refundable": true,
+              "refundableUntilDaysBefore": 14,
+              "breakfastIncluded": true,
+              "paymentType": "pay_now",
+              "available": true
+            },
+            {
+              "id": "mock_monaco_carlo_harbour_nrf_bb",
+              "currency": "EUR",
+              "nightlyNet": 69000,
+              "taxesPerNight": 1500,
+              "feesPerNight": 2500,
+              "refundable": false,
+              "breakfastIncluded": true,
+              "paymentType": "pay_now",
+              "available": true
+            },
+            {
+              "id": "mock_monaco_carlo_harbour_soldout",
+              "currency": "EUR",
+              "nightlyNet": 60000,
+              "taxesPerNight": 1500,
+              "feesPerNight": 0,
+              "refundable": false,
+              "breakfastIncluded": false,
+              "paymentType": "pay_now",
+              "available": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "raceWeek": { "from": "2027-06-01", "to": "2027-06-08" }
+}

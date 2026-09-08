@@ -85,6 +85,9 @@ export async function saveStayOptionAction(fd: FormData): Promise<void> {
     label: s.label,
     tier: s.tier,
     why_price_note: s.whyPriceNote ?? null,
+    // Curated hotel link (docs/hotels.md); the selects post plain uuids outside the Zod schema.
+    hotel_id: optionalId(fd, "hotelId"),
+    hotel_room_id: optionalId(fd, "hotelRoomId"),
     details: compactDetails({
       neighborhood: s.neighborhood,
       station_distance: s.stationDistance,
