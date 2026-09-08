@@ -109,31 +109,55 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
           />
         </Section>
 
-        <Section title="Issues" description="Operational risk, made visible.">
+        <Section
+          title="Issues"
+          description="Operational risk, made visible."
+          actions={
+            <Link href="/admin/inventory" className="text-sm">
+              Inventory
+            </Link>
+          }
+        >
           {issues.length === 0 ? (
             <p className="text-sm text-muted-foreground">Nothing outstanding. Enjoy it.</p>
           ) : (
-            <ul className="space-y-2 text-sm">
-              {issues.map((i, idx) => (
-                <li key={idx} className="flex gap-2">
-                  {i.severity === "warning" ? (
-                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#D9A441]" aria-hidden />
-                  ) : (
-                    <Info className="mt-0.5 h-4 w-4 shrink-0 text-cyan" aria-hidden />
-                  )}
-                  {i.href ? (
-                    <Link
-                      href={i.href as "/admin"}
-                      className="text-foreground no-underline hover:text-link"
-                    >
-                      {i.text}
-                    </Link>
-                  ) : (
-                    <span>{i.text}</span>
-                  )}
-                </li>
-              ))}
-            </ul>
+            <div className="space-y-4">
+              {(["warning", "info"] as const).map((severity) => {
+                const group = issues.filter((i) => i.severity === severity);
+                if (group.length === 0) return null;
+                return (
+                  <div key={severity}>
+                    <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      {severity === "warning" ? "Needs a decision" : "Worth knowing"}
+                    </h3>
+                    <ul className="space-y-2 text-sm">
+                      {group.map((i, idx) => (
+                        <li key={`${severity}-${idx}`} className="flex gap-2">
+                          {severity === "warning" ? (
+                            <AlertTriangle
+                              className="mt-0.5 h-4 w-4 shrink-0 text-[#D9A441]"
+                              aria-hidden
+                            />
+                          ) : (
+                            <Info className="mt-0.5 h-4 w-4 shrink-0 text-cyan" aria-hidden />
+                          )}
+                          {i.href ? (
+                            <Link
+                              href={i.href as "/admin"}
+                              className="text-foreground no-underline hover:text-link"
+                            >
+                              {i.text}
+                            </Link>
+                          ) : (
+                            <span>{i.text}</span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </Section>
       </div>

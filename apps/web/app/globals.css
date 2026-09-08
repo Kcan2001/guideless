@@ -129,3 +129,61 @@
     scroll-behavior: auto !important;
   }
 }
+
+/*
+ * Printing an operations sheet. The manifest is handed to a hotel or a coach company, so the
+ * navigation, buttons and page furniture come off and the tables are allowed to break across
+ * pages without splitting a row.
+ */
+@media print {
+  nav,
+  aside,
+  [data-print="hide"] {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+    font-size: 11pt;
+  }
+
+  main {
+    padding: 0 !important;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* Section cards become plain blocks; borders waste toner and add nothing on paper. */
+  section {
+    border: 0 !important;
+    background: transparent !important;
+    break-inside: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead {
+    display: table-header-group; /* Repeat the header on every page. */
+  }
+
+  tr {
+    break-inside: avoid;
+  }
+
+  th,
+  td {
+    padding: 4pt 6pt;
+    border-bottom: 0.5pt solid #999;
+  }
+
+  @page {
+    margin: 14mm;
+  }
+}

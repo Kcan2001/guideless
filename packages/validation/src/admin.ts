@@ -350,6 +350,67 @@ export const grantRoleSchema = z.object({
   role: z.enum(["trip_staff", "support", "content_editor", "finance", "admin", "super_admin"]),
 });
 
+// ── Coupons ───────────────────────────────────────────────────────────────────
+/**
+ * Mirrors the database rules on `coupons`: exactly one of percent/amount, a currency exactly when
+ * it is an amount, and a sane validity window. Amounts are typed in major units and converted here.
+ * Editing a coupon never changes an existing booking — bookings snapshot their discount.
+ */
+export const couponFormSchema = z
+  .object({
+    /** Codes are citext in the database; upper-cased here so the admin list reads consistently. */
+    code: z
+      .string()
+      .trim()
+      .min(3)
+      .max(40)
+      .regex(/^[A-Za-z0-9][A-Za-z0-9_-]*$/, "Letters, numbers, hyphen and underscore only")
+      .transform((c) => c.toUpperCase()),
+    /** Blank or absent both mean "no description" — a caller may omit the field entirely. */
+    description: z.preprocess(
+      (v) => (v === undefined || (typeof v === "string" && v.trim() === "") ? null : v),
+      z.string().trim().max(500).nullable(),
+    ),
+    /** "percent" or "amount" — decides which of the two value fields is used. */
+    kind: z.enum(["percent", "amount"]),
+    percentOff: z.preprocess(
+      (v) => (v === "" || v === undefined ? undefined : v),
+      intField(1, 100).optional(),
+    ),
+    amountOff: z.preprocess(
+      (v) => (v === "" || v === undefined ? undefined : v),
+      moneyMajorToMinor.optional(),
+    ),
+    currency: z.preprocess(
+      (v) => (v === "" || v === undefined ? undefined : v),
+      currencySchema.optional(),
+    ),
+    validFrom: z.preprocess((v) => (v === "" ? null : v), isoDateSchema.nullable()).default(null),
+    validUntil: z.preprocess((v) => (v === "" ? null : v), isoDateSchema.nullable()).default(null),
+    maxRedemptions: z.preprocess(
+      (v) => (v === "" || v === undefined ? null : v),
+      intField(1, 100000).nullable(),
+    ),
+    isActive: checkbox.default(false),
+  })
+  .refine((c) => c.kind !== "percent" || typeof c.percentOff === "number", {
+    message: "Enter a percentage between 1 and 100",
+    path: ["percentOff"],
+  })
+  .refine((c) => c.kind !== "amount" || (typeof c.amountOff === "number" && c.amountOff > 0), {
+    message: "Enter an amount greater than zero",
+    path: ["amountOff"],
+  })
+  .refine((c) => c.kind !== "amount" || Boolean(c.currency), {
+    message: "An amount off needs a currency",
+    path: ["currency"],
+  })
+  .refine((c) => !(c.validFrom && c.validUntil) || c.validUntil >= c.validFrom, {
+    message: "The end date must not be before the start date",
+    path: ["validUntil"],
+  });
+export type CouponForm = z.infer<typeof couponFormSchema>;
+
 // ── Support inbox (roadmap launch gap) ──────────────────────────────────────
 export const SUPPORT_PRIORITIES = ["low", "normal", "high", "urgent"] as const;
 export const SUPPORT_THREAD_STATUSES = [

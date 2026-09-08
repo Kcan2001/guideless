@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
 import { readConsent, writeConsent, type ConsentState } from "@/lib/analytics";
@@ -23,9 +24,14 @@ const getServerSnapshot = (): ConsentState | "server" => "server";
  * Minimal, calm cookie consent (GDPR / ePrivacy — we sell to EU travelers and run EU trips).
  * Only appears when no choice is stored and at least one analytics tool is configured.
  * Essential cookies (auth, checkout) need no consent and are not gated here.
+ *
+ * Staff tools are excluded: /admin is a signed-in internal surface, not a visitor journey, and the
+ * banner sat over its controls. Analytics does not track admin pages either.
  */
 export function ConsentBanner() {
+  const pathname = usePathname();
   const consent = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  if (pathname?.startsWith("/admin")) return null;
   if (!ANALYTICS_CONFIGURED || consent !== "unknown") return null;
 
   return (
