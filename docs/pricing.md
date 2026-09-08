@@ -32,6 +32,11 @@ only display what it returns._
   pins the Monaco example total to prove it.
 - **Deposit and due today.** Deposit = `departures.deposit_amount` × travelers. Due today =
   deposit + all add-ons (or the full total). Balance = total − due today.
+- **Tiers are presentation too.** Migration 040 adds a public `tier` (Explorer / Classic / Premium /
+  Elite) to stay options and add-ons. Every trip starts at the minimum: the base price covers the
+  default (Explorer) stay option; other tiers are just price deltas or add-on prices as before. The
+  tier is a level shown as a badge, distinct from the marketing `label`; untiered rows (transfers,
+  dinners) leave it null. `quote_booking()` does not read it.
 
 ## `quote_booking(...)`
 

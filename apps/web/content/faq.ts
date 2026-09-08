@@ -41,6 +41,12 @@ export const FAQ: FaqItem[] = [
       "Yes. Flying from many different cities is what makes a group work, so you book the flight that suits you. We tell you exactly when to land and where to walk when you do, and the welcome transfer is arranged around it.",
   },
   {
+    id: "tiers",
+    question: "What do Explorer, Classic, Premium and Elite mean?",
+    answer:
+      "Every trip starts at the minimum: the base price covers the Explorer tier. Explorer is the best price, more basic accommodation and maximum value. Classic is the standard Guideless experience. Premium means better hotels and upgraded experiences. Elite is luxury, the best available. You pick a tier for where you stay and, where an add-on comes in levels, for that add-on too. Anything without a tier is simply optional.",
+  },
+  {
     id: "hotel",
     question: "Can I choose my hotel?",
     answer:

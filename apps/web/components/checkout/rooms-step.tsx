@@ -3,6 +3,7 @@
 import { ArrowLeft, ArrowRight, BedDouble, Users } from "lucide-react";
 import { formatMoney } from "@guideless/utils";
 import type { CheckoutDeparture } from "@/components/checkout/types";
+import { TierBadge } from "@/components/tours/option-label";
 import { Button } from "@/components/ui/button";
 import { ownRoom, roomOccupancy, shareRoom } from "@/lib/bookings/add-on-selection";
 import { cn } from "@/lib/utils";
@@ -155,7 +156,8 @@ export function RoomsStep({
                   />
                   <span className="min-w-0 flex-1">
                     <span className="flex flex-wrap items-baseline justify-between gap-2">
-                      <span className="font-semibold">
+                      <span className="flex flex-wrap items-center gap-2 font-semibold">
+                        <TierBadge tier={s.tier} />
                         {s.name}
                         {s.star_rating ? (
                           <span className="ml-2 text-sm text-muted-foreground">

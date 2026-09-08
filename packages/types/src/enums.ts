@@ -244,6 +244,13 @@ export type AddOnKind = (typeof ADD_ON_KINDS)[number];
 export const OPTION_LABELS = ["best_value", "most_popular", "social", "luxury"] as const;
 export type OptionLabel = (typeof OPTION_LABELS)[number];
 
+/**
+ * Public tier of a stay option or add-on (migration 040): Explorer / Classic / Premium / Elite.
+ * Null means untiered (a transfer, a dinner). Presentation only; pricing never reads it.
+ */
+export const OPTION_TIERS = ["explorer", "classic", "premium", "elite"] as const;
+export type OptionTier = (typeof OPTION_TIERS)[number];
+
 /** ISO 4217 codes we sell in. Extend deliberately; each needs Stripe + pricing support. */
 export const CURRENCIES = ["USD", "EUR", "GBP"] as const;
 export type Currency = (typeof CURRENCIES)[number];

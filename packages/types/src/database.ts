@@ -1083,6 +1083,7 @@ export type Database = {
           pricing_basis: string;
           start_time: string | null;
           supplier_service_id: string | null;
+          tier: Database["public"]["Enums"]["option_tier"] | null;
           tier_group: string | null;
           title: string;
           tour_itinerary_item_id: string | null;
@@ -1118,6 +1119,7 @@ export type Database = {
           pricing_basis?: string;
           start_time?: string | null;
           supplier_service_id?: string | null;
+          tier?: Database["public"]["Enums"]["option_tier"] | null;
           tier_group?: string | null;
           title: string;
           tour_itinerary_item_id?: string | null;
@@ -1153,6 +1155,7 @@ export type Database = {
           pricing_basis?: string;
           start_time?: string | null;
           supplier_service_id?: string | null;
+          tier?: Database["public"]["Enums"]["option_tier"] | null;
           tier_group?: string | null;
           title?: string;
           tour_itinerary_item_id?: string | null;
@@ -1294,6 +1297,7 @@ export type Database = {
           shared_room_discount_amount: number | null;
           star_rating: number | null;
           tagline: string | null;
+          tier: Database["public"]["Enums"]["option_tier"] | null;
           updated_at: string;
           why_price_note: string | null;
         };
@@ -1319,6 +1323,7 @@ export type Database = {
           shared_room_discount_amount?: number | null;
           star_rating?: number | null;
           tagline?: string | null;
+          tier?: Database["public"]["Enums"]["option_tier"] | null;
           updated_at?: string;
           why_price_note?: string | null;
         };
@@ -1344,6 +1349,7 @@ export type Database = {
           shared_room_discount_amount?: number | null;
           star_rating?: number | null;
           tagline?: string | null;
+          tier?: Database["public"]["Enums"]["option_tier"] | null;
           updated_at?: string;
           why_price_note?: string | null;
         };
@@ -4723,6 +4729,7 @@ export type Database = {
       notification_category: "operational" | "social" | "marketing";
       notification_channel: "push" | "email" | "in_app";
       option_label: "best_value" | "most_popular" | "social" | "luxury";
+      option_tier: "explorer" | "classic" | "premium" | "elite";
       payment_status:
         | "unpaid"
         | "deposit_paid"
@@ -4969,6 +4976,7 @@ export const Constants = {
       notification_category: ["operational", "social", "marketing"],
       notification_channel: ["push", "email", "in_app"],
       option_label: ["best_value", "most_popular", "social", "luxury"],
+      option_tier: ["explorer", "classic", "premium", "elite"],
       payment_status: [
         "unpaid",
         "deposit_paid",

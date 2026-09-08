@@ -4,7 +4,7 @@ import type { Route } from "next";
 import { CalendarDays, Check, Clock, MapPin, Minus, Users } from "lucide-react";
 import type { AddOnKind, Currency } from "@guideless/types";
 import { formatDate, formatMoney, formatWallTime } from "@guideless/utils";
-import { OptionLabelBadge } from "@/components/tours/option-label";
+import { OptionLabelBadge, TierBadge } from "@/components/tours/option-label";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import type { AddOnWithCounts } from "@/lib/data/extras";
@@ -113,8 +113,9 @@ export function ExperienceCards({
                   className="object-cover"
                   style={{ objectPosition: photoPosition(image) }}
                 />
-                {a.label && (
-                  <div className="absolute top-4 left-4">
+                {(a.tier || a.label) && (
+                  <div className="absolute top-4 left-4 flex flex-wrap items-center gap-2">
+                    <TierBadge tier={a.tier} />
                     <OptionLabelBadge label={a.label} />
                   </div>
                 )}
@@ -123,6 +124,7 @@ export function ExperienceCards({
             <div className="flex flex-1 flex-col gap-4 p-6">
               <div>
                 <p className="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  {!image && <TierBadge tier={a.tier} />}
                   {KIND_LABEL[a.kind]}
                   {pickOne && <span className="normal-case tracking-normal">· choose one</span>}
                   {!image && <OptionLabelBadge label={a.label} />}

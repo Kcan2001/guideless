@@ -19,6 +19,7 @@ import { ItineraryTimeline } from "@/components/tours/itinerary-timeline";
 import { PhotoGallery } from "@/components/tours/photo-gallery";
 import { ResponsibilityList } from "@/components/tours/responsibility-list";
 import { StayTierCards } from "@/components/tours/stay-tier-cards";
+import { TierLegend } from "@/components/tours/tier-legend";
 import { CtaLink } from "@/components/analytics/cta-link";
 import { buttonVariants } from "@/components/ui/button";
 import { tourEventJsonLd } from "@/lib/community/seo";
@@ -329,9 +330,10 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
             {isEvent ? "Pick your base." : "Pick your tier."}
           </h2>
           <p className="mt-2 max-w-xl text-muted-foreground">
-            The base price includes the first option. Upgrade if you want to, and see exactly why it
-            costs more before you do.
+            Every trip starts at the minimum. Upgrade if you want to, and see exactly why it costs
+            more before you do. The same four tiers apply to add-ons.
           </p>
+          <TierLegend className="mt-8" />
           <div className="mt-10">
             <StayTierCards
               options={stayOptions}
@@ -362,7 +364,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
                 </h2>
                 <p className="mt-2 max-w-xl text-muted-foreground">
                   Priced per person, chosen per traveler. Pick one now or add it later while seats
-                  last.
+                  last. Tiers work the same way as for where you stay.
                 </p>
                 <div className="mt-10">
                   <ExperienceCards
