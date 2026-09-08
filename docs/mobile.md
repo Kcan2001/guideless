@@ -33,18 +33,38 @@ components/itinerary-item.tsx, sync-badge.tsx, screen-tracker.tsx
 
 - **Trip home** answers "where am I, what's next, what are my options": greeting and city in the
   day's own time zone, hotel with check-out and Maps link, NOW / NEXT items with minutes-until,
-  optional moments later today, group summary, link to the full route. Before the trip it shows
-  the overview; after, the last day.
+  today's Live Moments (at most two, live ones first, with a link to the rest in Group), today's
+  add-ons, optional items later today, group summary, link to the full route. Before the trip it
+  shows the overview; after, the last day. Which moments qualify is pure logic in
+  `src/lib/moments/today.ts`: nothing that started more than three hours ago, nothing more than
+  eighteen hours out.
+- **Explore** leads with what you can still add to the trip — the same add-on cards as the
+  itinerary, filtered to what is unbought and still on sale, soonest first — then the curated
+  destination recommendations for the stop you are on.
+- **Onboarding**: on first sign-in a traveler is offered one screen of profile questions (name,
+  where they are travelling from, what they are excited about, who they are travelling with,
+  interests). Only the name is required and "Do this later" is a real exit: both paths stamp
+  `profiles.onboarded_at`, so nobody is asked twice, and the app never bounces there more than
+  once per launch even if that write fails. Everything is editable later in the profile tab.
+- **Per-activity chat**: an add-on the traveler has bought offers "Chat", which calls
+  `ensure_add_on_chat_room` to create and join the room for that activity on first use, then opens
+  it. RLS hides the room from anyone who has not bought in, so there is nothing to filter client
+  side; the room appears in the Group tab's chat list named after the activity.
+- **Itinerary changes**: an item staff marked `changed` shows the note they wrote, on the row and
+  again on the item screen, rather than only an "Updated" pill. When staff linked a replacement,
+  the item screen offers "Open the replacement".
 - **Offline**: the current trip is cached in AsyncStorage on every successful fetch; when the
   network fails the cached copy renders with "Offline · last synced 8 minutes ago". Chat needs
-  connectivity.
+  connectivity. The cache carries a version; an entry written by an older build is ignored and
+  refetched rather than parsed into a shape that no longer matches.
 - **Realtime**: `messages` and `support_messages` inserts stream via Postgres Changes (migration
   026 adds them to the `supabase_realtime` publication); RLS decides what a subscriber receives.
 - **Push**: registers an Expo push token per device into `push_tokens` (needs a dev build and an
   EAS `projectId`; skipped quietly otherwise). Android channels: `operational`, `social`.
   Notification taps route through `deepLinkToPath()`.
 - **Privacy**: group members see display name plus whatever a traveler toggled on (home country,
-  bio). Never email, phone, DOB. Blocking hides a traveler's messages via RLS.
+  bio, where they are travelling from). Never email, phone, DOB. Blocking hides a traveler's
+  messages via RLS.
 - **Live Moments** (Group tab): scheduled and live moments for the trip with a Join / Leave
   toggle (`live_moment_participants` upsert, counts from the `live_moment_counts` view) and
   realtime refresh on `live_moments` changes. "Suggest one" opens `moments/new`, a modal form
@@ -53,8 +73,10 @@ components/itinerary-item.tsx, sync-badge.tsx, screen-tracker.tsx
   Database triggers notify the other members when a moment is announced (migration 027).
 - **Analytics** (`src/lib/analytics.ts`, PostHog): `app_opened`, `trip_opened`,
   `itinerary_item_viewed`, `map_opened` (item or accommodation), `recommendation_opened`,
-  `live_moment_joined`, `chat_opened`, `message_sent`, `support_started`; screens are tracked by
-  `ScreenTracker`. Ids only, never content or PII.
+  `live_moment_joined`, `chat_opened`, `message_sent`, `support_started`, `add_on_viewed`,
+  `add_on_add_tapped`, `add_on_chat_opened`, `onboarding_completed` (counts and booleans only,
+  never the answers), `onboarding_skipped`; screens are tracked by `ScreenTracker`. Ids only,
+  never content or PII.
 - **Crash reporting**: `@sentry/react-native`, enabled only with `EXPO_PUBLIC_SENTRY_DSN`;
   `sendDefaultPii: false`, network bodies dropped from breadcrumbs.
 - **Notifications received**: pushes come from the `notify-dispatch` Edge Function (docs/api.md);
@@ -157,8 +179,29 @@ and needs nothing.
 Verification on 2026-09-06: `npx expo-doctor` → 21/21 checks passed; `npx expo export --platform
 ios --platform android` bundled both Hermes entries (7 MB / 7.3 MB) with no errors.
 
+## Backend contract added for the app (migrations 045–047)
+
+- **Activity chats**: one room per paid add-on. Call `ensure_add_on_chat_room(tripId, addOnId)`
+  to open (or find) it — staff and confirmed buyers only; it is idempotent and joins the caller.
+  Membership tracks the purchase automatically: a trigger on `booking_add_ons` runs
+  `sync_add_on_chat_members(tripId)` whenever a status changes, so cancelling removes access.
+  Rooms carry `chat_rooms.add_on_id`; list them alongside the three trip-wide rooms and label
+  them by the add-on. A traveler who did not buy it cannot list or read the room at all, so no
+  client-side filtering is needed.
+- **First-run questions**: `profiles.traveling_from`, `excited_about`, `party_type`
+  (`solo | couple | friends | family`), `show_traveling_from`, and `onboarded_at` — set the last
+  one when the flow completes so the app asks once. Validate with `onboardingSchema` from
+  `@guideless/validation`; `PARTY_TYPES` is in `@guideless/types`.
+- **Avatars**: upload to the existing `user-avatars` bucket under `<uid>/…`; it is public-read
+  with an own-folder write policy, now 5 MB and accepting HEIC as well as JPEG/PNG/WebP. Use
+  `avatarUploadSchema` to check the file before sending it.
+- **Change notices**: a changed item now carries `change_note` (what actually changed, in the
+  traveler's words), `replaced_by_item_id` and `changed_at`. The push and in-app notification
+  send the note verbatim and put `replacedById` in the deep link, so the item screen can link
+  straight to the replacement.
+
 ## Not yet
 
-Photo sharing, offline queue for outgoing messages, E2E tests (Detox/Maestro), a real
+Traveler photo sharing, offline queue for outgoing messages, E2E tests (Detox/Maestro), a real
 device/simulator run (`eas build --profile development`, see above), Google Maps key for Android,
 Sentry source-map upload (`@sentry/react-native/expo` plugin in `app.config.ts`).

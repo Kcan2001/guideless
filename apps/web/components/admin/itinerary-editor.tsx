@@ -23,6 +23,8 @@ export interface EditorItem {
   is_optional: boolean;
   visibility: Tables<"tour_itinerary_items">["visibility"];
   status?: Tables<"trip_itinerary_items">["status"];
+  change_note?: string | null;
+  replaced_by_item_id?: string | null;
 }
 
 export interface EditorDay {
@@ -52,6 +54,8 @@ interface Props {
     addItem: Action;
     updateItem: Action;
     deleteItem: Action;
+    /** Trip scope only: mark an item changed or cancelled and tell travelers why. */
+    markItemChanged?: Action;
   };
 }
 
@@ -194,6 +198,53 @@ export function ItineraryEditor({
                       defaultTimezone={defaultTimezone}
                       submitLabel="Save item"
                     />
+                    {scope === "trip" && actions.markItemChanged && (
+                      <form
+                        action={actions.markItemChanged}
+                        className="mt-3 space-y-2 rounded-lg border border-border bg-background p-3"
+                      >
+                        {hiddenInputs}
+                        <input type="hidden" name="itemId" value={item.id} />
+                        <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                          Tell travelers what changed
+                        </p>
+                        <input
+                          name="changeNote"
+                          defaultValue={item.change_note ?? ""}
+                          required
+                          minLength={3}
+                          maxLength={280}
+                          placeholder="Replaced by the 09:32 from platform 2. Your pass still covers it."
+                          className={inputClass}
+                          aria-label="What changed"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          This sentence is what every traveler receives as a notification.
+                        </p>
+                        <div className="flex flex-wrap items-center gap-3">
+                          <select
+                            name="replacedByItemId"
+                            defaultValue={item.replaced_by_item_id ?? ""}
+                            className={inputClass}
+                            aria-label="Replaced by"
+                          >
+                            <option value="">No replacement</option>
+                            {day.items
+                              .filter((other) => other.id !== item.id)
+                              .map((other) => (
+                                <option key={other.id} value={other.id}>
+                                  Replaced by: {other.title}
+                                </option>
+                              ))}
+                          </select>
+                          <label className="flex items-center gap-2 text-sm">
+                            <input type="checkbox" name="cancel" value="true" />
+                            Cancel it instead
+                          </label>
+                          <SubmitButton size="sm">Notify travelers</SubmitButton>
+                        </div>
+                      </form>
+                    )}
                     <form action={actions.deleteItem} className="mt-2">
                       {hiddenInputs}
                       <input type="hidden" name="itemId" value={item.id} />

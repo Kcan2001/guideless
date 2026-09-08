@@ -16,7 +16,9 @@ const OUT = opt("out", "guideless_photos/_sheets");
 const PER = Number(opt("per", 36));
 const COLS = Number(opt("cols", 6));
 if (!DIR) {
-  console.error("Usage: node scripts/contact-sheets.mjs --dir <folder> [--out <dir>] [--per 36] [--cols 6]");
+  console.error(
+    "Usage: node scripts/contact-sheets.mjs --dir <folder> [--out <dir>] [--per 36] [--cols 6]",
+  );
   process.exit(1);
 }
 const W = 240;
@@ -35,7 +37,10 @@ for (let s = 0; s * PER < files.length; s++) {
   const comps = [];
   for (let i = 0; i < slice.length; i++) {
     const idx = s * PER + i + 1;
-    const tile = await sharp(join(DIR, slice[i])).resize(W, H, { fit: "cover" }).jpeg({ quality: 70 }).toBuffer();
+    const tile = await sharp(join(DIR, slice[i]))
+      .resize(W, H, { fit: "cover" })
+      .jpeg({ quality: 70 })
+      .toBuffer();
     const badge = Buffer.from(
       `<svg width="${W}" height="${H}"><rect x="6" y="6" width="${18 + String(idx).length * 11}" height="24" rx="6" fill="#0B2025" opacity="0.85"/><text x="14" y="24" font-family="Arial" font-size="17" font-weight="700" fill="#60E1BB">${idx}</text></svg>`,
     );

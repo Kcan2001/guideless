@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PARTY_TYPES } from "@guideless/types";
 import { emailSchema, uuidSchema } from "./common";
 
 const optionalText = (max: number) =>
@@ -41,11 +42,43 @@ export const groupProfileSchema = z.object({
   interests: z.array(z.enum(INTERESTS)).max(12).default([]),
   travelStyle: z.enum(TRAVEL_STYLES).nullable().default(null),
   languages: z.array(z.string().trim().min(2).max(24)).max(8).default([]),
+  travelingFrom: optionalText(80),
+  excitedAbout: optionalText(280),
+  partyType: z.enum(PARTY_TYPES).nullable().default(null),
   showHomeCountry: z.boolean().default(true),
   showBio: z.boolean().default(true),
   showInterests: z.boolean().default(true),
+  showTravelingFrom: z.boolean().default(true),
 });
 export type GroupProfileInput = z.infer<typeof groupProfileSchema>;
+
+/**
+ * The first-run questions the app asks once, when a traveler opens their group (migration 046).
+ * Everything but the name is optional: a traveler may skip straight past it.
+ */
+export const onboardingSchema = z.object({
+  displayName: z.string().trim().min(1).max(80),
+  partyType: z.enum(PARTY_TYPES).nullable().default(null),
+  travelingFrom: optionalText(80),
+  excitedAbout: optionalText(280),
+  interests: z.array(z.enum(INTERESTS)).max(12).default([]),
+});
+export type OnboardingInput = z.infer<typeof onboardingSchema>;
+
+/** Avatar uploads go to the `user-avatars` bucket under the traveler's own id. */
+export const AVATAR_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "image/heif",
+] as const;
+export const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
+export const avatarUploadSchema = z.object({
+  mimeType: z.enum(AVATAR_MIME_TYPES),
+  sizeBytes: z.number().int().positive().max(AVATAR_MAX_BYTES),
+});
+export type AvatarUploadInput = z.infer<typeof avatarUploadSchema>;
 
 // ── RSVPs ─────────────────────────────────────────────────────────────────────
 export const itemRsvpSchema = z.object({

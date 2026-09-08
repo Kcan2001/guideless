@@ -1,3 +1,5 @@
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { View } from "react-native";
 import { formatMoney, formatWallTime } from "@guideless/utils";
@@ -12,6 +14,7 @@ import {
   type AddOnView,
 } from "@/lib/add-ons/service";
 import { useSession } from "@/lib/auth/session";
+import { addOnRoomsService } from "@/lib/chat/add-on-rooms";
 
 /**
  * One optional add-on on the itinerary: price, time, place, who from the group is in, and an
@@ -21,12 +24,16 @@ export function AddOnCard({
   addOn,
   bookingId,
   todayISO,
+  tripId = null,
 }: {
   addOn: AddOnView;
   bookingId: string | null;
   todayISO: string;
+  /** Enables "Chat with who's going" once the traveler has bought this add-on. */
+  tripId?: string | null;
 }) {
   const { user } = useSession();
+  const router = useRouter();
   const state = addOnState(addOn, todayISO);
   const who = participantsLabel(addOn.participants, user?.id ?? null);
   const price = formatMoney(
@@ -36,6 +43,17 @@ export function AddOnCard({
   const when = [addOn.start_time ? formatWallTime(addOn.start_time) : null, addOn.location_name]
     .filter(Boolean)
     .join(" · ");
+
+  // The room is created on first use; a database without the feature simply never offers it.
+  const openChat = useMutation({
+    mutationFn: () => addOnRoomsService.ensureRoom(tripId!, addOn.id),
+    onSuccess: (room) => {
+      if (!room) return;
+      track("add_on_chat_opened", { add_on_id: addOn.id });
+      router.push(`/chat/${room.id}`);
+    },
+  });
+  const canChat = state === "mine" && !!tripId && !addOnRoomsService.isUnavailable;
 
   return (
     <Card tone={state === "mine" ? "accent" : "default"}>
@@ -68,6 +86,17 @@ export function AddOnCard({
             <Muted style={{ fontSize: 13 }}>{who}</Muted>
           ) : null}
         </View>
+        {canChat && (
+          <Button
+            title={openChat.isPending ? "Opening…" : "Chat"}
+            variant="secondary"
+            icon="chatbubbles-outline"
+            disabled={openChat.isPending}
+            accessibilityLabel={`Chat with travelers going to ${addOn.title}`}
+            style={{ minHeight: 40, paddingHorizontal: 14 }}
+            onPress={() => openChat.mutate()}
+          />
+        )}
         {state === "open" && bookingId && (
           <Button
             title="Add"

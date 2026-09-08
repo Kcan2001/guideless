@@ -8,16 +8,26 @@ import type { TripDetail } from "@/lib/trips/service";
  */
 const KEY = (tripId: string) => `guideless:trip:${tripId}`;
 const INDEX_KEY = "guideless:trips:index";
+/**
+ * Bump whenever the cached `TripDetail` shape changes. An entry written by an older build is
+ * ignored rather than parsed, so a shape change costs one refetch instead of a crash.
+ */
+const CACHE_VERSION = 2;
 
 export interface CachedTrip {
   detail: TripDetail;
   syncedAt: string; // ISO
+  version?: number;
 }
 
 export const tripCache = {
   async save(detail: TripDetail): Promise<void> {
     try {
-      const entry: CachedTrip = { detail, syncedAt: new Date().toISOString() };
+      const entry: CachedTrip = {
+        detail,
+        syncedAt: new Date().toISOString(),
+        version: CACHE_VERSION,
+      };
       await AsyncStorage.setItem(KEY(detail.trip.id), JSON.stringify(entry));
       const ids = await tripCache.index();
       if (!ids.includes(detail.trip.id)) {
@@ -31,7 +41,11 @@ export const tripCache = {
   async load(tripId: string): Promise<CachedTrip | null> {
     try {
       const raw = await AsyncStorage.getItem(KEY(tripId));
-      return raw ? (JSON.parse(raw) as CachedTrip) : null;
+      if (!raw) return null;
+      const entry = JSON.parse(raw) as CachedTrip;
+      // Written by an older build: drop it and let the query refetch.
+      if (entry.version !== CACHE_VERSION) return null;
+      return entry;
     } catch {
       return null;
     }

@@ -13,6 +13,7 @@ import {
   addTripNoteAction,
   createLiveMomentAction,
   deleteTripItemAction,
+  markTripItemChangedAction,
   setLiveMomentStatusAction,
   setTripStatusAction,
   updateTripItemAction,
@@ -97,6 +98,7 @@ export default async function AdminTripPage(
               addItem: addTripItemAction,
               updateItem: updateTripItemAction,
               deleteItem: deleteTripItemAction,
+              markItemChanged: markTripItemChangedAction,
             }}
           />
         </Section>

@@ -24,20 +24,54 @@ const OUT = "apps/web/public/photos";
 // folder → [index, output-name, alt text, optional focal point (CSS object-position)]
 const SELECTION = {
   monaco: [
-    [44, "monaco-hairpin-race", "Formula 1 cars through the Monaco hairpin seen from a terrace above the circuit", "center 82%"],
-    [82, "monaco-harbour-rock", "Port Hercule with superyachts and the Rock of Monaco behind", "center 65%"],
+    [
+      44,
+      "monaco-hairpin-race",
+      "Formula 1 cars through the Monaco hairpin seen from a terrace above the circuit",
+      "center 82%",
+    ],
+    [
+      82,
+      "monaco-harbour-rock",
+      "Port Hercule with superyachts and the Rock of Monaco behind",
+      "center 65%",
+    ],
     [14, "monaco-casino-square", "Café terraces on Casino Square in Monte Carlo"],
     [91, "monaco-larvotto-beach", "Larvotto beach with clear water on a sunny day"],
     [104, "monaco-casino-night", "The Casino de Monte-Carlo lit up at night"],
     [109, "monaco-harbour-yachts", "Yachts moored side by side in the Monaco harbour on race week"],
-    [113, "monaco-yacht-deck-view", "View of the harbour grandstands from a yacht deck", "center 55%"],
-    [114, "monaco-trackside-barriers", "Trackside at the Monaco circuit with the barriers in place", "center 60%"],
-    [122, "monaco-circuit-signage", "Circuit signage over the harbour section of the Monaco Grand Prix"],
+    [
+      113,
+      "monaco-yacht-deck-view",
+      "View of the harbour grandstands from a yacht deck",
+      "center 55%",
+    ],
+    [
+      114,
+      "monaco-trackside-barriers",
+      "Trackside at the Monaco circuit with the barriers in place",
+      "center 60%",
+    ],
+    [
+      122,
+      "monaco-circuit-signage",
+      "Circuit signage over the harbour section of the Monaco Grand Prix",
+    ],
     [47, "monaco-night-sea", "Lights on the water off Monaco at night"],
   ],
   nice: [
-    [25, "nice-promenade-dusk", "The Promenade des Anglais at dusk with striped parasols along the beach", "center 55%"],
-    [27, "nice-place-massena", "Place Masséna in Nice with its red façades and checkerboard paving", "center 60%"],
+    [
+      25,
+      "nice-promenade-dusk",
+      "The Promenade des Anglais at dusk with striped parasols along the beach",
+      "center 55%",
+    ],
+    [
+      27,
+      "nice-place-massena",
+      "Place Masséna in Nice with its red façades and checkerboard paving",
+      "center 60%",
+    ],
     [28, "nice-place-massena-wide", "Place Masséna under a soft sky"],
     [33, "nice-cours-saleya-flowers", "Flower stalls at the Cours Saleya market in Nice"],
     [34, "nice-market-soaps", "Soaps and lavender at a market stall in Nice"],
@@ -47,10 +81,23 @@ const SELECTION = {
     [20, "nice-beach-clouds", "Nice beach with a big afternoon cloud over the bay"],
   ],
   avignon: [
-    [1, "avignon-cloitre-saint-louis", "The plane-tree courtyard of the Cloître Saint-Louis in Avignon"],
-    [3, "chateauneuf-vineyard-road", "A cypress-lined road through the Châteauneuf-du-Pape vineyards"],
+    [
+      1,
+      "avignon-cloitre-saint-louis",
+      "The plane-tree courtyard of the Cloître Saint-Louis in Avignon",
+    ],
+    [
+      3,
+      "chateauneuf-vineyard-road",
+      "A cypress-lined road through the Châteauneuf-du-Pape vineyards",
+    ],
     [4, "chateauneuf-cellar-barrels", "Oak barrels in a stone cellar at Châteauneuf-du-Pape"],
-    [6, "chateauneuf-castle-ruins", "The ruins of the papal castle above Châteauneuf-du-Pape", "center 40%"],
+    [
+      6,
+      "chateauneuf-castle-ruins",
+      "The ruins of the papal castle above Châteauneuf-du-Pape",
+      "center 40%",
+    ],
     [7, "provence-view-vines", "Vines and olive trees under a Provençal sky"],
   ],
   paris: [

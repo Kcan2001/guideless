@@ -48,6 +48,12 @@
           "color": "#0B2025",
           "defaultChannel": "operational"
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Guideless uses your photos so you can set a profile picture your group will see."
+        }
       ]
     ],
     "experiments": {

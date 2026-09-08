@@ -3,23 +3,35 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { emptyStates } from "@guideless/config";
+import { AddOnCard } from "@/components/add-on-card";
 import { Card, EmptyState, Eyebrow, H1, H2, Loading, Muted, Pill, Screen } from "@/components/ui";
 import { Radius, Spacing } from "@/constants/theme";
+import { useTripAddOns } from "@/hooks/use-add-ons";
 import { useTheme } from "@/hooks/use-theme";
 import { useCurrentTrip } from "@/hooks/use-trip";
 import { track } from "@/lib/analytics";
 import { exploreService } from "@/lib/explore/service";
 import { currentDay } from "@/lib/trips/next-up";
 
-/** Destination recommendations for the current stop (spec §21). Curated, not generated. */
+/**
+ * What you can add, and where to go: bookable add-ons for the trip first, then curated
+ * destination recommendations for the stop you are on (spec §21). Curated, not generated.
+ */
 export default function ExploreScreen() {
   const c = useTheme();
   const { detail } = useCurrentTrip();
-  const day = detail ? currentDay(detail.days, new Date()) : null;
+  const { addOns, bookingId } = useTripAddOns(detail);
+  const now = new Date();
+  const todayISO = now.toISOString().slice(0, 10);
+  const day = detail ? currentDay(detail.days, now) : null;
   const destinations = detail?.destinations ?? [];
   const [selected, setSelected] = useState<string | null>(null);
   const destinationId = selected ?? day?.destination?.id ?? destinations[0]?.id ?? null;
   const destination = destinations.find((d) => d.id === destinationId) ?? null;
+  // Still buyable, soonest first; anything already bought or closed stays on the itinerary.
+  const openAddOns = addOns
+    .filter((a) => !a.mine && todayISO <= a.bookableUntil)
+    .sort((a, b) => a.date.localeCompare(b.date));
 
   const recs = useQuery({
     queryKey: ["recommendations", destinationId],
@@ -63,6 +75,26 @@ export default function ExploreScreen() {
           ))}
         </ScrollView>
       )}
+
+      {detail && openAddOns.length > 0 && (
+        <View style={{ gap: Spacing.two }}>
+          <Eyebrow>Add to your trip</Eyebrow>
+          <Muted style={{ fontSize: 13 }}>
+            Optional, priced per person unless noted, and yours to skip.
+          </Muted>
+          {openAddOns.map((a) => (
+            <AddOnCard
+              key={a.id}
+              addOn={a}
+              bookingId={bookingId}
+              todayISO={todayISO}
+              tripId={detail.trip.id}
+            />
+          ))}
+        </View>
+      )}
+
+      {detail && <Eyebrow>Where to go</Eyebrow>}
 
       {!detail ? (
         <EmptyState

@@ -91,7 +91,11 @@ function parseExif(buf) {
     }
     return out;
   };
-  const ascii = (v) => buf.slice(v.off, v.off + v.count).toString("latin1").replace(/\0+$/, "");
+  const ascii = (v) =>
+    buf
+      .slice(v.off, v.off + v.count)
+      .toString("latin1")
+      .replace(/\0+$/, "");
   const rationals = (v) => {
     const arr = [];
     for (let i = 0; i < v.count; i++) {
@@ -103,7 +107,7 @@ function parseExif(buf) {
     }
     return arr;
   };
-  const dms = (a) => (a.length >= 3 ? a[0] + a[1] / 60 + a[2] / 3600 : a[0] ?? NaN);
+  const dms = (a) => (a.length >= 3 ? a[0] + a[1] / 60 + a[2] / 3600 : (a[0] ?? NaN));
 
   const main = readIfd(ifd0);
   let date = null;
@@ -175,7 +179,13 @@ for (const file of files) {
   const name = `${dateStr}_${basename(file, extname(file)).replace(/[^\w()-]+/g, "_")}${ext}`;
   const outDir = join(DEST, r.trip, r.region);
   const out = join(outDir, name);
-  manifest.push({ file: `${r.trip}/${r.region}/${name}`, source: basename(file), lat: ex.lat, lon: ex.lon, date: ex.date });
+  manifest.push({
+    file: `${r.trip}/${r.region}/${name}`,
+    source: basename(file),
+    lat: ex.lat,
+    lon: ex.lon,
+    date: ex.date,
+  });
   if (!DRY) {
     mkdirSync(outDir, { recursive: true });
     if (!existsSync(out) || statSync(out).size !== statSync(file).size) copyFileSync(file, out);

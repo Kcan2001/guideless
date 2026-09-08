@@ -922,6 +922,7 @@ export type Database = {
       };
       chat_rooms: {
         Row: {
+          add_on_id: string | null;
           created_at: string;
           id: string;
           is_archived: boolean;
@@ -930,6 +931,7 @@ export type Database = {
           type: Database["public"]["Enums"]["chat_room_type"];
         };
         Insert: {
+          add_on_id?: string | null;
           created_at?: string;
           id?: string;
           is_archived?: boolean;
@@ -938,6 +940,7 @@ export type Database = {
           type: Database["public"]["Enums"]["chat_room_type"];
         };
         Update: {
+          add_on_id?: string | null;
           created_at?: string;
           id?: string;
           is_archived?: boolean;
@@ -946,6 +949,20 @@ export type Database = {
           type?: Database["public"]["Enums"]["chat_room_type"];
         };
         Relationships: [
+          {
+            foreignKeyName: "chat_rooms_add_on_id_fkey";
+            columns: ["add_on_id"];
+            isOneToOne: false;
+            referencedRelation: "add_on_availability";
+            referencedColumns: ["add_on_id"];
+          },
+          {
+            foreignKeyName: "chat_rooms_add_on_id_fkey";
+            columns: ["add_on_id"];
+            isOneToOne: false;
+            referencedRelation: "departure_add_ons";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "chat_rooms_trip_id_fkey";
             columns: ["trip_id"];
@@ -2901,16 +2918,21 @@ export type Database = {
           bio: string | null;
           created_at: string;
           display_name: string;
+          excited_about: string | null;
           home_country: string | null;
           id: string;
           interests: string[];
           languages: string[];
           marketing_opt_in: boolean;
+          onboarded_at: string | null;
+          party_type: string | null;
           preferred_language: string;
           show_bio: boolean;
           show_home_country: boolean;
           show_interests: boolean;
+          show_traveling_from: boolean;
           travel_style: string | null;
+          traveling_from: string | null;
           updated_at: string;
         };
         Insert: {
@@ -2918,16 +2940,21 @@ export type Database = {
           bio?: string | null;
           created_at?: string;
           display_name?: string;
+          excited_about?: string | null;
           home_country?: string | null;
           id: string;
           interests?: string[];
           languages?: string[];
           marketing_opt_in?: boolean;
+          onboarded_at?: string | null;
+          party_type?: string | null;
           preferred_language?: string;
           show_bio?: boolean;
           show_home_country?: boolean;
           show_interests?: boolean;
+          show_traveling_from?: boolean;
           travel_style?: string | null;
+          traveling_from?: string | null;
           updated_at?: string;
         };
         Update: {
@@ -2935,16 +2962,21 @@ export type Database = {
           bio?: string | null;
           created_at?: string;
           display_name?: string;
+          excited_about?: string | null;
           home_country?: string | null;
           id?: string;
           interests?: string[];
           languages?: string[];
           marketing_opt_in?: boolean;
+          onboarded_at?: string | null;
+          party_type?: string | null;
           preferred_language?: string;
           show_bio?: boolean;
           show_home_country?: boolean;
           show_interests?: boolean;
+          show_traveling_from?: boolean;
           travel_style?: string | null;
+          traveling_from?: string | null;
           updated_at?: string;
         };
         Relationships: [];
@@ -4420,6 +4452,8 @@ export type Database = {
           accommodation_id: string | null;
           activity_id: string | null;
           address: string | null;
+          change_note: string | null;
+          changed_at: string | null;
           created_at: string;
           description: string | null;
           end_time: string | null;
@@ -4431,6 +4465,7 @@ export type Database = {
           location_name: string | null;
           longitude: number | null;
           position: number;
+          replaced_by_item_id: string | null;
           responsibility: Database["public"]["Enums"]["responsibility"];
           source_item_id: string | null;
           start_time: string | null;
@@ -4448,6 +4483,8 @@ export type Database = {
           accommodation_id?: string | null;
           activity_id?: string | null;
           address?: string | null;
+          change_note?: string | null;
+          changed_at?: string | null;
           created_at?: string;
           description?: string | null;
           end_time?: string | null;
@@ -4459,6 +4496,7 @@ export type Database = {
           location_name?: string | null;
           longitude?: number | null;
           position?: number;
+          replaced_by_item_id?: string | null;
           responsibility?: Database["public"]["Enums"]["responsibility"];
           source_item_id?: string | null;
           start_time?: string | null;
@@ -4476,6 +4514,8 @@ export type Database = {
           accommodation_id?: string | null;
           activity_id?: string | null;
           address?: string | null;
+          change_note?: string | null;
+          changed_at?: string | null;
           created_at?: string;
           description?: string | null;
           end_time?: string | null;
@@ -4487,6 +4527,7 @@ export type Database = {
           location_name?: string | null;
           longitude?: number | null;
           position?: number;
+          replaced_by_item_id?: string | null;
           responsibility?: Database["public"]["Enums"]["responsibility"];
           source_item_id?: string | null;
           start_time?: string | null;
@@ -4513,6 +4554,13 @@ export type Database = {
             columns: ["activity_id"];
             isOneToOne: false;
             referencedRelation: "activities";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "trip_itinerary_items_replaced_by_item_id_fkey";
+            columns: ["replaced_by_item_id"];
+            isOneToOne: false;
+            referencedRelation: "trip_itinerary_items";
             referencedColumns: ["id"];
           },
           {
@@ -5157,6 +5205,12 @@ export type Database = {
         };
         Returns: string;
       };
+      add_on_room_participants: {
+        Args: { p_add_on_id: string; p_trip_id: string };
+        Returns: {
+          user_id: string;
+        }[];
+      };
       assert_departure_capacity: {
         Args: { p_departure_id: string };
         Returns: undefined;
@@ -5290,6 +5344,24 @@ export type Database = {
       };
       enqueue_payment_reminders: { Args: never; Returns: number };
       enqueue_trip_reminders: { Args: never; Returns: number };
+      ensure_add_on_chat_room: {
+        Args: { p_add_on_id: string; p_trip_id: string };
+        Returns: {
+          add_on_id: string | null;
+          created_at: string;
+          id: string;
+          is_archived: boolean;
+          name: string;
+          trip_id: string;
+          type: Database["public"]["Enums"]["chat_room_type"];
+        };
+        SetofOptions: {
+          from: "*";
+          to: "chat_rooms";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       format_money: {
         Args: { p_amount: number; p_currency: string };
         Returns: string;
@@ -5406,6 +5478,7 @@ export type Database = {
         };
         Returns: Json;
       };
+      sync_add_on_chat_members: { Args: { p_trip_id: string }; Returns: number };
       tour_version_is_public: { Args: { version_id: string }; Returns: boolean };
       trip_add_on_participants: {
         Args: { p_trip_id: string };

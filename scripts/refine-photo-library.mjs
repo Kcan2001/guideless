@@ -4,7 +4,15 @@
 //
 //   node scripts/refine-photo-library.mjs [--dest guideless_photos/_library]
 
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync, rmdirSync, readdirSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  writeFileSync,
+  rmdirSync,
+  readdirSync,
+} from "node:fs";
 import { basename, dirname, extname, join } from "node:path";
 
 const args = process.argv.slice(2);
@@ -23,7 +31,8 @@ const PLACES = [
   { name: "lyon", lat: [45.65, 45.85], lon: [4.75, 4.95] },
   { name: "marseille", lat: [43.2, 43.4], lon: [5.3, 5.5] },
 ];
-const NOT_FRANCE = (lat, lon) => lat > 50.5 || lon < -1.6 || (lat > 46.0 && lat < 47.9 && lon > 6.05 && lon < 6.2 && false);
+const NOT_FRANCE = (lat, lon) =>
+  lat > 50.5 || lon < -1.6 || (lat > 46.0 && lat < 47.9 && lon > 6.05 && lon < 6.2 && false);
 
 function placeFor(lat, lon) {
   if (NOT_FRANCE(lat, lon)) return { trip: "not-france", region: lon < 0 ? "spain" : "belgium" };

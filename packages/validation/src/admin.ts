@@ -112,6 +112,18 @@ export const itineraryItemSchema = z.object({
 });
 export type ItineraryItemInput = z.infer<typeof itineraryItemSchema>;
 
+/**
+ * Marking a live item changed (migration 047). The note is what the traveler is told, so it is
+ * required here even though the column is nullable: a change with no explanation is the thing
+ * this feature exists to stop.
+ */
+export const itineraryChangeSchema = z.object({
+  changeNote: z.string().trim().min(3).max(280),
+  replacedByItemId: z.preprocess((v) => (v === "" ? undefined : v), uuidSchema.optional()),
+  cancel: z.coerce.boolean().default(false),
+});
+export type ItineraryChangeInput = z.infer<typeof itineraryChangeSchema>;
+
 // ── Departures ────────────────────────────────────────────────────────────────
 export const departureFormSchema = z
   .object({

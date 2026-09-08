@@ -66,7 +66,13 @@ export default function ItineraryScreen() {
           {addOns
             .filter((a) => a.date === day.date)
             .map((a) => (
-              <AddOnCard key={a.id} addOn={a} bookingId={bookingId} todayISO={todayISO} />
+              <AddOnCard
+                key={a.id}
+                addOn={a}
+                bookingId={bookingId}
+                todayISO={todayISO}
+                tripId={tripId}
+              />
             ))}
         </View>
       ))}

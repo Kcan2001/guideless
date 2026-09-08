@@ -13,11 +13,15 @@ import { PostHogProvider } from "posthog-react-native";
 import { useEffect, type ReactNode } from "react";
 import { useColorScheme } from "react-native";
 
+import { useQuery } from "@tanstack/react-query";
+
 import { ScreenTracker } from "@/components/screen-tracker";
 import { Colors } from "@/constants/theme";
 import { posthog } from "@/lib/analytics";
 import { SessionProvider, useSession } from "@/lib/auth/session";
 import { usePushRegistration } from "@/lib/notifications/push";
+import { needsOnboarding } from "@/lib/profile/extras";
+import { profileService } from "@/lib/profile/service";
 import { QueryProvider } from "@/lib/query";
 
 SplashScreen.preventAutoHideAsync();
@@ -68,7 +72,45 @@ function AuthGate({ children }: { children: ReactNode }) {
 
   usePushRegistration(session?.user.id ?? null);
 
-  return <>{children}</>;
+  return (
+    <>
+      <OnboardingGate />
+      {children}
+    </>
+  );
+}
+
+/**
+ * Offers the first-run profile flow once. Skipping stamps `onboarded_at`, and the in-memory flag
+ * means a traveler is never bounced there twice in one launch even if that write fails.
+ */
+let promptedThisSession = false;
+
+function OnboardingGate() {
+  const { session, ready } = useSession();
+  const segments = useSegments();
+  const router = useRouter();
+  const userId = session?.user.id ?? null;
+
+  const profile = useQuery({
+    queryKey: ["profile", userId ?? ""],
+    enabled: !!userId,
+    staleTime: 5 * 60_000,
+    queryFn: () => profileService.getProfile(userId!),
+  });
+
+  const onOnboarding = segments[0] === "onboarding";
+  const inAuthFlow = segments[0] === "(auth)" || segments[0] === "auth";
+  const due = needsOnboarding(profile.data);
+
+  useEffect(() => {
+    if (!ready || !userId || inAuthFlow || onOnboarding) return;
+    if (!due || promptedThisSession) return;
+    promptedThisSession = true;
+    router.replace("/onboarding");
+  }, [ready, userId, inAuthFlow, onOnboarding, due, router]);
+
+  return null;
 }
 
 function RootLayout() {
@@ -121,6 +163,7 @@ function RootLayout() {
               >
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                 <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
+                <Stack.Screen name="onboarding" options={{ headerShown: false }} />
                 <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
                 <Stack.Screen name="itinerary/[tripId]" options={{ title: "Your Route" }} />
                 <Stack.Screen name="item/[itemId]" options={{ title: "" }} />
