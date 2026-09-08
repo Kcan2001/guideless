@@ -171,6 +171,14 @@ async function handleCheckoutPaid(admin: Admin, session: Stripe.Checkout.Session
     .eq("id", booking.id);
   if (updErr) throw updErr;
 
+  // In-app / push notification for the owner; idempotent per payment intent (dedupe_key).
+  const { error: notifyErr } = await admin.rpc("notify_booking_paid", {
+    p_booking_id: booking.id,
+    p_payment_intent_id: paymentIntentId,
+    p_kind: kind,
+  });
+  if (notifyErr) throw notifyErr;
+
   const email = session.customer_details?.email ?? session.customer_email;
   if (email) {
     await sendBookingConfirmedEmail(admin, {

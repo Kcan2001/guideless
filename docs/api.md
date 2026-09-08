@@ -69,7 +69,8 @@ uses Realtime presence channels keyed by room.
      roomIndexes, stayOptionId, addOns, code)  metadata.booking_id, expires_at = hold)
   2. refuse if Stripe not configured        5. service role: bookings.stripe_checkout_session_id
   3. rpc create_booking(… p_stay_option_id, 6. redirect → Stripe
-     p_add_ons, p_code) — re-quotes inside   on Stripe error: hold released immediately (→ draft)
+     p_add_ons, p_code, p_group_code) —     on Stripe error: hold released immediately (→ draft)
+     re-quotes inside
      the transaction, stores line items,
      booking_add_ons (pending, same hold)
 /checkout/[departureId]/confirmation?booking=…   reads via RLS; shows "processing" until the
@@ -91,7 +92,11 @@ mid-trip): `startAddOnPurchase()` → rpc `start_add_on_purchase(p_booking_id, p
 hold) → Stripe Checkout with `metadata: { booking_id, add_on_purchase_id, payment_option: 'add_on' }`
 → webhook `checkout.session.completed` calls `confirm_add_on_purchase(purchase_id, amount_total,
 payment_intent, session_id)` (service role; idempotent on the payment intent; records a payment of
-kind `add_on`, confirms the rows, writes line items, raises the booking totals). `checkout.session.expired`
+kind `add_on`, confirms the rows, writes line items from the title snapshot, raises the booking totals,
+notifies the owner). Booking payments also call `notify_booking_paid(booking_id, intent, kind)` so the
+app gets "Your trip is confirmed" once per intent. Builder extras: `create_group_code(booking_id)`,
+`check_group_code(code, departure_id)` (anon), and the owner-only `builder_drafts` table for
+save/resume across devices. `checkout.session.expired`
 on such a session cancels the pending rows; the 5-minute cron `release_expired_add_on_holds()` is
 the backstop.
 

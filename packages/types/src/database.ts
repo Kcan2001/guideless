@@ -312,6 +312,7 @@ export type Database = {
           quantity: number;
           status: string;
           stripe_checkout_session_id: string | null;
+          title_snapshot: string | null;
           total_amount: number;
           traveler_id: string | null;
           unit_amount: number;
@@ -330,6 +331,7 @@ export type Database = {
           quantity?: number;
           status?: string;
           stripe_checkout_session_id?: string | null;
+          title_snapshot?: string | null;
           total_amount: number;
           traveler_id?: string | null;
           unit_amount: number;
@@ -348,6 +350,7 @@ export type Database = {
           quantity?: number;
           status?: string;
           stripe_checkout_session_id?: string | null;
+          title_snapshot?: string | null;
           total_amount?: number;
           traveler_id?: string | null;
           unit_amount?: number;
@@ -657,6 +660,7 @@ export type Database = {
           departure_id: string;
           deposit_amount: number;
           discount_amount: number;
+          group_code_id: string | null;
           hold_expires_at: string | null;
           id: string;
           payment_status: Database["public"]["Enums"]["payment_status"];
@@ -685,6 +689,7 @@ export type Database = {
           departure_id: string;
           deposit_amount?: number;
           discount_amount?: number;
+          group_code_id?: string | null;
           hold_expires_at?: string | null;
           id?: string;
           payment_status?: Database["public"]["Enums"]["payment_status"];
@@ -713,6 +718,7 @@ export type Database = {
           departure_id?: string;
           deposit_amount?: number;
           discount_amount?: number;
+          group_code_id?: string | null;
           hold_expires_at?: string | null;
           id?: string;
           payment_status?: Database["public"]["Enums"]["payment_status"];
@@ -751,6 +757,13 @@ export type Database = {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "bookings_group_code_id_fkey";
+            columns: ["group_code_id"];
+            isOneToOne: false;
+            referencedRelation: "group_codes";
+            referencedColumns: ["id"];
+          },
+          {
             foreignKeyName: "bookings_stay_option_id_fkey";
             columns: ["stay_option_id"];
             isOneToOne: false;
@@ -762,6 +775,45 @@ export type Database = {
             columns: ["tour_version_id"];
             isOneToOne: false;
             referencedRelation: "tour_versions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      builder_drafts: {
+        Row: {
+          departure_id: string;
+          draft: Json;
+          step: number;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          departure_id: string;
+          draft: Json;
+          step?: number;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          departure_id?: string;
+          draft?: Json;
+          step?: number;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "builder_drafts_departure_id_fkey";
+            columns: ["departure_id"];
+            isOneToOne: false;
+            referencedRelation: "departures";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "builder_drafts_departure_id_fkey";
+            columns: ["departure_id"];
+            isOneToOne: false;
+            referencedRelation: "departures_public";
             referencedColumns: ["id"];
           },
         ];
@@ -1671,6 +1723,74 @@ export type Database = {
           updated_by?: string | null;
         };
         Relationships: [];
+      };
+      group_codes: {
+        Row: {
+          code: string;
+          created_at: string;
+          departure_id: string;
+          expires_at: string | null;
+          id: string;
+          label: string | null;
+          max_uses: number;
+          owner_booking_id: string | null;
+          owner_user_id: string;
+          uses: number;
+        };
+        Insert: {
+          code: string;
+          created_at?: string;
+          departure_id: string;
+          expires_at?: string | null;
+          id?: string;
+          label?: string | null;
+          max_uses?: number;
+          owner_booking_id?: string | null;
+          owner_user_id: string;
+          uses?: number;
+        };
+        Update: {
+          code?: string;
+          created_at?: string;
+          departure_id?: string;
+          expires_at?: string | null;
+          id?: string;
+          label?: string | null;
+          max_uses?: number;
+          owner_booking_id?: string | null;
+          owner_user_id?: string;
+          uses?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "group_codes_departure_id_fkey";
+            columns: ["departure_id"];
+            isOneToOne: false;
+            referencedRelation: "departures";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "group_codes_departure_id_fkey";
+            columns: ["departure_id"];
+            isOneToOne: false;
+            referencedRelation: "departures_public";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "group_codes_owner_booking_id_fkey";
+            columns: ["owner_booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "group_codes_owner_booking_id_fkey";
+            columns: ["owner_booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings_public";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       host_applications: {
         Row: {
@@ -4447,6 +4567,10 @@ export type Database = {
         Args: { p_departure_id: string };
         Returns: undefined;
       };
+      check_group_code: {
+        Args: { p_code: string; p_departure_id: string };
+        Returns: Json;
+      };
       check_rate_limit: {
         Args: { p_key: string; p_limit: number; p_window_seconds: number };
         Returns: boolean;
@@ -4527,6 +4651,7 @@ export type Database = {
           p_code?: string;
           p_departure_id: string;
           p_emergency_contact: Json;
+          p_group_code?: string;
           p_payment_option?: string;
           p_preferences: Json;
           p_stay_option_id?: string;
@@ -4542,6 +4667,27 @@ export type Database = {
           hold_expires_at: string;
           total_amount: number;
         }[];
+      };
+      create_group_code: {
+        Args: { p_booking_id: string };
+        Returns: {
+          code: string;
+          created_at: string;
+          departure_id: string;
+          expires_at: string | null;
+          id: string;
+          label: string | null;
+          max_uses: number;
+          owner_booking_id: string | null;
+          owner_user_id: string;
+          uses: number;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "group_codes";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
       };
       create_trip_for_group: { Args: { p_group_id: string }; Returns: string };
       departure_roster_stats: {
@@ -4592,6 +4738,14 @@ export type Database = {
         };
         Returns: undefined;
       };
+      notify_booking_paid: {
+        Args: {
+          p_booking_id: string;
+          p_kind?: string;
+          p_payment_intent_id: string;
+        };
+        Returns: boolean;
+      };
       notify_trip_members: {
         Args: {
           p_body: string;
@@ -4606,6 +4760,7 @@ export type Database = {
         Returns: number;
       };
       open_due_groups: { Args: never; Returns: number };
+      purge_stale_builder_drafts: { Args: never; Returns: number };
       quote_booking: {
         Args: {
           p_add_ons?: Json;

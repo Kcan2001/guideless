@@ -56,10 +56,21 @@ by `anon` (read-only, security definer); the checkout sidebar calls it from the 
 
 ## Booking lifecycle
 
-- `create_booking(..., p_stay_option_id, p_add_ons, p_code)` re-runs the quote inside the
-  transaction, refuses on any problem (the code is in the exception hint), stores the totals and
+- `create_booking(..., p_stay_option_id, p_add_ons, p_code, p_group_code)` re-runs the quote inside
+  the transaction, refuses on any problem (the code is in the exception hint), stores the totals and
   `booking_items` lines, writes travelers with `room_index`, `booking_add_ons` as `pending` with the
   seat hold's expiry, and a `pending` `referrals` row when a referral code was used.
+- **Line items are a snapshot (migration 041).** The accommodation tier is its own `stay` line
+  (`unit = price_delta_amount`, `quantity = travelers`) and the base lines shrink by the same total,
+  so `sum(base + stay) + add-ons − discounts = subtotal/total` to the cent; the line's metadata keeps
+  `stay_option_id`, `tier` and `label` as sold. An included tier still writes a zero `stay` line.
+  `booking_add_ons.title_snapshot` holds each add-on's title at purchase; `booking_items` add-on
+  lines are written from it, so a later catalog rename never changes what a customer bought.
+- **Group codes never price (migration 042).** `p_group_code` (e.g. `KYLE-MONACO-27`) links the
+  new booking to a friend's `group_codes` row on the same departure and increments `uses`; an invalid
+  code raises with hint `group_code_invalid`. `quote_booking` does not know about codes. Owners mint
+  a code with `create_group_code(booking_id)` (one per booking, first name + tour token + year);
+  anyone can look one up with `check_group_code(code, departure_id)` → `{valid, reason, owner_first_name, joined}`.
 - On `bookings.status → confirmed` (Stripe webhook): pending add-ons become `confirmed` (and get
   their `booking_items` lines), the coupon redemption is counted, applied credit is redeemed, and
   the referrer earns credit. On `draft` / `cancelled` / `refunded`: add-ons are cancelled and a
@@ -69,8 +80,12 @@ by `anon` (read-only, security definer); the checkout sidebar calls it from the 
   `purchase_id` with a 30-minute hold and returns the amount; the web creates a Stripe Checkout
   session with `metadata.add_on_purchase_id`; the webhook calls `confirm_add_on_purchase(...)`
   (service role, idempotent on the payment intent) which records the `add_on` payment, confirms
-  the rows, writes line items and raises the booking's subtotal, total and amount paid together.
+  the rows, writes line items and raises the booking's subtotal, total and amount paid together,
+  then writes one operational notification ("Added to your trip", deduped per payment intent).
   `release_expired_add_on_holds()` runs every 5 minutes.
+- **Payment notification**: the webhook calls `notify_booking_paid(booking_id, payment_intent, kind)`
+  after recording a booking payment — "Your trip is confirmed" for a deposit/full payment, "Payment
+  received" for a balance — once per intent (`notifications.dedupe_key = 'payment:<intent>'`).
 - **Social signal**: `add_on_headcounts` (public, aggregate) and `trip_add_on_participants(trip_id)`
   (trip members and staff: who from the group is on each add-on).
 

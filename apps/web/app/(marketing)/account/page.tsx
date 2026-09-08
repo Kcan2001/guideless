@@ -7,6 +7,7 @@ import { formatDate, formatDateRange, formatMoney } from "@guideless/utils";
 import type { BookingStatus, CancellationTier, Currency, PaymentStatus } from "@guideless/types";
 import { CancelBooking } from "@/components/account/cancel-booking";
 import { OnboardingChecklist } from "@/components/account/onboarding-checklist";
+import { GroupCodeCard } from "@/components/account/group-code-card";
 import { ReferralCard } from "@/components/account/referral-card";
 import { TravelerDetails } from "@/components/account/traveler-details";
 import { previewRefund } from "@/lib/bookings/cancellations";
@@ -22,6 +23,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { payBalance } from "@/lib/bookings/actions";
 import { daysBetweenDates, onboardingSteps, travelersComplete } from "@/lib/bookings/onboarding";
 import { listMyBookings } from "@/lib/data/bookings";
+import { publicEnv } from "@/lib/env";
 import { listMyTrips } from "@/lib/data/trips";
 import { isStripeConfigured } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
@@ -256,6 +258,15 @@ export default async function AccountPage(props: PageProps<"/account">) {
                     leadTravelerId={leadByBooking.get(b.booking.id) ?? null}
                     contacts={contactsByTraveler}
                   />
+                  {(b.booking.status === "confirmed" || b.booking.status === "pending_payment") && (
+                    <div className="mt-6">
+                      <GroupCodeCard
+                        bookingId={b.booking.id}
+                        tourName={b.tour.name}
+                        buildUrl={`${publicEnv.NEXT_PUBLIC_SITE_URL}/tours/${b.tour.slug}/build?departure=${b.booking.departure_id}`}
+                      />
+                    </div>
+                  )}
                   {b.booking.status === "confirmed" &&
                     b.departure.start_date &&
                     b.departure.end_date && (

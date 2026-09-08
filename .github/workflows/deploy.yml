@@ -147,6 +147,11 @@ jobs:
           url=$(pnpm dlx vercel@latest deploy --prebuilt ${{ needs.target.outputs.vercel_prod_flag }} --token="$VERCEL_TOKEN")
           echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "Deployed: $url" >> "$GITHUB_STEP_SUMMARY"
+      - name: Stable staging alias
+        # Previews get a new URL per deploy; staging needs one fixed address for Stripe's test-mode
+        # webhook and for NEXT_PUBLIC_SITE_URL in the Preview environment (docs/go-live.md §2.2).
+        if: steps.gate.outputs.ready == 'true' && needs.target.outputs.environment == 'staging'
+        run: pnpm dlx vercel@latest alias set "${{ steps.deploy.outputs.url }}" guideless-staging.vercel.app --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID"
       - name: Smoke test
         if: steps.gate.outputs.ready == 'true'
         run: |

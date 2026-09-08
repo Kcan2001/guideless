@@ -86,8 +86,11 @@ export function DepartureList({
                   Sold out
                 </span>
               ) : (
-                <Link href={`/checkout/${d.id}`} className={buttonVariants({ size: "sm" })}>
-                  Book
+                <Link
+                  href={{ pathname: `/tours/${tourSlug}/build`, query: { departure: d.id } }}
+                  className={buttonVariants({ size: "sm" })}
+                >
+                  Build my trip
                 </Link>
               )}
             </div>

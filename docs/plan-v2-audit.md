@@ -226,16 +226,24 @@ working, tested logic for no customer-visible gain.
 1. **Milestone 1 — Positioning** (this proposal): homepage, new pages, Monaco page, catalog
    presentation migration, first simulator build for screenshots, analytics additions for the new
    CTAs. No booking-logic changes.
-2. **Milestone 2 — Trip Builder**: `/tours/[slug]/build`, reordered steps, rich cards, headcounts,
+2. **Milestone 2 — Trip Builder** (started 2026-09-08): `/tours/[slug]/build`, reordered steps, rich cards, headcounts,
    sticky mobile summary, group codes, server drafts, snapshot fixes, builder analytics.
 3. **Milestone 3 — Hotel inventory**: supplier abstraction, Duffel proof of concept, hotel tables,
    rate refresh and revalidation, admin hotel curation.
-4. **Milestone 4 — Mobile**: first emulator/device build and the six homepage app screenshots
+4. **Milestone 4 — Complete reskin** (deferred 2026-09-08: Kyle will hire a designer for the
+   visual direction; engineering integrates.) (added 2026-09-08 after Kyle's review of the Milestone 1
+   result: "major slop"). Rules: the value proposition is one line plus one sentence; photography
+   dominates (full-bleed, image-led cards, galleries, far fewer boxed cards and badges); the bar is
+   EF Ultimate Break, Amber Lounge, Senate Grand Prix and Tomorrowland Global Journey. Process: a
+   visual direction and two comps (home, trip page) for Kyle's approval before code; then home, trip
+   pages, cards, the marketing pages and the checkout shell, so the builder inherits the new system.
+   Needs a wider photo selection from the library and possibly hero video.
+5. **Milestone 5 — Mobile**: first emulator/device build and the six homepage app screenshots
    (moved here from Milestone 1), Today/Explore changes, onboarding, activity chats, change
    notices, store listings.
-5. **Milestone 5 — Operations**: coupons UI, inventory screen, manifests/rooming polish, alerts,
+6. **Milestone 6 — Operations**: coupons UI, inventory screen, manifests/rooming polish, alerts,
    reconciliation.
-6. **Milestone 6 — Growth**: reviews, photos, journal, destination SEO, funnel dashboard.
+7. **Milestone 7 — Growth**: reviews, photos, journal, destination SEO, funnel dashboard.
 
 ## 9. Milestone 1 proposal — "A stranger understands why in 10 seconds"
 

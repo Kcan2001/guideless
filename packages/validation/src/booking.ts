@@ -80,6 +80,17 @@ export const promoCodeInputSchema = z.preprocess(
     .optional(),
 );
 
+/** Friend / group code such as KYLE-MONACO-27 (public.group_codes). Blank → undefined. */
+export const groupCodeSchema = z.preprocess(
+  (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
+  z
+    .string()
+    .trim()
+    .toUpperCase()
+    .regex(/^[A-Z0-9]{2,12}(-[A-Z0-9]{2,12}){1,3}$/, "That does not look like a group code")
+    .optional(),
+);
+
 export const createBookingSchema = z
   .object({
     departureId: uuidSchema,
@@ -93,6 +104,8 @@ export const createBookingSchema = z
     terms: termsAcceptanceSchema,
     /** Coupon or a friend's referral code (GL-XXXXXX). */
     code: promoCodeInputSchema,
+    /** Joins a friend's group on the same departure; never changes the price. */
+    groupCode: groupCodeSchema,
     paymentOption: z.enum(["deposit", "full"]).default("deposit"),
   })
   .refine((b) => !b.roomIndexes || b.roomIndexes.length === b.travelers.length, {
@@ -168,3 +181,11 @@ export const cancellationRequestSchema = z.object({
   reason: z.string().trim().min(3, "Tell us briefly why").max(2000),
 });
 export type CancellationRequestInput = z.infer<typeof cancellationRequestSchema>;
+
+/** Trip Builder saved configuration (public.builder_drafts). The draft shape belongs to the web app. */
+export const builderDraftSchema = z.object({
+  departureId: uuidSchema,
+  step: z.number().int().min(0).max(7),
+  draft: z.object({}).passthrough(),
+});
+export type BuilderDraftInput = z.infer<typeof builderDraftSchema>;

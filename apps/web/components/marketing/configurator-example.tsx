@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import { ArrowRight } from "lucide-react";
 import { formatDateRange, formatMoney } from "@guideless/utils";
 import { CtaLink } from "@/components/analytics/cta-link";
@@ -24,7 +25,7 @@ export function ConfiguratorExampleCard({ example }: { example: ConfiguratorExam
           watch, what you join. The price updates as you go, and these numbers are the real ones.
         </p>
         <CtaLink
-          href={{ pathname: `/tours/${example.tourSlug}`, hash: "make-it-yours" }}
+          href={`/tours/${example.tourSlug}/build` as Route}
           placement="home_configurator"
           className={cn(buttonVariants({ size: "lg" }), "mt-8")}
         >

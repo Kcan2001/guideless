@@ -13,6 +13,15 @@ Sentry.init({
   sendDefaultPii: false,
   beforeSend: scrubEvent,
   ignoreErrors: ["ResizeObserver loop", "AbortError", /Loading chunk \d+ failed/],
+  // Browser extensions run in the page and their unhandled rejections reach our global handler.
+  // Their scripts are not served from this origin, so drop anything whose frames come from a
+  // path we never ship (e.g. app:///executors/200.js, seen on /tours/:slug 2026-09-08).
+  denyUrls: [
+    /^chrome(?:-extension)?:\/\//,
+    /^moz-extension:\/\//,
+    /^safari-(?:web-)?extension:\/\//,
+    /\/executors\//,
+  ],
 });
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

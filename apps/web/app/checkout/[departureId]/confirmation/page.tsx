@@ -6,7 +6,6 @@ import { emails } from "@guideless/config";
 import { formatDate, formatDateRange, formatMoney } from "@guideless/utils";
 import { TrackView } from "@/components/analytics/track-view";
 import { ClearDraft } from "@/components/checkout/clear-draft";
-import { Stepper } from "@/components/checkout/stepper";
 import { buttonVariants } from "@/components/ui/button";
 import { getMyBooking } from "@/lib/data/bookings";
 import { createClient } from "@/lib/supabase/server";
@@ -50,8 +49,6 @@ export default async function ConfirmationPage(
 
   return (
     <div className="mx-auto w-full max-w-3xl px-6 py-10">
-      <Stepper current={6} />
-
       <section className="mt-10 rounded-2xl border border-border bg-surface p-8">
         {confirmed ? (
           <>
