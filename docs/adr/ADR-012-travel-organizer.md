@@ -7,7 +7,7 @@
 
 Guideless sells accommodation, rail, transfers and selected experiences as one purchase, takes the
 customer's money, and contracts with the suppliers itself. Under US state seller-of-travel laws and
-the EU Package Travel Directive that makes Guideless the *organizer* of a package, with obligations
+the EU Package Travel Directive that makes Guideless the _organizer_ of a package, with obligations
 around registration, disclosures, insolvency protection, refunds and performance. The codebase so
 far treated Guideless as a marketplace-like website: `included` vs `optional` items, a free-text
 cancellation policy per departure, a confirmation email, no supplier contracts, no record of what

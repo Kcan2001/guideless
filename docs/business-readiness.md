@@ -38,14 +38,14 @@ developer account.
 **Decision.** Google Workspace on `guidelesstravel.com`, one paid seat for Kyle, everything else as
 free aliases or groups:
 
-| Address                          | Type          | Purpose                                     |
-| -------------------------------- | ------------- | ------------------------------------------- |
-| kyle@guidelesstravel.com         | user (paid)   | Admin account, owner of every SaaS login    |
-| hello@guidelesstravel.com        | group → kyle  | Primary customer inbox, reply-to for Resend |
-| support@guidelesstravel.com      | group → kyle  | Support threads (admin inbox mirrors it)    |
-| bookings@guidelesstravel.com     | group → kyle  | Booking and operations confirmations        |
-| partners@guidelesstravel.com     | group → kyle  | Hotels, transport, activity suppliers       |
-| finance@guidelesstravel.com      | group → kyle  | Stripe payouts, invoices, accounting        |
+| Address                      | Type         | Purpose                                     |
+| ---------------------------- | ------------ | ------------------------------------------- |
+| kyle@guidelesstravel.com     | user (paid)  | Admin account, owner of every SaaS login    |
+| hello@guidelesstravel.com    | group → kyle | Primary customer inbox, reply-to for Resend |
+| support@guidelesstravel.com  | group → kyle | Support threads (admin inbox mirrors it)    |
+| bookings@guidelesstravel.com | group → kyle | Booking and operations confirmations        |
+| partners@guidelesstravel.com | group → kyle | Hotels, transport, activity suppliers       |
+| finance@guidelesstravel.com  | group → kyle | Stripe payouts, invoices, accounting        |
 
 Groups are free, keep a shared history, and can be handed to a second person later without changing
 any public address.
@@ -54,7 +54,7 @@ any public address.
 
 - DNS: Google's MX records plus the Workspace verification TXT at Squarespace; keep Resend's DKIM
   and `send`/`rsend` records; SPF must include both Resend and Google (`v=spf1
-  include:_spf.google.com include:amazonses.com ~all` or the record Resend prescribes for the
+include:_spf.google.com include:amazonses.com ~all` or the record Resend prescribes for the
   `send` subdomain); DMARC `p=quarantine` once mail flows both ways.
 - Resend: `EMAIL_FROM` stays `hello@guidelesstravel.com`; add `reply_to` on every template.
 - Third-party accounts: move Stripe support email, Meta business email, Google Play and Apple
@@ -67,8 +67,8 @@ any public address.
 ## 2. P0 — Legal, insurance and travel-operator compliance
 
 **Problem.** Guideless sells accommodation + transport + excursions through a single point of sale
-and takes payment for the whole. In most jurisdictions that is a *package*, and the seller is the
-*organizer*, responsible for performance, refunds and insolvency protection — not a website that
+and takes payment for the whole. In most jurisdictions that is a _package_, and the seller is the
+_organizer_, responsible for performance, refunds and insolvency protection — not a website that
 "recommends hotels". Nothing in the company or the platform reflects that yet.
 
 **This is a workstream, not a task.** It has an outside lawyer and an insurance broker in it, and it
@@ -79,15 +79,15 @@ finishes before serious sales, not before launch of the website.
 Determine, per jurisdiction where customers are solicited, what Guideless LLC legally is and what
 that requires. Known items to have the lawyer confirm:
 
-| Jurisdiction | Regime                                           | Likely requirement                                                                   |
-| ------------ | ------------------------------------------------ | ------------------------------------------------------------------------------------ |
-| California   | Seller of Travel Law (Attorney General registry) | Register before selling to CA residents; show the CST number in all advertising; Travel Consumer Restitution Fund participation |
-| Florida      | Sellers of Travel Act (FDACS)                    | Annual registration; surety bond or performance assurance                            |
-| Hawaii       | Travel agency registration (DCCA)                | Registration; client trust account                                                   |
-| Washington   | Sellers of Travel (DOL)                          | Registration; trust account or bond                                                  |
-| Other states | Check when marketing there                       | Iowa, Nevada, Illinois, Delaware (home state) have lighter or no regimes            |
-| EU           | Package Travel Directive (2015/2302, amended 2026)| Applies when selling packages to EU consumers; pre-contractual information, organizer liability, insolvency protection, refund deadlines. Selling from the US to US residents traveling *in* Europe does not by itself make Guideless an EU organizer, but the suppliers are EU businesses and the trips happen there — get an opinion |
-| Delaware     | LLC home state                                   | Registered agent (ZenBusiness) in place; annual franchise tax                        |
+| Jurisdiction | Regime                                             | Likely requirement                                                                                                                                                                                                                                                                                                                     |
+| ------------ | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| California   | Seller of Travel Law (Attorney General registry)   | Register before selling to CA residents; show the CST number in all advertising; Travel Consumer Restitution Fund participation                                                                                                                                                                                                        |
+| Florida      | Sellers of Travel Act (FDACS)                      | Annual registration; surety bond or performance assurance                                                                                                                                                                                                                                                                              |
+| Hawaii       | Travel agency registration (DCCA)                  | Registration; client trust account                                                                                                                                                                                                                                                                                                     |
+| Washington   | Sellers of Travel (DOL)                            | Registration; trust account or bond                                                                                                                                                                                                                                                                                                    |
+| Other states | Check when marketing there                         | Iowa, Nevada, Illinois, Delaware (home state) have lighter or no regimes                                                                                                                                                                                                                                                               |
+| EU           | Package Travel Directive (2015/2302, amended 2026) | Applies when selling packages to EU consumers; pre-contractual information, organizer liability, insolvency protection, refund deadlines. Selling from the US to US residents traveling _in_ Europe does not by itself make Guideless an EU organizer, but the suppliers are EU businesses and the trips happen there — get an opinion |
+| Delaware     | LLC home state                                     | Registered agent (ZenBusiness) in place; annual franchise tax                                                                                                                                                                                                                                                                          |
 
 Deliverables: written opinion, list of registrations to file with dates and costs, the CST/other
 numbers to display, trust-account or bond requirements, and the customer-facing disclosures each
@@ -97,15 +97,15 @@ regime requires.
 
 Talk to a travel-industry broker (not a generic small-business agent) and price at least:
 
-| Coverage                                 | Why                                                                                 |
-| ---------------------------------------- | ----------------------------------------------------------------------------------- |
-| Commercial general liability             | Third-party injury or property damage on a trip                                     |
+| Coverage                                         | Why                                                                                           |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| Commercial general liability                     | Third-party injury or property damage on a trip                                               |
 | Professional liability / E&O, tour-operator form | Booking errors, supplier failures, itinerary mistakes, wrong information, missed arrangements |
-| Cyber liability                          | Customer accounts, travel documents, chat, payment-adjacent data                    |
-| Crime / fraud                            | Once supplier prepayments and customer funds are meaningful                         |
-| Hired / non-owned auto                   | If transfers are arranged with drivers                                              |
-| Event- and activity-specific             | Boats, race hospitality, adventure activities — often excluded from base policies   |
-| Workers' compensation                    | When there are employees                                                            |
+| Cyber liability                                  | Customer accounts, travel documents, chat, payment-adjacent data                              |
+| Crime / fraud                                    | Once supplier prepayments and customer funds are meaningful                                   |
+| Hired / non-owned auto                           | If transfers are arranged with drivers                                                        |
+| Event- and activity-specific                     | Boats, race hospitality, adventure activities — often excluded from base policies             |
+| Workers' compensation                            | When there are employees                                                                      |
 
 The question for the broker is not "do we have insurance" but "does this policy cover us acting as
 the organizer of packaged travel where we contract with hotels, rail, boats and activity operators
@@ -127,10 +127,10 @@ insured where the activity warrants it.
 
 The Trip Builder and every confirmation must distinguish two relationships and say so in words:
 
-| Relationship                | Example                                              | Who is responsible          |
-| --------------------------- | ---------------------------------------------------- | --------------------------- |
-| Guideless-organized         | Hotel, train Nice→Avignon, welcome drinks, race terrace, boat | Guideless LLC (organizer)   |
-| Third-party, booked directly| Flight to Nice, travel insurance, a restaurant we only recommend | The supplier; Guideless informs |
+| Relationship                 | Example                                                          | Who is responsible              |
+| ---------------------------- | ---------------------------------------------------------------- | ------------------------------- |
+| Guideless-organized          | Hotel, train Nice→Avignon, welcome drinks, race terrace, boat    | Guideless LLC (organizer)       |
+| Third-party, booked directly | Flight to Nice, travel insurance, a restaurant we only recommend | The supplier; Guideless informs |
 
 Data model consequence: `tour_itinerary_items` / `trip_itinerary_items` and `departure_add_ons`
 need a `provision` column (`organized` \| `recommended` \| `third_party_direct`) and the UI must
@@ -157,14 +157,14 @@ target of a generated PDF per version; the generator lives in an Edge Function f
 
 New tables, one migration per group, all RLS staff-only (finance/admin) unless noted:
 
-| Group          | Tables                                                                          |
-| -------------- | ------------------------------------------------------------------------------- |
-| Entity         | `legal_entities` (name, EIN, state, addresses, registered agent), `travel_registrations` (jurisdiction, number, status, expires_at, bond/trust details), `travel_registration_documents` |
-| Insurance      | `insurance_policies` (carrier, type, limits, effective/expires), `insurance_certificates` |
-| Suppliers      | `supplier_contracts`, `supplier_insurance`, `supplier_documents` — extend the existing `suppliers` (migration 009) rather than replace it |
-| Terms          | `terms_versions`, `booking_terms` (which version each booking accepted), `booking_document_versions`, `traveler_consents` |
-| Policies       | `refund_policies`, `cancellation_policies` as named, versioned records referenced by departures instead of free jsonb |
-| Incidents      | `incident_reports`, `claims` (linked to departure, traveler, supplier, insurance policy) |
+| Group     | Tables                                                                                                                                                                                   |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Entity    | `legal_entities` (name, EIN, state, addresses, registered agent), `travel_registrations` (jurisdiction, number, status, expires_at, bond/trust details), `travel_registration_documents` |
+| Insurance | `insurance_policies` (carrier, type, limits, effective/expires), `insurance_certificates`                                                                                                |
+| Suppliers | `supplier_contracts`, `supplier_insurance`, `supplier_documents` — extend the existing `suppliers` (migration 009) rather than replace it                                                |
+| Terms     | `terms_versions`, `booking_terms` (which version each booking accepted), `booking_document_versions`, `traveler_consents`                                                                |
+| Policies  | `refund_policies`, `cancellation_policies` as named, versioned records referenced by departures instead of free jsonb                                                                    |
+| Incidents | `incident_reports`, `claims` (linked to departure, traveler, supplier, insurance policy)                                                                                                 |
 
 `audit_logs` (migration 022) already exists; every table above gets the audit trigger.
 

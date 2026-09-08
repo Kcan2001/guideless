@@ -140,10 +140,11 @@ single-member LLC, EIN + legal name `GUIDELESS LLC`, business address 646 Rector
 Philadelphia PA 19128, public name Guideless Travel, category Travel agencies, support phone
 (hidden on receipts), statement descriptor `GUIDELESS TRAVEL`, Radar Lite, no Stripe Tax, no Climate
 — except **Account representative** (Kyle's home address + SSN last 4) and the final "Agree and
-submit", followed by a payout bank account. Once live keys exist: create a *live-mode* webhook
+submit", followed by a payout bank account. Once live keys exist: create a _live-mode_ webhook
 endpoint with the same URL/events and replace the three Production values in Vercel with live keys
-+ its signing secret. Kyle's login also owned two old "Reset Club" accounts; the 2026 one is closed
-and the 2021 one (`acct_1Ja1HE2SQ0KlVgLK`) is being closed on Kyle's instruction.
+
+- its signing secret. Kyle's login also owned two old "Reset Club" accounts; the 2026 one is closed
+  and the 2021 one (`acct_1Ja1HE2SQ0KlVgLK`) is being closed on Kyle's instruction.
 
 ### 2.4 Resend
 
