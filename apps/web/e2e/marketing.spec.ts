@@ -73,7 +73,7 @@ test.describe("marketing site", () => {
     await expect(page.getByTestId("base-includes")).toContainText("Add only what you want.");
     await expect(page.getByTestId("compare-block")).toContainText("Traditional group tour");
     await expect(page.getByRole("heading", { name: /pick your tier/i })).toBeVisible();
-    await expect(page.getByTestId("stay-tiers")).toContainText("Well-located 3★ hotels");
+    await expect(page.getByTestId("stay-tiers")).toContainText("Well-located hotels");
     await expect(page.getByTestId("experience-options")).toContainText(
       "Boat day along the Riviera",
     );

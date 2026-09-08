@@ -280,18 +280,22 @@ export default async function HomePage() {
             All trips
           </Link>
         </div>
-        {featured.length > 0 ? (
-          <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {featured.map((item) => (
-              <TourCard key={item.tour.id} item={item} />
-            ))}
-          </div>
-        ) : (
+        {featured.length + events.length === 0 && (
           <p className="mt-12 text-muted-foreground">Our first routes are being finalized.</p>
         )}
 
-        {events.length > 0 && (
-          <ul className="mt-6 grid gap-6 md:grid-cols-2">
+        {featured.length + events.length > 0 && (
+          <ul
+            className={cn(
+              "mt-12 grid gap-6 md:grid-cols-2",
+              featured.length + events.length >= 3 && "lg:grid-cols-3",
+            )}
+          >
+            {featured.map((item) => (
+              <li key={item.tour.id} className="grid">
+                <TourCard item={item} />
+              </li>
+            ))}
             {events.map(({ tour, version, destinations: dests, departures }) => {
               const next = departures[0];
               return (

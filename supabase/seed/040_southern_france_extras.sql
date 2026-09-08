@@ -130,3 +130,12 @@ update public.departure_stay_options
 set star_rating = null
 where coalesce((details ->> 'hotel_confirmed')::boolean, false) = false
   and star_rating is not null;
+
+-- Tier names carry no star rating until properties are confirmed, and no popularity claims.
+update public.departure_stay_options
+set name = 'Well-located hotels',
+    description = 'Three comfortable hotels a short walk from the centre of each city. Breakfast included.'
+where name = 'Well-located 3★ hotels';
+update public.departure_stay_options
+set name = 'Boutique upgrade'
+where name = 'Boutique 4★ upgrade';

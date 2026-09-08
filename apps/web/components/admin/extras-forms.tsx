@@ -154,7 +154,7 @@ export function StayOptionForm({
           id={`stay-${k}-name`}
           name="name"
           defaultValue={stay?.name ?? ""}
-          placeholder="Nice, 3★ near the port"
+          placeholder="Nice, near the port"
           className={inputClass}
           required
           disabled={disabled}
