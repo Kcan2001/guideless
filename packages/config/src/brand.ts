@@ -13,6 +13,8 @@ export const brand = {
   /** Consumer headline (plan v2 §2). "Minimal intervention travel" is category language, not the headline. */
   tagline: "Travel with a plan. Not a tour guide.",
   taglineSecondary: "Everything planned. Nothing forced.",
+  /** Brand signature (Kyle, 2026-09-07): footer, social previews, app sign-in. Revisit after the first bookings. */
+  signature: "Go together. Be guided by no one.",
   description:
     "Hotels, transportation, experiences and a group are organized for you. Explore independently, meet people when you want, and build the trip you actually want to take.",
   /** Category language, used as an eyebrow or secondary line only. */

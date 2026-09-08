@@ -62,7 +62,9 @@ export function SiteFooter() {
         <div>
           <p className="font-heading text-lg font-bold">{brand.name}</p>
           <p className="mt-3 max-w-sm text-muted-foreground">{brand.tagline}</p>
-          <p className="mt-1 max-w-sm text-sm text-muted-foreground">{brand.taglineSecondary}</p>
+          <p className="mt-1 max-w-sm font-heading text-sm font-semibold text-foreground">
+            {brand.signature}
+          </p>
           <div className="mt-6 max-w-sm">
             <p className="text-sm font-semibold">New departures, first.</p>
             <p className="mb-3 mt-1 text-xs text-muted-foreground">
