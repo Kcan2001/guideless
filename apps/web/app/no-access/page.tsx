@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { brand } from "@guideless/config";
+import { emails } from "@guideless/config";
 import { buttonVariants } from "@/components/ui/button";
 
 export const metadata: Metadata = { title: "No access", robots: { index: false, follow: false } };
@@ -20,10 +20,7 @@ export default function NoAccessPage() {
         <Link href="/account" className={buttonVariants()}>
           Your account
         </Link>
-        <a
-          href={`mailto:${brand.supportEmail}`}
-          className={buttonVariants({ variant: "secondary" })}
-        >
+        <a href={`mailto:${emails.support}`} className={buttonVariants({ variant: "secondary" })}>
           Contact us
         </a>
       </div>

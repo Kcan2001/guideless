@@ -2,7 +2,7 @@
 
 import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
-import { brand } from "@guideless/config";
+import { emails } from "@guideless/config";
 
 /** Last-resort error boundary (root layout failures). Human message; technical detail → Sentry. */
 export default function GlobalError({
@@ -42,8 +42,8 @@ export default function GlobalError({
           </h1>
           <p style={{ color: "#586266" }}>
             Nothing was charged and your booking is safe. Try again, or email{" "}
-            <a href={`mailto:${brand.supportEmail}`} style={{ color: "#17B1DF" }}>
-              {brand.supportEmail}
+            <a href={`mailto:${emails.support}`} style={{ color: "#17B1DF" }}>
+              {emails.support}
             </a>
             {error.digest ? ` and mention reference ${error.digest}.` : "."}
           </p>

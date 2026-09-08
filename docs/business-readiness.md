@@ -68,10 +68,15 @@ include:_spf.google.com include:amazonses.com ~all` or the record Resend prescri
 records. The five shared addresses exist as Google Groups, each delivering to `kyle@`:
 `hello@`, `support@`, `bookings@`, `partners@`, `finance@` (access type Public, external senders
 allowed to post, membership invite-only). A Resend → `hello@` round-trip was sent to verify
-delivery. Remaining: turn on Gmail DKIM ("Authenticate outgoing emails" in the Workspace setup),
-tighten `_dmarc` to `p=quarantine` once both directions are proven, add `reply_to` to the Resend
-templates, and repoint the third-party account contacts (Stripe, Meta, Play, Apple, Pinterest,
-PostHog, Sentry, Vercel) to the new addresses.
+delivery. The web app publishes them where each one belongs: `/contact` carries a "Where to write" block
+(hello, support, finance, partners), checkout and in-trip surfaces point at `support@`, and
+outgoing mail from `apps/web/lib/email/send.ts` now sets a reply-to of `support@` so a traveler can
+answer a booking email. Addresses live in `packages/config/src/emails.ts`; `bookings@` stays an
+operations mailbox and is not shown to customers. Remaining: turn on Gmail DKIM ("Authenticate
+outgoing emails" in the Workspace setup), tighten `_dmarc` to `p=quarantine` once both directions
+are proven, switch the mobile support screen from `hello@` to `support@`, and repoint the
+third-party account contacts (Stripe, Meta, Play, Apple, Pinterest, PostHog, Sentry, Vercel) to the
+new addresses.
 
 ## 2. P0 — Legal, insurance and travel-operator compliance
 
