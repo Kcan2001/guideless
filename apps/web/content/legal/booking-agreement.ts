@@ -7,6 +7,11 @@ import type { LegalDocument } from "@/content/legal/types";
  * Terms do not — who is the organiser, what is protected if we fail, what happens when a trip
  * changes materially, how to complain and by when.
  *
+ * NOT PUBLISHED. There is deliberately no route rendering this. It was briefly live and showed its
+ * own review markers to customers, which is worse than not having the page: a contract full of
+ * [BRACKETS] tells a traveler we do not know our own terms. It goes public only once an attorney
+ * has settled clause 4 and every bracket is either filled or deleted.
+ *
  * DRAFT PENDING LEGAL REVIEW. Several clauses turn on a question that has not been settled:
  * whether Guideless sells as an agent for suppliers or as the organiser of a package. Clauses
  * that depend on it are marked in `docs/legal/README.md`. Do not treat this as legal advice, and
