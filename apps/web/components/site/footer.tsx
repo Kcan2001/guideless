@@ -48,6 +48,7 @@ const COLUMNS: Array<{ label: string; links: Array<{ href: Route; label: string 
     label: "Legal",
     links: [
       { href: "/terms", label: "Terms of Service" },
+      { href: "/booking-agreement", label: "Booking Agreement" },
       { href: "/privacy", label: "Privacy Policy" },
       { href: "/cancellation", label: "Cancellation policy" },
       { href: "/travel-insurance", label: "Travel insurance" },

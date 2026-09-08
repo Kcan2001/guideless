@@ -175,7 +175,7 @@ test.describe("marketing site", () => {
   });
 
   test("terms and privacy are published for Guideless LLC", async ({ page }) => {
-    for (const path of ["/terms", "/privacy"]) {
+    for (const path of ["/terms", "/privacy", "/booking-agreement"]) {
       const res = await page.goto(path);
       expect(res?.status()).toBe(200);
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();

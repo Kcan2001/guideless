@@ -1,6 +1,10 @@
 /** [key, label, linked phrase → page]. The link stays inside the label so the checkbox's accessible name is unchanged. */
 export const TERMS = [
-  ["terms", "I accept the Terms of Service.", ["Terms of Service", "/terms"]],
+  [
+    "terms",
+    "I accept the Booking Agreement and the Terms of Service.",
+    ["Booking Agreement", "/booking-agreement"],
+  ],
   ["cancellationPolicy", "I understand the cancellation policy for this departure.", null],
   [
     "travelResponsibility",

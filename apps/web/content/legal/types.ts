@@ -6,7 +6,7 @@ export interface LegalSection {
 }
 
 export interface LegalDocument {
-  slug: "terms" | "privacy";
+  slug: "terms" | "privacy" | "booking-agreement";
   title: string;
   lede: string;
   /** Matches brand.termsVersion; stored on each booking as the accepted version. */
