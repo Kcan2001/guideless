@@ -145,3 +145,15 @@ where name = 'Boutique 4★ upgrade';
 -- extra night, farewell dinner) are single experiences, not levels of one another, so they stay untiered.
 update public.departure_stay_options set tier = 'explorer' where name = 'Well-located hotels';
 update public.departure_stay_options set tier = 'premium'  where name = 'Boutique upgrade';
+
+-- ── Insurance wording, corrected (2026-09-08) ────────────────────────────────
+-- The policy audit rewrote the Terms and the FAQ to say travel insurance is strongly recommended
+-- and explicitly not a condition of booking, because nothing in the schema can mark a departure as
+-- requiring it and nobody checks. This line was missed because it lives in seed data rather than in
+-- code, so the trip page went on telling travelers insurance was required while the Terms two
+-- clicks away said the opposite. Contradicting ourselves about a contract term is worse than either
+-- position on its own.
+update public.tour_excluded_items
+set description = 'Strongly recommended, and yours to arrange. Our cancellation policy refunds what we control; insurance covers your flights, your health and everything you booked yourself.'
+where tour_version_id = '21000000-0000-4000-8000-000000000001'
+  and title = 'Travel insurance';
