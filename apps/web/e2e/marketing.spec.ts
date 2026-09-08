@@ -107,11 +107,13 @@ test.describe("marketing site", () => {
     await expect(page.getByTestId("tier-legend")).toContainText("Explorer");
     await expect(stays.locator("[data-tier='explorer']")).toHaveText("Explorer");
     await expect(stays.locator("[data-tier='elite']")).toHaveText("Elite");
-    await expect(page.getByTestId("race-options")).toContainText("Yacht in the harbour (Sun)");
-    await expect(page.getByTestId("race-options")).toContainText("Most popular");
-    await expect(page.getByTestId("race-options").locator("[data-tier='classic']")).toHaveText(
-      "Classic",
-    );
+    // Assert that race viewing renders as priced, tiered options, not which options the catalog
+    // holds: the titles and prices are supplier data that changes with every reprice.
+    const raceOptions = page.getByTestId("race-options");
+    await expect(raceOptions.locator("[data-tier]").first()).toBeVisible();
+    await expect(raceOptions).toContainText("per person");
+    await expect(raceOptions).toContainText("Most popular");
+    await expect(raceOptions.locator("[data-tier='classic']")).toHaveText("Classic");
     const ld = await page.locator('script[type="application/ld+json"]').allTextContents();
     const types = ld.flatMap((t) => JSON.parse(t)).map((d: { "@type": string }) => d["@type"]);
     expect(types).toEqual(expect.arrayContaining(["TouristTrip", "Event"]));
