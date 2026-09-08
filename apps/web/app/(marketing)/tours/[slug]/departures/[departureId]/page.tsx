@@ -237,7 +237,7 @@ export default async function DeparturePage(
                 </span>
               ) : (
                 <Link
-                  href={`/tours/${tour.slug}/build?departure=${d.id}`}
+                  href={{ pathname: `/tours/${tour.slug}/build`, query: { departure: d.id } }}
                   className={cn(buttonVariants({ size: "lg" }), "w-full")}
                 >
                   Build my trip <ArrowRight className="h-4 w-4" aria-hidden />

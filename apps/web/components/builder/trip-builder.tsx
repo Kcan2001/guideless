@@ -1,5 +1,7 @@
 "use client";
 
+import type { Route } from "next";
+
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { AddOnStep } from "@/components/builder/add-on-step";
@@ -187,7 +189,7 @@ export function TripBuilder({
       onSelect={(id) => {
         if (id === departure.id) return;
         track("departure_selected", { departure_id: id });
-        router.push(`/tours/${tourSlug}/build?departure=${id}`);
+        router.push(`/tours/${tourSlug}/build?departure=${id}` as Route);
       }}
       onTravelerCount={setTravelerCount}
       onNext={forward}

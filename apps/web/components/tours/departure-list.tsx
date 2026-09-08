@@ -87,7 +87,7 @@ export function DepartureList({
                 </span>
               ) : (
                 <Link
-                  href={`/tours/${tourSlug}/build?departure=${d.id}`}
+                  href={{ pathname: `/tours/${tourSlug}/build`, query: { departure: d.id } }}
                   className={buttonVariants({ size: "sm" })}
                 >
                   Build my trip
