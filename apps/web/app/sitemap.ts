@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { listUpcomingMeetups } from "@/lib/data/community";
+import { listJournalSlugs } from "@/lib/content/journal";
 import { listDestinationSlugs } from "@/lib/data/destinations";
 import { listTourSlugs, listUpcomingDepartureRefs } from "@/lib/data/tours";
 import { siteUrl } from "@/lib/seo";
@@ -7,11 +8,12 @@ import { siteUrl } from "@/lib/seo";
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [tours, destinations, departures, meetups] = await Promise.all([
+  const [tours, destinations, departures, meetups, journal] = await Promise.all([
     listTourSlugs(),
     listDestinationSlugs(),
     listUpcomingDepartureRefs(),
     listUpcomingMeetups(),
+    listJournalSlugs(),
   ]);
   const now = new Date();
 
@@ -38,6 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.3,
     },
     { url: siteUrl("/host"), lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+    { url: siteUrl("/journal"), lastModified: now, changeFrequency: "weekly", priority: 0.6 },
     { url: siteUrl("/meetups"), lastModified: now, changeFrequency: "weekly", priority: 0.5 },
     { url: siteUrl("/terms"), lastModified: now, changeFrequency: "yearly", priority: 0.3 },
     { url: siteUrl("/privacy"), lastModified: now, changeFrequency: "yearly", priority: 0.3 },
@@ -58,6 +61,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
       changeFrequency: "daily" as const,
       priority: 0.8,
+    })),
+    ...journal.map((post) => ({
+      url: siteUrl(`/journal/${post.slug}`),
+      lastModified: new Date(post.updatedAt),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
     })),
     ...destinations.map((slug) => ({
       url: siteUrl(`/destinations/${slug}`),

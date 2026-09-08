@@ -33,7 +33,10 @@ export type AnalyticsEvent =
   | "quote_updated" // props: departure_id, total, due_now, currency
   | "group_code_entered" // props: departure_id, valid
   | "post_booking_addon_viewed" // props: booking_id
-  | "post_booking_addon_added"; // props: booking_id, add_on_id
+  | "post_booking_addon_added" // props: booking_id, add_on_id
+  | "waitlist_joined" // props: source (tour or departure), never the email
+  | "drop_viewed" // props: departure_id
+  | "unlock_progress_viewed"; // props: departure_id, threshold
 
 export type AnalyticsParams = Record<string, string | number | boolean | undefined>;
 

@@ -11,3 +11,6 @@ export * from "./admin";
 export * from "./marketing";
 export * from "./community";
 export * from "./hotels";
+export * from "./growth";
+export * from "./reviews";
+export * from "./content";

@@ -21,6 +21,8 @@ export interface PublicDeparture {
   bookingDeadline: string | null;
   balanceDueDate: string | null;
   cancellationPolicy: CancellationTier[];
+  /** Trip drop: bookable only once this moment has passed. Null means open now. */
+  opensAt: string | null;
 }
 
 export interface TourListItem {

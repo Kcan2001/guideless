@@ -10,6 +10,8 @@ import { TourCard } from "@/components/tours/tour-card";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { getDestinationBySlug, listDestinationSlugs } from "@/lib/data/destinations";
+import { Prose } from "@/components/content/prose";
+import { listDestinationGuides } from "@/lib/content/journal";
 import { breadcrumbJsonLd } from "@/lib/seo";
 
 export const revalidate = 300;
@@ -46,7 +48,12 @@ export default async function DestinationPage(props: PageProps<"/destinations/[s
   const detail = await getDestinationBySlug(slug);
   if (!detail) notFound();
   const { destination: d, tours, recommendations } = detail;
+  const guides = await listDestinationGuides(d.id);
   const emergency = Object.entries((d.emergency_numbers ?? {}) as Record<string, string>);
+
+  // The closing call to action goes straight to the builder when a trip here has an open departure.
+  const bookable = tours.find((t) => t.departures.length > 0);
+  const nextDeparture = bookable?.departures[0];
 
   return (
     <>
@@ -91,6 +98,17 @@ export default async function DestinationPage(props: PageProps<"/destinations/[s
       {d.description && (
         <section className="mx-auto w-full max-w-3xl px-6 py-16 text-lg leading-relaxed">
           <p>{d.description}</p>
+        </section>
+      )}
+
+      {guides.length > 0 && (
+        <section className="mx-auto w-full max-w-3xl px-6 pb-8">
+          {guides.map((guide) => (
+            <div key={guide.id} className="mb-12 last:mb-0">
+              <h2 className="font-heading text-2xl font-bold md:text-3xl">{guide.title}</h2>
+              <Prose markdown={guide.body_markdown} className="mt-4" />
+            </div>
+          ))}
         </section>
       )}
 
@@ -186,6 +204,37 @@ export default async function DestinationPage(props: PageProps<"/destinations/[s
               How support works <ArrowRight className="h-3.5 w-3.5" aria-hidden />
             </Link>
           </aside>
+        </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-6xl px-6 py-20">
+        <div className="rounded-2xl bg-ink px-8 py-12 text-cloud md:px-12">
+          <h2 className="font-heading text-3xl font-bold md:text-4xl">
+            {bookable ? `See ${d.name} on your own terms.` : `${d.name} is on the list.`}
+          </h2>
+          <p className="mt-3 max-w-xl text-cloud/80">
+            {bookable
+              ? "Hotels, trains and one good evening at the start are handled. Choose where you stay and what you join; the rest of the week is yours."
+              : "No route stops here yet. New trips are added a few times a year — the newsletter carries them first."}
+          </p>
+          {bookable && nextDeparture ? (
+            <Link
+              href={{
+                pathname: `/tours/${bookable.tour.slug}/build`,
+                query: { departure: nextDeparture.id },
+              }}
+              className={buttonVariants({ variant: "inverse", size: "lg" }) + " mt-6"}
+            >
+              Build this trip <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+          ) : (
+            <Link
+              href="/tours"
+              className={buttonVariants({ variant: "inverse", size: "lg" }) + " mt-6"}
+            >
+              Explore trips <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+          )}
         </div>
       </section>
 
