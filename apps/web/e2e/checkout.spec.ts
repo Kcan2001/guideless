@@ -80,7 +80,7 @@ test("a new customer can build a trip up to the payment step, and is refused cle
   await expect(page.getByRole("heading", { name: /almost there/i })).toBeVisible();
   await expect(page.getByText(`Signed in as ${email}`)).toBeVisible();
   for (const label of [
-    "I accept the Terms of Service.",
+    "I accept the Booking Agreement and the Terms of Service.",
     "I understand the cancellation policy for this departure.",
     "I understand I am responsible for my own flights, insurance and documents.",
     "I accept the Privacy Policy.",

@@ -1166,7 +1166,7 @@ export type Database = {
         Row: {
           address: string | null;
           bookable_until_days_before: number;
-          cancellable_until_days_before: number;
+          cancellable_until_days_before: number | null;
           capacity: number | null;
           created_at: string;
           currency: string;
@@ -1202,7 +1202,7 @@ export type Database = {
         Insert: {
           address?: string | null;
           bookable_until_days_before?: number;
-          cancellable_until_days_before?: number;
+          cancellable_until_days_before?: number | null;
           capacity?: number | null;
           created_at?: string;
           currency: string;
@@ -1238,7 +1238,7 @@ export type Database = {
         Update: {
           address?: string | null;
           bookable_until_days_before?: number;
-          cancellable_until_days_before?: number;
+          cancellable_until_days_before?: number | null;
           capacity?: number | null;
           created_at?: string;
           currency?: string;

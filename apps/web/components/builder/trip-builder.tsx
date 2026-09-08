@@ -48,6 +48,7 @@ export function TripBuilder({
   departures,
   steps,
   user,
+  googleEnabled = false,
   initialStep,
   cancelled = false,
   serverDraft,
@@ -57,6 +58,8 @@ export function TripBuilder({
   departures: BuilderDepartureSummary[];
   steps: BuilderStep[];
   user: CheckoutUser | null;
+  /** Whether the project has Google sign-in switched on; the button is hidden when it does not. */
+  googleEnabled?: boolean;
   initialStep: BuilderStepKey;
   cancelled?: boolean;
   serverDraft: SavedBuilderDraft | null;
@@ -247,6 +250,7 @@ export function TripBuilder({
     <ReviewStep
       title={current.title}
       user={user}
+      googleEnabled={googleEnabled}
       loginNext={`${builderPath}&step=review`}
       onBack={back}
       onNext={forward}

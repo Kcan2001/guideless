@@ -25,7 +25,8 @@ export interface RefundPreview {
     title: string;
     total: number;
     refundable: boolean;
-    cancellableUntil: string;
+    /** Null when the extra was never refundable after purchase. */
+    cancellableUntil: string | null;
   }[];
   addOnsRefund: number;
   totalRefund: number;
@@ -39,8 +40,10 @@ export function addDaysISO(iso: string, days: number): string {
 
 /**
  * Add-ons refund in full until their own deadline (`cancellable_until_days_before` before the
- * add-on's date, or the trip end when undated). The base trip follows the tiers on what was paid
- * toward it, which is everything paid minus confirmed add-ons (add-ons are always paid in full).
+ * add-on's date, or the trip end when undated); a null deadline means the extra was never
+ * refundable after purchase, which is how event tickets work. The base trip follows the tiers on
+ * what was paid toward it, which is everything paid minus confirmed add-ons (add-ons are always
+ * paid in full).
  */
 export function previewRefund(input: {
   todayISO: string;
@@ -54,7 +57,8 @@ export function previewRefund(input: {
     total: number;
     status: string;
     dayNumber: number | null;
-    cancellableUntilDaysBefore: number;
+    /** Null: non-refundable from purchase, so there is no date at which it can still go back. */
+    cancellableUntilDaysBefore: number | null;
   }[];
 }): RefundPreview {
   const daysBefore = Math.round(
@@ -68,6 +72,15 @@ export function previewRefund(input: {
   const baseRefund = Math.round((basePaid * pct) / 100);
   const addOns = confirmed.map((a) => {
     const date = a.dayNumber ? addDaysISO(input.startDate, a.dayNumber - 1) : input.endDate;
+    if (a.cancellableUntilDaysBefore === null) {
+      return {
+        id: a.id,
+        title: a.title,
+        total: a.total,
+        refundable: false,
+        cancellableUntil: null,
+      };
+    }
     const cancellableUntil = addDaysISO(date, -a.cancellableUntilDaysBefore);
     return {
       id: a.id,

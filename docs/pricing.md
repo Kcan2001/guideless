@@ -121,6 +121,24 @@ by `anon` (read-only, security definer); the checkout sidebar calls it from the 
   decision and notifies the customer. Wiring that button in admin is a small follow-up.
 - Money never moves from the request itself; the request is a ticket with the quote attached.
 
+## Refund tiers versus what suppliers allow — unresolved (2026-09-09)
+
+The seeded departures refund **100% at 60+ days**, 75% at 30–59, 50% at 15–29 and nothing inside 15.
+That is more generous than the suppliers behind a Monaco weekend will be. Grandstand tickets are
+non-refundable once issued, and race-week accommodation is normally prepaid and non-refundable too
+(`docs/legal/schedule-d-event-tickets.md` D4). A traveler cancelling at 61 days would currently be
+refunded in full for components Guideless can no longer recover, and the loss is ours.
+
+Two things have to happen before a Monaco departure opens for sale, and neither is a code change:
+
+1. Set that departure's tiers in admin to match the supplier terms actually signed.
+2. Mark the non-refundable extras as such at the point of sale. Clause 7 of the Booking Agreement
+   already carves them out of the percentage, and carries a `[CONFIRM PER DEPARTURE]` marker so the
+   two cannot quietly disagree.
+
+The Southern France departures are lower risk — hotels and experiences there are usually cancellable
+much closer in — but the tiers should still be checked against the signed rates rather than assumed.
+
 ## Hotel inventory (migration 044)
 
 Supplier rates never set a customer price directly. The chain is:

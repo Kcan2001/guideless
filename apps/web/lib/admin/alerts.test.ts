@@ -25,6 +25,7 @@ function facts(over: Partial<DepartureFacts> = {}): DepartureFacts {
     balanceOverdueBookings: 0,
     travelersMissingDetails: 0,
     hotelLinkedTiers: [],
+    refundPercentages: [90, 70, 40, 0],
     ...over,
   };
 }
@@ -180,5 +181,10 @@ describe("minutesUntil", () => {
   it("is negative once the moment has passed", () => {
     expect(minutesUntil(new Date(NOW.getTime() - 60_000).toISOString(), NOW)).toBe(-1);
     expect(minutesUntil(new Date(NOW.getTime() + 90_000).toISOString(), NOW)).toBe(1);
+  });
+
+  it("flags a 100% refund tier, because the processing fee never comes back", () => {
+    expect(kinds({ refundPercentages: [100, 50, 0] })).toContain("full_refund_tier");
+    expect(kinds({ refundPercentages: [90, 70, 0] })).not.toContain("full_refund_tier");
   });
 });

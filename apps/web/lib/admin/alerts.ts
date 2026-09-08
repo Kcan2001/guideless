@@ -28,6 +28,7 @@ export type AlertKind =
   | "balance_overdue"
   | "traveler_details"
   | "hotel_rates_stale"
+  | "full_refund_tier"
   | "support_unassigned"
   | "support_open";
 
@@ -71,6 +72,8 @@ export interface DepartureFacts {
    * has a hotel but no rate has ever been fetched.
    */
   hotelLinkedTiers: Array<{ name: string; lastRateAt: string | null }>;
+  /** The refund percentages this departure publishes, highest tier first or in any order. */
+  refundPercentages: number[];
 }
 
 function plural(n: number, one: string, many = `${one}s`): string {
@@ -104,6 +107,18 @@ export function departureAlerts(
       kind: "below_minimum",
       severity: "warning",
       text: `${where}: ${d.confirmed} of ${d.minimumTravelers} minimum travelers, ${plural(d.daysUntil, "day")} out.`,
+      href,
+    });
+  }
+
+  // A full refund is never actually full: the card networks keep their processing fee, so a 100%
+  // tier loses money on every cancellation. Worth telling staff rather than enforcing, because a
+  // departure might deliberately carry one — a goodwill date, say — and that should be a choice.
+  if (d.refundPercentages.some((p) => p >= 100)) {
+    alerts.push({
+      kind: "full_refund_tier",
+      severity: "info",
+      text: `${where}: publishes a 100% refund tier. The processing fee is not returned, so every cancellation at that tier costs us the fee.`,
       href,
     });
   }
