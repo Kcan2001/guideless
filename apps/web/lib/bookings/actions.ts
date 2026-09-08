@@ -2,7 +2,7 @@
 
 import type { Route } from "next";
 import { redirect } from "next/navigation";
-import { brand } from "@guideless/config";
+import { brand, emails } from "@guideless/config";
 import {
   addOnPurchaseSchema,
   createBookingSchema,
@@ -94,7 +94,7 @@ export async function startCheckout(input: CreateBookingInput): Promise<Checkout
   if (!isStripeConfigured()) {
     return {
       code: "payments_unavailable",
-      error: `Online payment isn't switched on yet. Email ${brand.supportEmail} and we'll hold your place.`,
+      error: `Online payment isn't switched on yet. Email ${emails.support} and we'll hold your place.`,
     };
   }
 
@@ -325,7 +325,7 @@ export async function startAddOnPurchase(input: AddOnPurchaseInput): Promise<Pur
   if (!isStripeConfigured()) {
     return {
       code: "payments_unavailable",
-      error: `Online payment isn't switched on yet. Email ${brand.supportEmail} and we'll add it for you.`,
+      error: `Online payment isn't switched on yet. Email ${emails.support} and we'll add it for you.`,
     };
   }
   const supabase = await createClient();

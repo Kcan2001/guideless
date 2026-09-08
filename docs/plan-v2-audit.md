@@ -230,8 +230,9 @@ working, tested logic for no customer-visible gain.
    sticky mobile summary, group codes, server drafts, snapshot fixes, builder analytics.
 3. **Milestone 3 — Hotel inventory**: supplier abstraction, Duffel proof of concept, hotel tables,
    rate refresh and revalidation, admin hotel curation.
-4. **Milestone 4 — Mobile**: Today/Explore changes, onboarding, activity chats, change notices,
-   device builds and store listings.
+4. **Milestone 4 — Mobile**: first emulator/device build and the six homepage app screenshots
+   (moved here from Milestone 1), Today/Explore changes, onboarding, activity chats, change
+   notices, store listings.
 5. **Milestone 5 — Operations**: coupons UI, inventory screen, manifests/rooming polish, alerts,
    reconciliation.
 6. **Milestone 6 — Growth**: reviews, photos, journal, destination SEO, funnel dashboard.
@@ -252,8 +253,10 @@ working, tested logic for no customer-visible gain.
    later"; CTA "Build my trip" points at the existing checkout until Milestone 2 replaces it.
 4. Migration 039 `catalog_presentation` + enum promotion + admin form fields + pgTAP + Monaco seed
    filled with real details (hotel names, sections, includes/excludes, why-price notes).
-5. First Expo simulator build (iOS Simulator or Android emulator) and a screenshot set for Today,
-   Itinerary, Map, Group, Add an experience, Support.
+5. ~~First Expo simulator build and a screenshot set~~ — **deferred by Kyle on 2026-09-07 to
+   Milestone 4 (Mobile)**. The homepage app section renders text cards until
+   `apps/web/public/app/{today,itinerary,map,group,add-on,support}.png` exist; the Map shot also
+   needs a Google Maps Android key (Google Cloud billing account required).
 6. Analytics: add `cta_click` (with placement), `faq_expanded`, `compare_viewed`; keep existing
    names.
 7. Definition of done: `pnpm check` green, pgTAP for 039, Playwright smoke on the new pages,

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Lock } from "lucide-react";
-import { brand } from "@guideless/config";
+import { brand, emails } from "@guideless/config";
 
 /** Focused checkout chrome: logo, a lock, no navigation to wander off into. */
 export default function CheckoutLayout({ children }: LayoutProps<"/checkout">) {
@@ -30,7 +30,7 @@ export default function CheckoutLayout({ children }: LayoutProps<"/checkout">) {
           <span>
             © {new Date().getFullYear()} {brand.name}
           </span>
-          <a href={`mailto:${brand.supportEmail}`}>{brand.supportEmail}</a>
+          <a href={`mailto:${emails.support}`}>{emails.support}</a>
         </div>
       </footer>
     </>

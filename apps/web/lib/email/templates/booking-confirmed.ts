@@ -1,4 +1,4 @@
-import { brand } from "@guideless/config";
+import { brand, emails } from "@guideless/config";
 import { formatDate } from "@guideless/utils";
 
 export interface BookingConfirmedProps {
@@ -45,7 +45,7 @@ export function bookingConfirmedEmail(p: BookingConfirmedProps): {
     `Your bookings: ${p.accountUrl}`,
     ``,
     `${brand.tagline}`,
-    `${brand.supportEmail}`,
+    `${emails.support}`,
   ].join("\n");
 
   const html = `<!doctype html>
@@ -64,7 +64,7 @@ export function bookingConfirmedEmail(p: BookingConfirmedProps): {
       <p style="margin:24px 0 0;line-height:1.6">What happens next: we'll send arrival instructions and your group details as the trip approaches — 90, 30 and 7 days out. Nothing to do right now.</p>
       <p style="margin:24px 0 0"><a href="${esc(p.accountUrl)}" style="display:inline-block;background:#0B2025;color:#FFFFFF;text-decoration:none;padding:12px 20px;border-radius:10px;font-weight:600">Your bookings</a></p>
     </div>
-    <p style="margin:24px 0 0;color:#586266;font-size:13px">${esc(brand.tagline)} · <a href="mailto:${esc(brand.supportEmail)}" style="color:#17B1DF">${esc(brand.supportEmail)}</a></p>
+    <p style="margin:24px 0 0;color:#586266;font-size:13px">${esc(brand.tagline)} · <a href="mailto:${esc(emails.support)}" style="color:#17B1DF">${esc(emails.support)}</a></p>
   </div>
 </body></html>`;
 

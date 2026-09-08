@@ -59,6 +59,7 @@ export default function LoginScreen() {
             source={require("@/assets/images/icon.png")}
             style={{ width: 56, height: 56, borderRadius: 14 }}
           />
+          <Muted>{brand.signature}</Muted>
           <H1>{brand.tagline}</H1>
           <Muted>Sign in to see your trip, your group and your route.</Muted>
         </View>

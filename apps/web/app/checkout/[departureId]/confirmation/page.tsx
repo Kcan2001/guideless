@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowRight, Check, Clock } from "lucide-react";
-import { brand } from "@guideless/config";
+import { emails } from "@guideless/config";
 import { formatDate, formatDateRange, formatMoney } from "@guideless/utils";
 import { TrackView } from "@/components/analytics/track-view";
 import { ClearDraft } from "@/components/checkout/clear-draft";
@@ -132,7 +132,7 @@ export default async function ConfirmationPage(
           </Link>
         </div>
         <p className="mt-6 text-xs text-muted-foreground">
-          Questions? <a href={`mailto:${brand.supportEmail}`}>{brand.supportEmail}</a>
+          Questions? <a href={`mailto:${emails.support}`}>{emails.support}</a>
         </p>
       </section>
 

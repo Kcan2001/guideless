@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Bed, Flag, MapPin, MessageCircle, Sparkles, Users } from "lucide-react";
-import { brand } from "@guideless/config";
+import { emails } from "@guideless/config";
 import {
   formatDate,
   formatDateRange,
@@ -210,7 +210,7 @@ export default async function TripPage(props: PageProps<"/trips/[tripId]">) {
               In an emergency, call local services first (112 across the EU). Then tell us.
             </p>
             <a
-              href={`mailto:${brand.supportEmail}?subject=${encodeURIComponent(`Trip ${trip.name}`)}`}
+              href={`mailto:${emails.support}?subject=${encodeURIComponent(`Trip ${trip.name}`)}`}
               className={cn(buttonVariants({ variant: "inverse", size: "sm" }), "mt-4")}
             >
               Email Guideless

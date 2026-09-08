@@ -156,18 +156,23 @@ nice-to-have.
 | AI concierge / builder / value intelligence     | After M3–M4; concierge first (reads existing trip data), value intelligence needs the hotel engine                                            |
 | Company retreats                                | Later; separate buyer                                                                                                                         |
 
-## 7. Decisions to take with Kyle
+## 7. Decisions (taken 2026-09-07)
 
-1. **Brand line.** Current tagline "Travel with a plan. Not a tour guide." vs "Go together. Be
-   guided by no one." The second is closer to the new thesis; the first tests better with a
-   stranger who has never heard of Guideless. Proposal: keep the current H1, adopt "Go together.
-   Be guided by no one." as the brand signature (footer, OG, app splash) and revisit after the
-   first bookings.
-2. **Tier naming.** Explorer / Classic / Premium / Elite as the public names for stay tiers across
-   tours (labels exist in migration 039 as best_value / most_popular / social / luxury; a
-   tier-name field per option would follow).
-3. **Mystery pilot.** Whether to run one manually operated Mystery Drop in 2027 before the hotel
-   engine exists.
+1. **Brand line — decided.** Headline stays "Travel with a plan. Not a tour guide."; **"Go together.
+   Be guided by no one."** is the brand signature (footer, social preview image, app sign-in).
+   Revisit after the first bookings.
+2. **Tier names — decided.** Every option, accommodation and add-on alike, can carry a tier:
+   **Explorer** (best price, more basic accommodation, maximum value) · **Classic** (the standard
+   Guideless experience) · **Premium** (better hotels and upgraded experiences) · **Elite** (luxury,
+   the best available). Every trip starts at the bare minimum; travelers pick between tiered options.
+   Monaco: Nice hotel Explorer, Monaco hotel Elite, Grandstand K Explorer, Terrace Classic, Friday
+   boat Premium, Sunday yacht Elite. Implemented as `option_tier` on both option tables; the
+   marketing `label` (best value, most popular, social, luxury) stays separate.
+3. **Mystery Drop pilot — deferred** to Milestone 7; decide once the hotel engine exists.
+
+**Pre-sale gate (Kyle, 2026-09-07): every price and date in the catalog is placeholder seed data.**
+Real 2027 departure dates, base prices, deposits, tier deltas and add-on prices must be entered in
+admin (departure settings, stays, add-ons) from supplier quotes before any departure is sold.
 
 ## 8. Business readiness (Kyle's own list, for tracking — not code)
 

@@ -108,35 +108,51 @@ On a physical device against local Supabase, replace `127.0.0.1` with your machi
 
 ## Store and device builds (EAS)
 
-`react-native-maps` and `expo-notifications` need a development build; Expo Go is no longer enough.
-`apps/mobile/eas.json` defines `development` (dev client, internal), `preview` (internal, Android
-APK) and `production` profiles. Public config lives in **EAS environment variables** (Expo project
-`guideless`, id `992a1489-97e2-4534-b832-18a51c312df7`, account `@guidelesstravel`), not in
-`eas.json`: `EXPO_PUBLIC_POSTHOG_KEY`, `EXPO_PUBLIC_POSTHOG_HOST` and the two Firebase file
-variables `GOOGLE_SERVICES_JSON` / `GOOGLE_SERVICE_INFO_PLIST` exist in development, preview and
-production (`eas env:list --environment production`). Still to add there: `EXPO_PUBLIC_SUPABASE_URL`,
-`EXPO_PUBLIC_SUPABASE_ANON_KEY` (hosted projects) and `EXPO_PUBLIC_SENTRY_DSN`; `eas.json` must not
-contain empty-string env values (the CLI rejects them).
+`react-native-maps` and `expo-notifications` need a real build; Expo Go is no longer enough.
+`apps/mobile/eas.json` defines `development` (dev client, internal), `preview` (internal Android
+APK) and `production`. The profiles carry **no `env` block on purpose**: values in `eas.json`
+override EAS environment variables, so anything hardcoded there silently wins over the real
+configuration. All public config lives in **EAS environment variables** (Expo project `guideless`,
+id `992a1489-97e2-4534-b832-18a51c312df7`, account `@guidelesstravel`), set for development,
+preview and production:
+
+| Variable                                                     | development / preview | production          |
+| ------------------------------------------------------------ | --------------------- | ------------------- |
+| `EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY` | staging project       | production project  |
+| `EXPO_PUBLIC_SITE_URL`                                       | guidelesstravel.com   | guidelesstravel.com |
+| `EXPO_PUBLIC_POSTHOG_KEY` / `EXPO_PUBLIC_POSTHOG_HOST`       | same                  | same                |
+| `EXPO_PUBLIC_SENTRY_DSN`                                     | same                  | same                |
+| `GOOGLE_SERVICES_JSON` / `GOOGLE_SERVICE_INFO_PLIST` (file)  | same                  | same                |
+
+Check with `eas env:list --environment production`. `eas.json` must not contain empty-string env
+values either (the CLI rejects them).
+
+Two prerequisites are **not installed yet**, so the profiles do not reference them:
+
+- `expo-dev-client` — needed for `developmentClient: true` to produce a dev launcher. Until it is
+  added, build the `preview` profile, which is a standalone APK.
+- `expo-updates` — needed before a `channel` field means anything. Add both back when over-the-air
+  updates are wanted.
 
 First internal build, once:
 
 ```bash
 npm i -g eas-cli
 cd apps/mobile
-eas login                                  # already done: @guidelesstravel; extra.eas.projectId is committed in app.json
-eas env:list --environment development     # PostHog + Firebase files are there; add Supabase URL/anon key + Sentry DSN with `eas env:create`
-eas build --profile development --platform ios      # or android
-eas build --profile development --platform android
+eas login                              # done: @guidelesstravel; extra.eas.projectId is committed in app.json
+eas env:list --environment preview     # confirm what the build will bake in
+eas build --platform android --profile preview --non-interactive
 ```
 
-Install the build from the link EAS prints (TestFlight-free internal distribution), then run
-`pnpm dev:mobile` and open the project from the dev client. Later builds: `eas build --profile
-preview` for testers, `eas build --profile production` + `eas submit` for the stores.
+EAS prints an install link (internal distribution, no store review). Later: `eas build --profile
+production` + `eas submit`, which needs the Play Console and Apple accounts
+(`docs/go-live.md` §2.5b).
 
-Android maps: add the Google Maps key to `app.json` before an Android build:
-`"android": { "config": { "googleMaps": { "apiKey": "<key>" } } }` (restrict the key to the
-package `com.guidelesstours.app`). iOS uses Apple Maps and needs nothing. `app.config.ts` is owned
-by the marketing/analytics work; if the key should come from an env var, add it there.
+Android maps: the Map tab renders blank until a Google Maps Android SDK key exists. The key is
+blocked on a Google Maps Platform billing account for the `guideless-tours` Cloud project; once it
+exists, store it as `GOOGLE_MAPS_ANDROID_KEY` (EAS env + `supabase/.env`) and read it in
+`app.config.ts` as `android.config.googleMaps.apiKey`, so no key is committed. iOS uses Apple Maps
+and needs nothing.
 
 Verification on 2026-09-06: `npx expo-doctor` → 21/21 checks passed; `npx expo export --platform
 ios --platform android` bundled both Hermes entries (7 MB / 7.3 MB) with no errors.

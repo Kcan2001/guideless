@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Mail, MessageSquare, Phone } from "lucide-react";
-import { brand, social } from "@guideless/config";
+import { brand, emails, social } from "@guideless/config";
 import { PageHero } from "@/components/marketing/page-hero";
 import { JsonLd } from "@/components/site/json-ld";
 import { buttonVariants } from "@/components/ui/button";
@@ -14,6 +14,26 @@ export const metadata: Metadata = {
   description: `Reach ${brand.name} by email before you book, and through in-app support once you have. Emergency numbers for every destination are one tap away in the app.`,
   alternates: { canonical: "/contact" },
 };
+
+/** The mailboxes we publish, in the order a customer is likely to need them. */
+const CONTACT_ADDRESSES = [
+  {
+    address: emails.hello,
+    use: "Trips, dates, hotel tiers and traveling with friends — anything before you book.",
+  },
+  {
+    address: emails.support,
+    use: "Help with a booking you already have, or with a trip that has already started.",
+  },
+  {
+    address: emails.finance,
+    use: "Payments, refunds, invoices and anything that appears on a card statement.",
+  },
+  {
+    address: emails.partners,
+    use: "Hotels, boat operators, wine estates, press and anyone proposing to work with us.",
+  },
+] as const;
 
 export default function ContactPage() {
   return (
@@ -36,10 +56,10 @@ export default function ContactPage() {
               person replies.
             </p>
             <a
-              href={`mailto:${brand.supportEmail}`}
+              href={`mailto:${emails.hello}`}
               className={cn(buttonVariants({ variant: "secondary" }), "mt-5")}
             >
-              {brand.supportEmail}
+              {emails.hello}
             </a>
           </div>
           <div className="rounded-xl border border-border bg-surface p-6">
@@ -52,6 +72,13 @@ export default function ContactPage() {
             <Link href="/account" className={cn(buttonVariants({ variant: "secondary" }), "mt-5")}>
               Open your account
             </Link>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Or email{" "}
+              <a href={`mailto:${emails.support}`} className="text-link">
+                {emails.support}
+              </a>
+              .
+            </p>
           </div>
           <div className="rounded-xl border border-border bg-surface p-6">
             <Phone className="h-6 w-6 text-teal" aria-hidden />
@@ -63,12 +90,36 @@ export default function ContactPage() {
           </div>
         </div>
 
+        <div className="mt-16 border-t border-border pt-10">
+          <h2 className="text-2xl font-bold">Where to write</h2>
+          <p className="mt-3 max-w-2xl text-muted-foreground">
+            Every address reaches a person, not a ticket queue. Choosing the right one gets you a
+            faster answer, and keeps a traveler mid-trip from waiting behind a hotel contract.
+          </p>
+          <dl className="mt-8 grid gap-x-10 gap-y-6 sm:grid-cols-2">
+            {CONTACT_ADDRESSES.map((entry) => (
+              <div key={entry.address}>
+                <dt>
+                  <a href={`mailto:${entry.address}`} className="font-medium text-link">
+                    {entry.address}
+                  </a>
+                </dt>
+                <dd className="mt-1 text-sm text-muted-foreground">{entry.use}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+
         <div className="mt-16 grid gap-10 lg:grid-cols-2">
           <div>
             <h2 className="text-2xl font-bold">Press, partners and suppliers</h2>
             <p className="mt-3 text-muted-foreground">
               Hotels, boat operators, wine estates and anyone who would like to work with Guideless:
-              write to {brand.supportEmail} with the subject line &ldquo;Partner&rdquo;.
+              write to{" "}
+              <a href={`mailto:${emails.partners}`} className="text-link">
+                {emails.partners}
+              </a>
+              .
             </p>
           </div>
           <div>

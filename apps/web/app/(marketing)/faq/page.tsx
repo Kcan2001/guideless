@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { brand } from "@guideless/config";
+import { emails } from "@guideless/config";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import { PageHero } from "@/components/marketing/page-hero";
 import { JsonLd } from "@/components/site/json-ld";
@@ -37,8 +37,8 @@ export default function FaqPage() {
           <div>
             <h2 className="text-2xl font-bold">Still wondering about something?</h2>
             <p className="mt-2 text-muted-foreground">
-              Email {brand.supportEmail}. If you have booked, message support from your account or
-              the app and we already see your trip.
+              Email {emails.hello}. If you have booked, message support from your account or the app
+              and we already see your trip.
             </p>
           </div>
           <Link href="/contact" className={cn(buttonVariants({ variant: "secondary" }))}>

@@ -81,7 +81,7 @@ export default async function OpenGraphImage() {
           marginBottom: 20,
         }}
       >
-        Minimal intervention travel
+        {brand.signature}
       </div>
       <div
         style={{

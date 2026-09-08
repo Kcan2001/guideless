@@ -1,6 +1,6 @@
 import "server-only";
 
-import { brand } from "@guideless/config";
+import { brand, emails } from "@guideless/config";
 import type { Currency, Tables } from "@guideless/types";
 import { formatDateRange, formatMoney } from "@guideless/utils";
 import { getServerEnv, publicEnv } from "@/lib/env";
@@ -16,11 +16,15 @@ interface SendEmailInput {
   text: string;
   template: string;
   userId: string | null;
+  /** Where replies go. Defaults to the support mailbox, which a person reads. */
+  replyTo?: string;
   payload?: Record<string, unknown>;
 }
 
 /**
  * Sends through Resend's REST API (no SDK needed) and records the attempt in email_events.
+ * Replies go to the support mailbox unless the caller names another one, so a traveler can answer
+ * a booking email and reach someone.
  * Without RESEND_API_KEY (local dev) the email is recorded as `skipped` and logged, never thrown.
  */
 export async function sendEmail(admin: Admin, input: SendEmailInput): Promise<void> {
@@ -54,6 +58,7 @@ export async function sendEmail(admin: Admin, input: SendEmailInput): Promise<vo
       body: JSON.stringify({
         from,
         to: [input.to],
+        reply_to: input.replyTo ?? emails.support,
         subject: input.subject,
         html: input.html,
         text: input.text,
