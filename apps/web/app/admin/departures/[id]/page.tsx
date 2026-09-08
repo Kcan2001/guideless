@@ -69,12 +69,20 @@ export default async function AdminDeparturePage(props: PageProps<"/admin/depart
           </>
         }
         actions={
-          <Link
-            href={`/tours/${tour.slug}/departures/${d.id}`}
-            className={buttonVariants({ variant: "secondary", size: "sm" })}
-          >
-            Public page
-          </Link>
+          <>
+            <Link
+              href={`/admin/departures/${d.id}/manifest`}
+              className={buttonVariants({ size: "sm" })}
+            >
+              Manifest
+            </Link>
+            <Link
+              href={`/tours/${tour.slug}/departures/${d.id}`}
+              className={buttonVariants({ variant: "secondary", size: "sm" })}
+            >
+              Public page
+            </Link>
+          </>
         }
       />
       <Flash searchParams={sp} />

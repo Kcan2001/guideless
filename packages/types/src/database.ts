@@ -774,6 +774,13 @@ export type Database = {
             foreignKeyName: "bookings_stay_option_id_fkey";
             columns: ["stay_option_id"];
             isOneToOne: false;
+            referencedRelation: "stay_option_availability";
+            referencedColumns: ["stay_option_id"];
+          },
+          {
+            foreignKeyName: "bookings_stay_option_id_fkey";
+            columns: ["stay_option_id"];
+            isOneToOne: false;
             referencedRelation: "stay_option_hotels_public";
             referencedColumns: ["stay_option_id"];
           },
@@ -1994,6 +2001,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "departure_stay_options";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "hotel_bookings_stay_option_id_fkey";
+            columns: ["stay_option_id"];
+            isOneToOne: false;
+            referencedRelation: "stay_option_availability";
+            referencedColumns: ["stay_option_id"];
           },
           {
             foreignKeyName: "hotel_bookings_stay_option_id_fkey";
@@ -5154,6 +5168,45 @@ export type Database = {
           },
         ];
       };
+      stay_option_availability: {
+        Row: {
+          capacity: number | null;
+          confirmed: number | null;
+          departure_id: string | null;
+          held: number | null;
+          stay_option_id: string | null;
+        };
+        Insert: {
+          capacity?: number | null;
+          confirmed?: never;
+          departure_id?: string | null;
+          held?: never;
+          stay_option_id?: string | null;
+        };
+        Update: {
+          capacity?: number | null;
+          confirmed?: never;
+          departure_id?: string | null;
+          held?: never;
+          stay_option_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "departure_stay_options_departure_id_fkey";
+            columns: ["departure_id"];
+            isOneToOne: false;
+            referencedRelation: "departures";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "departure_stay_options_departure_id_fkey";
+            columns: ["departure_id"];
+            isOneToOne: false;
+            referencedRelation: "departures_public";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       stay_option_hotels_public: {
         Row: {
           amenities: string[] | null;
@@ -5463,6 +5516,15 @@ export type Database = {
           currency: string;
           purchase_id: string;
           summary: string;
+        }[];
+      };
+      stay_option_availability_for: {
+        Args: { p_departure_id: string };
+        Returns: {
+          capacity: number;
+          confirmed: number;
+          held: number;
+          stay_option_id: string;
         }[];
       };
       subscribe_newsletter: {

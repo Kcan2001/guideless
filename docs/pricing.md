@@ -20,7 +20,13 @@ only display what it returns._
   date (`day_number` → departure date; undated → trip end); `0` means the day itself.
 - **Codes.** A coupon (`coupons`) or a friend's referral code (`referral_codes`, `GL-XXXXXX`)
   discounts the base trip (never add-ons). Referral percent comes from
-  `system_settings.referral_discount_percent` (5). You cannot use your own code.
+  `system_settings.referral_discount_percent` (5). You cannot use your own code. Coupons are
+  managed at `/admin/coupons` (finance roles): a percentage or a fixed amount in one currency,
+  never both, with an optional validity window and maximum. **Editing a coupon never changes a
+  booking that already used it** — bookings snapshot their discount into `booking_items`, so a
+  coupon change only affects future redemptions. A coupon that has been used can be deactivated
+  but not deleted, which keeps the history intact. Codes are `citext`, so capitalisation is
+  ignored when a traveler types one.
 - **Credit.** Signed-in customers' `account_credits` balance in the booking currency is applied
   automatically to the base trip. Credit is earned when a referred booking is confirmed
   (`referral_reward_amount`, 7500 minor units) and redeemed when the crediting booking confirms.

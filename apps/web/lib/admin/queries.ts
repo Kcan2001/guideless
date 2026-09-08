@@ -2,6 +2,13 @@ import "server-only";
 
 import type { Tables } from "@guideless/types";
 import { daysBetween } from "@guideless/utils";
+import {
+  departureAlerts,
+  sortAlerts,
+  supportAlerts,
+  type DepartureFacts,
+  type SupportFacts,
+} from "@/lib/admin/alerts";
 import { listHotelsForSelect } from "@/lib/hotels/catalog";
 import { createClient } from "@/lib/supabase/server";
 
@@ -23,11 +30,8 @@ export interface Availability {
   available: number;
 }
 
-export interface Issue {
-  severity: "warning" | "info";
-  text: string;
-  href?: string;
-}
+/** An alert as the dashboard renders it. The rules that produce these live in `alerts.ts`. */
+export type Issue = import("@/lib/admin/alerts").Alert;
 
 export interface DepartureRow {
   departure: Departure;
@@ -122,17 +126,14 @@ export async function getDashboard() {
     ];
   });
 
-  const issues: Issue[] = [];
-  for (const row of upcoming) {
-    const ds = await departureIssues(row.departure, row.availability);
-    for (const i of ds) issues.push({ ...i, href: `/admin/departures/${row.departure.id}` });
-  }
-  if ((openSupport ?? 0) > 0) {
-    issues.push({
-      severity: "info",
-      text: `${openSupport} open support ${openSupport === 1 ? "thread" : "threads"}`,
-    });
-  }
+  const now = new Date();
+  const facts = await Promise.all(
+    upcoming.map((row) => departureFacts(row.departure, row.tour, row.availability, now)),
+  );
+  const issues: Issue[] = sortAlerts([
+    ...facts.flatMap((f) => departureAlerts(f, now)),
+    ...supportAlerts(await supportFacts(now)),
+  ]);
 
   const recentBookings = recent.flatMap((booking) => {
     const dep = recentDepById.get(booking.departure_id);
@@ -143,66 +144,131 @@ export async function getDashboard() {
   return { upcoming, issues, recentBookings, openSupport: openSupport ?? 0 };
 }
 
-async function departureIssues(d: Departure, a: Availability): Promise<Issue[]> {
+/**
+ * Gathers everything the alert rules need about one departure. The rules themselves are pure and
+ * live in `alerts.ts`, so this function only fetches — it makes no judgements.
+ */
+async function departureFacts(
+  d: Departure,
+  tour: Tour,
+  a: Availability,
+  now: Date,
+): Promise<DepartureFacts> {
   const sb = await createClient();
-  const issues: Issue[] = [];
-  const days = daysBetween(today(), d.start_date);
+  const nowIso = now.toISOString();
 
-  if (a.confirmed < d.minimum_travelers && days <= 60) {
-    issues.push({
-      severity: "warning",
-      text: `${d.start_date}: ${a.confirmed}/${d.minimum_travelers} minimum travelers, ${days} days out`,
-    });
-  }
-  if (a.held > 0)
-    issues.push({
-      severity: "info",
-      text: `${d.start_date}: ${a.held} seat${a.held === 1 ? "" : "s"} on hold`,
-    });
+  const [{ count: unconfirmedServices }, { data: bookings }, { data: seatHolds }, { data: tiers }] =
+    await Promise.all([
+      sb
+        .from("supplier_services")
+        .select("id", { count: "exact", head: true })
+        .eq("departure_id", d.id)
+        .in("status", ["requested", "pending"]),
+      sb
+        .from("bookings")
+        .select("id, total_amount, amount_paid")
+        .eq("departure_id", d.id)
+        .eq("status", "confirmed"),
+      sb
+        .from("bookings")
+        .select("hold_expires_at")
+        .eq("departure_id", d.id)
+        .eq("status", "pending_payment")
+        .gt("hold_expires_at", nowIso),
+      sb
+        .from("departure_stay_options")
+        .select("name, hotel_id")
+        .eq("departure_id", d.id)
+        .eq("is_active", true)
+        .not("hotel_id", "is", null),
+    ]);
 
-  const [{ count: pendingServices }, { data: bookings }] = await Promise.all([
-    sb
-      .from("supplier_services")
-      .select("id", { count: "exact", head: true })
-      .eq("departure_id", d.id)
-      .in("status", ["requested", "pending"]),
-    sb
-      .from("bookings")
-      .select("id, total_amount, amount_paid, status")
-      .eq("departure_id", d.id)
-      .eq("status", "confirmed"),
+  const bookingIds = (bookings ?? []).map((b) => b.id);
+  const [{ data: travelers }, { data: addOnHolds }, { data: rates }] = await Promise.all([
+    bookingIds.length
+      ? sb
+          .from("booking_travelers")
+          .select("traveler_profiles(date_of_birth, nationality)")
+          .in("booking_id", bookingIds)
+      : Promise.resolve({ data: [] as Array<{ traveler_profiles: unknown }> }),
+    bookingIds.length
+      ? sb
+          .from("booking_add_ons")
+          .select("hold_expires_at")
+          .in("booking_id", bookingIds)
+          .eq("status", "pending")
+          .gt("hold_expires_at", nowIso)
+      : Promise.resolve({ data: [] as Array<{ hold_expires_at: string | null }> }),
+    (tiers ?? []).length
+      ? sb
+          .from("hotel_rates")
+          .select("hotel_id, fetched_at")
+          .in(
+            "hotel_id",
+            (tiers ?? []).map((t) => t.hotel_id).filter((id): id is string => id !== null),
+          )
+          .order("fetched_at", { ascending: false })
+      : Promise.resolve({ data: [] as Array<{ hotel_id: string; fetched_at: string }> }),
   ]);
-  if ((pendingServices ?? 0) > 0) {
-    issues.push({
-      severity: "warning",
-      text: `${d.start_date}: ${pendingServices} supplier confirmation${pendingServices === 1 ? "" : "s"} pending`,
-    });
-  }
-  const unpaid = (bookings ?? []).filter((b) => b.amount_paid < b.total_amount);
-  if (unpaid.length > 0 && d.balance_due_date && d.balance_due_date < today()) {
-    issues.push({
-      severity: "warning",
-      text: `${d.start_date}: ${unpaid.length} booking${unpaid.length === 1 ? "" : "s"} with balance overdue`,
-    });
-  }
-  if (bookings && bookings.length > 0) {
-    const { data: travelers } = await sb
-      .from("booking_travelers")
-      .select("traveler_profiles(date_of_birth, nationality)")
-      .in(
-        "booking_id",
-        bookings.map((b) => b.id),
-      );
-    const missing = (travelers ?? []).filter(
-      (t) => !t.traveler_profiles?.date_of_birth || !t.traveler_profiles?.nationality,
-    ).length;
-    if (missing > 0)
-      issues.push({
-        severity: "warning",
-        text: `${d.start_date}: ${missing} traveler${missing === 1 ? "" : "s"} missing date of birth or nationality`,
-      });
-  }
-  return issues;
+
+  const lastRateByHotel = new Map<string, string>();
+  for (const r of rates ?? [])
+    if (!lastRateByHotel.has(r.hotel_id)) lastRateByHotel.set(r.hotel_id, r.fetched_at);
+
+  const overdue =
+    d.balance_due_date && d.balance_due_date < today()
+      ? (bookings ?? []).filter((b) => b.amount_paid < b.total_amount).length
+      : 0;
+
+  return {
+    departureId: d.id,
+    tourName: tour.name,
+    startDate: d.start_date,
+    daysUntil: daysBetween(today(), d.start_date),
+    minimumTravelers: d.minimum_travelers,
+    confirmed: a.confirmed,
+    held: a.held,
+    holdExpiries: [
+      ...(seatHolds ?? []).map((h) => h.hold_expires_at),
+      ...(addOnHolds ?? []).map((h) => h.hold_expires_at),
+    ].filter((v): v is string => v !== null),
+    supplierServicesUnconfirmed: unconfirmedServices ?? 0,
+    balanceOverdueBookings: overdue,
+    travelersMissingDetails: (travelers ?? []).filter((t) => {
+      const p = t.traveler_profiles as {
+        date_of_birth: string | null;
+        nationality: string | null;
+      } | null;
+      return !p?.date_of_birth || !p?.nationality;
+    }).length,
+    hotelLinkedTiers: (tiers ?? []).map((t) => ({
+      name: t.name,
+      lastRateAt: t.hotel_id ? (lastRateByHotel.get(t.hotel_id) ?? null) : null,
+    })),
+  };
+}
+
+/** Support inbox facts for the alert rules. */
+async function supportFacts(now: Date): Promise<SupportFacts> {
+  const sb = await createClient();
+  const [{ count: openThreads }, { data: unassigned }] = await Promise.all([
+    sb
+      .from("support_threads")
+      .select("id", { count: "exact", head: true })
+      .in("status", ["open", "waiting_on_staff"]),
+    sb
+      .from("support_threads")
+      .select("id, created_at")
+      .in("status", ["open", "waiting_on_staff"])
+      .is("assigned_to", null),
+  ]);
+  return {
+    openThreads: openThreads ?? 0,
+    unassigned: (unassigned ?? []).map((t) => ({
+      id: t.id,
+      ageHours: (now.getTime() - new Date(t.created_at).getTime()) / 3_600_000,
+    })),
+  };
 }
 
 // ── Tours ─────────────────────────────────────────────────────────────────────
@@ -417,7 +483,9 @@ export async function getDepartureAdmin(id: string) {
   }));
 
   const a = availability.get(id)!;
-  const issues = await departureIssues(departure, a);
+  const now = new Date();
+  // Same rules as the dashboard, scoped to this departure.
+  const issues = departureAlerts(await departureFacts(departure, tour, a, now), now);
 
   return {
     departure,
