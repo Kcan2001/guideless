@@ -62,7 +62,16 @@ include:_spf.google.com include:amazonses.com ~all` or the record Resend prescri
 - Admin: the support inbox (`/admin/support`) should ingest `support@` mail later (Resend inbound
   webhook), not today.
 
-**Owner / blocker.** Kyle: Workspace signup and payment. Then DNS and account updates are ours.
+**Status 2026-09-07: DONE.** Google Workspace is live on `guidelesstravel.com` (admin
+`kyle@guidelesstravel.com`, one paid seat). DNS at Squarespace: `MX @ 1 smtp.google.com` and
+`TXT @ v=spf1 include:_spf.google.com ~all`, alongside the untouched Resend DKIM and `send`/`rsend`
+records. The five shared addresses exist as Google Groups, each delivering to `kyle@`:
+`hello@`, `support@`, `bookings@`, `partners@`, `finance@` (access type Public, external senders
+allowed to post, membership invite-only). A Resend → `hello@` round-trip was sent to verify
+delivery. Remaining: turn on Gmail DKIM ("Authenticate outgoing emails" in the Workspace setup),
+tighten `_dmarc` to `p=quarantine` once both directions are proven, add `reply_to` to the Resend
+templates, and repoint the third-party account contacts (Stripe, Meta, Play, Apple, Pinterest,
+PostHog, Sentry, Vercel) to the new addresses.
 
 ## 2. P0 — Legal, insurance and travel-operator compliance
 
