@@ -8,6 +8,8 @@ node_modules/
 out/
 dist/
 build/
+# The Trip Builder route lives at app/(marketing)/tours/[slug]/build — not a build output.
+!apps/web/app/**/build/
 .turbo/
 .vercel/
 .expo/
