@@ -30,7 +30,7 @@ Guideless hotel catalog (hotels, hotel_rooms)      ← staff curate, /admin/hote
 | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `apps/web/lib/hotels/types.ts`                                                   | `HotelSupplier` interface, `NormalizedHotel`, `NormalizedRate`, `PricedRate`, `HotelSearchInput`                                                                          |
 | `apps/web/lib/hotels/normalize.ts`, `fingerprint.ts`, `compare.ts`, `pricing.ts` | Pure helpers: money/date normalisation, rate fingerprint (hotel + room + bed + occupancy + refundable + policy + breakfast + payment type), offer selection, markup rules |
-| `apps/web/lib/hotels/suppliers/shared.ts`                                        | `HotelSupplierError`, timeouts, `withTimeout` (no `server-only`, unit-testable)                                                                           |
+| `apps/web/lib/hotels/suppliers/shared.ts`                                        | `HotelSupplierError`, timeouts, `withTimeout` (no `server-only`, unit-testable)                                                                                           |
 | `apps/web/lib/hotels/suppliers/duffel.ts`                                        | Duffel Stays adapter                                                                                                                                                      |
 | `apps/web/lib/hotels/suppliers/mock.ts`                                          | Deterministic fixture supplier (`__fixtures__/mock-hotels.json`)                                                                                                          |
 | `apps/web/lib/hotels/suppliers/index.ts`                                         | `getHotelSupplier()` from env (server-only)                                                                                                                               |
@@ -53,13 +53,13 @@ Guideless hotel catalog (hotels, hotel_rooms)      ← staff curate, /admin/hote
 
 Endpoints used (API version `v2`, JSON bodies wrapped in `{ data: … }`):
 
-| Step      | Call                                                      | Notes                                                                                  |
-| --------- | --------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| search    | `POST /stays/search`                                      | `accommodation.ids` of the mapped properties only (curated catalog, never a free search)        |
-| all rates | `POST /stays/search_results/{id}/actions/fetch_all_rates` | rooms × rates for one search result                                                    |
-| recheck   | `POST /stays/quotes` `{ rate_id }`                        | our "recheck": re-priced total, expiry, cancellation timeline; 404 → rate withdrawn    |
-| book      | `POST /stays/quotes` then `POST /stays/bookings`          | booking needs a quote id, guests (given/family name), email, phone |
-| cancel    | `POST /stays/bookings/{id}/actions/cancel`                |                                                                                        |
+| Step      | Call                                                      | Notes                                                                                    |
+| --------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| search    | `POST /stays/search`                                      | `accommodation.ids` of the mapped properties only (curated catalog, never a free search) |
+| all rates | `POST /stays/search_results/{id}/actions/fetch_all_rates` | rooms × rates for one search result                                                      |
+| recheck   | `POST /stays/quotes` `{ rate_id }`                        | our "recheck": re-priced total, expiry, cancellation timeline; 404 → rate withdrawn      |
+| book      | `POST /stays/quotes` then `POST /stays/bookings`          | booking needs a quote id, guests (given/family name), email, phone                       |
+| cancel    | `POST /stays/bookings/{id}/actions/cancel`                |                                                                                          |
 
 Normalisation rules: amounts are decimal strings in major units → integer minor units;
 `board_type` in `breakfast | half_board | full_board | all_inclusive` → `breakfastIncluded`;
