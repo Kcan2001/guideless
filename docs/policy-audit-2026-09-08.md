@@ -99,12 +99,14 @@ gracefully, since the traveler learns about it after entering passport details.
 Nothing on the site is false today, because no departure claims an exception. The exposure is that
 we publish an age floor we cannot show we applied.
 
-### D. Live prices and dates are still placeholder catalog data
+### D. Southern France still publishes placeholder prices against live Stripe keys
 
-Structured data on the Monaco page publishes `"price":"1890.00"`, `"priceCurrency":"USD"` and
-`availability: InStock` to search engines, against live Stripe keys. This is the gate you already
-identified. Nothing else on the site should go out until the real 2027 dates and prices replace the
-seed.
+Half-closed while this audit was running. Monaco was repriced in the same session from published
+supplier figures and now carries real dates, so the structured data that page emits to search engines
+is a price we would honour. Southern France was not: its departures, tier deltas and add-on prices
+are still invented seed values, and its pages publish them with `availability: InStock`. Stripe is
+live, so a placeholder price is a real charge. That trip must not be sold until it is repriced. See
+`docs/pricing.md` and the pre-sale gate in `docs/go-live.md`.
 
 ### E. Regulatory items already logged for the attorney
 
