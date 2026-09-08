@@ -88,6 +88,7 @@ export function normalizeDeparture(row: Views<"departures_public">): PublicDepar
     // jsonb column; shape is enforced by cancellationPolicySchema when staff edit departures.
     cancellationPolicy: (row.cancellation_policy ??
       []) as unknown as PublicDeparture["cancellationPolicy"],
+    opensAt: row.opens_at,
   };
 }
 

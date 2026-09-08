@@ -13,6 +13,9 @@ import { AddLaterCallout } from "@/components/tours/add-later-callout";
 import { BaseIncludes } from "@/components/tours/base-includes";
 import { CompareBlock } from "@/components/tours/compare-block";
 import { DepartureList } from "@/components/tours/departure-list";
+import { UnlockProgress, type DepartureUnlock } from "@/components/growth/unlock-progress";
+import { getUnlockProgress } from "@/lib/growth/unlocks";
+import { WaitlistForm } from "@/components/growth/waitlist-form";
 import { ExperienceCards } from "@/components/tours/experience-cards";
 import { Faq } from "@/components/tours/faq";
 import { ItineraryTimeline } from "@/components/tours/itinerary-timeline";
@@ -27,6 +30,9 @@ import { getRoomRule } from "@/lib/data/community";
 import { listDepartureExtras } from "@/lib/data/extras";
 import { getTourBySlug, listTourSlugs } from "@/lib/data/tours";
 import { tourFromPrice } from "@/lib/data/tour-filters";
+import { TourReviews } from "@/components/reviews/tour-reviews";
+import { getTourReviewStats, listReviewsForTour } from "@/lib/reviews/queries";
+import { withAggregateRating } from "@/lib/reviews/seo";
 import { breadcrumbJsonLd, faqJsonLd, tourJsonLd } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
@@ -92,9 +98,18 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
   const nights = route.reduce((n, r) => n + r.nights, 0);
   const isEvent = tour.kind === "event";
   const next = departures[0];
+  // Group unlocks for the departure the page is selling. Real confirmed counts only.
+  const unlockProgress = next
+    ? await getUnlockProgress(next.id)
+    : { confirmed: 0, unlocks: [] as DepartureUnlock[] };
   const [extras, roomRule] = next
     ? await Promise.all([listDepartureExtras(next.id), getRoomRule(next.id)])
     : [null, null];
+  // Reviews appear only once real travelers have written them; both are empty until then.
+  const [reviewStats, reviews] = await Promise.all([
+    getTourReviewStats(tour.id),
+    listReviewsForTour(tour.id),
+  ]);
   const currency = next?.currency ?? version.starting_price_currency;
   const anchor = days
     .flatMap((d) => d.items.map((i) => ({ item: i, day: d })))
@@ -456,7 +471,27 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
             handles&rdquo;. Reserve with a deposit; the balance is due before departure.
           </p>
           <div className="mt-8">
-            <DepartureList tourSlug={tour.slug} departures={departures} />
+            <DepartureList tourSlug={tour.slug} tourId={tour.id} departures={departures} />
+            {departures.length === 0 && (
+              <div className="mt-6 max-w-md">
+                <p className="text-sm text-muted-foreground">
+                  Tell us where to write when the next dates land.
+                </p>
+                <WaitlistForm
+                  tourId={tour.id}
+                  source="tour_page"
+                  label="Tell me first"
+                  className="mt-3"
+                />
+              </div>
+            )}
+            {unlockProgress.unlocks.length > 0 && (
+              <UnlockProgress
+                confirmed={unlockProgress.confirmed}
+                unlocks={unlockProgress.unlocks}
+                className="mt-10 max-w-2xl"
+              />
+            )}
           </div>
         </div>
       </section>
@@ -472,6 +507,8 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
         </div>
       </section>
 
+      <TourReviews stats={reviewStats} reviews={reviews} tourName={tour.name} />
+
       {/* FAQ */}
       {faqs.length > 0 && (
         <section className="mx-auto w-full max-w-6xl px-6 pb-24">
@@ -483,7 +520,14 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
       )}
 
       <TrackView event="view_tour" params={{ tour_id: tour.id, tour_slug: tour.slug }} />
-      <JsonLd data={tourJsonLd({ tour, version, route, departures, days })} />
+      {/* The rating is attached only when travelers have actually left one: a review count in
+          machine-readable form that nobody wrote would be a lie a search engine repeats. */}
+      <JsonLd
+        data={withAggregateRating(
+          tourJsonLd({ tour, version, route, departures, days }),
+          reviewStats,
+        )}
+      />
       {isEvent && tour.event_name && tour.event_starts_on && (
         <JsonLd
           data={tourEventJsonLd({

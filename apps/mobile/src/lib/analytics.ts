@@ -30,6 +30,8 @@ export type ProductEvent =
   | "onboarding_completed" // props: counts and booleans only, never the answers
   | "onboarding_skipped"
   | "avatar_set" // props: where it was set, never the image or its URL
+  | "review_submitted" // props: rating and whether a photo came with it, never the words
+  | "trip_photo_added"
   | "app_opened";
 
 export type EventProps = Record<string, string | number | boolean | undefined>;

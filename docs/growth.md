@@ -93,6 +93,30 @@ signed-in users (signed-out visitors are sent to sign in and come back). Staff c
 see RSVPs at `/admin/meetups` (content or ops roles). Seeded: New York, London, Austin
 (`060_meetups.sql`). Both routes are in the sitemap.
 
+## Reviews and traveler photos (migration 049)
+
+The homepage promises "no invented reviews", so the schema enforces it rather than the UI.
+
+- **Who may write one.** `submit_review()` is the only way a row is created, and it refuses
+  anyone who is not the customer on a `confirmed`/`completed` booking whose trip has already
+  ended. There is no insert policy on `reviews`, so the rule cannot be sidestepped. Photos go
+  through `submit_trip_photo()` under the same test, and the path must sit inside
+  `trip-media/{trip_id}/{user_id}/`, matching the storage policy exactly.
+- **One per booking.** A party of four does not get four voices; the person who booked writes.
+- **Nothing is public until a human publishes it.** Everything lands `pending`; a moderator
+  publishes or rejects at `/admin/moderation` with an optional staff note. Rejecting clears the
+  publish stamp, so it leaves the site and the aggregate immediately.
+- **Empty means empty.** `tour_review_stats` has no row for a tour with nothing published, so the
+  tour page renders no rating, no count and no stars at all, and `/reviews` says so plainly. The
+  `AggregateRating` structured data is attached only when at least one review exists — a rating in
+  machine-readable form that nobody gave is a lie a search engine would repeat.
+- **The byline is frozen.** `author_name` (first name only) and `trip_end_date` are copied onto
+  the row when it is written. Anonymous visitors can read neither `profiles` nor `trips`, and a
+  published review should not silently change its name because the author renamed themselves.
+- **Where travelers are asked.** On `/account` once a trip has ended, and on the app's Trip tab
+  after the trip, each once — the prompt disappears as soon as they have written or the trip is
+  no longer reviewable.
+
 ## Copy rules
 
 Brand terms only: Your Trip, Your Route, Your Group, Live Moments, Included, Optional. Calm and

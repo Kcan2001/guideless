@@ -51,6 +51,7 @@ function departure(tourId: string, startDate: string, priceAmount: number): Publ
     bookingDeadline: null,
     balanceDueDate: null,
     cancellationPolicy: [],
+    opensAt: null,
   };
 }
 

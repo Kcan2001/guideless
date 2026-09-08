@@ -9,6 +9,7 @@ import { CancelBooking } from "@/components/account/cancel-booking";
 import { OnboardingChecklist } from "@/components/account/onboarding-checklist";
 import { GroupCodeCard } from "@/components/account/group-code-card";
 import { ReferralCard } from "@/components/account/referral-card";
+import { ReviewForm } from "@/components/reviews/review-form";
 import { TravelerDetails } from "@/components/account/traveler-details";
 import { previewRefund } from "@/lib/bookings/cancellations";
 import {
@@ -17,6 +18,7 @@ import {
   listRefundableAddOns,
 } from "@/lib/bookings/self-service-data";
 import { getMyReferral, listMyBookingAddOns, type BookingAddOn } from "@/lib/data/add-on-purchases";
+import { listMyReviews, listReviewableBookings } from "@/lib/reviews/queries";
 import { signOut } from "@/lib/auth/actions";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -74,10 +76,12 @@ export default async function AccountPage(props: PageProps<"/account">) {
   ] = await Promise.all([supabase.auth.getUser(), props.searchParams]);
   if (!user) redirect("/login?next=/account");
 
-  const [bookings, trips, referral] = await Promise.all([
+  const [bookings, trips, referral, reviewable, myReviews] = await Promise.all([
     listMyBookings(),
     listMyTrips(),
     getMyReferral(),
+    listReviewableBookings(),
+    listMyReviews(),
   ]);
   const travelerIds = bookings.flatMap((b) => b.travelers.map((t) => t.id));
   const bookingIds = bookings.map((b) => b.booking.id);
@@ -296,6 +300,42 @@ export default async function AccountPage(props: PageProps<"/account">) {
               ))}
             </section>
           )}
+          {(reviewable.length > 0 || myReviews.length > 0) && (
+            <section className="mt-12" id="reviews">
+              <h2 className="text-xl font-semibold">
+                {reviewable.length > 0 ? "How was it?" : "Your reviews"}
+              </h2>
+              {reviewable.length > 0 && (
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {reviewable.length === 1
+                    ? "Your trip has ended. Tell the next traveler what it was actually like."
+                    : "These trips have ended. Tell the next traveler what they were actually like."}
+                </p>
+              )}
+              <div className="mt-4 grid gap-4">
+                {reviewable.map((b) => (
+                  <ReviewForm key={b.bookingId} booking={b} />
+                ))}
+                {myReviews.map((r) => (
+                  <div key={r.id} className="rounded-xl border border-border bg-surface p-6">
+                    <p className="font-medium">{r.tourName}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {r.status === "published"
+                        ? "Published. Thank you — it is on the site."
+                        : r.status === "pending"
+                          ? "With us. We read every review before it goes up."
+                          : "Not published. Email us if you think that is wrong."}
+                    </p>
+                    {r.title && <p className="mt-3 font-medium">{r.title}</p>}
+                    <p className="mt-1 whitespace-pre-line text-sm text-muted-foreground">
+                      {r.body}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           <section className="mt-12">
             <h2 className="text-xl font-semibold">Bring a friend</h2>
             <div className="mt-4">

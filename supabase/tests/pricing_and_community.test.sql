@@ -140,8 +140,10 @@ select is(
   (select count(*)::int from public.booking_add_ons ba join public.bookings b on b.id = ba.booking_id
     where b.customer_id = 'e2000000-0000-4000-8000-0000000000e2' and ba.status = 'confirmed'),
   3, 'paying confirms the add-ons');
-select is(public.account_credit_balance('e1000000-0000-4000-8000-0000000000e1', 'USD'), 7500::bigint,
-  'the referrer earns the configured credit when the booking is confirmed');
+-- $75 flat plus the ladder's top-up to the first tier: one friend is worth $100 in total, which is
+-- what the account card advertises. See docs/referrals.md.
+select is(public.account_credit_balance('e1000000-0000-4000-8000-0000000000e1', 'USD'), 10000::bigint,
+  'one confirmed referral leaves the referrer on the first tier, $100 in total');
 select is(
   (select count(*)::int from public.booking_items bi join public.bookings b on b.id = bi.booking_id
     where b.customer_id = 'e2000000-0000-4000-8000-0000000000e2' and bi.kind = 'add_on'),
@@ -153,7 +155,7 @@ select is((select going from public.add_on_headcounts where add_on_id = 'a300000
 select tests.authenticate_as('e1000000-0000-4000-8000-0000000000e1');
 select is(
   (public.quote_booking('30000000-0000-4000-8000-000000000001', array[1], null, '[]', null, 'full', true) ->> 'credit_amount')::int,
-  7500, 'account credit is applied to the next booking''s quote');
+  10000, 'account credit is applied to the next booking''s quote');
 select tests.clear_auth();
 
 -- ── Roster stats are anonymized and public ───────────────────────────────────

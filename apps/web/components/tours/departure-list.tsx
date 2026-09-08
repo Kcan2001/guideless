@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { CalendarDays, Users } from "lucide-react";
+import { dropCountdown, dropState } from "@/lib/growth/drops";
+import { WaitlistForm } from "@/components/growth/waitlist-form";
 import { formatDateRange, formatMoney } from "@guideless/utils";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -8,6 +10,10 @@ import { cn } from "@/lib/utils";
 
 export function availabilityBadge(d: DepartureWithAvailability) {
   const { available } = d.availability;
+  const drop = dropState(d.opensAt);
+  if (!drop.open) {
+    return { variant: "info" as const, label: dropCountdown(drop.secondsUntil) };
+  }
   if (d.status === "guaranteed" && available > 0) {
     return { variant: "included" as const, label: `Guaranteed · ${available} left` };
   }
@@ -18,9 +24,12 @@ export function availabilityBadge(d: DepartureWithAvailability) {
 
 export function DepartureList({
   tourSlug,
+  tourId,
   departures,
 }: {
   tourSlug: string;
+  /** Needed so a sold-out or not-yet-dropped departure can offer the waitlist. */
+  tourId?: string;
   departures: DepartureWithAvailability[];
 }) {
   if (departures.length === 0) {
@@ -42,6 +51,7 @@ export function DepartureList({
     <ul className="divide-y divide-border rounded-xl border border-border bg-surface">
       {departures.map((d) => {
         const badge = availabilityBadge(d);
+        const drop = dropState(d.opensAt);
         const soldOut = d.availability.available <= 0;
         return (
           <li key={d.id} className="flex flex-wrap items-center gap-4 p-5">
@@ -79,11 +89,11 @@ export function DepartureList({
               >
                 Details
               </Link>
-              {soldOut ? (
+              {!drop.open || soldOut ? (
                 <span
                   className={cn(buttonVariants({ size: "sm" }), "pointer-events-none opacity-50")}
                 >
-                  Sold out
+                  {drop.open ? "Sold out" : "Not open yet"}
                 </span>
               ) : (
                 <Link
@@ -94,6 +104,21 @@ export function DepartureList({
                 </Link>
               )}
             </div>
+            {tourId && (!drop.open || soldOut) && (
+              <div className="w-full border-t border-border pt-4">
+                <p className="text-sm text-muted-foreground">
+                  {drop.open
+                    ? "These dates are full. We will write if a place opens."
+                    : "These dates open soon. We will write the moment they do."}
+                </p>
+                <WaitlistForm
+                  tourId={tourId}
+                  departureId={d.id}
+                  source="departure_list"
+                  className="mt-3 max-w-md"
+                />
+              </div>
+            )}
           </li>
         );
       })}

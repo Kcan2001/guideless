@@ -32,6 +32,7 @@ import {
 import { Spacing } from "@/constants/theme";
 import { useInbox } from "@/hooks/use-inbox";
 import { useMoments } from "@/hooks/use-moments";
+import { useReviewable } from "@/hooks/use-reviewable";
 import { useTheme } from "@/hooks/use-theme";
 import { useTripAddOns } from "@/hooks/use-add-ons";
 import { useCurrentTrip } from "@/hooks/use-trip";
@@ -50,6 +51,7 @@ import {
 export default function TripHomeScreen() {
   const c = useTheme();
   const router = useRouter();
+  const reviewable = useReviewable();
   const { trips, current, detail, offline, syncedAt, isPending, refetch } = useCurrentTrip();
   const inbox = useInbox();
   const { addOns, bookingId } = useTripAddOns(detail);
@@ -98,6 +100,8 @@ export default function TripHomeScreen() {
   const { trip, days, accommodations, members } = detail;
   const todayISO = now.toISOString().slice(0, 10);
   const phase = tripPhase(trip, todayISO);
+  // Only ever the trip they just finished; the query is empty for everyone else.
+  const reviewableTrip = reviewable.data?.find((t) => t.tripId === trip.id) ?? null;
   const day = currentDay(days, now);
   const tz = day?.timezone ?? trip.timezone;
   const clock = localClock(now, tz);
@@ -145,6 +149,22 @@ export default function TripHomeScreen() {
           </Muted>
           <SyncBadge offline={offline} syncedAt={syncedAt} />
         </View>
+
+        {/* After the trip: the one thing worth asking for, once, without nagging. */}
+        {phase === "after" && reviewableTrip && (
+          <Card tone="accent">
+            <Eyebrow>One last thing</Eyebrow>
+            <H2>How was {reviewableTrip.tourName}?</H2>
+            <Body>
+              A few sentences helps the next traveler more than anything we could write. Published
+              with your first name once we have read it.
+            </Body>
+            <Button
+              title="Write a review"
+              onPress={() => router.push(`/review/${reviewableTrip.bookingId}`)}
+            />
+          </Card>
+        )}
 
         {phase === "before" && (
           <Card tone="accent">
