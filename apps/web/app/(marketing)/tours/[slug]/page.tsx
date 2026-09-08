@@ -1,24 +1,25 @@
 import type { Metadata } from "next";
+import type { Route } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight, CalendarDays, Gauge, MapPin, MoonStar, Sparkles, Users } from "lucide-react";
 import { brand } from "@guideless/config";
 import { formatDateRange, formatMoney, formatWallTime } from "@guideless/utils";
 import { TrackView } from "@/components/analytics/track-view";
-import {
-  AddOnList,
-  EventTierMenu,
-  ReferralHint,
-  RoomRule,
-  StayTiers,
-} from "@/components/marketing/make-it-yours";
+import { ReferralHint, RoomRule } from "@/components/marketing/make-it-yours";
 import { JsonLd } from "@/components/site/json-ld";
 import { PhotoBackdrop } from "@/components/site/photo-hero";
-import { PhotoGallery } from "@/components/tours/photo-gallery";
+import { AddLaterCallout } from "@/components/tours/add-later-callout";
+import { BaseIncludes } from "@/components/tours/base-includes";
+import { CompareBlock } from "@/components/tours/compare-block";
 import { DepartureList } from "@/components/tours/departure-list";
+import { ExperienceCards } from "@/components/tours/experience-cards";
 import { Faq } from "@/components/tours/faq";
 import { ItineraryTimeline } from "@/components/tours/itinerary-timeline";
+import { PhotoGallery } from "@/components/tours/photo-gallery";
 import { ResponsibilityList } from "@/components/tours/responsibility-list";
+import { StayTierCards } from "@/components/tours/stay-tier-cards";
+import { CtaLink } from "@/components/analytics/cta-link";
 import { buttonVariants } from "@/components/ui/button";
 import { tourEventJsonLd } from "@/lib/community/seo";
 import { getRoomRule } from "@/lib/data/community";
@@ -36,6 +37,16 @@ const LEVEL_LABEL = {
   moderate: "Moderate pace",
   active: "Active pace",
 } as const;
+
+/** Hero promise when the version has no tagline of its own. */
+function heroPromise(slug: string, isEvent: boolean): string {
+  if (slug === "monaco-grand-prix") {
+    return "Stay in Nice or Monaco. Choose your race view. Meet the group. Explore the Riviera on your own terms.";
+  }
+  return isEvent
+    ? "Choose where you stay and how you watch. Meet the group. Explore on your own terms."
+    : "Hotels, trains and a welcome drink are organized. Your days are yours, and the group is there when you want it.";
+}
 
 export async function generateStaticParams() {
   const slugs = await listTourSlugs();
@@ -87,7 +98,14 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
   const anchor = days
     .flatMap((d) => d.items.map((i) => ({ item: i, day: d })))
     .find((x) => x.item.is_anchor);
-  const hasExtras = !!extras && (extras.stayOptions.length > 0 || extras.addOns.length > 0);
+  const stayOptions = extras?.stayOptions ?? [];
+  const viewing = (extras?.addOns ?? []).filter((a) => a.tier_group);
+  const experiences = (extras?.addOns ?? []).filter((a) => !a.tier_group);
+  const hasExtras = stayOptions.length > 0 || viewing.length > 0 || experiences.length > 0;
+  const bookable = !!next && next.availability.available > 0;
+  // The builder route arrives in Milestone 2; until then "Build my trip" opens the existing checkout.
+  const buildHref = bookable ? (`/checkout/${next.id}` as Route) : null;
+  const eventShortName = tour.event_name?.replace(/^Formula 1 /, "") ?? null;
 
   return (
     <>
@@ -126,9 +144,12 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
           <h1 className="mt-3 max-w-3xl text-5xl font-bold leading-[1.02] md:text-7xl">
             {tour.name}
           </h1>
+          <p className="mt-6 max-w-2xl text-lg text-cloud/85 md:text-xl">
+            {version.tagline ?? heroPromise(tour.slug, isEvent)}
+          </p>
           {isEvent && tour.event_starts_on && (
             <p
-              className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-cloud/85"
+              className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-cloud/85"
               data-testid="event-hero"
             >
               <span className="inline-flex items-center gap-1.5">
@@ -147,43 +168,72 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
               </span>
             </p>
           )}
-          {version.tagline && (
-            <p className="mt-6 max-w-xl text-lg text-cloud/80 md:text-xl">{version.tagline}</p>
-          )}
 
-          <dl className="mt-10 flex flex-wrap gap-x-10 gap-y-4 text-sm">
-            <div className="flex items-center gap-2">
-              <MoonStar className="h-4 w-4 text-aqua" aria-hidden />
-              <dt className="sr-only">Duration</dt>
-              <dd>
+          {/* Facts strip */}
+          <dl
+            className="mt-10 grid max-w-3xl grid-cols-2 gap-x-8 gap-y-5 border-t border-cloud/20 pt-8 text-sm sm:grid-cols-4"
+            data-testid="hero-facts"
+          >
+            {next ? (
+              <div>
+                <dt className="flex items-center gap-1.5 text-cloud/70">
+                  <CalendarDays className="h-4 w-4 text-aqua" aria-hidden /> Next departure
+                </dt>
+                <dd className="mt-1 font-heading text-base font-bold">
+                  {formatDateRange(next.startDate, next.endDate)}
+                </dd>
+              </div>
+            ) : (
+              <div>
+                <dt className="flex items-center gap-1.5 text-cloud/70">
+                  <Gauge className="h-4 w-4 text-aqua" aria-hidden /> Pace
+                </dt>
+                <dd className="mt-1 font-heading text-base font-bold">
+                  {LEVEL_LABEL[tour.activity_level]}
+                </dd>
+              </div>
+            )}
+            <div>
+              <dt className="flex items-center gap-1.5 text-cloud/70">
+                <MoonStar className="h-4 w-4 text-aqua" aria-hidden /> Length
+              </dt>
+              <dd className="mt-1 font-heading text-base font-bold">
                 {tour.duration_days} days · {nights} nights
               </dd>
             </div>
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-aqua" aria-hidden />
-              <dt className="sr-only">Group size</dt>
-              <dd>
+            <div>
+              <dt className="flex items-center gap-1.5 text-cloud/70">
+                <Users className="h-4 w-4 text-aqua" aria-hidden /> Group
+              </dt>
+              <dd className="mt-1 font-heading text-base font-bold">
                 {tour.group_size_min}–{tour.group_size_max} travelers
               </dd>
             </div>
-            <div className="flex items-center gap-2">
-              <Gauge className="h-4 w-4 text-aqua" aria-hidden />
-              <dt className="sr-only">Pace</dt>
-              <dd>{LEVEL_LABEL[tour.activity_level]}</dd>
-            </div>
             {price && (
-              <div className="flex items-center gap-2">
+              <div>
                 <dt className="text-cloud/70">From</dt>
-                <dd className="font-heading text-base font-bold">
+                <dd className="mt-1 font-heading text-base font-bold">
                   {formatMoney(price, { compact: true })}
+                  <span className="ml-1 text-xs font-normal text-cloud/70">per person</span>
                 </dd>
               </div>
             )}
           </dl>
+
           <div className="mt-10 flex flex-wrap gap-3">
-            <a href="#departures" className={buttonVariants({ variant: "inverse", size: "lg" })}>
-              See dates &amp; book <ArrowRight className="h-4 w-4" aria-hidden />
-            </a>
+            {buildHref ? (
+              <CtaLink
+                placement="tour_hero"
+                href={buildHref}
+                className={buttonVariants({ variant: "inverse", size: "lg" })}
+              >
+                Build my trip <ArrowRight className="h-4 w-4" aria-hidden />
+              </CtaLink>
+            ) : (
+              <a href="#departures" className={buttonVariants({ variant: "inverse", size: "lg" })}>
+                See dates <ArrowRight className="h-4 w-4" aria-hidden />
+              </a>
+            )}
             <a
               href="#itinerary"
               className={cn(
@@ -191,11 +241,17 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
                 "border border-cloud/30 bg-transparent text-cloud hover:bg-cloud/10",
               )}
             >
-              Day by day
+              See itinerary
             </a>
           </div>
         </div>
       </section>
+
+      {/* Base trip includes */}
+      <BaseIncludes
+        included={included}
+        groupOpensDaysBefore={extras?.groupOpensDaysBefore ?? null}
+      />
 
       {version.gallery_image_urls.length > 0 && (
         <section
@@ -248,106 +304,170 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
         </aside>
       </section>
 
-      {/* Make it yours */}
-      {hasExtras && extras && (
-        <section id="make-it-yours" className="scroll-mt-24 bg-surface py-20">
-          <div className="mx-auto w-full max-w-6xl px-6">
-            <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-              {isEvent ? "Race weekend, your way" : "Make it yours"}
-            </p>
-            <h2 className="mt-3 text-3xl font-bold md:text-4xl">
-              {isEvent
-                ? "Your hotel, your seat, your call."
-                : "Pay for what you want. Skip what you don't."}
-            </h2>
-            <p className="mt-2 max-w-xl text-muted-foreground">
-              The base trip is the hotels, the trains and the welcome drinks. Everything below is
-              optional, chosen at booking or any time later, even mid-trip. You always see who else
-              is in.
-            </p>
-            <div className="mt-10">
-              {isEvent ? (
-                <EventTierMenu
-                  stayOptions={extras.stayOptions}
-                  addOns={extras.addOns}
-                  currency={currency}
-                  eventName={tour.event_name ?? tour.name}
-                />
-              ) : (
-                <div className="grid gap-10 lg:grid-cols-2">
-                  <StayTiers options={extras.stayOptions} currency={currency} />
-                  <AddOnList addOns={extras.addOns} currency={currency} featuredOnly />
-                </div>
-              )}
-            </div>
-            <div className="mt-8 space-y-2">
-              <RoomRule rule={roomRule} />
-              <ReferralHint />
-            </div>
+      {/* Two ways to buy the same trip */}
+      <section className="bg-surface py-20">
+        <div className="mx-auto w-full max-w-6xl px-6">
+          <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            Two ways to do this
+          </p>
+          <h2 className="mt-3 text-3xl font-bold md:text-4xl">
+            {isEvent ? "One package, or your weekend." : "One itinerary, or your trip."}
+          </h2>
+          <div className="mt-10">
+            <CompareBlock isEvent={isEvent} eventName={eventShortName} />
+          </div>
+        </div>
+      </section>
+
+      {/* Where you stay */}
+      {stayOptions.length > 0 && extras && (
+        <section id="make-it-yours" className="mx-auto w-full max-w-6xl scroll-mt-24 px-6 py-20">
+          <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            Where you stay
+          </p>
+          <h2 className="mt-3 text-3xl font-bold md:text-4xl">
+            {isEvent ? "Pick your base." : "Pick your tier."}
+          </h2>
+          <p className="mt-2 max-w-xl text-muted-foreground">
+            The base price includes the first option. Upgrade if you want to, and see exactly why it
+            costs more before you do.
+          </p>
+          <div className="mt-10">
+            <StayTierCards
+              options={stayOptions}
+              currency={currency}
+              sharedRoomDiscountAmount={extras.sharedRoomDiscountAmount}
+              ctaHref={buildHref}
+            />
+          </div>
+          <div className="mt-8 space-y-2">
+            <RoomRule rule={roomRule} />
           </div>
         </section>
       )}
 
+      {/* How you watch / experiences */}
+      {(viewing.length > 0 || experiences.length > 0) && (
+        <section className="bg-surface py-20">
+          <div className="mx-auto w-full max-w-6xl space-y-16 px-6">
+            {viewing.length > 0 && (
+              <div>
+                <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                  {isEvent ? "How you watch" : "Choose one"}
+                </p>
+                <h2 className="mt-3 text-3xl font-bold md:text-4xl">
+                  {isEvent && eventShortName
+                    ? `How you watch ${eventShortName}.`
+                    : "One of these, your call."}
+                </h2>
+                <p className="mt-2 max-w-xl text-muted-foreground">
+                  Priced per person, chosen per traveler. Pick one now or add it later while seats
+                  last.
+                </p>
+                <div className="mt-10">
+                  <ExperienceCards
+                    addOns={viewing}
+                    currency={currency}
+                    size="large"
+                    pickOne
+                    ctaHref={buildHref}
+                    testId="race-options"
+                  />
+                </div>
+              </div>
+            )}
+            {experiences.length > 0 && (
+              <div>
+                <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                  Also optional
+                </p>
+                <h2 className="mt-3 text-3xl font-bold md:text-4xl">
+                  {viewing.length > 0 ? "Round out the weekend." : "Add on what you like."}
+                </h2>
+                <p className="mt-2 max-w-xl text-muted-foreground">
+                  Everything here is optional, paid only if you choose it, and visible to the group
+                  so you can see who else is in.
+                </p>
+                <div className="mt-10">
+                  <ExperienceCards
+                    addOns={experiences}
+                    currency={currency}
+                    ctaHref={buildHref}
+                    testId="experience-options"
+                  />
+                </div>
+              </div>
+            )}
+            {hasExtras && (
+              <div className="space-y-6">
+                <AddLaterCallout />
+                <ReferralHint />
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* Itinerary */}
+      <section id="itinerary" className="mx-auto w-full max-w-6xl scroll-mt-24 px-6 py-20">
+        <h2 className="text-3xl font-bold md:text-4xl">Day by day.</h2>
+        <p className="mt-2 max-w-xl text-muted-foreground">
+          Times are local. Anything marked{" "}
+          <span className="font-medium text-foreground">Optional</span> is exactly that. The dashed
+          blocks are free time — on purpose.
+        </p>
+        {anchor && (
+          <aside
+            className="mt-10 max-w-3xl rounded-2xl border border-aqua bg-aqua/10 p-6"
+            aria-labelledby="night-one"
+            data-testid="anchor-callout"
+          >
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              Night one · Day {anchor.day.day_number}
+            </p>
+            <h3
+              id="night-one"
+              className="mt-1 flex items-center gap-2 font-heading text-2xl font-semibold"
+            >
+              <Sparkles className="h-5 w-5 text-teal" aria-hidden /> {anchor.item.title}
+              {anchor.item.start_time ? ` · ${formatWallTime(anchor.item.start_time)}` : ""}
+            </h3>
+            {anchor.item.description && (
+              <p className="mt-2 text-muted-foreground">{anchor.item.description}</p>
+            )}
+            <p className="mt-3 text-sm text-muted-foreground">
+              Everyone is invited, nobody is obliged. In the app you see who&rsquo;s coming, and the
+              group opens weeks before you fly.
+            </p>
+          </aside>
+        )}
+        <div className="mt-10 max-w-3xl">
+          <ItineraryTimeline days={days} />
+        </div>
+      </section>
+
+      {/* Departures */}
+      <section id="departures" className="scroll-mt-24 bg-surface py-20">
+        <div className="mx-auto w-full max-w-6xl px-6">
+          <h2 className="text-3xl font-bold md:text-4xl">Dates &amp; prices.</h2>
+          <p className="mt-2 max-w-xl text-muted-foreground">
+            Prices are per traveler in your own room and include everything under &ldquo;Guideless
+            handles&rdquo;. Reserve with a deposit; the balance is due before departure.
+          </p>
+          <div className="mt-8">
+            <DepartureList tourSlug={tour.slug} departures={departures} />
+          </div>
+        </div>
+      </section>
+
       {/* Included / excluded */}
-      <section className="mx-auto w-full max-w-6xl px-6 pb-20">
+      <section className="mx-auto w-full max-w-6xl px-6 py-20">
         <h2 className="text-3xl font-bold md:text-4xl">Who handles what.</h2>
         <p className="mt-2 max-w-xl text-muted-foreground">
           The one thing every traveler should know before booking.
         </p>
         <div className="mt-8">
           <ResponsibilityList included={included} excluded={excluded} />
-        </div>
-      </section>
-
-      {/* Itinerary */}
-      <section id="itinerary" className="scroll-mt-24 bg-surface py-20">
-        <div className="mx-auto w-full max-w-6xl px-6">
-          <h2 className="text-3xl font-bold md:text-4xl">Day by day.</h2>
-          <p className="mt-2 max-w-xl text-muted-foreground">
-            Times are local. Anything marked{" "}
-            <span className="font-medium text-foreground">Optional</span> is exactly that. The
-            dashed blocks are free time — on purpose.
-          </p>
-          {anchor && (
-            <aside
-              className="mt-10 max-w-3xl rounded-2xl border border-aqua bg-aqua/10 p-6"
-              aria-labelledby="night-one"
-              data-testid="anchor-callout"
-            >
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Night one · Day {anchor.day.day_number}
-              </p>
-              <h3
-                id="night-one"
-                className="mt-1 flex items-center gap-2 font-heading text-2xl font-semibold"
-              >
-                <Sparkles className="h-5 w-5 text-teal" aria-hidden /> {anchor.item.title}
-                {anchor.item.start_time ? ` · ${formatWallTime(anchor.item.start_time)}` : ""}
-              </h3>
-              {anchor.item.description && (
-                <p className="mt-2 text-muted-foreground">{anchor.item.description}</p>
-              )}
-              <p className="mt-3 text-sm text-muted-foreground">
-                Everyone is invited, nobody is obliged. In the app you see who&rsquo;s coming, and
-                the group opens weeks before you fly.
-              </p>
-            </aside>
-          )}
-          <div className="mt-10 max-w-3xl">
-            <ItineraryTimeline days={days} />
-          </div>
-        </div>
-      </section>
-
-      {/* Departures */}
-      <section id="departures" className="mx-auto w-full max-w-6xl scroll-mt-24 px-6 py-20">
-        <h2 className="text-3xl font-bold md:text-4xl">Dates &amp; prices.</h2>
-        <p className="mt-2 max-w-xl text-muted-foreground">
-          Prices are per traveler and include everything under &ldquo;Guideless handles&rdquo;.
-          Reserve with a deposit; the balance is due before departure.
-        </p>
-        <div className="mt-8">
-          <DepartureList tourSlug={tour.slug} departures={departures} />
         </div>
       </section>
 

@@ -1065,13 +1065,19 @@ export type Database = {
           departure_id: string;
           description: string | null;
           end_time: string | null;
+          excludes: string[];
           id: string;
+          image_urls: string[];
+          includes: string[];
           is_active: boolean;
           is_featured: boolean;
-          kind: string;
+          kind: Database["public"]["Enums"]["add_on_kind"];
+          label: Database["public"]["Enums"]["option_label"] | null;
           latitude: number | null;
           location_name: string | null;
           longitude: number | null;
+          meeting_point: string | null;
+          min_age: number | null;
           position: number;
           price_amount: number;
           pricing_basis: string;
@@ -1081,6 +1087,7 @@ export type Database = {
           title: string;
           tour_itinerary_item_id: string | null;
           updated_at: string;
+          why_price_note: string | null;
         };
         Insert: {
           address?: string | null;
@@ -1093,13 +1100,19 @@ export type Database = {
           departure_id: string;
           description?: string | null;
           end_time?: string | null;
+          excludes?: string[];
           id?: string;
+          image_urls?: string[];
+          includes?: string[];
           is_active?: boolean;
           is_featured?: boolean;
-          kind?: string;
+          kind?: Database["public"]["Enums"]["add_on_kind"];
+          label?: Database["public"]["Enums"]["option_label"] | null;
           latitude?: number | null;
           location_name?: string | null;
           longitude?: number | null;
+          meeting_point?: string | null;
+          min_age?: number | null;
           position?: number;
           price_amount: number;
           pricing_basis?: string;
@@ -1109,6 +1122,7 @@ export type Database = {
           title: string;
           tour_itinerary_item_id?: string | null;
           updated_at?: string;
+          why_price_note?: string | null;
         };
         Update: {
           address?: string | null;
@@ -1121,13 +1135,19 @@ export type Database = {
           departure_id?: string;
           description?: string | null;
           end_time?: string | null;
+          excludes?: string[];
           id?: string;
+          image_urls?: string[];
+          includes?: string[];
           is_active?: boolean;
           is_featured?: boolean;
-          kind?: string;
+          kind?: Database["public"]["Enums"]["add_on_kind"];
+          label?: Database["public"]["Enums"]["option_label"] | null;
           latitude?: number | null;
           location_name?: string | null;
           longitude?: number | null;
+          meeting_point?: string | null;
+          min_age?: number | null;
           position?: number;
           price_amount?: number;
           pricing_basis?: string;
@@ -1137,6 +1157,7 @@ export type Database = {
           title?: string;
           tour_itinerary_item_id?: string | null;
           updated_at?: string;
+          why_price_note?: string | null;
         };
         Relationships: [
           {
@@ -1258,16 +1279,23 @@ export type Database = {
           departure_id: string;
           description: string | null;
           destination_id: string | null;
+          details: Json;
+          excludes: string[];
           hotel_name: string | null;
           id: string;
+          image_urls: string[];
+          includes: string[];
           is_active: boolean;
           is_default: boolean;
+          label: Database["public"]["Enums"]["option_label"] | null;
           name: string;
           position: number;
           price_delta_amount: number;
           shared_room_discount_amount: number | null;
           star_rating: number | null;
+          tagline: string | null;
           updated_at: string;
+          why_price_note: string | null;
         };
         Insert: {
           area?: string | null;
@@ -1276,16 +1304,23 @@ export type Database = {
           departure_id: string;
           description?: string | null;
           destination_id?: string | null;
+          details?: Json;
+          excludes?: string[];
           hotel_name?: string | null;
           id?: string;
+          image_urls?: string[];
+          includes?: string[];
           is_active?: boolean;
           is_default?: boolean;
+          label?: Database["public"]["Enums"]["option_label"] | null;
           name: string;
           position?: number;
           price_delta_amount?: number;
           shared_room_discount_amount?: number | null;
           star_rating?: number | null;
+          tagline?: string | null;
           updated_at?: string;
+          why_price_note?: string | null;
         };
         Update: {
           area?: string | null;
@@ -1294,16 +1329,23 @@ export type Database = {
           departure_id?: string;
           description?: string | null;
           destination_id?: string | null;
+          details?: Json;
+          excludes?: string[];
           hotel_name?: string | null;
           id?: string;
+          image_urls?: string[];
+          includes?: string[];
           is_active?: boolean;
           is_default?: boolean;
+          label?: Database["public"]["Enums"]["option_label"] | null;
           name?: string;
           position?: number;
           price_delta_amount?: number;
           shared_room_discount_amount?: number | null;
           star_rating?: number | null;
+          tagline?: string | null;
           updated_at?: string;
+          why_price_note?: string | null;
         };
         Relationships: [
           {
@@ -4617,6 +4659,17 @@ export type Database = {
     };
     Enums: {
       activity_level: "relaxed" | "moderate" | "active";
+      add_on_kind:
+        | "activity"
+        | "ticket"
+        | "transfer"
+        | "dinner"
+        | "extra_night"
+        | "room_upgrade"
+        | "group_moment"
+        | "insurance"
+        | "extension"
+        | "other";
       app_role:
         | "customer"
         | "trip_staff"
@@ -4669,6 +4722,7 @@ export type Database = {
       live_moment_status: "draft" | "scheduled" | "live" | "completed" | "cancelled";
       notification_category: "operational" | "social" | "marketing";
       notification_channel: "push" | "email" | "in_app";
+      option_label: "best_value" | "most_popular" | "social" | "luxury";
       payment_status:
         | "unpaid"
         | "deposit_paid"
@@ -4840,6 +4894,18 @@ export const Constants = {
   public: {
     Enums: {
       activity_level: ["relaxed", "moderate", "active"],
+      add_on_kind: [
+        "activity",
+        "ticket",
+        "transfer",
+        "dinner",
+        "extra_night",
+        "room_upgrade",
+        "group_moment",
+        "insurance",
+        "extension",
+        "other",
+      ],
       app_role: [
         "customer",
         "trip_staff",
@@ -4902,6 +4968,7 @@ export const Constants = {
       live_moment_status: ["draft", "scheduled", "live", "completed", "cancelled"],
       notification_category: ["operational", "social", "marketing"],
       notification_channel: ["push", "email", "in_app"],
+      option_label: ["best_value", "most_popular", "social", "luxury"],
       payment_status: [
         "unpaid",
         "deposit_paid",

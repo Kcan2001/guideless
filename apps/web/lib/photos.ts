@@ -42,6 +42,23 @@ export const sitePhotos = {
   homeSecondary: "/photos/monaco-hairpin-race.jpg",
   howItWorks: "/photos/nice-cours-saleya-flowers.jpg",
   solo: "/photos/nice-old-town-evening.jpg",
+  /** Why Guideless — one per benefit block. */
+  choices: "/photos/monaco-yacht-deck-view.jpg",
+  people: "/photos/paris-seine-quay.jpg",
+  app: "/photos/paris-metropolitain-sign.jpg",
+  addLater: "/photos/monaco-harbour-yachts.jpg",
+  /** Independent, not alone. */
+  together: "/photos/paris-cafe-terrace.jpg",
+  /** Founder / about. */
+  founder: "/photos/chateauneuf-cellar-barrels.jpg",
+  about: "/photos/chateauneuf-vineyard-road.jpg",
+  /** Page heroes. */
+  whyGuideless: "/photos/nice-beach-castle-hill.jpg",
+  faq: "/photos/paris-covered-passage.jpg",
+  contact: "/photos/nice-place-massena-wide.jpg",
+  groupTravel: "/photos/nice-bay-promenade.jpg",
+  cancellation: "/photos/paris-arcades-street.jpg",
+  insurance: "/photos/provence-view-vines.jpg",
 } as const;
 
 /** Local photos are served from /public; anything else is an admin upload (Supabase Storage). */

@@ -10,10 +10,13 @@ export const brand = {
   shortName: "Guideless",
   /** Legal entity for copyright lines, terms, invoices and the Stripe account business name. */
   legalName: "Guideless LLC",
-  tagline: "Travel organized. Explore independently.",
+  /** Consumer headline (plan v2 §2). "Minimal intervention travel" is category language, not the headline. */
+  tagline: "Travel with a plan. Not a tour guide.",
   taglineSecondary: "Everything planned. Nothing forced.",
   description:
-    "Guideless Travel organizes the logistics, connects you with a small group, and gives you the tools to explore on your own. No tour guide. No rigid schedule. Just a better way to travel.",
+    "Hotels, transportation, experiences and a group are organized for you. Explore independently, meet people when you want, and build the trip you actually want to take.",
+  /** Category language, used as an eyebrow or secondary line only. */
+  category: "Minimal intervention travel",
   supportEmail: "hello@guidelesstravel.com",
   /** Bump when terms / cancellation policy / waiver text changes; stored on each booking. */
   termsVersion: "2026-09",

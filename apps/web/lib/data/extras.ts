@@ -13,6 +13,38 @@ export interface AddOnWithCounts extends AddOn {
   going: number;
   /** Last calendar day it can be bought (ISO date), from the departure dates and the sales window. */
   bookableUntil: string;
+  /** Calendar day of the add-on (ISO date) when it has a day number, else null. */
+  date: string | null;
+}
+
+/** Practical facts about a stay tier, read from the `details` jsonb (migration 039). */
+export interface StayDetails {
+  neighborhood?: string;
+  stationDistance?: string;
+  trainTime?: string;
+  breakfast?: string;
+  roomType?: string;
+  /** False until a property is contracted; the UI then says "Property confirmed at booking". */
+  hotelConfirmed: boolean;
+}
+
+/** Safe parse of `departure_stay_options.details`; unknown or malformed keys are ignored. */
+export function stayDetails(option: Pick<StayOption, "details">): StayDetails {
+  const raw = option.details;
+  const obj: Record<string, unknown> =
+    raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {};
+  const str = (key: string): string | undefined => {
+    const v = obj[key];
+    return typeof v === "string" && v.trim() ? v.trim() : undefined;
+  };
+  return {
+    neighborhood: str("neighborhood"),
+    stationDistance: str("station_distance"),
+    trainTime: str("train_time"),
+    breakfast: str("breakfast"),
+    roomType: str("room_type"),
+    hotelConfirmed: obj.hotel_confirmed === true,
+  };
 }
 
 export interface DepartureExtras {
@@ -104,6 +136,7 @@ export async function listDepartureExtras(departureId: string): Promise<Departur
             : Math.max(a.capacity - (av?.confirmed ?? 0) - (av?.held ?? 0), 0),
         going: goingById.get(a.id) ?? 0,
         bookableUntil: addDays(date, -a.bookable_until_days_before),
+        date: a.day_number && start ? date : null,
       };
     }),
   };

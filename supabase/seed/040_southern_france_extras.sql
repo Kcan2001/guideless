@@ -32,7 +32,7 @@ where d.tour_id = '20000000-0000-4000-8000-000000000001'
 insert into public.departure_add_ons
   (id, departure_id, title, description, kind, price_amount, currency, pricing_basis, capacity, day_number, start_time, end_time,
    location_name, latitude, longitude, bookable_until_days_before, cancellable_until_days_before, position, is_featured)
-select gen_random_uuid(), d.id, a.title, a.description, a.kind, a.price, d.currency, a.basis, a.capacity, a.day_number, a.start_time, a.end_time,
+select gen_random_uuid(), d.id, a.title, a.description, a.kind::public.add_on_kind, a.price, d.currency, a.basis, a.capacity, a.day_number, a.start_time, a.end_time,
        a.location_name, a.lat, a.lng, a.bookable, a.cancellable, a.position, a.featured
 from public.departures d
 cross join (values
@@ -49,3 +49,84 @@ cross join (values
 ) as a(title, description, kind, price, basis, capacity, day_number, start_time, end_time, location_name, lat, lng, bookable, cancellable, position, featured)
 where d.tour_id = '20000000-0000-4000-8000-000000000001'
   and not exists (select 1 from public.departure_add_ons x where x.departure_id = d.id);
+
+-- ── Presentation (migration 039) ─────────────────────────────────────────────
+-- Keyed by title so both fresh and existing databases pick these up. Only facts already stated
+-- in the descriptions above are turned into includes / excludes.
+update public.departure_stay_options o set
+  tagline = 'Three good hotels, three walkable neighbourhoods.',
+  label = 'best_value',
+  includes = array['8 nights across Nice, Avignon and Paris', 'Breakfast', 'Trains between cities', 'Properties named at booking'],
+  excludes = array['Flights'],
+  details = jsonb_build_object('breakfast', 'Included', 'room_type', 'Double or twin', 'hotel_confirmed', false),
+  why_price_note = 'This is the base trip. Hotels, trains and the welcome drinks are already in the price.'
+from public.departures d
+where o.departure_id = d.id and d.tour_id = '20000000-0000-4000-8000-000000000001'
+  and o.name = 'Well-located 3★ hotels';
+
+update public.departure_stay_options o set
+  tagline = 'Same neighbourhoods, nicer rooms.',
+  includes = array['8 nights in boutique hotels', 'Breakfast', 'Trains between cities', 'Properties named at booking'],
+  excludes = array['Flights'],
+  details = jsonb_build_object('breakfast', 'Included', 'room_type', 'Double or twin', 'hotel_confirmed', false),
+  why_price_note = 'Design-led boutique properties in the same neighbourhoods; the difference is the room, not the route.'
+from public.departures d
+where o.departure_id = d.id and d.tour_id = '20000000-0000-4000-8000-000000000001'
+  and o.name = 'Boutique 4★ upgrade';
+
+update public.departure_add_ons a set
+  label = 'social',
+  includes = array['Shared boat from the old port', 'Skipper', 'Snorkels', 'Lunch on board', 'Swim stops at Villefranche and Cap Ferrat'],
+  excludes = array['Drinks'],
+  meeting_point = 'Port Lympia, Nice · 10:00',
+  why_price_note = 'The boat, skipper and lunch for the day, split across up to twelve travelers.',
+  image_urls = array['/photos/nice-beach-castle-hill.jpg']
+from public.departures d
+where a.departure_id = d.id and d.tour_id = '20000000-0000-4000-8000-000000000001'
+  and a.title = 'Boat day along the Riviera';
+
+update public.departure_add_ons a set
+  includes = array['Second tasting in the winemaker''s cellar', 'Village walk at your own pace'],
+  excludes = array['Bottles to take home'],
+  meeting_point = 'Châteauneuf-du-Pape, after the included lunch',
+  why_price_note = 'A private cellar tasting for a small group; the afternoon tasting and lunch are already in the trip.',
+  image_urls = array['/photos/chateauneuf-cellar-barrels.jpg', '/photos/chateauneuf-vineyard-road.jpg']
+from public.departures d
+where a.departure_id = d.id and d.tour_id = '20000000-0000-4000-8000-000000000001'
+  and a.title = 'Châteauneuf-du-Pape cellar afternoon';
+
+update public.departure_add_ons a set
+  includes = array['Private car, airport to your hotel'],
+  excludes = array['Return to the airport'],
+  meeting_point = 'Nice Côte d''Azur Airport, arrivals hall',
+  why_price_note = 'One car per booking instead of the shared welcome drive.'
+from public.departures d
+where a.departure_id = d.id and d.tour_id = '20000000-0000-4000-8000-000000000001'
+  and a.title = 'Private airport transfer';
+
+update public.departure_add_ons a set
+  includes = array['One extra night in your Paris hotel', 'Breakfast'],
+  excludes = array['Late check-out'],
+  why_price_note = 'The same room for one more night at our group rate.'
+from public.departures d
+where a.departure_id = d.id and d.tour_id = '20000000-0000-4000-8000-000000000001'
+  and a.title = 'Extra night in Paris';
+
+update public.departure_add_ons a set
+  label = 'social',
+  includes = array['Dinner at one long table in a Marais bistro'],
+  excludes = array['Drinks'],
+  meeting_point = 'Le Marais, Paris · 20:00 (exact bistro in your app)',
+  why_price_note = 'A set menu for the group at a neighbourhood bistro; drinks are on you.',
+  image_urls = array['/photos/paris-covered-passage.jpg']
+from public.departures d
+where a.departure_id = d.id and d.tour_id = '20000000-0000-4000-8000-000000000001'
+  and a.title = 'Farewell dinner';
+
+-- Honesty rule (plan v2 §10): no star rating is shown until a real property is confirmed. Tiers whose
+-- details do not say hotel_confirmed = true carry no rating; the cards print "Property confirmed at
+-- booking" instead.
+update public.departure_stay_options
+set star_rating = null
+where coalesce((details ->> 'hotel_confirmed')::boolean, false) = false
+  and star_rating is not null;

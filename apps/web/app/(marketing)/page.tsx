@@ -1,68 +1,107 @@
 import Link from "next/link";
-import { ArrowRight, CalendarDays, Check, MapPin, Plane } from "lucide-react";
-import { brand, responsibilityLabels } from "@guideless/config";
-import { formatDateRange, formatMoney, formatWallTime } from "@guideless/utils";
+import { ArrowRight, CalendarDays, MapPin } from "lucide-react";
+import { brand } from "@guideless/config";
+import { formatDateRange, formatMoney } from "@guideless/utils";
+import { CtaLink } from "@/components/analytics/cta-link";
+import { AppShowcase } from "@/components/marketing/app-showcase";
+import { CompareObserver } from "@/components/marketing/compare-observer";
+import { CompareTable } from "@/components/marketing/compare-table";
+import { ConfiguratorExampleCard } from "@/components/marketing/configurator-example";
+import { FaqAccordion } from "@/components/marketing/faq-accordion";
+import { FounderBlock } from "@/components/marketing/founder-block";
+import { SectionHeading } from "@/components/marketing/page-hero";
+import { RosterStrip } from "@/components/marketing/roster-strip";
+import { JsonLd } from "@/components/site/json-ld";
+import { PhotoBackdrop } from "@/components/site/photo-hero";
+import { TourCard } from "@/components/tours/tour-card";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import { PhotoBackdrop } from "@/components/site/photo-hero";
+import { faqByIds, HOME_FAQ_IDS } from "@/content/faq";
+import { listAppScreens } from "@/lib/app-screens";
+import { getConfiguratorExample } from "@/lib/data/configurator";
+import { getRosterStats } from "@/lib/data/extras";
+import { listPublishedTours } from "@/lib/data/tours";
 import { sitePhotos } from "@/lib/photos";
-import { TourCard } from "@/components/tours/tour-card";
-import { Faq } from "@/components/tours/faq";
-import { JsonLd } from "@/components/site/json-ld";
-import { listPublishedDestinations } from "@/lib/data/destinations";
-import { getTourBySlug, listPublishedTours } from "@/lib/data/tours";
 import { faqJsonLd } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
 export const revalidate = 300;
 
-const HOW = [
-  ["Pick a trip", "A route, a small group, a departure date."],
-  [
-    "Book",
-    "Reserve with a deposit. We arrange hotels, trains and a few experiences worth showing up for.",
-  ],
-  [
-    "Fly in and meet the group",
-    "You book the flight. We meet you at arrivals with a welcome drive.",
-  ],
-  [
-    "Explore independently",
-    "Your itinerary lives on your phone. Free time is built in on purpose.",
-  ],
-] as const;
+const COMPARE = [
+  {
+    title: "Book everything yourself",
+    lines: [
+      "Hotel research in three cities.",
+      "Train schedules and station changes.",
+      "Which boat, which tickets, which transfer.",
+      "Coordinating everyone's dates.",
+      "Nobody to call when the train is cancelled.",
+    ],
+  },
+  {
+    title: "Traditional group tour",
+    lines: [
+      "Fixed itinerary, headcounts, a flag to follow.",
+      "Mandatory activities and set meals.",
+      "Forty people on a coach.",
+      "A guide deciding your afternoon.",
+      "One price for the whole package.",
+    ],
+  },
+  {
+    title: "Guideless",
+    highlight: true,
+    lines: [
+      "Hotels, trains and transfers handled.",
+      "Your free time is yours. No headcounts.",
+      "A small group there when you want it.",
+      "Choose your hotel, your seat, your extras.",
+      "Add more later, from your phone.",
+    ],
+  },
+];
 
-const GENERIC_FAQ = [
+const WHY = [
   {
-    id: "guide",
-    question: "Is there really no guide?",
-    answer:
-      "There is no tour guide walking you around. Your itinerary, maps, recommendations and support live in the Guideless app, and a small Guideless team is reachable whenever you need a human.",
+    title: "Your trip, your choices",
+    body: "Start with the essentials handled. Choose where you stay, which experiences you join, how you get from the airport, and see the price change as you decide.",
+    photo: sitePhotos.choices,
+    alt: "View of the harbour grandstands from a yacht deck",
   },
   {
-    id: "group",
-    question: "Do I have to do things with the group?",
-    answer:
-      "No. Group moments — welcome drinks, a wine afternoon, a farewell dinner — are optional. Many travelers join one or two and otherwise go their own way.",
+    title: "Travel with people, not a tour group",
+    body: "Everyone on your departure is in one group. Meet at the welcome drinks, chat before you fly, join a dinner or a boat when you feel like it, and go your own way when you do not.",
+    photo: sitePhotos.people,
+    alt: "Parisians sitting along the Seine quay in the evening",
   },
   {
-    id: "problems",
-    question: "What happens if something goes wrong?",
-    answer:
-      "Message support in the app. We see your trip, your itinerary and where you are, and we fix it. For emergencies, local numbers are one tap away.",
+    title: "Everything lives in the app",
+    body: "Today's plan, the full itinerary, a map of everything, your tickets and confirmations, the group, chat and support. It works offline for the parts you need on the move.",
+    photo: sitePhotos.app,
+    alt: "A Métropolitain sign in front of a Haussmann façade",
+  },
+  {
+    title: "Keep adding to your trip",
+    body: "Not sure about the boat yet? Reserve the trip now and add experiences later from your account or the app, even mid-trip, subject to availability.",
+    photo: sitePhotos.addLater,
+    alt: "Yachts moored side by side in the Monaco harbour on race week",
   },
 ];
 
 export default async function HomePage() {
-  const [tours, destinations] = await Promise.all([
-    listPublishedTours(),
-    listPublishedDestinations(),
-  ]);
+  const [tours, example] = await Promise.all([listPublishedTours(), getConfiguratorExample()]);
   const routes = tours.filter((t) => t.tour.kind !== "event");
   const events = tours.filter((t) => t.tour.kind === "event");
   const featured = routes.slice(0, 3);
-  const sample = routes[0] ? await getTourBySlug(routes[0].tour.slug) : null;
-  const sampleDay = sample?.days.find((d) => d.day_number === 2) ?? sample?.days[0];
+  const screens = listAppScreens();
+  const homeFaq = faqByIds(HOME_FAQ_IDS);
+
+  // "Independent, not alone" shows real roster numbers only once a departure has three bookings.
+  const nextDeparture = tours
+    .flatMap((t) => t.departures)
+    .sort((a, b) => a.startDate.localeCompare(b.startDate))[0];
+  const roster = nextDeparture ? await getRosterStats(nextDeparture.id) : null;
+  const showRoster = roster != null && roster.booked >= 3;
 
   return (
     <>
@@ -80,97 +119,179 @@ export default async function HomePage() {
         />
         <div className="relative mx-auto flex w-full max-w-6xl flex-col px-6 py-28 md:py-40">
           <p className="mb-5 text-sm font-medium uppercase tracking-[0.22em] text-aqua">
-            Minimal intervention travel
+            Small-group trips to Europe
           </p>
           <h1 className="max-w-3xl text-5xl font-bold leading-[1.02] md:text-7xl">
             {brand.tagline}
           </h1>
-          <p className="mt-7 max-w-xl text-lg leading-relaxed text-cloud/80 md:text-xl">
+          <p className="mt-7 max-w-xl text-lg leading-relaxed text-cloud/85 md:text-xl">
             {brand.description}
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
-            <Link href="/tours" className={buttonVariants({ variant: "inverse", size: "lg" })}>
+            <CtaLink
+              href="/tours"
+              placement="home_hero"
+              className={buttonVariants({ variant: "inverse", size: "lg" })}
+            >
               Explore trips <ArrowRight className="h-4 w-4" aria-hidden />
-            </Link>
-            <Link
+            </CtaLink>
+            <CtaLink
               href="/how-it-works"
+              placement="home_hero_secondary"
               className={cn(
                 buttonVariants({ size: "lg" }),
                 "border border-cloud/30 bg-transparent text-cloud hover:bg-cloud/10",
               )}
             >
               How Guideless works
-            </Link>
+            </CtaLink>
           </div>
         </div>
       </section>
 
-      {/* How it works */}
+      {/* The problem */}
       <section className="mx-auto w-full max-w-6xl px-6 py-24">
-        <div className="max-w-2xl">
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            How it works
-          </p>
-          <h2 className="mt-3 text-4xl font-bold md:text-5xl">
-            Everything planned. Nothing forced.
-          </h2>
-        </div>
-        <ol className="mt-12 grid gap-6 md:grid-cols-4">
-          {HOW.map(([title, body], i) => (
-            <li key={title} className="rounded-xl border border-border bg-surface p-6">
-              <span className="font-heading text-sm font-semibold text-link">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <h3 className="mt-2 text-xl font-semibold">{title}</h3>
-              <p className="mt-2 text-muted-foreground">{body}</p>
-            </li>
-          ))}
-        </ol>
-        <Link href="/how-it-works" className={cn(buttonVariants({ variant: "link" }), "mt-6 px-0")}>
-          The full story <ArrowRight className="h-4 w-4" aria-hidden />
-        </Link>
+        <SectionHeading
+          eyebrow="The problem"
+          title="You want to travel. You don’t want to plan every damn thing."
+          lede="There have been two ways to see Europe: do all the work yourself, or hand your days to a tour guide. Guideless is the third."
+        />
+        <CompareObserver section="home_problem">
+          <div className="mt-12">
+            <CompareTable columns={COMPARE} />
+          </div>
+        </CompareObserver>
       </section>
 
-      {/* Featured trips */}
+      {/* Why Guideless */}
       <section className="bg-surface py-24">
         <div className="mx-auto w-full max-w-6xl px-6">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                Trips
-              </p>
-              <h2 className="mt-3 text-4xl font-bold md:text-5xl">
-                Routes we would send a friend on.
-              </h2>
-            </div>
-            <Link href="/tours" className={buttonVariants({ variant: "secondary" })}>
-              All trips
-            </Link>
-          </div>
-          {featured.length > 0 ? (
-            <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {featured.map((item) => (
-                <TourCard key={item.tour.id} item={item} />
-              ))}
-            </div>
-          ) : (
-            <p className="mt-12 text-muted-foreground">Our first routes are being finalized.</p>
-          )}
+          <SectionHeading
+            eyebrow="Why Guideless"
+            title="We plan the hard parts. You choose the rest."
+          />
+          <ul className="mt-14 grid gap-10 md:grid-cols-2">
+            {WHY.map((w, i) => (
+              <li key={w.title} className="group">
+                <div className="relative aspect-[3/2] overflow-hidden rounded-2xl">
+                  <PhotoBackdrop
+                    src={w.photo}
+                    fallbackAlt={w.alt}
+                    sizes="(min-width: 768px) 50vw, 100vw"
+                    imgClassName="transition-transform duration-500 group-hover:scale-[1.02]"
+                  />
+                </div>
+                <p className="mt-6 font-heading text-sm font-semibold text-link">
+                  {String(i + 1).padStart(2, "0")}
+                </p>
+                <h3 className="mt-2 text-2xl font-semibold md:text-3xl">{w.title}</h3>
+                <p className="mt-3 max-w-lg text-lg text-muted-foreground">{w.body}</p>
+              </li>
+            ))}
+          </ul>
+          <Link
+            href="/why-guideless"
+            className={cn(buttonVariants({ variant: "link" }), "mt-10 px-0")}
+          >
+            Why someone books Guideless instead of doing it themselves{" "}
+            <ArrowRight className="h-4 w-4" aria-hidden />
+          </Link>
         </div>
       </section>
 
-      {/* Event weekends */}
-      {events.length > 0 && (
+      {/* The app */}
+      <section className="bg-ink py-24 text-cloud">
+        <div className="mx-auto w-full max-w-6xl px-6">
+          <SectionHeading
+            eyebrow="The app"
+            title="Your entire trip. In your pocket."
+            lede="Guideless is a travel company with an app instead of a guide. Every morning it answers three questions: where am I, what is next, and what are my options."
+            inverse
+          />
+          <div className="mt-14">
+            <AppShowcase screens={screens} />
+          </div>
+        </div>
+      </section>
+
+      {/* Configurator */}
+      {example && (
         <section className="mx-auto w-full max-w-6xl px-6 py-24">
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            Event weekends
-          </p>
-          <h2 className="mt-3 text-4xl font-bold md:text-5xl">One weekend, fifty ways to do it.</h2>
-          <p className="mt-3 max-w-xl text-muted-foreground">
-            Big events, one group. Stay where you like, pick your view, meet everyone at the welcome
-            drinks. The event supplies the date; we supply the people and the logistics.
-          </p>
-          <ul className="mt-12 grid gap-6 md:grid-cols-2">
+          <ConfiguratorExampleCard example={example} />
+        </section>
+      )}
+
+      {/* Independent, not alone */}
+      <section className={cn("py-24", example ? "bg-surface" : "")}>
+        <div className="mx-auto grid w-full max-w-6xl gap-12 px-6 lg:grid-cols-2 lg:items-center">
+          <div className="relative aspect-[4/5] overflow-hidden rounded-2xl">
+            <PhotoBackdrop
+              src={sitePhotos.together}
+              fallbackAlt="A café terrace in Paris"
+              sizes="(min-width: 1024px) 50vw, 100vw"
+            />
+          </div>
+          <div>
+            <SectionHeading
+              eyebrow="Independent, not alone"
+              title="Travel independently. Don’t travel alone."
+              lede="Guideless is built for people who book on their own. The trip is designed so that never feels like a compromise."
+            />
+            <ul className="mt-8 space-y-4 text-lg">
+              {[
+                ["Welcome drinks on night one.", "Included. You will know faces by breakfast."],
+                [
+                  "The group chat opens before you fly.",
+                  "Thirty to forty-five days out, the roster, chat and Live Moments switch on together.",
+                ],
+                [
+                  "Optional dinners, boats and meetups.",
+                  "Each one shows how many of your group are in before you decide.",
+                ],
+                [
+                  "City evenings at home.",
+                  "Meet other Guideless travelers in your own city before you ever board a plane.",
+                ],
+              ].map(([title, body]) => (
+                <li key={title}>
+                  <span className="font-semibold">{title}</span>{" "}
+                  <span className="text-muted-foreground">{body}</span>
+                </li>
+              ))}
+            </ul>
+            {showRoster && <RosterStrip stats={roster} className="mt-8" />}
+            <div className="mt-8 flex flex-wrap gap-4">
+              <Link href="/group-travel" className={buttonVariants({ variant: "secondary" })}>
+                Traveling with friends
+              </Link>
+              <Link href="/meetups" className={cn(buttonVariants({ variant: "link" }), "px-0")}>
+                City evenings <ArrowRight className="h-4 w-4" aria-hidden />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Trips */}
+      <section className="mx-auto w-full max-w-6xl px-6 py-24">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <SectionHeading eyebrow="Trips" title="Routes we would send a friend on." />
+          <Link href="/tours" className={buttonVariants({ variant: "secondary" })}>
+            All trips
+          </Link>
+        </div>
+        {featured.length > 0 ? (
+          <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {featured.map((item) => (
+              <TourCard key={item.tour.id} item={item} />
+            ))}
+          </div>
+        ) : (
+          <p className="mt-12 text-muted-foreground">Our first routes are being finalized.</p>
+        )}
+
+        {events.length > 0 && (
+          <ul className="mt-6 grid gap-6 md:grid-cols-2">
             {events.map(({ tour, version, destinations: dests, departures }) => {
               const next = departures[0];
               return (
@@ -193,7 +314,7 @@ export default async function HomePage() {
                   )}
                   <div className="relative">
                     <p className="text-xs font-medium uppercase tracking-[0.2em] text-aqua">
-                      {tour.event_name}
+                      Event weekend · {tour.event_name}
                     </p>
                     <h3 className="mt-2 font-heading text-3xl font-bold">{tour.name}</h3>
                     {version.tagline && <p className="mt-3 text-cloud/80">{version.tagline}</p>}
@@ -247,137 +368,45 @@ export default async function HomePage() {
               );
             })}
           </ul>
-        </section>
-      )}
+        )}
+      </section>
 
-      {/* Destinations */}
-      {destinations.length > 0 && (
-        <section className="mx-auto w-full max-w-6xl px-6 py-24">
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            Destinations
-          </p>
-          <h2 className="mt-3 text-4xl font-bold md:text-5xl">Where the routes go.</h2>
-          <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {destinations.map((d) => (
-              <li key={d.id}>
-                <Link
-                  href={`/destinations/${d.slug}`}
-                  className="group flex items-center justify-between gap-4 rounded-xl border border-border bg-surface p-5 no-underline transition-colors hover:border-teal"
-                >
-                  <div>
-                    <p className="font-heading text-xl font-semibold text-foreground">{d.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {d.region ? `${d.region}, ` : ""}
-                      {d.country_name}
-                    </p>
-                  </div>
-                  <ArrowRight
-                    className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-link"
-                    aria-hidden
-                  />
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {/* Included / not included */}
-      <section className="bg-ink py-24 text-cloud">
-        <div className="mx-auto grid w-full max-w-6xl gap-12 px-6 md:grid-cols-2">
-          <div>
-            <h2 className="font-heading text-2xl font-semibold text-aqua">
-              {responsibilityLabels.guideless}
-            </h2>
-            <ul className="mt-6 space-y-3">
-              {[
-                "Hotels in every city",
-                "Trains and transfers between them",
-                "A welcome transfer with your group",
-                "Selected experiences — optional, included",
-                "A digital guide that always knows what is next",
-                "Real people at Guideless when you need them",
-              ].map((t) => (
-                <li key={t} className="flex gap-3">
-                  <Check className="mt-1 h-4 w-4 shrink-0 text-aqua" aria-hidden /> {t}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h2 className="font-heading text-2xl font-semibold">{responsibilityLabels.traveler}</h2>
-            <ul className="mt-6 space-y-3 text-cloud/85">
-              {[
-                "Your flights — we tell you exactly when to land",
-                "Most meals — we have recommendations",
-                "Travel insurance",
-                "Every free afternoon",
-              ].map((t) => (
-                <li key={t} className="flex gap-3">
-                  <Plane className="mt-1 h-4 w-4 shrink-0 text-cyan" aria-hidden /> {t}
-                </li>
-              ))}
-            </ul>
+      {/* Trust */}
+      <section className="bg-surface py-24">
+        <div className="mx-auto w-full max-w-6xl px-6">
+          <SectionHeading eyebrow="Who is behind this" title="A small company. A specific idea." />
+          <div className="mt-12">
+            <FounderBlock />
           </div>
         </div>
       </section>
 
-      {/* Sample day */}
-      {sample && sampleDay && (
-        <section className="mx-auto w-full max-w-6xl px-6 py-24">
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            A sample day
-          </p>
-          <h2 className="mt-3 text-4xl font-bold md:text-5xl">
-            Day {sampleDay.day_number} in {sampleDay.destination?.name ?? sample.tour.name}
-          </h2>
-          <p className="mt-3 max-w-xl text-muted-foreground">{sampleDay.summary}</p>
-          <ol className="mt-10 grid gap-3 md:grid-cols-2">
-            {sampleDay.items.map((item) => (
-              <li
-                key={item.id}
-                className={cn(
-                  "rounded-lg border p-4",
-                  item.type === "free_time"
-                    ? "border-dashed border-aqua bg-aqua/10"
-                    : "border-border bg-surface",
-                )}
-              >
-                <p className="text-xs text-muted-foreground">
-                  {item.start_time ? formatWallTime(item.start_time) : "Anytime"} ·{" "}
-                  {item.type.replace("_", " ")}
-                </p>
-                <p className="mt-1 font-semibold">{item.title}</p>
-              </li>
-            ))}
-          </ol>
-          <Link
-            href={`/tours/${sample.tour.slug}`}
-            className={cn(buttonVariants({ variant: "link" }), "mt-6 px-0")}
-          >
-            See the whole {sample.tour.name} itinerary{" "}
-            <ArrowRight className="h-4 w-4" aria-hidden />
-          </Link>
-        </section>
-      )}
-
       {/* FAQ + CTA */}
-      <section className="mx-auto w-full max-w-6xl px-6 pb-24">
-        <h2 className="text-3xl font-bold md:text-4xl">Questions people ask.</h2>
+      <section className="mx-auto w-full max-w-6xl px-6 py-24">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <SectionHeading eyebrow="Questions" title="Questions people ask." />
+          <Link href="/faq" className={buttonVariants({ variant: "secondary" })}>
+            All questions
+          </Link>
+        </div>
         <div className="mt-8 max-w-3xl">
-          <Faq items={GENERIC_FAQ} />
+          <FaqAccordion items={homeFaq} />
         </div>
         <div className="mt-20 rounded-2xl bg-sand p-10 md:p-14">
           <h2 className="max-w-2xl text-3xl font-bold md:text-4xl">{brand.taglineSecondary}</h2>
           <p className="mt-3 max-w-xl text-muted-foreground">
-            Pick a route. We will handle the rest — and then get out of the way.
+            Pick a trip. We will handle the rest, and then get out of the way.
           </p>
-          <Link href="/tours" className={cn(buttonVariants({ size: "lg" }), "mt-8")}>
+          <CtaLink
+            href="/tours"
+            placement="home_closing"
+            className={cn(buttonVariants({ size: "lg" }), "mt-8")}
+          >
             Explore trips <ArrowRight className="h-4 w-4" aria-hidden />
-          </Link>
+          </CtaLink>
         </div>
       </section>
-      <JsonLd data={faqJsonLd(GENERIC_FAQ)} />
+      <JsonLd data={faqJsonLd(homeFaq)} />
     </>
   );
 }

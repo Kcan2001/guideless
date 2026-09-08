@@ -82,7 +82,7 @@ export function StayTiers({
                 </span>
               )}
               {o.area && <span>{o.area}</span>}
-              {o.is_default && <Badge variant="optional">Most people book this</Badge>}
+              {o.is_default && <Badge variant="optional">Included by default</Badge>}
             </p>
             {o.description && <p className="mt-2 text-sm text-muted-foreground">{o.description}</p>}
           </li>

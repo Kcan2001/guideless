@@ -19,7 +19,10 @@ export type AnalyticsEvent =
   | "add_add_on" // props: departure_id, add_on_id
   | "remove_add_on" // props: departure_id, add_on_id
   | "newsletter_signup"
-  | "social_link_click";
+  | "social_link_click"
+  | "cta_click" // props: placement, target
+  | "faq_expanded" // props: question (the id, never free text)
+  | "compare_viewed"; // props: section
 
 export type AnalyticsParams = Record<string, string | number | boolean | undefined>;
 

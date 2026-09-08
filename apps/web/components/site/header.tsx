@@ -5,10 +5,14 @@ import { SessionNav } from "@/components/auth/session-nav";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const nav = [
+/** Primary navigation (plan v2 §6). Order follows the visitor's questions: what, where, how, why. */
+export const primaryNav = [
   { href: "/tours", label: "Trips" },
   { href: "/destinations", label: "Destinations" },
   { href: "/how-it-works", label: "How it works" },
+  { href: "/why-guideless", label: "Why Guideless" },
+  { href: "/group-travel", label: "Group travel" },
+  { href: "/faq", label: "FAQ" },
 ] as const;
 
 export function SiteHeader() {
@@ -28,8 +32,8 @@ export function SiteHeader() {
           <span className="sr-only">{brand.name} home</span>
         </Link>
 
-        <nav aria-label="Primary" className="hidden items-center gap-7 text-sm md:flex">
-          {nav.map((item) => (
+        <nav aria-label="Primary" className="hidden items-center gap-6 text-sm lg:flex">
+          {primaryNav.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -48,7 +52,7 @@ export function SiteHeader() {
           >
             Explore trips
           </Link>
-          <details className="relative md:hidden">
+          <details className="relative lg:hidden">
             <summary
               role="button"
               aria-haspopup="menu"
@@ -62,9 +66,9 @@ export function SiteHeader() {
             </summary>
             <nav
               aria-label="Mobile"
-              className="absolute right-0 mt-2 flex w-56 flex-col gap-1 rounded-xl border border-border bg-surface p-2 shadow-lg"
+              className="absolute right-0 mt-2 flex w-60 flex-col gap-1 rounded-xl border border-border bg-surface p-2 shadow-lg"
             >
-              {nav.map((item) => (
+              {primaryNav.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -73,6 +77,19 @@ export function SiteHeader() {
                   {item.label}
                 </Link>
               ))}
+              <Link
+                href="/about"
+                className="rounded-lg px-3 py-2 text-foreground no-underline hover:bg-sand/60"
+              >
+                About
+              </Link>
+              <Link
+                href="/contact"
+                className="rounded-lg px-3 py-2 text-foreground no-underline hover:bg-sand/60"
+              >
+                Contact
+              </Link>
+              <SessionNav className="rounded-lg px-3 py-2 text-foreground no-underline hover:bg-sand/60 sm:hidden" />
               <Link
                 href="/tours"
                 className={cn(buttonVariants({ size: "sm" }), "mt-1 justify-center")}
