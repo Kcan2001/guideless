@@ -7,7 +7,7 @@ export const privacy: LegalDocument = {
   title: "Privacy Policy",
   lede: "Organizing a trip means we hold personal details for you and the people you travel with. This policy explains what we collect, why, who processes it for us and the choices you have. No surprises.",
   version: brand.termsVersion,
-  lastUpdated: "2026-09-06",
+  lastUpdated: "2026-09-08",
   sections: [
     {
       id: "who",
@@ -28,6 +28,7 @@ export const privacy: LegalDocument = {
         "Messages you send in group chat, Live Moments you create or join, RSVPs, support conversations and any attachments you upload.",
         "App and device information: a push notification token if you allow notifications, app version, and crash reports (with personal fields removed) if the app fails.",
         "Location: only while the app is open and only if you grant permission, to show what is near you and how far your next stop is. We do not track your location in the background and do not store a location history.",
+        "Newsletter: if you subscribe, your email address, where on the site you subscribed from and the date you did. You do not need an account to subscribe, and every email carries a one-click unsubscribe link.",
         "Website usage: cookies and similar technologies for analytics, only after you accept them in the consent banner. Essential cookies for signing in and checkout always apply.",
       ],
     },
@@ -64,6 +65,7 @@ export const privacy: LegalDocument = {
         "Booking, payment and invoice records: as long as tax and accounting law requires, usually seven years.",
         "Traveler details, emergency contacts and support conversations: for the trip and a reasonable period afterwards to handle questions, then deleted or anonymized.",
         "Group chat and Live Moments: for the trip and up to twelve months after it ends, unless you delete your messages sooner.",
+        "Newsletter subscriptions: until you unsubscribe. We keep the unsubscribed record itself so we do not email you again by mistake.",
         "Analytics: in aggregated form; individual identifiers are removed or expire according to each tool's retention setting.",
       ],
     },
@@ -73,7 +75,7 @@ export const privacy: LegalDocument = {
       list: [
         "You can view and edit most of your data in your account and in the app (profile, traveler details, notification preferences, what the group sees).",
         `You can ask us to access, correct, export or delete your personal data by emailing ${brand.supportEmail}. We verify the request, then act within 30 days. Financial records that the law requires us to keep are anonymized rather than deleted.`,
-        "You can withdraw analytics consent at any time from the cookie settings link in the footer, and turn off push notifications in your device settings.",
+        "You can withdraw analytics consent at any time from Cookie settings in the footer, which stops analytics immediately and brings the banner back. You can turn off push notifications in your device settings, and unsubscribe from the newsletter with the link in any of its emails.",
         "If you are in the EU or UK you also have the right to complain to your data protection authority. We would appreciate the chance to resolve it first.",
       ],
     },

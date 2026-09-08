@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 export const metadata: Metadata = {
   title: "Travel insurance",
   description:
-    "Travel insurance is not included in a Guideless trip and is strongly recommended. What it should cover, why it matters for the parts you book yourself, and when a departure requires it.",
+    "Travel insurance is not included in a Guideless trip and is strongly recommended. What it should cover and why it matters for the parts you book yourself.",
   alternates: { canonical: "/travel-insurance" },
 };
 
@@ -55,7 +55,7 @@ export default function TravelInsurancePage() {
             <ul className="mt-8 space-y-3 text-foreground/90">
               {[
                 "Travel insurance is not part of any Guideless trip price.",
-                "It is strongly recommended on every departure, and required on departures that say so on their page.",
+                "It is strongly recommended on every departure. We do not make it a condition of booking and we do not check it.",
                 "We do not sell or recommend a specific insurer. Your bank, card or employer may already provide cover; check what you have first.",
                 "Bring the policy number with you. Support can help you reach your insurer but cannot claim on your behalf.",
               ].map((t) => (
@@ -82,8 +82,10 @@ export default function TravelInsurancePage() {
           <div>
             <h2 className="text-2xl font-bold">What Guideless covers itself</h2>
             <p className="mt-2 text-muted-foreground">
-              The trip price follows the published refund tiers, add-ons refund in full until their
-              deadline, and if we cancel a departure you get everything back.
+              The trip price follows the published refund tiers, most optional extras refund in full
+              until their own deadline, and if we cancel a departure you get everything back. A few
+              extras, event tickets above all, are non-refundable from purchase and say so before
+              you add them.
             </p>
           </div>
           <Link href="/cancellation" className={cn(buttonVariants({ variant: "secondary" }))}>

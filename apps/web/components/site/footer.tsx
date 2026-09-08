@@ -1,6 +1,7 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { brand, social } from "@guideless/config";
+import { CookieSettingsButton } from "@/components/analytics/cookie-settings-button";
 import { NewsletterForm } from "@/components/site/newsletter-form";
 
 /** Instagram glyph (lucide dropped brand icons in v1). */
@@ -108,6 +109,11 @@ export function SiteFooter() {
                   </Link>
                 </li>
               ))}
+              {col.label === "Legal" && (
+                <li>
+                  <CookieSettingsButton />
+                </li>
+              )}
             </ul>
           </nav>
         ))}

@@ -21,9 +21,10 @@ export function AnalyticsProvider() {
     const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
     const host = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.i.posthog.com";
 
+    // "unknown" means no stored choice — either a first visit or a withdrawal from the footer's
+    // cookie settings. Either way nothing may be collected until the visitor chooses again.
     async function apply(state: ConsentState) {
-      if (state === "unknown") return;
-      applyGtagConsent(state);
+      applyGtagConsent(state === "granted" ? "granted" : "denied");
       if (!key) return;
       const { default: posthog } = await import("posthog-js");
       if (state === "granted") {

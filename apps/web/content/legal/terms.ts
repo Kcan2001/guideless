@@ -3,6 +3,13 @@ import type { LegalDocument } from "@/content/legal/types";
 
 /**
  * Terms of Service for Guideless LLC, trading as Guideless Travel. Plain language on purpose.
+ *
+ * Section 4 deliberately does not say what happens to redeemed account credit when the customer
+ * cancels. Today the code forfeits it: `previewRefund` works from `amount_paid`, which is card
+ * money only, and nothing reverses the negative `account_credits` redemption row, so a traveler
+ * loses 100% of applied credit even at the top refund tier. That is a decision Kyle has to make
+ * (return it as credit, refund it at the tier percentage, or keep forfeiting it and say so), and
+ * publishing a clause before the decision would bake the current behavior into the contract.
  * Bump `brand.termsVersion` when anything here changes materially; every booking stores the
  * version the customer accepted.
  */
@@ -11,7 +18,7 @@ export const terms: LegalDocument = {
   title: "Terms of Service",
   lede: "These are the terms between you and Guideless LLC when you browse our site, book a trip or use the Guideless Travel app. We have kept them short and readable. If something is unclear, ask us before you book.",
   version: brand.termsVersion,
-  lastUpdated: "2026-09-06",
+  lastUpdated: "2026-09-08",
   sections: [
     {
       id: "who-we-are",
@@ -43,18 +50,31 @@ export const terms: LegalDocument = {
       ],
     },
     {
+      id: "account-credit",
+      title: "4. Account credit",
+      paragraphs: [
+        "You earn account credit when a friend books with your referral code, when you reach a referral milestone, or when we grant it for a service issue. It is a discount on a future Guideless trip, not money.",
+      ],
+      list: [
+        "Credit has no cash value. We do not pay it out, transfer it between accounts or exchange it for anything other than a Guideless booking.",
+        "Credit is applied automatically to the base trip price at checkout when you are signed in, up to the value of that trip. It is not applied to add-ons, and it does not expire.",
+        "Credit is earned only once the friend's booking is confirmed. If that booking is later cancelled, the credit is reversed, because the trip it rewarded did not happen. If you had already spent it, the reversal leaves a negative balance that the next credit you earn clears first.",
+        "On the host program, a departure host travels free once the number of travelers stated on the host page have booked and confirmed on that departure. Cancelled bookings do not count toward it.",
+      ],
+    },
+    {
       id: "changes-by-you",
-      title: "4. Changes you can make",
+      title: "5. Changes you can make",
       list: [
         "You can update traveler details (names as they appear on passports, dates of birth, nationality, contact details, dietary and accessibility needs) from your account. Some suppliers need final details by a set date; we tell you when.",
         "You can add add-ons any time they are still on sale, including during the trip, from your account or the app.",
-        "You can remove an add-on up to its stated cancellation deadline for a full refund of that add-on. After the deadline it is non-refundable.",
+        "You can remove an add-on up to its stated cancellation deadline for a full refund of that add-on. After the deadline it is non-refundable. Some add-ons, event tickets in particular, are bought in your name and cannot be handed back, so they are non-refundable from the moment you buy them; those say so before you add them and show no deadline.",
         "Room changes and traveler substitutions are handled by our team on request and depend on what hotels and rail operators allow.",
       ],
     },
     {
       id: "cancellation-by-you",
-      title: "5. Cancelling your booking",
+      title: "6. Cancelling your booking",
       paragraphs: [
         "Every departure publishes its cancellation policy before you book: a set of tiers that state what percentage of the trip price is refunded depending on how many days before departure you cancel. The tiers for your departure are shown on the departure page, at checkout and in your account.",
       ],
@@ -68,7 +88,7 @@ export const terms: LegalDocument = {
     },
     {
       id: "changes-by-us",
-      title: "6. Changes or cancellation by us",
+      title: "7. Changes or cancellation by us",
       list: [
         "Each departure has a minimum number of travelers. If it is not reached by the booking deadline we may cancel the departure; you then choose a full refund or a transfer to another date.",
         "If we cancel a departure for any other reason within our control, you receive a full refund of everything you paid us. Flights and other arrangements you booked yourself are your responsibility, which is why we recommend travel insurance that covers them.",
@@ -78,11 +98,11 @@ export const terms: LegalDocument = {
     },
     {
       id: "your-responsibilities",
-      title: "7. Your responsibilities",
+      title: "8. Your responsibilities",
       list: [
         "Flights, and getting to the first hotel and home from the last one, are yours to arrange. We tell you exactly when to arrive.",
         "Passports, visas, vaccinations and any entry requirements are your responsibility. Names on your booking must match your passport.",
-        "Travel insurance covering medical care, cancellation and personal belongings is strongly recommended and required on some departures where stated.",
+        "Travel insurance covering medical care, cancellation and personal belongings is strongly recommended on every departure. We do not make it a condition of booking and we do not check it, but if you travel without it, the losses it would have covered are yours.",
         "You are responsible for your own health, safety and behavior during the trip, for complying with local laws, and for the terms of the hotels, rail operators and activity providers you use.",
         "Timings in Your Guide are firm for trains and transfers. If you miss a departure, rebooking costs are yours.",
         "Travelers must be 18 or older at the start of the trip unless a departure states otherwise.",
@@ -90,7 +110,7 @@ export const terms: LegalDocument = {
     },
     {
       id: "group-and-live-moments",
-      title: "8. Your Group and Live Moments",
+      title: "9. Your Group and Live Moments",
       paragraphs: [
         "The group features of the app (the roster, group chat, Live Moments, seeing who chose the same add-ons) are optional. You choose what other travelers see about you.",
         "Be decent to each other. We may remove content or suspend a traveler from the group features for harassment, discrimination, threats or persistent disrespect, and in serious cases end their participation in the trip without refund. You can report messages or people from within the app.",
@@ -99,7 +119,7 @@ export const terms: LegalDocument = {
     },
     {
       id: "suppliers-and-liability",
-      title: "9. Suppliers and liability",
+      title: "10. Suppliers and liability",
       list: [
         "Hotels, rail operators, transfer companies and activity providers are independent businesses. We select and book them with care, but we do not run them, and we are not liable for their acts or omissions beyond what applicable law requires of a travel organizer.",
         "To the extent the law allows, our total liability to you for a booking is limited to the amount you paid us for that booking, and we are not liable for indirect or consequential losses such as missed flights you booked yourself, lost earnings or disappointment.",
@@ -108,14 +128,14 @@ export const terms: LegalDocument = {
     },
     {
       id: "app-and-content",
-      title: "10. The app, the site and our content",
+      title: "11. The app, the site and our content",
       paragraphs: [
         "You may use the Guideless app and website for your own trip planning and travel. The content, design and software are ours or our licensors' and may not be copied or resold. Recommendations in the app are suggestions, not endorsements, and prices at third-party venues can change.",
       ],
     },
     {
       id: "law-and-disputes",
-      title: "11. Governing law and disputes",
+      title: "12. Governing law and disputes",
       paragraphs: [
         "These terms are governed by the laws of Delaware, United States, without regard to conflict-of-law rules, and any court proceedings take place there unless consumer protection law where you live gives you additional rights, which these terms do not remove.",
         "If something goes wrong, tell us first. Most issues are resolved by email within a few days, and we would rather fix a trip than argue about one.",
@@ -123,14 +143,14 @@ export const terms: LegalDocument = {
     },
     {
       id: "changes-to-terms",
-      title: "12. Changes to these terms",
+      title: "13. Changes to these terms",
       paragraphs: [
         `We may update these terms. The version number at the top changes when we do, and the version you accepted is stored on your booking. Changes do not reduce your rights on a booking you have already made.`,
       ],
     },
     {
       id: "contact",
-      title: "13. Contact",
+      title: "14. Contact",
       paragraphs: [`${brand.legalName}, trading as ${brand.name}. Email: ${brand.supportEmail}.`],
     },
   ],
