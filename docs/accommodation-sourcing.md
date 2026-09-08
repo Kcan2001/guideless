@@ -47,16 +47,16 @@ priced knowing we earn nothing on it.
 
 Ordered by how quickly a company with no trading history can actually get in.
 
-| Channel | Barrier | What it gives us |
-| --- | --- | --- |
-| **Bedsonline (HBX)** | Free. Prove you are a travel agent. Credentials in 1 to 3 working days. No IATA, no volume minimum. | The obvious first account. Trade rates on hotels. |
-| **RateHawk** | Free, no monthly fee. Needs a legal entity and bank details. | B2B net rates, and it explicitly includes apartments, which is the Airbnb-shaped inventory we wanted. |
-| **Nuitee / LiteAPI** | Free account, a card for production, a prefunded wallet. No licence or volume requirement stated. | A genuine API at zero barrier. Apartment coverage unconfirmed. |
-| **Direct villa and apartment managers** | One agency agreement per supplier. Typically around 10% commission. | The least gated route to hero properties, and the only one where we can negotiate terms that match our refund ladder. |
-| **WebBeds / Stuba** | Trade only, requirements not published. | Apartments in the WebBeds supply. Worth an enquiry, not a plan. |
-| **Expedia TAAP** | Open to agencies of any size, but needs accreditation: IATA/IATAN, ARC, CLIA or TRUE. | 3.5M properties including vacation rentals, commission on gross value. Route in through a host agency. |
-| **Booking.com Demand API** | Must already be a Managed Affiliate Partner; the search-look-book tier needs separate approval and an account manager. | Its schema separates booker from guest, so agency booking is native. Effectively closed at zero volume. |
-| **Expedia Rapid** | Application only, case by case, certification required. | Out of reach for now. |
+| Channel                                 | Barrier                                                                                                                | What it gives us                                                                                                      |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| **Bedsonline (HBX)**                    | Free. Prove you are a travel agent. Credentials in 1 to 3 working days. No IATA, no volume minimum.                    | The obvious first account. Trade rates on hotels.                                                                     |
+| **RateHawk**                            | Free, no monthly fee. Needs a legal entity and bank details.                                                           | B2B net rates, and it explicitly includes apartments, which is the Airbnb-shaped inventory we wanted.                 |
+| **Nuitee / LiteAPI**                    | Free account, a card for production, a prefunded wallet. No licence or volume requirement stated.                      | A genuine API at zero barrier. Apartment coverage unconfirmed.                                                        |
+| **Direct villa and apartment managers** | One agency agreement per supplier. Typically around 10% commission.                                                    | The least gated route to hero properties, and the only one where we can negotiate terms that match our refund ladder. |
+| **WebBeds / Stuba**                     | Trade only, requirements not published.                                                                                | Apartments in the WebBeds supply. Worth an enquiry, not a plan.                                                       |
+| **Expedia TAAP**                        | Open to agencies of any size, but needs accreditation: IATA/IATAN, ARC, CLIA or TRUE.                                  | 3.5M properties including vacation rentals, commission on gross value. Route in through a host agency.                |
+| **Booking.com Demand API**              | Must already be a Managed Affiliate Partner; the search-look-book tier needs separate approval and an account manager. | Its schema separates booker from guest, so agency booking is native. Effectively closed at zero volume.               |
+| **Expedia Rapid**                       | Application only, case by case, certification required.                                                                | Out of reach for now.                                                                                                 |
 
 **The plan:** open Bedsonline and RateHawk now, because both are free and neither has a volume bar,
 and RateHawk carries the apartment inventory. Sign direct agreements for the properties a trip is
