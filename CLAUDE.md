@@ -43,7 +43,7 @@ pnpm db:start           # local Supabase (needs Docker)
 pnpm db:reset           # re-apply migrations + seed
 pnpm db:test            # pgTAP suite in supabase/tests (RLS + invariants) — run after any migration
 pnpm db:types           # regenerate packages/types/src/database.ts — commit the result
-pnpm check              # lint + typecheck + test + build (run before finishing any task)
+pnpm check              # format + lint + typecheck + test + build (run before finishing any task)
 ```
 
 ## Admin (/admin) — see docs/admin.md
