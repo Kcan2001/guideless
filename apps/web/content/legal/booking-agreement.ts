@@ -93,7 +93,9 @@ export const bookingAgreement: LegalDocument = {
       ],
       list: [
         "Request a cancellation from your account. We confirm within two business days, and refunds go back to the original payment method, usually within 10 business days of confirmation.",
-        "Some components are non-refundable from the moment they are bought, whatever the tiers say — event tickets are the clearest example, and race-week accommodation is often the same. Anything in that position is marked as non-refundable at the point of sale and is excluded from the percentage above. [CONFIRM PER DEPARTURE: the tiers and the non-refundable list must agree with what the suppliers actually allow.]",
+        "No tier is 100%. The card networks keep their processing fee when we refund you, so a full refund costs us money on every cancellation; we would rather show you a real number than advertise a round one and find a fee to charge instead.",
+        "Optional extras follow their own deadlines, not the tiers. Most can be removed for a full refund until a stated number of days before they happen. Some are non-refundable from the moment you buy them, because we buy them in your name and cannot give them back — event tickets are the clear case. Which one applies is written on the extra before you add it and again in your account.",
+        "Tiers differ by departure, because the risk does. A touring route commits us to little until about a month out, so its early tiers are generous. An event weekend is prepaid much earlier and cannot be resold, so it steps down sooner.",
         "If one traveler on a booking cancels, the tiers apply to their share, and the room arrangement for the others may change and be repriced.",
         "If you abandon the trip after it starts, or are removed under clause 11, no refund is due for what you do not use.",
       ],

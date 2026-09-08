@@ -23,15 +23,15 @@ export const metadata: Metadata = {
 const RULES = [
   {
     title: "Every departure publishes its tiers before you book.",
-    body: "The tiers state what percentage of the trip price is refunded depending on how many days before departure you cancel. They are shown on the departure page, at checkout and in your account.",
+    body: "The tiers state what percentage of the trip price is refunded depending on how many days before departure you cancel. They are shown on the departure page, at checkout and in your account. They differ by trip, because the risk does: a touring route commits us to very little until about a month out, while an event weekend is prepaid months ahead and cannot be resold, so it steps down sooner.",
   },
   {
     title: "Deposits and balances follow the same tiers.",
-    body: "There are no separate cancellation fees. Whatever you have paid toward the trip is refunded at the percentage for the day you cancel.",
+    body: "There are no separate cancellation fees. Whatever you have paid toward the trip is refunded at the percentage for the day you cancel. No tier is 100%: refunding a card payment costs us the processing fee, so the top tier sits just below it instead of us inventing a fee to cover it.",
   },
   {
-    title: "Add-ons refund in full until their own deadline.",
-    body: "Each optional experience has a cancellation deadline shown when you add it, usually a few days before the experience itself. Before the deadline you get that add-on back in full; after it, the add-on is non-refundable.",
+    title: "Extras follow their own deadline, not the tiers.",
+    body: "Each optional extra shows its deadline when you add it, usually a few days before it happens. Before the deadline you get it back in full; after it, you do not. A few extras are non-refundable from the moment you buy them, because we buy them in your name and cannot hand them back — race tickets are the clear case — and those say so before you add them.",
   },
   {
     title: "You see the refund before you confirm.",

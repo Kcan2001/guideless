@@ -28,12 +28,14 @@ function TermLabel({ label, link }: { label: string; link: readonly [string, str
 
 /** "Almost there." — sign in (or create the account the trip lives in) and accept the terms. */
 export function ReviewStep({
+  googleEnabled = false,
   title,
   user,
   loginNext,
   onBack,
   onNext,
 }: {
+  googleEnabled?: boolean;
   title: string;
   user: CheckoutUser | null;
   /** Where the sign-in form lands afterwards: this step of this builder. */
@@ -71,7 +73,7 @@ export function ReviewStep({
         </div>
       ) : (
         <div className="rounded-xl border border-border bg-surface p-6">
-          <LoginForm compact next={loginNext} initialMode="signup" />
+          <LoginForm compact next={loginNext} initialMode="signup" googleEnabled={googleEnabled} />
         </div>
       )}
 

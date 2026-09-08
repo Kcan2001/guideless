@@ -141,7 +141,7 @@ export function AddOnStep({
             {
               icon: Clock,
               text:
-                a.cancellable_until_days_before > 0
+                a.cancellable_until_days_before != null && a.cancellable_until_days_before > 0
                   ? `Free cancellation until ${a.cancellable_until_days_before} days before`
                   : "Non-refundable once booked",
             },

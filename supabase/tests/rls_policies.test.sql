@@ -4,7 +4,7 @@
 
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(36);
+select plan(38);
 
 -- ── Fixtures ─────────────────────────────────────────────────────────────────
 create schema if not exists tests;
@@ -137,8 +137,33 @@ select is(public.release_expired_holds(), 1, 'release_expired_holds returns the 
 select is((select status::text from public.bookings where id = '70000000-0000-4000-8000-0000000000ff'), 'draft', 'expired hold returns to draft');
 
 -- ── 5. Cancellation tiers ────────────────────────────────────────────────────
-select is(public.refund_percentage_for((select cancellation_policy from public.departures where id = '30000000-0000-4000-8000-000000000001'), 90), 100, '90 days out → 100%');
-select is(public.refund_percentage_for((select cancellation_policy from public.departures where id = '30000000-0000-4000-8000-000000000001'), 45), 75, '45 days out → 75%');
+-- Tier selection is the function's job; which percentages a departure publishes is a commercial
+-- decision that changes in admin. Assert against a policy stated here so editing a real departure
+-- never breaks the suite, and so the boundaries are visible in the test itself.
+select is(public.refund_percentage_for(
+  '[{"daysBeforeDeparture": 90, "refundPercentage": 90},
+    {"daysBeforeDeparture": 60, "refundPercentage": 70},
+    {"daysBeforeDeparture": 30, "refundPercentage": 40},
+    {"daysBeforeDeparture": 0,  "refundPercentage": 0}]'::jsonb, 120),
+  90, 'beyond the top tier takes the top tier');
+select is(public.refund_percentage_for(
+  '[{"daysBeforeDeparture": 90, "refundPercentage": 90},
+    {"daysBeforeDeparture": 60, "refundPercentage": 70},
+    {"daysBeforeDeparture": 30, "refundPercentage": 40},
+    {"daysBeforeDeparture": 0,  "refundPercentage": 0}]'::jsonb, 90),
+  90, 'a boundary day takes the tier it names');
+select is(public.refund_percentage_for(
+  '[{"daysBeforeDeparture": 90, "refundPercentage": 90},
+    {"daysBeforeDeparture": 60, "refundPercentage": 70},
+    {"daysBeforeDeparture": 30, "refundPercentage": 40},
+    {"daysBeforeDeparture": 0,  "refundPercentage": 0}]'::jsonb, 45),
+  40, 'between tiers takes the lower one');
+select is(public.refund_percentage_for(
+  '[{"daysBeforeDeparture": 90, "refundPercentage": 90},
+    {"daysBeforeDeparture": 60, "refundPercentage": 70},
+    {"daysBeforeDeparture": 30, "refundPercentage": 40},
+    {"daysBeforeDeparture": 0,  "refundPercentage": 0}]'::jsonb, 0),
+  0, 'the day of departure refunds nothing');
 select is(public.refund_percentage_for((select cancellation_policy from public.departures where id = '30000000-0000-4000-8000-000000000001'), 7), 0, '7 days out → 0%');
 
 -- ── 6. Trip snapshot and trip-scoped access ───────────────────────────────────

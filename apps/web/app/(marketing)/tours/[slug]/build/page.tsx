@@ -10,6 +10,7 @@ import { deriveBuilderSteps, resolveStep } from "@/lib/bookings/builder-steps";
 import { loadBuilderDraft } from "@/lib/bookings/drafts";
 import { listDepartureExtras } from "@/lib/data/extras";
 import { getTourBySlug } from "@/lib/data/tours";
+import { enabledAuthProviders } from "@/lib/auth/providers";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -51,6 +52,7 @@ export default async function BuildPage(props: PageProps<"/tours/[slug]/build">)
     loadBuilderDraft(chosen.id),
   ]);
   const user = userRes.data.user;
+  const providers = await enabledAuthProviders();
 
   const departure: CheckoutDeparture = {
     id: chosen.id,
@@ -106,6 +108,7 @@ export default async function BuildPage(props: PageProps<"/tours/[slug]/build">)
         departures={summaries}
         steps={steps}
         user={user ? { id: user.id, email: user.email ?? null } : null}
+        googleEnabled={providers.google}
         initialStep={initialStep}
         cancelled={sp.cancelled === "1"}
         serverDraft={serverDraft}

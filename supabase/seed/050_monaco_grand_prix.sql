@@ -223,3 +223,24 @@ update public.departure_add_ons set tier = 'classic'  where id = '32000000-0000-
 update public.departure_add_ons set tier = 'elite'    where id = '32000000-0000-4000-8000-000000000003'; -- Yacht in the harbour
 update public.departure_add_ons set tier = 'premium'  where id = '32000000-0000-4000-8000-000000000004'; -- Friday coast boat
 update public.departure_add_ons set tier = null       where id = '32000000-0000-4000-8000-000000000005'; -- Private airport transfer
+
+-- An event weekend is a different risk from a touring route, so it gets its own ladder. Race-week
+-- rooms in Nice and Monaco are prepaid and non-refundable well before departure, and the weekend
+-- cannot be resold to anyone else once we are close, so the tiers step down earlier and reach zero
+-- two months out rather than two weeks.
+update public.departures
+set cancellation_policy = '[
+  {"daysBeforeDeparture": 120, "refundPercentage": 70},
+  {"daysBeforeDeparture": 90,  "refundPercentage": 45},
+  {"daysBeforeDeparture": 60,  "refundPercentage": 20},
+  {"daysBeforeDeparture": 0,   "refundPercentage": 0}
+]'::jsonb
+where id = '30000000-0000-4000-8000-000000000004';
+
+-- Race viewing is bought in our travelers' names months ahead and the event does not take it back,
+-- so it is non-refundable from purchase and now says so. The boat and the transfer are ordinary
+-- suppliers and keep a real window.
+update public.departure_add_ons
+set cancellable_until_days_before = null
+where departure_id = '30000000-0000-4000-8000-000000000004'
+  and tier_group = 'race_view';

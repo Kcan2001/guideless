@@ -72,8 +72,12 @@ export function CancelBooking({
               <dt className="text-muted-foreground">
                 {a.title}
                 {a.refundable
-                  ? ` (refundable until ${formatDate(a.cancellableUntil)})`
-                  : " (past its deadline)"}
+                  ? a.cancellableUntil
+                    ? ` (refundable until ${formatDate(a.cancellableUntil)})`
+                    : ""
+                  : a.cancellableUntil
+                    ? " (past its deadline)"
+                    : " (non-refundable once booked)"}
               </dt>
               <dd>{a.refundable ? `${money(a.total)} back` : "no refund"}</dd>
             </div>

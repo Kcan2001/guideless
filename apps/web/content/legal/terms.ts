@@ -61,7 +61,8 @@ export const terms: LegalDocument = {
       list: [
         "Request a cancellation from your account. Your account shows, before you confirm, the refund percentage that applies on that day and which add-ons are still refundable.",
         "We confirm the cancellation within two business days. Refunds go back to the original payment method and usually arrive within 10 business days of confirmation.",
-        "Deposits and balances follow the same tiers; there are no separate fees.",
+        "Deposits and balances follow the same tiers, and we charge no cancellation fee on top. No tier is 100%: refunding a payment costs us the processing fee, so the top tier sits below it rather than us inventing a fee to cover it.",
+        "Optional extras follow their own deadlines instead of the tiers. Some, event tickets in particular, are non-refundable from the moment you buy them, and say so before you add them.",
         "If one traveler on a multi-traveler booking cancels, the tiers apply to that traveler's share, and the remaining travelers' room arrangement may change.",
       ],
     },

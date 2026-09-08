@@ -245,6 +245,11 @@ async function departureFacts(
       name: t.name,
       lastRateAt: t.hotel_id ? (lastRateByHotel.get(t.hotel_id) ?? null) : null,
     })),
+    refundPercentages: Array.isArray(d.cancellation_policy)
+      ? (d.cancellation_policy as Array<{ refundPercentage?: number }>).map(
+          (t) => t.refundPercentage ?? 0,
+        )
+      : [],
   };
 }
 

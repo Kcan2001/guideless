@@ -219,7 +219,7 @@ export function ExperienceCards({
               <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                 <span className="inline-flex items-center gap-1">
                   <Clock className="h-3.5 w-3.5" aria-hidden />
-                  {a.cancellable_until_days_before > 0
+                  {a.cancellable_until_days_before != null && a.cancellable_until_days_before > 0
                     ? `Free cancellation until ${a.cancellable_until_days_before} days before`
                     : "Non-refundable once booked"}
                 </span>

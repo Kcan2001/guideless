@@ -4,6 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { brand } from "@guideless/config";
 import { LoginForm } from "@/components/auth/login-form";
+import { enabledAuthProviders } from "@/lib/auth/providers";
 import { FormError } from "@/components/ui/field";
 import { createClient } from "@/lib/supabase/server";
 
@@ -18,6 +19,7 @@ const ERRORS: Record<string, string> = {
 };
 
 export default async function LoginPage(props: PageProps<"/login">) {
+  const providers = await enabledAuthProviders();
   const sp = await props.searchParams;
   const rawNext = typeof sp.next === "string" ? sp.next : "/account";
   const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/account";
@@ -52,7 +54,7 @@ export default async function LoginPage(props: PageProps<"/login">) {
         {errorKey && (
           <FormError message={ERRORS[errorKey] ?? "Something went wrong. Please try again."} />
         )}
-        <LoginForm next={next} />
+        <LoginForm next={next} googleEnabled={providers.google} />
       </div>
     </main>
   );
