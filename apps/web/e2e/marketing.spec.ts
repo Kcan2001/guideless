@@ -64,7 +64,10 @@ test.describe("marketing site", () => {
     await expect(page).toHaveURL(/\/departures\//);
     await expect(page.getByRole("heading", { name: /payment schedule/i })).toBeVisible();
     await expect(page.getByRole("heading", { name: /cancellation policy/i })).toBeVisible();
-    await expect(page.getByText("100%")).toBeVisible();
+    // Assert that tiers render, not which percentages they hold: those are a commercial decision
+    // that changes per departure in admin, and a test that pins them breaks on every price review.
+    await expect(page.getByText(/^\d{1,3}%$/).first()).toBeVisible();
+    await expect(page.getByText(/\d+\+? days before/).first()).toBeVisible();
     const build = page.getByRole("link", { name: /build my trip/i }).first();
     await expect(build).toBeVisible();
     await expect(build).toHaveAttribute("href", /\/build\?departure=/);
