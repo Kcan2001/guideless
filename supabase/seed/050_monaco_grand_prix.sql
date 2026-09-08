@@ -213,3 +213,13 @@ where tour_version_id = '21000000-0000-4000-8000-000000000002' and position = 1;
 update public.tour_faqs
 set answer = 'Nice is the value tier: a comfortable hotel by the port, twenty minutes by train from the circuit, and where the welcome drinks are. Monaco is the full show: four nights in Monte Carlo, walking distance to the track, at race-week prices. One group, two prices; everyone meets at the harbour on Sunday night. Hotels are named in your confirmation.'
 where tour_version_id = '21000000-0000-4000-8000-000000000002' and question = 'Nice or Monaco: which should I choose?';
+
+-- ── Public tiers (migration 040) ─────────────────────────────────────────────
+-- Explorer / Classic / Premium / Elite. The transfer has no tier: it is not a level of anything.
+update public.departure_stay_options set tier = 'explorer' where id = '31000000-0000-4000-8000-000000000001';
+update public.departure_stay_options set tier = 'elite'    where id = '31000000-0000-4000-8000-000000000002';
+update public.departure_add_ons set tier = 'explorer' where id = '32000000-0000-4000-8000-000000000001'; -- Grandstand K
+update public.departure_add_ons set tier = 'classic'  where id = '32000000-0000-4000-8000-000000000002'; -- Terrace with lunch
+update public.departure_add_ons set tier = 'elite'    where id = '32000000-0000-4000-8000-000000000003'; -- Yacht in the harbour
+update public.departure_add_ons set tier = 'premium'  where id = '32000000-0000-4000-8000-000000000004'; -- Friday coast boat
+update public.departure_add_ons set tier = null       where id = '32000000-0000-4000-8000-000000000005'; -- Private airport transfer

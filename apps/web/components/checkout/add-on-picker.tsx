@@ -4,6 +4,7 @@ import { CalendarDays, MapPin, Users } from "lucide-react";
 import type { Currency } from "@guideless/types";
 import { formatDate, formatMoney, formatWallTime } from "@guideless/utils";
 import type { AddOnSelection } from "@guideless/validation";
+import { TierBadge } from "@/components/tours/option-label";
 import { Badge } from "@/components/ui/badge";
 import type { AddOnWithCounts } from "@/lib/data/extras";
 import {
@@ -97,6 +98,7 @@ export function AddOnPicker({
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
+                      <TierBadge tier={a.tier} />
                       <Badge variant="optional">{KIND_LABEL[a.kind] ?? "Add-on"}</Badge>
                       {a.is_featured && <Badge variant="included">Popular</Badge>}
                       {a.going > 0 && (

@@ -4,7 +4,7 @@ import type { Route } from "next";
 import { BedDouble, Check, Coffee, Info, MapPin, Minus, Star, TrainFront } from "lucide-react";
 import { formatMoney } from "@guideless/utils";
 import type { Currency } from "@guideless/types";
-import { OptionLabelBadge } from "@/components/tours/option-label";
+import { OptionLabelBadge, TierBadge } from "@/components/tours/option-label";
 import { buttonVariants } from "@/components/ui/button";
 import { stayDetails, type StayOption } from "@/lib/data/extras";
 import { photoAlt, photoPosition } from "@/lib/photos";
@@ -71,8 +71,9 @@ export function StayTierCards({
                   className="object-cover"
                   style={{ objectPosition: photoPosition(image) }}
                 />
-                {o.label && (
-                  <div className="absolute top-4 left-4">
+                {(o.tier || o.label) && (
+                  <div className="absolute top-4 left-4 flex flex-wrap items-center gap-2">
+                    <TierBadge tier={o.tier} />
                     <OptionLabelBadge label={o.label} />
                   </div>
                 )}
@@ -81,6 +82,7 @@ export function StayTierCards({
             <div className="flex flex-1 flex-col gap-5 p-6 md:p-7">
               <div>
                 <p className="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  {!image && <TierBadge tier={o.tier} />}
                   {o.area ?? "Where you stay"}
                   {!image && <OptionLabelBadge label={o.label} />}
                   {o.is_default && !o.label && (

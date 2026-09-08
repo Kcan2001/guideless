@@ -6,6 +6,7 @@ import {
   ITINERARY_ITEM_STATUSES,
   ITINERARY_ITEM_TYPES,
   OPTION_LABELS,
+  OPTION_TIERS,
   RESPONSIBILITIES,
   SUPPLIER_SERVICE_STATUSES,
   VISIBILITIES,
@@ -222,6 +223,10 @@ const optionalLabel = z.preprocess(
   (v) => (v === "" || v === undefined ? null : v),
   z.enum(OPTION_LABELS).nullable(),
 );
+const optionalTier = z.preprocess(
+  (v) => (v === "" || v === undefined ? null : v),
+  z.enum(OPTION_TIERS).nullable(),
+);
 
 export const stayOptionFormSchema = z.object({
   name: z.string().trim().min(2).max(120),
@@ -244,6 +249,7 @@ export const stayOptionFormSchema = z.object({
   includes: lineList(12, 160),
   excludes: lineList(12, 160),
   label: optionalLabel,
+  tier: optionalTier,
   whyPriceNote: optionalText(500),
   neighborhood: optionalText(120),
   stationDistance: optionalText(120),
@@ -256,7 +262,7 @@ export type StayOptionForm = z.infer<typeof stayOptionFormSchema>;
 
 // Source of truth moved to @guideless/types (migration 039 made it a Postgres enum); re-exported
 // so existing imports keep working.
-export { ADD_ON_KINDS, OPTION_LABELS };
+export { ADD_ON_KINDS, OPTION_LABELS, OPTION_TIERS };
 
 export const addOnFormSchema = z.object({
   title: z.string().trim().min(2).max(120),
@@ -285,6 +291,7 @@ export const addOnFormSchema = z.object({
   includes: lineList(12, 160),
   excludes: lineList(12, 160),
   label: optionalLabel,
+  tier: optionalTier,
   whyPriceNote: optionalText(500),
   meetingPoint: optionalText(200),
   minAge: nullableInt(0, 99),

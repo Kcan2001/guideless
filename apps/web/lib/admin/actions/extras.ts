@@ -83,6 +83,7 @@ export async function saveStayOptionAction(fd: FormData): Promise<void> {
     includes: s.includes,
     excludes: s.excludes,
     label: s.label,
+    tier: s.tier,
     why_price_note: s.whyPriceNote ?? null,
     details: compactDetails({
       neighborhood: s.neighborhood,
@@ -155,6 +156,7 @@ export async function saveAddOnAction(fd: FormData): Promise<void> {
     includes: a.includes,
     excludes: a.excludes,
     label: a.label,
+    tier: a.tier,
     why_price_note: a.whyPriceNote ?? null,
     meeting_point: a.meetingPoint ?? null,
     min_age: a.minAge,

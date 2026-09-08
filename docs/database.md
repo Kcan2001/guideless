@@ -9,7 +9,7 @@ Postgres on Supabase is the **system of record**. Schema changes happen only thr
 
 - `uuid` primary keys via `gen_random_uuid()`; `created_at` / `updated_at timestamptz` on every
   mutable table (`set_updated_at()` trigger from migration 001).
-- Enums are Postgres enum types (migration 002, plus `add_on_kind` / `option_label` in 039) whose values match `@guideless/types` exactly.
+- Enums are Postgres enum types (migration 002, plus `add_on_kind` / `option_label` in 039 and `option_tier` in 040) whose values match `@guideless/types` exactly.
 - Money: `*_amount bigint` in minor units + `currency public.currency_code` (domain: USD, EUR, GBP).
 - Time: `*_at timestamptz` (UTC) plus a `timezone text` (IANA) on every travel event; itinerary
   items carry `start_time`/`end_time` as local wall time in their own `timezone`.
@@ -51,6 +51,7 @@ Postgres on Supabase is the **system of record**. Schema changes happen only thr
 | 037 | `_social_pinterest`     | `social_platform` + `'pinterest'`; `social_posts.title`, `.link_url`; `social_accounts.metadata` jsonb (board id, refresh token)                                                                                                                                                                                                                                                                                                                         |
 | 038 | `_plpgsql_lint_fixes`   | `create_booking`, `start_add_on_purchase`, `confirm_add_on_purchase` re-declared with typed empty-array initialisers and without a never-read local; behaviour unchanged                                                                                                                                                                                                                                                                                 |
 | 039 | `_catalog_presentation` | Enums `option_label` (best_value, most_popular, social, luxury) and `add_on_kind` (old kinds + group_moment, insurance, extension; `departure_add_ons.kind` converted). Stay tiers gain `tagline`, `image_urls`, `includes`, `excludes`, `details` jsonb, `label`, `why_price_note`; add-ons gain `image_urls`, `includes`, `excludes`, `label`, `why_price_note`, `meeting_point`, `min_age`. Pricing untouched. Tests: `catalog_presentation.test.sql` |
+| 040 | `_option_tiers`         | Enum `option_tier` (explorer, classic, premium, elite) and a nullable `tier` column on `departure_stay_options` and `departure_add_ons`. Public level shown as a badge; separate from the marketing `label`; pricing untouched. Tests: `option_tiers.test.sql`                                                                                                                                                                                           |
 
 ## Domain model
 

@@ -139,3 +139,9 @@ where name = 'Well-located 3★ hotels';
 update public.departure_stay_options
 set name = 'Boutique upgrade'
 where name = 'Boutique 4★ upgrade';
+
+-- ── Public tiers (migration 040) ─────────────────────────────────────────────
+-- Only the two accommodation levels are tiers. The add-ons (boat day, cellar afternoon, transfer,
+-- extra night, farewell dinner) are single experiences, not levels of one another, so they stay untiered.
+update public.departure_stay_options set tier = 'explorer' where name = 'Well-located hotels';
+update public.departure_stay_options set tier = 'premium'  where name = 'Boutique upgrade';

@@ -1,5 +1,5 @@
 import type { Tables } from "@guideless/types";
-import { ADD_ON_KINDS, OPTION_LABELS } from "@guideless/validation";
+import { ADD_ON_KINDS, OPTION_LABELS, OPTION_TIERS } from "@guideless/validation";
 import { SubmitButton } from "@/components/admin/submit-button";
 import { inputClass, labelClass } from "@/components/admin/ui";
 import { saveAddOnAction, saveStayOptionAction } from "@/lib/admin/actions/extras";
@@ -15,6 +15,12 @@ const LABEL_TEXT: Record<(typeof OPTION_LABELS)[number], string> = {
   most_popular: "Most popular",
   social: "Social",
   luxury: "Luxury",
+};
+const TIER_TEXT: Record<(typeof OPTION_TIERS)[number], string> = {
+  explorer: "Explorer — best price, more basic, maximum value",
+  classic: "Classic — the standard Guideless experience",
+  premium: "Premium — better hotels and upgraded experiences",
+  elite: "Elite — luxury, the best available",
 };
 type StayDetails = {
   neighborhood?: string;
@@ -34,6 +40,7 @@ function PresentationFields({
   includes,
   excludes,
   label,
+  tier,
   whyPriceNote,
   disabled,
 }: {
@@ -42,6 +49,7 @@ function PresentationFields({
   includes: string[] | null | undefined;
   excludes: string[] | null | undefined;
   label: string | null | undefined;
+  tier: string | null | undefined;
   whyPriceNote: string | null | undefined;
   disabled?: boolean;
 }) {
@@ -65,6 +73,25 @@ function PresentationFields({
           {OPTION_LABELS.map((l) => (
             <option key={l} value={l}>
               {LABEL_TEXT[l]}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label htmlFor={`${prefix}-tier`} className={labelClass}>
+          Tier (public level: Explorer / Classic / Premium / Elite)
+        </label>
+        <select
+          id={`${prefix}-tier`}
+          name="tier"
+          defaultValue={tier ?? ""}
+          className={inputClass}
+          disabled={disabled}
+        >
+          <option value="">Untiered (transfer, dinner, extra night)</option>
+          {OPTION_TIERS.map((t) => (
+            <option key={t} value={t}>
+              {TIER_TEXT[t]}
             </option>
           ))}
         </select>
@@ -349,6 +376,7 @@ export function StayOptionForm({
         includes={stay?.includes}
         excludes={stay?.excludes}
         label={stay?.label}
+        tier={stay?.tier}
         whyPriceNote={stay?.why_price_note}
         disabled={disabled}
       />
@@ -679,6 +707,7 @@ export function AddOnForm({
         includes={addOn?.includes}
         excludes={addOn?.excludes}
         label={addOn?.label}
+        tier={addOn?.tier}
         whyPriceNote={addOn?.why_price_note}
         disabled={disabled}
       />
