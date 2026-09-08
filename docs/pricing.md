@@ -198,18 +198,18 @@ flies out the evening of the race.
 year-on-year step the circuit has held recently. No trade rate agreed with any supplier, so every
 cost below is retail plus our margin.
 
-| Line | Cost basis | We charge |
-| --- | --- | --- |
-| Base trip, Nice, 5 nights | Room about EUR 280/night race week, plus train pass, welcome round, ops: about $1,650 landed | $2,450 |
-| Monte Carlo upgrade | EUR 900–1,200/night against EUR 280: about $3,900 more over five nights | $4,450 |
-| Grandstand K, three-day pass | 2026 K1–K2 face EUR 1,420, plus 9%: about $1,690 | $2,190 |
-| Terrace, Saturday and Sunday, catered | Hospitality rate about EUR 2,300/day | $5,450 |
-| Amber Lounge yacht, Sunday | EUR 4,500 + 20% VAT + 3% card fee = EUR 5,562, about $6,060 | $6,750 |
-| Amber Lounge yacht, Saturday | EUR 3,200 grossed up = EUR 3,955, about $4,310 | $4,950 |
-| Amber Lounge yacht, both days | EUR 7,700 grossed up = EUR 9,518, about $10,370 | $11,400 |
-| Friday night party | EUR 1,100 grossed up, about $1,480 | $1,690 |
-| Sunday after party | EUR 1,500 grossed up, about $2,020 | $2,290 |
-| Private airport transfer | A car from Nice airport runs EUR 90–140 | $150 |
+| Line                                  | Cost basis                                                                                   | We charge |
+| ------------------------------------- | -------------------------------------------------------------------------------------------- | --------- |
+| Base trip, Nice, 5 nights             | Room about EUR 280/night race week, plus train pass, welcome round, ops: about $1,650 landed | $2,450    |
+| Monte Carlo upgrade                   | EUR 900–1,200/night against EUR 280: about $3,900 more over five nights                      | $4,450    |
+| Grandstand K, three-day pass          | 2026 K1–K2 face EUR 1,420, plus 9%: about $1,690                                             | $2,190    |
+| Terrace, Saturday and Sunday, catered | Hospitality rate about EUR 2,300/day                                                         | $5,450    |
+| Amber Lounge yacht, Sunday            | EUR 4,500 + 20% VAT + 3% card fee = EUR 5,562, about $6,060                                  | $6,750    |
+| Amber Lounge yacht, Saturday          | EUR 3,200 grossed up = EUR 3,955, about $4,310                                               | $4,950    |
+| Amber Lounge yacht, both days         | EUR 7,700 grossed up = EUR 9,518, about $10,370                                              | $11,400   |
+| Friday night party                    | EUR 1,100 grossed up, about $1,480                                                           | $1,690    |
+| Sunday after party                    | EUR 1,500 grossed up, about $2,020                                                           | $2,290    |
+| Private airport transfer              | A car from Nice airport runs EUR 90–140                                                      | $150      |
 
 **Grandstand K was described as a product that does not exist.** Monaco sells grandstand seats as
 three-day passes covering Friday, Saturday and Sunday. There is no Saturday-and-Sunday seat. The
