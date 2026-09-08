@@ -143,6 +143,50 @@ live keys**; Preview keeps the test keys and the test-mode endpoint. Kyle's logi
 "Reset Club" accounts; the 2026 one is closed, the 2021 one (`acct_1Ja1HE2SQ0KlVgLK`) was being
 closed on Kyle's instruction.
 
+**Status 2026-09-08 — end-to-end test booking and a webhook secret mismatch.** A full test booking
+on a preview deployment (Monaco Grand Prix Weekend, deposit + one add-on, $1,790 on card
+4242 4242 4242 4242) paid successfully at Stripe but the booking stayed `unpaid`. Three separate
+environment faults, all config and no code:
+
+1. **Production `STRIPE_WEBHOOK_SECRET` matched no live endpoint.** Every real payment would have
+   been rejected at signature verification, so a customer's card would be charged and the booking
+   would never be confirmed. Rather than trust a recorded value, a fresh live endpoint was created
+   through the Stripe API (create is the only call that returns the secret), Production was set to
+   that secret, and the old endpoint `we_1UDDN9BhgWBLSqYpckusvsSq` was **disabled**. The live
+   endpoint is now `we_1UDEhiBhgWBLSqYpZpKMdLCx`; its secret and id are in `supabase/.env` as
+   `STRIPE_LIVE_WEBHOOK_SECRET` / `STRIPE_LIVE_WEBHOOK_ENDPOINT_ID`. Verified: a live-signed POST to
+   the production route returns 200 and writes a `webhook_events` row (the probe row was deleted).
+2. **Preview `SUPABASE_SERVICE_ROLE_KEY` did not authenticate against the staging project**, so
+   every service-role write from a preview deployment failed. That is why the booking never recorded
+   its `stripe_checkout_session_id` and why the webhook first answered `500 ledger unavailable`.
+   Preview now holds the staging project's service role key; Production was reset to the value read
+   back from the Supabase API so it is known-good rather than assumed.
+3. **Preview `STRIPE_WEBHOOK_SECRET` was stale** and matched neither the test nor the live endpoint.
+
+After the fixes the whole chain verifies on staging: `bookings` → `confirmed` /
+`partially_paid` with `amount_paid` 179000 and the hold released, one `payments` row
+(`kind` deposit, `stripe_status` succeeded), the `webhook_events` row `processed`, and an
+`email_events` row for `booking-confirmed` sent through Resend with a provider message id — which
+confirms the verified Resend domain at the same time.
+
+**Two open items that need a decision.**
+
+- `NEXT_PUBLIC_SITE_URL` is a single variable shared by Preview and Production, so Stripe's
+  `success_url` and `cancel_url` on a _preview_ checkout point at `guidelesstravel.com`, which reads
+  the production database. A preview test booking therefore lands on a confirmation page that cannot
+  find it. Either give Preview its own value (a stable branch alias) or accept that preview
+  checkouts finish in the wrong environment.
+- The **test-mode** endpoint still points at `guidelesstravel.com`, which now runs live keys, so
+  test-mode events can never verify there and sit as failed deliveries. Test-mode webhooks need a
+  deployment that carries test keys. That means either a permanent staging deployment (its URL is
+  behind Vercel deployment protection, so the endpoint would have to carry the bypass token) or
+  `stripe listen --forward-to` against a local server. Until one is chosen, a test payment's webhook
+  has to be delivered by hand, signed with the Preview secret.
+
+There is no in-app notification on payment: `notifications` rows are written only by
+`notificationService`, and neither the webhook nor `lib/bookings/payments.ts` calls it. A paid
+booking reaches the customer by email alone.
+
 ### 2.4 Resend
 
 Add the domain `guidelesstravel.com`; Resend gives DNS records (see §3). Verify, then create the
