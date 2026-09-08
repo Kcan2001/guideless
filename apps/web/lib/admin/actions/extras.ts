@@ -21,6 +21,16 @@ function optionalId(fd: FormData, key: string): string | null {
 
 const toMinor = (major: number) => Math.round(major * 100);
 
+/** Stay-tier practicalities as a flat jsonb object; blank strings are dropped, booleans kept. */
+function compactDetails(input: Record<string, string | boolean | null | undefined>) {
+  const out: Record<string, string | boolean> = {};
+  for (const [key, value] of Object.entries(input)) {
+    if (typeof value === "boolean") out[key] = value;
+    else if (typeof value === "string" && value.trim()) out[key] = value.trim();
+  }
+  return out;
+}
+
 async function departureCurrency(
   sb: Awaited<ReturnType<typeof createClient>>,
   departureId: string,
@@ -68,6 +78,20 @@ export async function saveStayOptionAction(fd: FormData): Promise<void> {
     position: s.position,
     is_default: s.isDefault,
     is_active: s.isActive,
+    tagline: s.tagline ?? null,
+    image_urls: s.imageUrls,
+    includes: s.includes,
+    excludes: s.excludes,
+    label: s.label,
+    why_price_note: s.whyPriceNote ?? null,
+    details: compactDetails({
+      neighborhood: s.neighborhood,
+      station_distance: s.stationDistance,
+      train_time: s.trainTime,
+      breakfast: s.breakfast,
+      room_type: s.roomType,
+      hotel_confirmed: s.hotelConfirmed,
+    }),
   };
   const { error } = stayId
     ? await sb.from("departure_stay_options").update(row).eq("id", stayId)
@@ -127,6 +151,13 @@ export async function saveAddOnAction(fd: FormData): Promise<void> {
     position: a.position,
     is_featured: a.isFeatured,
     is_active: a.isActive,
+    image_urls: a.imageUrls,
+    includes: a.includes,
+    excludes: a.excludes,
+    label: a.label,
+    why_price_note: a.whyPriceNote ?? null,
+    meeting_point: a.meetingPoint ?? null,
+    min_age: a.minAge,
   };
   const { error } = addOnId
     ? await sb.from("departure_add_ons").update(row).eq("id", addOnId)

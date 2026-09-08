@@ -135,11 +135,13 @@ Travel", US), still in test mode / not activated. Test publishable + secret key 
 signing secret are in `supabase/.env` (`STRIPE_TEST_*`) and in Vercel **Production and Preview** as
 `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` / `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` (test values on
 both for now). Test-mode endpoint `we_1UD63UBhgWBLSqYpP4OQwhqU` →
-`https://guidelesstravel.com/api/webhooks/stripe` with the six events above. **Still manual
-(Kyle):** step 1 — Stripe only exposes business name, public name and statement descriptor inside
-the activation flow (legal entity Guideless LLC, EIN, bank account, representative identity); when
-you activate, create a _live-mode_ endpoint with the same URL/events and replace the three
-Production values with live keys + its signing secret.
+`https://guidelesstravel.com/api/webhooks/stripe` with the six events above. **Activated 2026-09-07:** charges and payouts enabled, statement descriptor `GUIDELESS TRAVEL`.
+Live publishable/secret keys and the live webhook signing secret are in `supabase/.env`
+(`STRIPE_LIVE_*`); live-mode endpoint `we_1UDDN9BhgWBLSqYpckusvsSq` →
+`https://guidelesstravel.com/api/webhooks/stripe` with the six events. **Vercel Production now runs
+live keys**; Preview keeps the test keys and the test-mode endpoint. Kyle's login also owned two old
+"Reset Club" accounts; the 2026 one is closed, the 2021 one (`acct_1Ja1HE2SQ0KlVgLK`) was being
+closed on Kyle's instruction.
 
 ### 2.4 Resend
 
@@ -165,6 +167,14 @@ and `guideless-mobile` (react-native). DSNs are in `supabase/.env` (`SENTRY_WEB_
 `SENTRY_PROJECT=guideless-web`, in Vercel; the same three values still need to go into the GitHub
 `staging` and `production` environments for deploy.yml's source-map upload. PostHog and GA4 were
 done earlier (docs/marketing.md §6).
+
+### 2.5b App store accounts (Apple Developer Program, Google Play Console)
+
+Both organization enrollments require a **D-U-N-S number** for Guideless LLC. **Assigned 2026-09-07:
+`149931168`** (free D&B request, case DFC-671905, issued within the hour; stored as `DUNS_NUMBER` in
+`supabase/.env`). Play Console signup (organization → company) and the Apple Developer Program
+enrollment can now proceed; Google recommends an organization email (Workspace mailbox on
+guidelesstravel.com) to reduce verification steps — see `docs/business-readiness.md` §1.
 
 ### 2.6 Expo / EAS (app)
 
@@ -205,15 +215,27 @@ domain can only point one way.
 Propagation is minutes to an hour. Vercel issues the TLS certificate automatically once the A/CNAME
 resolve. Keep Squarespace as the registrar and DNS host; nothing needs to transfer.
 
-## 3b. Pipeline status (2026-09-07)
+## 3b. Pipeline and launch status (2026-09-07)
 
-`deploy.yml` ran green end to end against staging: verify → migrations and functions on
-`zvwkwlvtputdrmqvcquj` → Vercel preview → smoke test. Preview deployments are behind Vercel's
-deployment protection; the pipeline's smoke test sends the automation bypass secret
-(`VERCEL_PROTECTION_BYPASS` in both GitHub environments and in `supabase/.env`). Production PR:
-github.com/Kcan2001/guideless/pull/1 (develop → production). Three CI fixes were needed on the
-way: the pnpm action's duplicate version pin, a CSS module declaration for the mobile typecheck,
-and the anon key missing from Vercel's environments.
+- `deploy.yml` is green end to end on both branches. Staging (`develop` → Supabase
+  `zvwkwlvtputdrmqvcquj` → Vercel preview) and production (`production` → `xxvmiugkmxgaoosycsei` →
+  Vercel production, run 34157645639) both pass the smoke test. Preview deployments sit behind
+  Vercel deployment protection, so the smoke test sends the automation bypass secret
+  (`VERCEL_PROTECTION_BYPASS` in both GitHub environments and in `supabase/.env`).
+- PR #1 (develop → production) was merged as the first release. Release from now on = merge
+  `develop` into `production`.
+- CI fixes needed on the way: the pnpm action's duplicate version pin, a CSS module declaration for
+  the mobile typecheck, the anon key missing from Vercel, quoted values from `supabase status -o env`
+  in the e2e job, a version-independent empty-report check for `supabase db lint`, and migration
+  `20260906003800_plpgsql_lint_fixes.sql` for three plpgsql_check warnings.
+- DNS switched at Squarespace: the "Squarespace Defaults" preset was deleted and custom records
+  `A @ 76.76.21.21` and `CNAME www cname.vercel-dns.com` added; Resend, DMARC and Google
+  site-verification records were left in place. The `www` 308 redirect to the apex was paused for the
+  first four hours after the switch (cached Squarespace apex + Vercel www looped for some resolvers)
+  and restored the same evening once every public resolver returned 76.76.21.21.
+- Still to do by hand: first sign-up on the live site and the admin grant (§4 step 6), Stripe
+  account activation and live keys (test keys are deliberately in Vercel until then), Pinterest
+  trial-access re-application once `guidelesstravel.com/privacy` resolves.
 
 ## 4. First production release, step by step
 

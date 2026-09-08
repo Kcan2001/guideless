@@ -124,3 +124,92 @@ values
    'Your own car from the airport to your hotel, Nice or Monaco.',
    'transfer', 12000, 'USD', 'per_booking', null, 1, null, null, 'Nice Côte d''Azur Airport', null, null, 2, 3, null, 5, false)
 on conflict (id) do nothing;
+
+-- ── Presentation (migration 039) ─────────────────────────────────────────────
+-- Updates rather than inserts so existing databases pick these up too. Honesty rules: no star
+-- rating or property name until a hotel is contracted; nothing listed that isn't in the price.
+update public.departure_stay_options set
+  name = 'Nice, near the port',
+  tagline = 'Spend less on the room. Spend more on the weekend.',
+  description = 'A comfortable hotel in the port quarter, the group''s base for drinks and a short hop to Nice-Ville for the train to the circuit. A fraction of Monaco race-week prices.',
+  star_rating = null,
+  label = 'best_value',
+  includes = array['4 nights', 'Breakfast', 'Train pass Nice ↔ Monaco', 'Property named at booking'],
+  excludes = array['Flights', 'Race tickets (choose below)'],
+  details = jsonb_build_object(
+    'neighborhood', 'Port Lympia / Old Town',
+    'station_distance', '10–15 min to Nice-Ville by tram or taxi',
+    'train_time', '20–25 min Nice → Monaco',
+    'breakfast', 'Included',
+    'room_type', 'Double or twin',
+    'hotel_confirmed', false),
+  why_price_note = 'This is the base trip: the hotel, the train pass and the welcome drinks are already in the price. Nothing to add unless you want to.',
+  image_urls = array['/photos/nice-old-town-evening.jpg', '/photos/nice-promenade-dusk.jpg']
+where id = '31000000-0000-4000-8000-000000000001';
+
+update public.departure_stay_options set
+  name = 'Monaco, Monte Carlo',
+  tagline = 'Wake up in the middle of the action.',
+  description = 'Four nights in Monte Carlo during race week, walking distance to the circuit. No train in the morning, and the harbour at your door at night.',
+  star_rating = null,
+  label = null,
+  includes = array['4 nights in Monte Carlo', 'Breakfast', 'Walk to the circuit', 'Property confirmed at booking'],
+  excludes = array['Flights', 'Race tickets (choose below)'],
+  details = jsonb_build_object(
+    'neighborhood', 'Monte Carlo',
+    'station_distance', 'Walking distance to the circuit; Monaco-Monte-Carlo station nearby',
+    'train_time', 'None needed on race days',
+    'breakfast', 'Included',
+    'room_type', 'Double or twin',
+    'hotel_confirmed', false),
+  why_price_note = 'Four nights in Monte Carlo during race week, walking distance to the circuit; race-week hotel pricing.',
+  image_urls = array['/photos/monaco-casino-square.jpg', '/photos/monaco-harbour-rock.jpg']
+where id = '31000000-0000-4000-8000-000000000002';
+
+update public.departure_add_ons set
+  label = 'most_popular',
+  includes = array['Grandstand K seat Saturday + Sunday', 'Access both days'],
+  excludes = array['Food and drinks', 'Transfers to the circuit'],
+  meeting_point = 'Grandstand K entrance, Circuit de Monaco',
+  why_price_note = 'Official two-day grandstand seating over the swimming-pool section, at face value plus our booking.',
+  image_urls = array['/photos/monaco-trackside-barriers.jpg', '/photos/monaco-hairpin-race.jpg']
+where id = '32000000-0000-4000-8000-000000000001';
+
+update public.departure_add_ons set
+  includes = array['Terrace access Saturday + Sunday', 'Lunch both days', 'Open bar both days'],
+  excludes = array['Transfers to the circuit'],
+  meeting_point = 'Harbour terrace, Port Hercule (exact entrance in your app)',
+  why_price_note = 'A private terrace with catering above the harbour chicane for two race days; hospitality pricing, shared with the members of Your Group who choose it.'
+where id = '32000000-0000-4000-8000-000000000002';
+
+update public.departure_add_ons set
+  includes = array['Sunday on a circuit-berthed yacht', 'Brunch and bar', 'Cars at eye level'],
+  excludes = array['Saturday qualifying', 'Transfers to the harbour'],
+  meeting_point = 'Port Hercule berth (exact berth in your app)',
+  why_price_note = 'Race-day yacht berths in the harbour are the scarcest seats in Monaco; the price is the berth, the boat, the crew and the catering divided by the twelve people on board.',
+  image_urls = array['/photos/monaco-harbour-yachts.jpg', '/photos/monaco-yacht-deck-view.jpg']
+where id = '32000000-0000-4000-8000-000000000003';
+
+update public.departure_add_ons set
+  label = 'social',
+  includes = array['Shared boat Nice → Monaco', 'Skipper', 'Swim stop near Cap Ferrat', 'Arrival in Monaco harbour for practice day'],
+  excludes = array['Lunch', 'Drinks', 'Return (your train pass covers it)'],
+  meeting_point = 'Port Lympia, Nice · 10:00',
+  why_price_note = 'The boat and skipper for the morning, split across up to twelve travelers.',
+  image_urls = array['/photos/nice-beach-castle-hill.jpg']
+where id = '32000000-0000-4000-8000-000000000004';
+
+update public.departure_add_ons set
+  includes = array['Private car, airport to your hotel', 'Driver meets you at arrivals'],
+  excludes = array['Return to the airport'],
+  meeting_point = 'Nice Côte d''Azur Airport, arrivals hall',
+  why_price_note = 'One car per booking, so it costs the same whether you travel alone or as a pair.'
+where id = '32000000-0000-4000-8000-000000000005';
+
+-- Marketing copy on the version follows the same rule: no star ratings for unconfirmed properties.
+update public.tour_included_items
+set description = 'Choose your tier at booking: a well-located hotel by the port in Nice, or a hotel in Monte Carlo within walking distance of the circuit. Breakfast included either way, your own room unless you choose to share. Properties are named in your confirmation.'
+where tour_version_id = '21000000-0000-4000-8000-000000000002' and position = 1;
+update public.tour_faqs
+set answer = 'Nice is the value tier: a comfortable hotel by the port, twenty minutes by train from the circuit, and where the welcome drinks are. Monaco is the full show: four nights in Monte Carlo, walking distance to the track, at race-week prices. One group, two prices; everyone meets at the harbour on Sunday night. Hotels are named in your confirmation.'
+where tour_version_id = '21000000-0000-4000-8000-000000000002' and question = 'Nice or Monaco: which should I choose?';

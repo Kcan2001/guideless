@@ -1,9 +1,11 @@
 import { z } from "zod";
 import {
   ACTIVITY_LEVELS,
+  ADD_ON_KINDS,
   DEPARTURE_STATUSES,
   ITINERARY_ITEM_STATUSES,
   ITINERARY_ITEM_TYPES,
+  OPTION_LABELS,
   RESPONSIBILITIES,
   SUPPLIER_SERVICE_STATUSES,
   VISIBILITIES,
@@ -202,6 +204,25 @@ const nullableNumber = (min: number, max: number) =>
     z.coerce.number().min(min).max(max).nullable(),
   );
 
+/** One entry per line from a textarea → trimmed, de-blanked string[] (max `count` items). */
+const lineList = (count: number, maxLen: number) =>
+  z.preprocess(
+    (v) =>
+      typeof v === "string"
+        ? v
+            .split(/\r?\n/)
+            .map((line) => line.trim())
+            .filter(Boolean)
+        : Array.isArray(v)
+          ? v
+          : [],
+    z.array(z.string().max(maxLen)).max(count),
+  );
+const optionalLabel = z.preprocess(
+  (v) => (v === "" || v === undefined ? null : v),
+  z.enum(OPTION_LABELS).nullable(),
+);
+
 export const stayOptionFormSchema = z.object({
   name: z.string().trim().min(2).max(120),
   description: optionalText(2000),
@@ -217,18 +238,25 @@ export const stayOptionFormSchema = z.object({
   position: intField(1, 50).default(1),
   isDefault: flag(false),
   isActive: flag(true),
+  // Presentation (migration 039). Pricing never reads these.
+  tagline: optionalText(160),
+  imageUrls: lineList(12, 500),
+  includes: lineList(12, 160),
+  excludes: lineList(12, 160),
+  label: optionalLabel,
+  whyPriceNote: optionalText(500),
+  neighborhood: optionalText(120),
+  stationDistance: optionalText(120),
+  trainTime: optionalText(120),
+  breakfast: optionalText(120),
+  roomType: optionalText(120),
+  hotelConfirmed: flag(false),
 });
 export type StayOptionForm = z.infer<typeof stayOptionFormSchema>;
 
-export const ADD_ON_KINDS = [
-  "activity",
-  "ticket",
-  "transfer",
-  "dinner",
-  "extra_night",
-  "room_upgrade",
-  "other",
-] as const;
+// Source of truth moved to @guideless/types (migration 039 made it a Postgres enum); re-exported
+// so existing imports keep working.
+export { ADD_ON_KINDS, OPTION_LABELS };
 
 export const addOnFormSchema = z.object({
   title: z.string().trim().min(2).max(120),
@@ -252,6 +280,14 @@ export const addOnFormSchema = z.object({
   position: intField(1, 100).default(1),
   isFeatured: flag(false),
   isActive: flag(true),
+  // Presentation (migration 039).
+  imageUrls: lineList(12, 500),
+  includes: lineList(12, 160),
+  excludes: lineList(12, 160),
+  label: optionalLabel,
+  whyPriceNote: optionalText(500),
+  meetingPoint: optionalText(200),
+  minAge: nullableInt(0, 99),
 });
 export type AddOnForm = z.infer<typeof addOnFormSchema>;
 

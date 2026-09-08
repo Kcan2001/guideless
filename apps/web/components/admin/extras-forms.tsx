@@ -1,5 +1,5 @@
 import type { Tables } from "@guideless/types";
-import { ADD_ON_KINDS } from "@guideless/validation";
+import { ADD_ON_KINDS, OPTION_LABELS } from "@guideless/validation";
 import { SubmitButton } from "@/components/admin/submit-button";
 import { inputClass, labelClass } from "@/components/admin/ui";
 import { saveAddOnAction, saveStayOptionAction } from "@/lib/admin/actions/extras";
@@ -9,6 +9,122 @@ type AddOn = Tables<"departure_add_ons">;
 
 const major = (minor: number | null | undefined) =>
   minor === null || minor === undefined ? "" : (minor / 100).toFixed(2);
+const lines = (values: string[] | null | undefined) => (values ?? []).join("\n");
+const LABEL_TEXT: Record<(typeof OPTION_LABELS)[number], string> = {
+  best_value: "Best value",
+  most_popular: "Most popular",
+  social: "Social",
+  luxury: "Luxury",
+};
+type StayDetails = {
+  neighborhood?: string;
+  station_distance?: string;
+  train_time?: string;
+  breakfast?: string;
+  room_type?: string;
+  hotel_confirmed?: boolean;
+};
+const stayDetails = (value: unknown): StayDetails =>
+  value && typeof value === "object" && !Array.isArray(value) ? (value as StayDetails) : {};
+
+/** Shared "Presentation" fields: photos, includes / excludes, label, why the price differs. */
+function PresentationFields({
+  prefix,
+  imageUrls,
+  includes,
+  excludes,
+  label,
+  whyPriceNote,
+  disabled,
+}: {
+  prefix: string;
+  imageUrls: string[] | null | undefined;
+  includes: string[] | null | undefined;
+  excludes: string[] | null | undefined;
+  label: string | null | undefined;
+  whyPriceNote: string | null | undefined;
+  disabled?: boolean;
+}) {
+  return (
+    <fieldset className="grid gap-3 rounded-lg border border-border p-3 sm:col-span-2 sm:grid-cols-2">
+      <legend className="px-1 text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+        Presentation
+      </legend>
+      <div>
+        <label htmlFor={`${prefix}-label`} className={labelClass}>
+          Label (manual badge)
+        </label>
+        <select
+          id={`${prefix}-label`}
+          name="label"
+          defaultValue={label ?? ""}
+          className={inputClass}
+          disabled={disabled}
+        >
+          <option value="">None</option>
+          {OPTION_LABELS.map((l) => (
+            <option key={l} value={l}>
+              {LABEL_TEXT[l]}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label htmlFor={`${prefix}-why`} className={labelClass}>
+          Why it costs what it costs (shown to customers)
+        </label>
+        <textarea
+          id={`${prefix}-why`}
+          name="whyPriceNote"
+          rows={2}
+          maxLength={500}
+          defaultValue={whyPriceNote ?? ""}
+          className={inputClass}
+          disabled={disabled}
+        />
+      </div>
+      <div>
+        <label htmlFor={`${prefix}-inc`} className={labelClass}>
+          Included (one per line, max 12)
+        </label>
+        <textarea
+          id={`${prefix}-inc`}
+          name="includes"
+          rows={4}
+          defaultValue={lines(includes)}
+          className={inputClass}
+          disabled={disabled}
+        />
+      </div>
+      <div>
+        <label htmlFor={`${prefix}-exc`} className={labelClass}>
+          Not included (one per line, max 12)
+        </label>
+        <textarea
+          id={`${prefix}-exc`}
+          name="excludes"
+          rows={4}
+          defaultValue={lines(excludes)}
+          className={inputClass}
+          disabled={disabled}
+        />
+      </div>
+      <div className="sm:col-span-2">
+        <label htmlFor={`${prefix}-img`} className={labelClass}>
+          Photo URLs (one per line, max 12; /photos/… or an uploaded file URL)
+        </label>
+        <textarea
+          id={`${prefix}-img`}
+          name="imageUrls"
+          rows={3}
+          defaultValue={lines(imageUrls)}
+          className={`${inputClass} font-mono text-xs`}
+          disabled={disabled}
+        />
+      </div>
+    </fieldset>
+  );
+}
 
 /** Create / edit a stay tier. Money is typed in major units; the action converts to minor units. */
 export function StayOptionForm({
@@ -25,6 +141,7 @@ export function StayOptionForm({
   disabled?: boolean;
 }) {
   const k = stay?.id ?? "new";
+  const details = stayDetails(stay?.details);
   return (
     <form action={saveStayOptionAction} className="grid gap-3 sm:grid-cols-2">
       <input type="hidden" name="departureId" value={departureId} />
@@ -37,9 +154,23 @@ export function StayOptionForm({
           id={`stay-${k}-name`}
           name="name"
           defaultValue={stay?.name ?? ""}
-          placeholder="Nice, 3★ near the port"
+          placeholder="Nice, near the port"
           className={inputClass}
           required
+          disabled={disabled}
+        />
+      </div>
+      <div className="sm:col-span-2">
+        <label htmlFor={`stay-${k}-tagline`} className={labelClass}>
+          Tagline (one line on the tier card)
+        </label>
+        <input
+          id={`stay-${k}-tagline`}
+          name="tagline"
+          maxLength={160}
+          defaultValue={stay?.tagline ?? ""}
+          placeholder="Spend less on the room. Spend more on the weekend."
+          className={inputClass}
           disabled={disabled}
         />
       </div>
@@ -175,6 +306,52 @@ export function StayOptionForm({
           disabled={disabled}
         />
       </div>
+      <fieldset className="grid gap-3 rounded-lg border border-border p-3 sm:col-span-2 sm:grid-cols-3">
+        <legend className="px-1 text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+          Practicalities
+        </legend>
+        {(
+          [
+            ["neighborhood", "Neighbourhood", details.neighborhood],
+            ["stationDistance", "Distance to station", details.station_distance],
+            ["trainTime", "Train time to the event / next stop", details.train_time],
+            ["breakfast", "Breakfast", details.breakfast],
+            ["roomType", "Room type", details.room_type],
+          ] as const
+        ).map(([name, text, value]) => (
+          <div key={name}>
+            <label htmlFor={`stay-${k}-${name}`} className={labelClass}>
+              {text}
+            </label>
+            <input
+              id={`stay-${k}-${name}`}
+              name={name}
+              maxLength={120}
+              defaultValue={value ?? ""}
+              className={inputClass}
+              disabled={disabled}
+            />
+          </div>
+        ))}
+        <label className="flex items-center gap-2 self-end pb-2 text-sm">
+          <input
+            type="checkbox"
+            name="hotelConfirmed"
+            defaultChecked={details.hotel_confirmed ?? false}
+            disabled={disabled}
+          />{" "}
+          Property confirmed (unchecked shows “property named at booking”)
+        </label>
+      </fieldset>
+      <PresentationFields
+        prefix={`stay-${k}`}
+        imageUrls={stay?.image_urls}
+        includes={stay?.includes}
+        excludes={stay?.excludes}
+        label={stay?.label}
+        whyPriceNote={stay?.why_price_note}
+        disabled={disabled}
+      />
       <div className="flex flex-wrap items-center gap-4 sm:col-span-2">
         <label className="flex items-center gap-2 text-sm">
           <input
@@ -423,6 +600,35 @@ export function AddOnForm({
           disabled={disabled}
         />
       </div>
+      <div>
+        <label htmlFor={`ao-${k}-meet`} className={labelClass}>
+          Meeting point (shown to customers)
+        </label>
+        <input
+          id={`ao-${k}-meet`}
+          name="meetingPoint"
+          maxLength={200}
+          defaultValue={addOn?.meeting_point ?? ""}
+          placeholder="Port Lympia, Nice · 10:00"
+          className={inputClass}
+          disabled={disabled}
+        />
+      </div>
+      <div>
+        <label htmlFor={`ao-${k}-age`} className={labelClass}>
+          Minimum age (blank = none)
+        </label>
+        <input
+          id={`ao-${k}-age`}
+          name="minAge"
+          type="number"
+          min={0}
+          max={99}
+          defaultValue={addOn?.min_age ?? ""}
+          className={inputClass}
+          disabled={disabled}
+        />
+      </div>
       <div className="flex gap-2">
         <div className="flex-1">
           <label htmlFor={`ao-${k}-book`} className={labelClass}>
@@ -467,6 +673,15 @@ export function AddOnForm({
           disabled={disabled}
         />
       </div>
+      <PresentationFields
+        prefix={`ao-${k}`}
+        imageUrls={addOn?.image_urls}
+        includes={addOn?.includes}
+        excludes={addOn?.excludes}
+        label={addOn?.label}
+        whyPriceNote={addOn?.why_price_note}
+        disabled={disabled}
+      />
       <div className="flex flex-wrap items-center gap-4 sm:col-span-2">
         <label className="flex items-center gap-2 text-sm">
           <input

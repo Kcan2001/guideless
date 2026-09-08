@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import Link from "next/link";
 import { brand, social } from "@guideless/config";
 import { NewsletterForm } from "@/components/site/newsletter-form";
@@ -22,10 +23,42 @@ function InstagramIcon({ className }: { className?: string }) {
   );
 }
 
+const COLUMNS: Array<{ label: string; links: Array<{ href: Route; label: string }> }> = [
+  {
+    label: "Trips",
+    links: [
+      { href: "/tours", label: "All trips" },
+      { href: "/destinations", label: "Destinations" },
+      { href: "/meetups", label: "City evenings" },
+      { href: "/host", label: "Host a departure" },
+    ],
+  },
+  {
+    label: "Company",
+    links: [
+      { href: "/about", label: "About" },
+      { href: "/why-guideless", label: "Why Guideless" },
+      { href: "/how-it-works", label: "How it works" },
+      { href: "/group-travel", label: "Traveling with friends" },
+      { href: "/faq", label: "FAQ" },
+      { href: "/contact", label: "Contact" },
+    ],
+  },
+  {
+    label: "Legal",
+    links: [
+      { href: "/terms", label: "Terms of Service" },
+      { href: "/privacy", label: "Privacy Policy" },
+      { href: "/cancellation", label: "Cancellation policy" },
+      { href: "/travel-insurance", label: "Travel insurance" },
+    ],
+  },
+];
+
 export function SiteFooter() {
   return (
     <footer className="mt-24 border-t border-border bg-surface">
-      <div className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-14 md:grid-cols-[1.5fr_1fr_1fr]">
+      <div className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-14 md:grid-cols-[1.6fr_1fr_1fr_1fr]">
         <div>
           <p className="font-heading text-lg font-bold">{brand.name}</p>
           <p className="mt-3 max-w-sm text-muted-foreground">{brand.tagline}</p>
@@ -37,36 +70,7 @@ export function SiteFooter() {
             </p>
             <NewsletterForm source="footer" />
           </div>
-        </div>
-        <nav aria-label="Footer — trips" className="text-sm">
-          <p className="font-semibold">Trips</p>
-          <ul className="mt-3 space-y-2">
-            <li>
-              <Link href="/tours" className="text-muted-foreground no-underline hover:text-link">
-                All trips
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/destinations"
-                className="text-muted-foreground no-underline hover:text-link"
-              >
-                Destinations
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/how-it-works"
-                className="text-muted-foreground no-underline hover:text-link"
-              >
-                How it works
-              </Link>
-            </li>
-          </ul>
-        </nav>
-        <nav aria-label="Footer — company" className="text-sm">
-          <p className="font-semibold">Guideless</p>
-          <ul className="mt-3 space-y-2">
+          <ul className="mt-6 space-y-2 text-sm">
             <li>
               <a
                 href={`mailto:${brand.supportEmail}`}
@@ -86,25 +90,32 @@ export function SiteFooter() {
                 <span className="sr-only">(opens Instagram in a new tab)</span>
               </a>
             </li>
-            <li>
-              <Link href="/terms" className="text-muted-foreground no-underline hover:text-link">
-                Terms of Service
-              </Link>
-            </li>
-            <li>
-              <Link href="/privacy" className="text-muted-foreground no-underline hover:text-link">
-                Privacy Policy
-              </Link>
-            </li>
           </ul>
-        </nav>
+        </div>
+        {COLUMNS.map((col) => (
+          <nav key={col.label} aria-label={`Footer — ${col.label}`} className="text-sm">
+            <p className="font-semibold">{col.label}</p>
+            <ul className="mt-3 space-y-2">
+              {col.links.map((l) => (
+                <li key={l.href}>
+                  <Link
+                    href={l.href}
+                    className="text-muted-foreground no-underline hover:text-link"
+                  >
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ))}
       </div>
       <div className="border-t border-border">
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 px-6 py-6 text-xs text-muted-foreground">
           <span>
             © {new Date().getFullYear()} {brand.legalName}. All rights reserved.
           </span>
-          <span>Organized, not escorted.</span>
+          <span>{brand.category}. Organized, not escorted.</span>
         </div>
       </div>
     </footer>

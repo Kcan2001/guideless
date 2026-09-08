@@ -224,6 +224,26 @@ export const SOCIAL_POST_STATUSES = [
 ] as const;
 export type SocialPostStatus = (typeof SOCIAL_POST_STATUSES)[number];
 
+// ── Catalog: add-ons and stay tiers (migrations 029, 039) ────────────────────
+/** What an add-on is; `extension` covers pre/post-trip nights and destinations. */
+export const ADD_ON_KINDS = [
+  "activity",
+  "ticket",
+  "transfer",
+  "dinner",
+  "extra_night",
+  "room_upgrade",
+  "group_moment",
+  "insurance",
+  "extension",
+  "other",
+] as const;
+export type AddOnKind = (typeof ADD_ON_KINDS)[number];
+
+/** Admin-chosen badge on a stay tier or add-on. Manual on purpose: no inferred "popular". */
+export const OPTION_LABELS = ["best_value", "most_popular", "social", "luxury"] as const;
+export type OptionLabel = (typeof OPTION_LABELS)[number];
+
 /** ISO 4217 codes we sell in. Extend deliberately; each needs Stripe + pricing support. */
 export const CURRENCIES = ["USD", "EUR", "GBP"] as const;
 export type Currency = (typeof CURRENCIES)[number];

@@ -19,10 +19,25 @@ Monaco 5★, grandstand / terrace / yacht, welcome drinks Thursday.
 
 ## "Make it yours" on every trip
 
-Tour and departure pages show, for the next open departure: stay tiers with per-traveler deltas,
-add-ons with price, day, "N going" (`add_on_headcounts`, aggregate only) and availability, the
-room rule, and a one-line referral hint. The room rule is derived from `quote_booking()` for one
-traveler vs. two sharing, so the saving shown equals the saving charged.
+The tour page (`/tours/[slug]`) sells the shape of the purchase before the itinerary, in this
+order: hero with the promise, next dates, length, group size and "from" price and a **Build my
+trip** CTA (the existing checkout until the Trip Builder lands) → **Base trip includes** (the
+version's included items plus the app, the group with its opening date from
+`group_opens_days_before`, and support) → a two-column **compare block** (one package or one
+guided itinerary vs. Guideless essentials plus choices) → **stay tier cards**
+(`components/tours/stay-tier-cards.tsx`) → **race/experience cards**
+(`components/tours/experience-cards.tsx`; `tier_group` add-ons render as the large "choose one"
+set, the rest as "Also optional") → the **add-later callout** → day by day → dates & prices → who
+handles what → FAQ.
+
+Cards read only migration-039 presentation columns (`tagline`, `image_urls`, `includes`,
+`excludes`, `details`, `label`, `why_price_note`, `meeting_point`, `min_age`) plus live counts:
+"N from your group are going" appears only from 3 (`add_on_headcounts`, aggregate), "N left" only
+at 5 or fewer, star ratings only when set, and an unconfirmed property says "Property confirmed at
+booking". Stay-tier scarcity is never shown because no public view exposes it. The departure page
+keeps the compact `StayTiers`/`AddOnList` lists, the room rule and the referral hint. The room
+rule is derived from `quote_booking()` for one traveler vs. two sharing, so the saving shown
+equals the saving charged.
 
 Pricing rules the copy must never contradict:
 

@@ -105,8 +105,8 @@ export default function HowItWorksPage() {
             </p>
             <h2 className="mt-3 text-3xl font-bold md:text-4xl">Come alone. Leave with a group.</h2>
             <p className="mt-3 text-muted-foreground">
-              Most of our travelers book alone. The trip is built so that never feels like a
-              compromise.
+              Guideless is built for people who book alone. The trip is designed so that never feels
+              like a compromise.
             </p>
             <ul className="mt-6 space-y-4 text-sm">
               <li className="flex gap-3">

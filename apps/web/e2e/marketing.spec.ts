@@ -3,7 +3,9 @@ import { expect, test } from "@playwright/test";
 test.describe("marketing site", () => {
   test("home renders the promise and primary navigation", async ({ page, isMobile }) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Travel organized.");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Travel with a plan.");
+    await expect(page.getByRole("heading", { name: /plan every damn thing/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /in your pocket/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /explore trips/i }).first()).toBeVisible();
     if (isMobile) {
       // Small screens collapse the nav into a <details> menu; it must be reachable by keyboard.
@@ -68,10 +70,15 @@ test.describe("marketing site", () => {
 
   test("tour page offers stay tiers, add-ons and the night-one anchor", async ({ page }) => {
     await page.goto("/tours/southern-france");
-    await expect(page.getByRole("heading", { name: /pay for what you want/i })).toBeVisible();
-    await expect(page.getByText("Well-located 3★ hotels")).toBeVisible();
-    await expect(page.getByText("Boat day along the Riviera")).toBeVisible();
+    await expect(page.getByTestId("base-includes")).toContainText("Add only what you want.");
+    await expect(page.getByTestId("compare-block")).toContainText("Traditional group tour");
+    await expect(page.getByRole("heading", { name: /pick your tier/i })).toBeVisible();
+    await expect(page.getByTestId("stay-tiers")).toContainText("Well-located hotels");
+    await expect(page.getByTestId("experience-options")).toContainText(
+      "Boat day along the Riviera",
+    );
     await expect(page.getByText(/your own room is the default/i)).toBeVisible();
+    await expect(page.getByTestId("add-later")).toContainText(/add experiences later/i);
     await expect(page.getByTestId("anchor-callout")).toContainText("Welcome drinks");
     await expect(page.getByText(/friend.s code/i)).toBeVisible();
   });
@@ -82,12 +89,16 @@ test.describe("marketing site", () => {
     await page.goto("/tours/monaco-grand-prix");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Monaco Grand Prix Weekend");
     await expect(page.getByTestId("event-hero")).toContainText("Circuit de Monaco");
-    await expect(
-      page.getByRole("heading", { name: /your hotel, your seat, your call/i }),
-    ).toBeVisible();
-    await expect(page.getByText("Nice, 3★ near the port")).toBeVisible();
-    await expect(page.getByText("Monaco, 5★ in Monte Carlo")).toBeVisible();
-    await expect(page.getByText("Yacht in the harbour (Sun)")).toBeVisible();
+    await expect(page.getByRole("link", { name: /build my trip/i }).first()).toBeVisible();
+    await expect(page.getByTestId("compare-block")).toContainText(/traditional .* package/i);
+    await expect(page.getByRole("heading", { name: /how you watch/i })).toBeVisible();
+    const stays = page.getByTestId("stay-tiers");
+    await expect(stays).toContainText("Nice, near the port");
+    await expect(stays).toContainText("Monaco, Monte Carlo");
+    await expect(stays).toContainText(/property confirmed at booking/i);
+    await expect(stays).not.toContainText("★");
+    await expect(page.getByTestId("race-options")).toContainText("Yacht in the harbour (Sun)");
+    await expect(page.getByTestId("race-options")).toContainText("Most popular");
     const ld = await page.locator('script[type="application/ld+json"]').allTextContents();
     const types = ld.flatMap((t) => JSON.parse(t)).map((d: { "@type": string }) => d["@type"]);
     expect(types).toEqual(expect.arrayContaining(["TouristTrip", "Event"]));
@@ -127,6 +138,32 @@ test.describe("marketing site", () => {
     await expect(page.getByRole("status")).toContainText(/thank you/i);
   });
 
+  test("marketing pages render with a heading, hero photo and breadcrumb data", async ({
+    page,
+  }) => {
+    for (const path of [
+      "/why-guideless",
+      "/faq",
+      "/contact",
+      "/group-travel",
+      "/cancellation",
+      "/travel-insurance",
+      "/about",
+    ]) {
+      const res = await page.goto(path);
+      expect(res?.status(), path).toBe(200);
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      await expect(page.locator('script[type="application/ld+json"]').first()).toBeAttached();
+    }
+    await page.goto("/faq");
+    // The header's mobile menu is also a <details>; scope to the page body.
+    const first = page.locator("main details").first();
+    await first.locator("summary").click();
+    await expect(first).toHaveAttribute("open", "");
+    await page.goto("/cancellation");
+    await expect(page.getByText(/refund of trip price/i).first()).toBeVisible();
+  });
+
   test("terms and privacy are published for Guideless LLC", async ({ page }) => {
     for (const path of ["/terms", "/privacy"]) {
       const res = await page.goto(path);
@@ -148,6 +185,9 @@ test.describe("marketing site", () => {
     expect(body).toContain("/host");
     expect(body).toContain("/terms");
     expect(body).toContain("/privacy");
+    expect(body).toContain("/why-guideless");
+    expect(body).toContain("/faq");
+    expect(body).toContain("/cancellation");
     const robots = await request.get("/robots.txt");
     expect(await robots.text()).toContain("Disallow: /checkout/");
   });

@@ -24,6 +24,12 @@ only display what it returns._
 - **Credit.** Signed-in customers' `account_credits` balance in the booking currency is applied
   automatically to the base trip. Credit is earned when a referred booking is confirmed
   (`referral_reward_amount`, 7500 minor units) and redeemed when the crediting booking confirms.
+- **Presentation is not pricing.** Migration 039 added `tagline`, `image_urls`, `includes`,
+  `excludes`, `details`, `label` and `why_price_note` to stay tiers and `image_urls`, `includes`,
+  `excludes`, `label`, `why_price_note`, `meeting_point`, `min_age` to add-ons, and made
+  `departure_add_ons.kind` the enum `add_on_kind` (adding `group_moment`, `insurance`,
+  `extension`). `quote_booking()` reads none of these; `supabase/tests/catalog_presentation.test.sql`
+  pins the Monaco example total to prove it.
 - **Deposit and due today.** Deposit = `departures.deposit_amount` × travelers. Due today =
   deposit + all add-ons (or the full total). Balance = total − due today.
 
