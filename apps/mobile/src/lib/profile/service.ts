@@ -1,5 +1,6 @@
 import type { Tables } from "@guideless/types";
 import { supabase } from "@/lib/supabase";
+import { isMissingColumnError, splitExtras } from "@/lib/profile/extras";
 
 export type Profile = Tables<"profiles">;
 export type NotificationPrefs = Tables<"notification_preferences">;
@@ -26,6 +27,12 @@ export type ProfilePatch = Partial<
     | "show_home_country"
     | "show_bio"
     | "show_interests"
+    | "avatar_url"
+    | "traveling_from"
+    | "excited_about"
+    | "party_type"
+    | "onboarded_at"
+    | "show_traveling_from"
   >
 >;
 
@@ -40,9 +47,31 @@ export const profileService = {
     return data;
   },
 
+  /**
+   * Saves a profile patch. When the database predates the onboarding columns the extras are
+   * dropped and the rest still saves, so an older environment loses the new fields, not the edit.
+   */
   async updateProfile(userId: string, patch: ProfilePatch): Promise<void> {
-    const { error } = await supabase.from("profiles").update(patch).eq("id", userId);
-    if (error) throw error;
+    const { base, extras } = splitExtras(patch);
+    const write = (values: Record<string, unknown>) =>
+      supabase
+        .from("profiles")
+        .update(values as never)
+        .eq("id", userId);
+
+    if (Object.keys(extras).length === 0) {
+      const { error } = await write(base);
+      if (error) throw error;
+      return;
+    }
+
+    const { error } = await write({ ...base, ...extras });
+    if (!error) return;
+    if (!isMissingColumnError(error)) throw error;
+
+    if (Object.keys(base).length === 0) return; // Nothing left to save.
+    const { error: retryError } = await write(base);
+    if (retryError) throw retryError;
   },
 
   async getPrefs(userId: string): Promise<NotificationPrefs> {

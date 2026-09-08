@@ -15,6 +15,7 @@ import { brand, emptyStates } from "@guideless/config";
 import { formatDate, formatDateRange, formatWallTime } from "@guideless/utils";
 import { AddOnCard } from "@/components/add-on-card";
 import { ItineraryItemRow, timeLabel } from "@/components/itinerary-item";
+import { MomentCard } from "@/components/moment-card";
 import { SyncBadge } from "@/components/sync-badge";
 import {
   Body,
@@ -30,10 +31,12 @@ import {
 } from "@/components/ui";
 import { Spacing } from "@/constants/theme";
 import { useInbox } from "@/hooks/use-inbox";
+import { useMoments } from "@/hooks/use-moments";
 import { useTheme } from "@/hooks/use-theme";
 import { useTripAddOns } from "@/hooks/use-add-ons";
 import { useCurrentTrip } from "@/hooks/use-trip";
 import { track } from "@/lib/analytics";
+import { momentsForToday, momentsNotShown } from "@/lib/moments/today";
 import {
   currentDay,
   greeting,
@@ -50,6 +53,7 @@ export default function TripHomeScreen() {
   const { trips, current, detail, offline, syncedAt, isPending, refetch } = useCurrentTrip();
   const inbox = useInbox();
   const { addOns, bookingId } = useTripAddOns(detail);
+  const { moments, toggle: toggleMoment } = useMoments(detail?.trip.id ?? null);
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 60_000);
@@ -106,6 +110,8 @@ export default function TripHomeScreen() {
     ? (accommodations.find((a) => a.check_in_date <= day.date && a.check_out_date > day.date) ??
       null)
     : (accommodations[0] ?? null);
+  const todayMoments = momentsForToday(moments, now);
+  const moreMoments = momentsNotShown(moments, now);
 
   return (
     <SafeAreaView
@@ -218,13 +224,46 @@ export default function TripHomeScreen() {
           </Card>
         )}
 
+        {phase === "during" && todayMoments.length > 0 && (
+          <View style={{ gap: Spacing.one }}>
+            <Eyebrow>Live Moments · optional</Eyebrow>
+            {todayMoments.map((m) => (
+              <MomentCard
+                key={m.id}
+                moment={m}
+                compact
+                disabled={toggleMoment.isPending}
+                onToggle={(going) => toggleMoment.mutate({ momentId: m.id, going })}
+              />
+            ))}
+            {moreMoments > 0 && (
+              <Pressable
+                onPress={() => router.push("/group")}
+                accessibilityRole="link"
+                style={styles.inlineLink}
+              >
+                <Ionicons name="flash-outline" size={16} color={c.link} />
+                <Text style={{ color: c.link, fontFamily: "Inter_500Medium" }}>
+                  {moreMoments} more in your group
+                </Text>
+              </Pressable>
+            )}
+          </View>
+        )}
+
         {day && addOns.some((a) => a.date === day.date) && (
           <View style={{ gap: Spacing.one }}>
             <Eyebrow>Add-ons today · optional</Eyebrow>
             {addOns
               .filter((a) => a.date === day.date)
               .map((a) => (
-                <AddOnCard key={a.id} addOn={a} bookingId={bookingId} todayISO={todayISO} />
+                <AddOnCard
+                  key={a.id}
+                  addOn={a}
+                  bookingId={bookingId}
+                  todayISO={todayISO}
+                  tripId={trip.id}
+                />
               ))}
           </View>
         )}

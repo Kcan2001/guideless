@@ -26,6 +26,10 @@ export type ProductEvent =
   | "trip_completed"
   | "add_on_viewed" // props: departure_id, add_on_id
   | "add_on_add_tapped" // props: departure_id, add_on_id
+  | "add_on_chat_opened" // props: add_on_id
+  | "onboarding_completed" // props: counts and booleans only, never the answers
+  | "onboarding_skipped"
+  | "avatar_set" // props: where it was set, never the image or its URL
   | "app_opened";
 
 export type EventProps = Record<string, string | number | boolean | undefined>;

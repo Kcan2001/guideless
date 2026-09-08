@@ -45,6 +45,15 @@ select id, 'admin' from auth.users where email = 'you@example.com';
 | `/admin/pricing`                                           | **Hotel pricing rules** (finance roles): markup %, fixed and minimum markup per destination and/or hotel with priority and effective dates                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `/admin/social`, `/admin/social/[id]`                      | Instagram queue (content roles): drafts imported from `guideless_photos/`, caption / hashtags / alt text, schedule in a chosen time zone, publish now, cancel, delete; failures show the publisher's error. See docs/marketing.md                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 
+### Telling travelers what changed
+
+On a live trip's itinerary, each item has a **Tell travelers what changed** form beside Edit
+(`markTripItemChangedAction`). The sentence written there is what every traveler receives as a
+push and in-app notification, so it is written for them: "Replaced by the 09:32 from platform 2.
+Your pass still covers it." Optionally link the replacement item, or tick "Cancel it instead".
+Without a note the item still notifies, but only with the generic "Details changed" text — which
+is the situation this form exists to avoid.
+
 ## Conventions
 
 - Mutations are Server Actions in `apps/web/lib/admin/actions/*`. Each: `requireStaff(roles)` →

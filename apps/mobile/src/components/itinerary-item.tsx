@@ -43,6 +43,28 @@ export const ITEM_LABEL: Record<ItineraryItemType, string> = {
   custom: "Note",
 };
 
+/**
+ * Operational change fields land with the itinerary-change migration; treat them as optional so
+ * the app still renders against a database that predates them.
+ * TODO(types): read these from `Tables<"trip_itinerary_items">` once database.ts is regenerated.
+ */
+export type ItemChange = {
+  change_note?: string | null;
+  replaced_by_item_id?: string | null;
+  changed_at?: string | null;
+};
+
+/** The note staff wrote when they changed this item, if there is one. */
+export function changeNoteOf(item: TripItem): string | null {
+  const note = (item as TripItem & ItemChange).change_note;
+  return item.status === "changed" && note?.trim() ? note.trim() : null;
+}
+
+/** The item that replaced this one, if staff linked one. */
+export function replacementIdOf(item: TripItem): string | null {
+  return (item as TripItem & ItemChange).replaced_by_item_id ?? null;
+}
+
 export function timeLabel(item: Pick<TripItem, "start_time" | "end_time">): string {
   if (item.start_time && item.end_time)
     return `${formatWallTime(item.start_time)} – ${formatWallTime(item.end_time)}`;
@@ -62,6 +84,7 @@ export function ItineraryItemRow({
   const router = useRouter();
   const isFree = item.type === "free_time";
   const cancelled = item.status === "cancelled";
+  const changeNote = changeNoteOf(item);
 
   return (
     <Pressable
@@ -95,6 +118,11 @@ export function ItineraryItemRow({
         {item.location_name ? (
           <Text style={[styles.sub, { color: c.textSecondary }]}>{item.location_name}</Text>
         ) : null}
+        {changeNote ? (
+          <Text style={[styles.changeNote, { color: c.text, borderLeftColor: c.warning }]}>
+            {changeNote}
+          </Text>
+        ) : null}
         <View style={styles.pills}>
           {item.is_optional && <Pill>Optional</Pill>}
           <Pill tone={item.responsibility === "guideless" ? "accent" : "neutral"}>
@@ -122,5 +150,12 @@ const styles = StyleSheet.create({
   time: { fontFamily: "Inter_500Medium", fontSize: 13 },
   title: { fontFamily: "Inter_600SemiBold", fontSize: 16 },
   sub: { fontFamily: "Inter_400Regular", fontSize: 13 },
+  changeNote: {
+    fontFamily: "Inter_500Medium",
+    fontSize: 13,
+    borderLeftWidth: 3,
+    paddingLeft: 8,
+    marginTop: 4,
+  },
   pills: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 4 },
 });

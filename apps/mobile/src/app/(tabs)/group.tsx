@@ -1,10 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
+import type { ComponentProps } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { useEffect } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 import { emptyStates } from "@guideless/config";
-import { formatDate, formatDateRange, formatInZone, formatWallTime } from "@guideless/utils";
+import { formatDate, formatDateRange, formatWallTime } from "@guideless/utils";
 import {
   Body,
   Button,
@@ -19,26 +19,27 @@ import {
   Row,
   Screen,
 } from "@/components/ui";
+import { MomentCard } from "@/components/moment-card";
 import { Spacing } from "@/constants/theme";
+import { useMoments } from "@/hooks/use-moments";
 import { useTheme } from "@/hooks/use-theme";
 import { useCurrentTrip } from "@/hooks/use-trip";
 import { track } from "@/lib/analytics";
 import { useSession } from "@/lib/auth/session";
 import { chatService } from "@/lib/chat/service";
 import { groupService, rosterLine, type ItemRsvpStatus } from "@/lib/group/service";
-import { momentsService } from "@/lib/moments/service";
-import { supabase } from "@/lib/supabase";
+import { PARTY_LABEL, type PartyType } from "@/lib/profile/extras";
 
-const ROOM_ICON = {
+const ROOM_ICON: Record<string, ComponentProps<typeof Ionicons>["name"]> = {
   trip_group: "chatbubbles-outline",
   announcements: "megaphone-outline",
   optional_activities: "sparkles-outline",
-} as const;
-const ROOM_HINT = {
+};
+const ROOM_HINT: Record<string, string> = {
   trip_group: "Everyone on your trip.",
   announcements: "Updates from Guideless. Read-only.",
   optional_activities: "Who's up for what.",
-} as const;
+};
 const STYLE_LABEL = { relaxed: "Relaxed pace", balanced: "Balanced", active: "Active" } as const;
 
 export default function GroupScreen() {
@@ -56,11 +57,7 @@ export default function GroupScreen() {
     refetchInterval: 30_000,
   });
 
-  const moments = useQuery({
-    queryKey: ["moments", tripId],
-    enabled: !!tripId && !!user,
-    queryFn: () => momentsService.list(tripId!, user!.id),
-  });
+  const { moments, isPending: momentsPending, toggle } = useMoments(tripId, { realtime: true });
 
   // Before the trip exists: the booking's departure and its anonymized roster.
   const upcoming = useQuery({
@@ -86,28 +83,6 @@ export default function GroupScreen() {
         track("live_moment_joined", { kind: "anchor_rsvp", item_id: anchor!.id });
       qc.invalidateQueries({ queryKey: ["rsvps", anchor?.id, user?.id] });
     },
-  });
-
-  useEffect(() => {
-    if (!tripId) return;
-    const channel = momentsService.subscribe(tripId, () =>
-      qc.invalidateQueries({ queryKey: ["moments", tripId] }),
-    );
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [tripId, qc]);
-
-  const toggle = useMutation({
-    mutationFn: async ({ momentId, going }: { momentId: string; going: boolean }) => {
-      if (going) {
-        await momentsService.join(momentId, user!.id);
-        track("live_moment_joined", { moment_id: momentId });
-      } else {
-        await momentsService.leave(momentId, user!.id);
-      }
-    },
-    onSettled: () => qc.invalidateQueries({ queryKey: ["moments", tripId] }),
   });
 
   if (!detail) {
@@ -234,55 +209,22 @@ export default function GroupScreen() {
             onPress={() => router.push("/moments/new")}
           />
         </View>
-        {moments.isPending ? (
+        {momentsPending ? (
           <Loading />
-        ) : (moments.data ?? []).length === 0 ? (
+        ) : moments.length === 0 ? (
           <Card>
             <H2 style={{ fontSize: 16 }}>Nothing planned right now.</H2>
             <Muted>Coffee at ten? A sunset walk? Suggest a moment and see who&rsquo;s in.</Muted>
           </Card>
         ) : (
-          (moments.data ?? []).map((m) => {
-            const going = m.mine === "joined";
-            const full = m.capacity != null && m.joined >= m.capacity && !going;
-            return (
-              <Card key={m.id} tone={m.status === "live" ? "accent" : "default"}>
-                <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap" }}>
-                  {m.is_official ? (
-                    <Pill tone="accent">Guideless</Pill>
-                  ) : (
-                    <Pill>Traveler suggested</Pill>
-                  )}
-                  {m.status === "live" && <Pill tone="warning">Happening now</Pill>}
-                </View>
-                <H2>{m.title}</H2>
-                <Muted>
-                  {formatInZone(m.start_at, m.timezone)}
-                  {m.location_name ? ` · ${m.location_name}` : ""}
-                </Muted>
-                {m.description && <Muted style={{ fontSize: 14 }}>{m.description}</Muted>}
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    marginTop: 4,
-                  }}
-                >
-                  <Muted style={{ fontSize: 13 }}>
-                    {m.joined} going{m.capacity ? ` · ${m.capacity} max` : ""}
-                  </Muted>
-                  <Button
-                    title={going ? "I'm going ✓" : full ? "Full" : "Join"}
-                    variant={going ? "secondary" : "primary"}
-                    disabled={full || toggle.isPending}
-                    onPress={() => toggle.mutate({ momentId: m.id, going: !going })}
-                    style={{ minHeight: 40, paddingHorizontal: 16 }}
-                  />
-                </View>
-              </Card>
-            );
-          })
+          moments.map((m) => (
+            <MomentCard
+              key={m.id}
+              moment={m}
+              disabled={toggle.isPending}
+              onToggle={(going) => toggle.mutate({ momentId: m.id, going })}
+            />
+          ))
         )}
       </View>
 
@@ -323,27 +265,50 @@ export default function GroupScreen() {
             const name = m.profile?.display_name || "Traveler";
             const p = m.profile;
             const interests = p?.show_interests && p.interests?.length ? p.interests : [];
+            // "Traveling from" has its own visibility switch; home country is the fallback.
+            const where =
+              p?.show_traveling_from && p.traveling_from
+                ? p.traveling_from
+                : p?.show_home_country && p.home_country
+                  ? p.home_country
+                  : null;
+            const excited = p?.excited_about?.trim() || null;
+            const party = (p?.party_type ?? null) as PartyType | null;
             return (
               <View
                 key={m.user_id}
                 style={[styles.member, i > 0 && { borderTopWidth: 1, borderTopColor: c.border }]}
               >
-                <View style={[styles.avatar, { backgroundColor: c.accent }]}>
-                  <Text style={{ fontFamily: "Manrope_700Bold", color: "#0B2025" }}>
-                    {name.slice(0, 1).toUpperCase()}
-                  </Text>
-                </View>
+                {p?.avatar_url ? (
+                  <Image
+                    source={{ uri: p.avatar_url }}
+                    style={styles.avatar}
+                    accessibilityIgnoresInvertColors
+                    accessible
+                    accessibilityLabel={`${name}'s photo`}
+                  />
+                ) : (
+                  <View style={[styles.avatar, { backgroundColor: c.accent }]}>
+                    <Text style={{ fontFamily: "Manrope_700Bold", color: "#0B2025" }}>
+                      {name.slice(0, 1).toUpperCase()}
+                    </Text>
+                  </View>
+                )}
                 <View style={{ flex: 1, gap: 2 }}>
                   <H2 style={{ fontSize: 16, lineHeight: 20 }}>
                     {name}
                     {m.user_id === user?.id ? " (you)" : ""}
                   </H2>
-                  {p?.show_home_country && p.home_country ? (
-                    <Muted style={{ fontSize: 13 }}>{p.home_country}</Muted>
-                  ) : null}
+                  {where ? <Muted style={{ fontSize: 13 }}>{where}</Muted> : null}
                   {p?.show_bio && p.bio ? <Muted style={{ fontSize: 13 }}>{p.bio}</Muted> : null}
-                  {(interests.length > 0 || (p?.show_interests && p.travel_style)) && (
+                  {excited ? (
+                    <Muted style={{ fontSize: 13, fontStyle: "italic" }}>
+                      Excited about {excited}
+                    </Muted>
+                  ) : null}
+                  {(interests.length > 0 || party || (p?.show_interests && p.travel_style)) && (
                     <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 4, marginTop: 2 }}>
+                      {party ? <Pill>{PARTY_LABEL[party]}</Pill> : null}
                       {p?.show_interests && p.travel_style ? (
                         <Pill>
                           {STYLE_LABEL[p.travel_style as keyof typeof STYLE_LABEL] ??

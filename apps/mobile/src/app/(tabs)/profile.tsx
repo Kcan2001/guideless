@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Constants from "expo-constants";
 import { useState } from "react";
-import { Linking, Pressable, Share, Switch, Text, View } from "react-native";
+import { Image, Linking, Pressable, Share, Switch, Text, View } from "react-native";
 import { brand } from "@guideless/config";
 import { INTERESTS, TRAVEL_STYLES, groupProfileSchema } from "@guideless/validation";
 import { formatMoney } from "@guideless/utils";
@@ -21,8 +21,11 @@ import {
 } from "@/components/ui";
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
+import { track } from "@/lib/analytics";
 import { authService } from "@/lib/auth/service";
+import { avatarErrorMessage, pickAndUploadAvatar } from "@/lib/profile/avatar";
 import { useSession } from "@/lib/auth/session";
+import { PARTY_LABEL, PARTY_TYPES, type PartyType } from "@/lib/profile/extras";
 import { profileService, type Profile } from "@/lib/profile/service";
 import { tripCache } from "@/lib/trips/cache";
 
@@ -59,8 +62,18 @@ export default function ProfileScreen() {
   return (
     <Screen>
       <Eyebrow>Profile</Eyebrow>
-      <H1>{profile.data?.display_name || "You"}</H1>
-      <Muted>{user?.email}</Muted>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.two }}>
+        <AvatarPicker
+          userId={userId}
+          url={profile.data?.avatar_url ?? null}
+          name={profile.data?.display_name || ""}
+          onChanged={() => qc.invalidateQueries({ queryKey: ["profile", userId] })}
+        />
+        <View style={{ flex: 1 }}>
+          <H1>{profile.data?.display_name || "You"}</H1>
+          <Muted>{user?.email}</Muted>
+        </View>
+      </View>
 
       {profile.isPending || !profile.data ? (
         <Loading />
@@ -191,6 +204,11 @@ function ProfileForm({ userId, profile }: { userId: string; profile: Profile }) 
   const [interests, setInterests] = useState<string[]>(profile.interests ?? []);
   const [travelStyle, setTravelStyle] = useState<string | null>(profile.travel_style ?? null);
   const [languages, setLanguages] = useState((profile.languages ?? []).join(", "));
+  const [travelingFrom, setTravelingFrom] = useState(profile.traveling_from ?? "");
+  const [excitedAbout, setExcitedAbout] = useState(profile.excited_about ?? "");
+  const [partyType, setPartyType] = useState<PartyType | null>(
+    (profile.party_type ?? null) as PartyType | null,
+  );
   const [error, setError] = useState<string | null>(null);
 
   const save = useMutation({
@@ -220,6 +238,9 @@ function ProfileForm({ userId, profile }: { userId: string; profile: Profile }) 
         interests: v.interests,
         travel_style: v.travelStyle,
         languages: v.languages,
+        traveling_from: travelingFrom.trim() || null,
+        excited_about: excitedAbout.trim() || null,
+        party_type: partyType,
       });
     },
     onSuccess: () => {
@@ -234,6 +255,7 @@ function ProfileForm({ userId, profile }: { userId: string; profile: Profile }) 
       show_home_country?: boolean;
       show_bio?: boolean;
       show_interests?: boolean;
+      show_traveling_from?: boolean;
     }) => profileService.updateProfile(userId, patch),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["profile", userId] }),
   });
@@ -268,6 +290,36 @@ function ProfileForm({ userId, profile }: { userId: string; profile: Profile }) 
           autoCapitalize="characters"
           maxLength={2}
         />
+      </View>
+      <View>
+        <Label>Traveling from (optional)</Label>
+        <Input
+          value={travelingFrom}
+          onChangeText={setTravelingFrom}
+          placeholder="Santa Monica, California"
+        />
+      </View>
+      <View>
+        <Label>Excited about (optional)</Label>
+        <Input
+          value={excitedAbout}
+          onChangeText={setExcitedAbout}
+          placeholder="The Friday boat."
+          multiline
+        />
+      </View>
+      <View style={{ gap: 6 }}>
+        <Label>Traveling as</Label>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+          {PARTY_TYPES.map((pt) => (
+            <Chip
+              key={pt}
+              label={PARTY_LABEL[pt]}
+              active={partyType === pt}
+              onPress={() => setPartyType(partyType === pt ? null : pt)}
+            />
+          ))}
+        </View>
       </View>
       <View style={{ gap: 6 }}>
         <Label>Travel style</Label>
@@ -312,6 +364,16 @@ function ProfileForm({ userId, profile }: { userId: string; profile: Profile }) 
             <Switch
               value={profile.show_home_country}
               onValueChange={(v) => toggleVisibility.mutate({ show_home_country: v })}
+              trackColor={{ true: c.accent }}
+            />
+          }
+        />
+        <Row
+          title="Show where I'm traveling from"
+          right={
+            <Switch
+              value={profile.show_traveling_from ?? true}
+              onValueChange={(v) => toggleVisibility.mutate({ show_traveling_from: v })}
               trackColor={{ true: c.accent }}
             />
           }
@@ -372,5 +434,78 @@ function Chip({ label, active, onPress }: { label: string; active: boolean; onPr
         {label}
       </Text>
     </Pressable>
+  );
+}
+
+/** Tap to replace your profile photo; the group roster shows it. Cancelling changes nothing. */
+function AvatarPicker({
+  userId,
+  url,
+  name,
+  onChanged,
+}: {
+  userId: string;
+  url: string | null;
+  name: string;
+  onChanged: () => void;
+}) {
+  const c = useTheme();
+  const [busy, setBusy] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const shown = preview ?? url;
+
+  const choose = async () => {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    const result = await pickAndUploadAvatar(userId);
+    if (result.ok) {
+      setPreview(result.url);
+      try {
+        await profileService.updateProfile(userId, { avatar_url: result.url });
+        track("avatar_set", { source: "profile" });
+        onChanged();
+      } catch {
+        setError("Could not save that photo. Try again.");
+      }
+    } else if (result.reason !== "cancelled") {
+      setError(avatarErrorMessage(result.reason));
+    }
+    setBusy(false);
+  };
+
+  return (
+    <View style={{ alignItems: "center", gap: 4 }}>
+      <Pressable
+        onPress={choose}
+        disabled={busy}
+        accessibilityRole="button"
+        accessibilityLabel={shown ? "Change your photo" : "Add a photo"}
+        style={{
+          width: 64,
+          height: 64,
+          borderRadius: 32,
+          overflow: "hidden",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: c.backgroundSelected,
+          borderWidth: 1,
+          borderColor: c.border,
+        }}
+      >
+        {shown ? (
+          <Image source={{ uri: shown }} style={{ width: 64, height: 64 }} />
+        ) : (
+          <Text style={{ fontSize: 22, color: c.textSecondary }}>
+            {(name.trim()[0] ?? "?").toUpperCase()}
+          </Text>
+        )}
+      </Pressable>
+      <Pressable onPress={choose} disabled={busy} accessibilityRole="button">
+        <Muted style={{ fontSize: 12 }}>{busy ? "Saving…" : shown ? "Change" : "Add photo"}</Muted>
+      </Pressable>
+      {error && <ErrorNote message={error} />}
+    </View>
   );
 }

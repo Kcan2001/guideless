@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import {
+  itineraryChangeSchema,
   itineraryItemSchema,
   liveMomentFormSchema,
   noteSchema,
@@ -88,6 +89,34 @@ export async function updateTripItemAction(fd: FormData): Promise<void> {
   if (error) flash(to, "error", dbErrorMessage(error));
   revalidatePath(to);
   flash(to, "ok", "Live item saved. Travelers see the change immediately.");
+}
+
+/**
+ * Mark a live item changed or cancelled and say why. The note reaches travelers verbatim as the
+ * push and in-app notification (migration 047), so it is written for them, not for staff.
+ */
+export async function markTripItemChangedAction(fd: FormData): Promise<void> {
+  await requireStaff(OPS_ROLES);
+  const departureId = id(fd, "departureId");
+  const tripId = id(fd, "tripId");
+  const itemId = id(fd, "itemId");
+  const to = back(departureId, tripId, `#item-${itemId}`);
+  const parsed = parseForm(itineraryChangeSchema, fd);
+  if (!parsed.ok) flash(to, "error", parsed.error);
+  const c = parsed.data;
+  if (c.replacedByItemId === itemId) flash(to, "error", "An item cannot replace itself.");
+  const sb = await createClient();
+  const { error } = await sb
+    .from("trip_itinerary_items")
+    .update({
+      status: c.cancel ? "cancelled" : "changed",
+      change_note: c.changeNote,
+      replaced_by_item_id: c.replacedByItemId ?? null,
+    })
+    .eq("id", itemId);
+  if (error) flash(to, "error", dbErrorMessage(error));
+  revalidatePath(to);
+  flash(to, "ok", "Travelers have been told what changed.");
 }
 
 export async function deleteTripItemAction(fd: FormData): Promise<void> {

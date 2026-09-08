@@ -4,7 +4,13 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect } from "react";
 import { Linking, View } from "react-native";
 import { formatDate } from "@guideless/utils";
-import { ITEM_ICON, ITEM_LABEL, timeLabel } from "@/components/itinerary-item";
+import {
+  ITEM_ICON,
+  ITEM_LABEL,
+  changeNoteOf,
+  replacementIdOf,
+  timeLabel,
+} from "@/components/itinerary-item";
 import {
   Body,
   Button,
@@ -54,6 +60,8 @@ export default function ItemScreen() {
 
   const i = item.data;
   const mapsQuery = [i.location_name, i.address].filter(Boolean).join(", ");
+  const changeNote = changeNoteOf(i);
+  const replacementId = replacementIdOf(i);
 
   return (
     <Screen>
@@ -92,6 +100,21 @@ export default function ItemScreen() {
         {i.status === "changed" && <Pill tone="warning">Updated</Pill>}
         {i.status === "cancelled" && <Pill tone="danger">Cancelled</Pill>}
       </View>
+
+      {changeNote && (
+        <Card tone="accent">
+          <Eyebrow>What changed</Eyebrow>
+          <Body>{changeNote}</Body>
+          {replacementId && (
+            <Button
+              title="Open the replacement"
+              variant="secondary"
+              icon="arrow-forward-outline"
+              onPress={() => router.push(`/item/${replacementId}`)}
+            />
+          )}
+        </Card>
+      )}
 
       <Card>
         <Eyebrow>When</Eyebrow>

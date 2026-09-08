@@ -251,6 +251,13 @@ export type OptionLabel = (typeof OPTION_LABELS)[number];
 export const OPTION_TIERS = ["explorer", "classic", "premium", "elite"] as const;
 export type OptionTier = (typeof OPTION_TIERS)[number];
 
+/**
+ * Who a traveler is coming with (migration 046). A check constraint on profiles.party_type
+ * rather than a Postgres enum, like ADD_ON_KINDS — keep the two in step.
+ */
+export const PARTY_TYPES = ["solo", "couple", "friends", "family"] as const;
+export type PartyType = (typeof PARTY_TYPES)[number];
+
 /** ISO 4217 codes we sell in. Extend deliberately; each needs Stripe + pricing support. */
 // Hotel inventory (migration 044). Mirrors of the Postgres enums of the same names.
 export const HOTEL_SUPPLIERS = ["duffel", "expedia", "hotelbeds", "manual"] as const;
