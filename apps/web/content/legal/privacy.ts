@@ -6,7 +6,7 @@ export const privacy: LegalDocument = {
   slug: "privacy",
   title: "Privacy Policy",
   lede: "Organizing a trip means we hold personal details for you and the people you travel with. This policy explains what we collect, why, who processes it for us and the choices you have. No surprises.",
-  version: brand.termsVersion,
+  version: brand.privacyVersion,
   lastUpdated: "2026-09-08",
   sections: [
     {

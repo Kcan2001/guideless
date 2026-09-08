@@ -113,7 +113,16 @@ with the CST number in advertising and Travel Consumer Restitution Fund particip
 organiser-versus-agent question that determines who is responsible when a supplier fails. The site
 currently declares `TravelAgency` in its Organization structured data while that question is open.
 
-### F. Operational
+### F. The accepted-terms version is now dated
+
+`brand.termsVersion` was the month string `2026-09`, and every booking stores it as the edition the
+customer accepted. This revision changed the contract materially inside that same month, so one
+string would have named two different documents. It is now `2026-09-08`, and the Privacy Policy has
+its own `privacyVersion` rather than borrowing the Terms' number, since it revises on a different
+schedule and is not part of the booking contract. No bookings exist yet, so nothing is ambiguous in
+the record.
+
+### G. Operational
 
 Five inboxes are published across the contact page and the legal documents and all five must route
 somewhere: hello, support, bookings, finance and partners at guidelesstravel.com.
