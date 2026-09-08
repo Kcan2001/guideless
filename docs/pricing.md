@@ -235,3 +235,68 @@ themselves. That is a claim risk as much as a pricing one.
 months ahead and no supplier takes them back. The boat and the transfer keep real windows. The
 departure runs the event cancellation ladder, which reaches zero sixty days out rather than the
 fifteen a touring route gets.
+
+## Southern France: checking the prices against real costs (2026-09-08)
+
+Monaco was repriced from scratch because its numbers were invented. Southern France turned out
+differently: the advertised price was invented too, but it happens to sit on a defensible margin,
+so it stays. What changed is the handful of things the research showed to be actually wrong.
+
+**Assumptions.** Roughly 1.16 USD to the euro. Costs are what a supplier publishes; no trade rate
+is agreed with anyone.
+
+### Landed cost per traveler, own room, standard tier
+
+| Line                                                                         | Cost                              |
+| ---------------------------------------------------------------------------- | --------------------------------- |
+| 8 nights with breakfast: 3 Nice, 2 Avignon, 3 Paris                          | about EUR 1,270                   |
+| TGV Nice to Avignon and Avignon to Paris, 2nd class reserved                 | EUR 115                           |
+| Shared airport minibus, Nice airport to the old town, split across the group | EUR 23                            |
+| Chateauneuf-du-Pape afternoon with lunch                                     | EUR 140                           |
+| Welcome round                                                                | EUR 10                            |
+| **Total**                                                                    | **about EUR 1,560, or USD 1,810** |
+
+Against an advertised $3,495 that is a gross margin near 48% before overhead. That is a normal
+operator margin, so the price holds.
+
+### What changed
+
+**The June premium is gone.** June charged $200 more than May and September for a week that costs
+within 2.5% of them. The seasonal curves cancel: the Cannes Film Festival runs 11 to 22 May 2027
+and lifts Nice hotel rates by roughly 30%, but May is the cheapest month in Paris and wins most of
+it back. September is the reverse, dearest in Paris and cheapest in Nice. Charging more for June
+was charging for a difference we do not pay.
+
+**The Riviera boat was sold at half cost, and this is the real find.** A skippered boat out of Nice
+runs about EUR 2,250 for six hours, and boats at that price seat ten, not the twelve the add-on
+advertised. Ten aboard with lunch is about EUR 265 a head, roughly USD 310, against the USD 145 we
+were charging. Every sale lost money, and it lost more the fuller it got. It is now $395 with
+capacity ten, which is the boat that actually exists.
+
+**Three smaller ones.** The second cellar tasting retails at EUR 90 to 100 with no trade rate
+anywhere, so $95 was under cost; it is now $135. An extra Marais night costs EUR 165 to 195, so
+$210 left nothing; it is now $245. The farewell dinner sat at the bottom of the EUR 50 to 80 range
+for three courses with wine; it is now $95. The private transfer at $90 was already right against a
+EUR 44 to 50 vehicle cost and only lacked a stated basis.
+
+### Left for Kyle rather than changed
+
+The boutique upgrade sells at $850 against a cost difference of about $720 across the eight nights.
+That is positive but a thinner margin than the base trip earns, proportionally. It is not a bug, so
+it is not a correction, and moving it is a pricing decision rather than a fix.
+
+### What could not be verified
+
+No 2027 hotel inventory is bookable yet, so the per-night figures are monthly estimates built on
+firm current rates rather than quotes. No wine tour publishes a trade rate. No operator publishes a
+six-hour shared boat day with lunch as a product, so that one has to be put out to tender. No
+Marais bistro publishes a fixed group menu including wine. Each of those needs a real quote before
+a departure sells, and each is a place where the price could move.
+
+### Where this sits in the market
+
+Land-only, eight or nine nights, southern France and Paris: Gate 1 at $1,649, Road Scholar at
+$2,899, Trafalgar at $2,966, Globus at $5,529, Tauck at $6,390 and up for the closest itinerary
+match. Ours is $3,495 with every traveler in their own room as standard, where most of that field
+charges a single supplement of 30 to 100% on top. That is the comparison to make on the trip page,
+and it is a genuinely strong one.
