@@ -122,6 +122,11 @@ somewhere: hello, support, bookings, finance and partners at guidelesstravel.com
 `host_free_spot_threshold` settings row. The public host page renders the constant, so changing the
 setting would leave the marketing page advertising the old number.
 
+`brand.termsVersion` is a month string, `2026-09`, and every booking stores it to record which terms
+the customer accepted. Today's revision changed the contract materially inside that same month, so
+`2026-09` would now name two different documents. No bookings exist yet, so nothing is ambiguous in
+practice, but the scheme needs finer granularity before the first sale.
+
 ## Checked and correct
 
 Payment and trip reminders run on a real daily cron rather than being promised and left manual. The
