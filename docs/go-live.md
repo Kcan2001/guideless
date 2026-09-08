@@ -230,12 +230,9 @@ resolve. Keep Squarespace as the registrar and DNS host; nothing needs to transf
   `20260906003800_plpgsql_lint_fixes.sql` for three plpgsql_check warnings.
 - DNS switched at Squarespace: the "Squarespace Defaults" preset was deleted and custom records
   `A @ 76.76.21.21` and `CNAME www cname.vercel-dns.com` added; Resend, DMARC and Google
-  site-verification records were left in place. The `www` 308 redirect to the apex was removed
-  again during propagation: resolvers that still cached the Squarespace apex IP were sent
-  apex → www (Squarespace 301) → apex (Vercel 308) in a loop. Once the old 4-hour TTL has expired
-  everywhere (after 2026-09-08 00:15 UTC), re-add the redirect: Vercel → Project → Domains → www →
-  Redirect to guidelesstravel.com (308), or `PATCH /v9/projects/<id>/domains/www.guidelesstravel.com`
-  with `{"redirect":"guidelesstravel.com","redirectStatusCode":308}`.
+  site-verification records were left in place. The `www` 308 redirect to the apex was paused for the
+  first four hours after the switch (cached Squarespace apex + Vercel www looped for some resolvers)
+  and restored the same evening once every public resolver returned 76.76.21.21.
 - Still to do by hand: first sign-up on the live site and the admin grant (§4 step 6), Stripe
   account activation and live keys (test keys are deliberately in Vercel until then), Pinterest
   trial-access re-application once `guidelesstravel.com/privacy` resolves.
