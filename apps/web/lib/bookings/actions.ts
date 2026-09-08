@@ -12,6 +12,7 @@ import {
 import { formatDateRange } from "@guideless/utils";
 import { publicEnv } from "@/lib/env";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
+import { recheckStayRate } from "@/lib/hotels/recheck";
 import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 
 export interface CheckoutActionResult {
@@ -123,8 +124,30 @@ export async function startCheckout(input: StartCheckoutInput): Promise<Checkout
   } = await supabase.auth.getUser();
   if (!user) return HINT_MESSAGES.auth_required!;
 
-  // 1. Atomic booking + hold, as the signed-in user (security definer RPC).
   const rooms = data.roomIndexes ?? data.travelers.map((_, i) => i + 1);
+
+  // 0. Live hotel price check (docs/hotels.md). Only when the chosen tier is backed by a hotel with a
+  //    stored supplier rate; today's catalog has none, so this is a no-op until hotels are linked.
+  //    Runs before the booking so a refusal never leaves a seat hold behind.
+  if (data.stayOptionId) {
+    const occupancy = Math.max(...rooms.map((r) => rooms.filter((x) => x === r).length), 1);
+    const check = await recheckStayRate(data.stayOptionId, Math.min(2, occupancy));
+    if (check.applicable && !check.ok) {
+      console.error("stay_rate_changed", {
+        stayOptionId: data.stayOptionId,
+        reason: check.reason,
+        storedTotal: check.storedTotal,
+        liveTotal: check.liveTotal,
+        deltaPct: check.deltaPct,
+      });
+      return {
+        code: "invalid",
+        error: "The hotel price for this option changed. Please choose again. Nothing was charged.",
+      };
+    }
+  }
+
+  // 1. Atomic booking + hold, as the signed-in user (security definer RPC).
   const { data: rows, error: rpcError } = await supabase.rpc("create_booking", {
     p_departure_id: data.departureId,
     p_travelers: data.travelers.map((t, i) => ({ ...t, roomIndex: rooms[i] ?? i + 1 })),

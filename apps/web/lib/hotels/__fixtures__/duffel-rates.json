@@ -1,0 +1,85 @@
+{
+  "data": {
+    "id": "ssr_0000AbCdEfGhIjKlMnOpQr",
+    "check_in_date": "2027-06-03",
+    "check_out_date": "2027-06-07",
+    "rooms": 1,
+    "guests": [{ "type": "adult" }, { "type": "adult" }],
+    "accommodation": {
+      "id": "acc_0000AbCdEfGhIjKlMnOpQs",
+      "name": "Hôtel du Port Nice",
+      "rating": 3,
+      "photos": [],
+      "location": {
+        "address": { "line_one": "12 Quai Papacino", "city_name": "Nice", "country_code": "FR" },
+        "geographic_coordinates": { "latitude": 43.6963, "longitude": 7.2853 }
+      },
+      "rooms": [
+        {
+          "name": "Classic Double Room",
+          "beds": [{ "type": "double", "count": 1 }],
+          "photos": [],
+          "rates": [
+            {
+              "id": "rat_0000AbCdEfGhIjKlMnOpQt",
+              "total_amount": "1180.00",
+              "total_currency": "EUR",
+              "base_amount": "1100.00",
+              "base_currency": "EUR",
+              "tax_amount": "80.00",
+              "tax_currency": "EUR",
+              "fee_amount": "0.00",
+              "fee_currency": "EUR",
+              "board_type": "breakfast",
+              "payment_type": "pay_now",
+              "quantity_available": 4,
+              "cancellation_timeline": [
+                { "before": "2027-05-31T22:00:00Z", "refund_amount": "1180.00", "currency": "EUR" },
+                { "before": "2027-06-02T22:00:00Z", "refund_amount": "590.00", "currency": "EUR" }
+              ],
+              "conditions": [{ "title": "Check-in", "description": "From 15:00" }]
+            },
+            {
+              "id": "rat_0000AbCdEfGhIjKlMnOpQu",
+              "total_amount": "990.00",
+              "total_currency": "EUR",
+              "base_amount": "910.00",
+              "base_currency": "EUR",
+              "tax_amount": "80.00",
+              "tax_currency": "EUR",
+              "fee_amount": "0.00",
+              "fee_currency": "EUR",
+              "board_type": "room_only",
+              "payment_type": "pay_now",
+              "quantity_available": 0,
+              "cancellation_timeline": [],
+              "conditions": []
+            }
+          ]
+        },
+        {
+          "name": "Superior Sea View",
+          "beds": [
+            { "type": "king", "count": 1 },
+            { "type": "sofa_bed", "count": 1 }
+          ],
+          "rates": [
+            {
+              "id": "rat_0000AbCdEfGhIjKlMnOpQv",
+              "total_amount": "1540.00",
+              "total_currency": "EUR",
+              "base_amount": "1400.00",
+              "tax_amount": "100.00",
+              "fee_amount": "40.00",
+              "board_type": "half_board",
+              "payment_type": "guarantee",
+              "cancellation_timeline": [
+                { "before": "2027-05-27T22:00:00Z", "refund_amount": "1540.00", "currency": "EUR" }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

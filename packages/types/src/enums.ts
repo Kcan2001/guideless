@@ -252,5 +252,21 @@ export const OPTION_TIERS = ["explorer", "classic", "premium", "elite"] as const
 export type OptionTier = (typeof OPTION_TIERS)[number];
 
 /** ISO 4217 codes we sell in. Extend deliberately; each needs Stripe + pricing support. */
+// Hotel inventory (migration 044). Mirrors of the Postgres enums of the same names.
+export const HOTEL_SUPPLIERS = ["duffel", "expedia", "hotelbeds", "manual"] as const;
+export type HotelSupplierId = (typeof HOTEL_SUPPLIERS)[number];
+
+export const HOTEL_PAYMENT_TYPES = ["pay_now", "pay_at_property"] as const;
+export type HotelPaymentType = (typeof HOTEL_PAYMENT_TYPES)[number];
+
+export const HOTEL_BOOKING_STATUSES = [
+  "quoted",
+  "booked",
+  "confirmed",
+  "cancelled",
+  "failed",
+] as const;
+export type HotelBookingStatus = (typeof HOTEL_BOOKING_STATUSES)[number];
+
 export const CURRENCIES = ["USD", "EUR", "GBP"] as const;
 export type Currency = (typeof CURRENCIES)[number];

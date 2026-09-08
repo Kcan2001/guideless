@@ -35,13 +35,15 @@ server secrets; mobile reads `EXPO_PUBLIC_*` only — it must never hold a secre
 
 Observability variables (all optional; the features are no-ops when unset):
 
-| Variable                                              | Where           | Purpose                                                           |
-| ----------------------------------------------------- | --------------- | ----------------------------------------------------------------- |
-| `NEXT_PUBLIC_SENTRY_DSN`                              | web             | Enables Sentry on the browser, Node and Edge runtimes             |
-| `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT`   | web (CI/Vercel) | Source-map upload at build time; skipped when the token is absent |
-| `EXPO_PUBLIC_SENTRY_DSN`                              | mobile          | Enables `@sentry/react-native` (wraps the root layout)            |
-| `NEXT_PUBLIC_POSTHOG_KEY` / `EXPO_PUBLIC_POSTHOG_KEY` | web / mobile    | Product analytics (see docs/api.md, Analytics events)             |
-| `EXPO_PUBLIC_SITE_URL`                                | mobile          | Web origin the app opens for add-on purchases and the account     |
+| Variable                                              | Where           | Purpose                                                                                    |
+| ----------------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------ |
+| `NEXT_PUBLIC_SENTRY_DSN`                              | web             | Enables Sentry on the browser, Node and Edge runtimes                                      |
+| `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT`   | web (CI/Vercel) | Source-map upload at build time; skipped when the token is absent                          |
+| `EXPO_PUBLIC_SENTRY_DSN`                              | mobile          | Enables `@sentry/react-native` (wraps the root layout)                                     |
+| `NEXT_PUBLIC_POSTHOG_KEY` / `EXPO_PUBLIC_POSTHOG_KEY` | web / mobile    | Product analytics (see docs/api.md, Analytics events)                                      |
+| `EXPO_PUBLIC_SITE_URL`                                | mobile          | Web origin the app opens for add-on purchases and the account                              |
+| `HOTEL_SUPPLIER`, `DUFFEL_ACCESS_TOKEN`               | web (server)    | Hotel inventory supplier (`mock` default; `duffel` + token for live rates), docs/hotels.md |
+| `CRON_SECRET`                                         | web (server)    | Bearer token Vercel sends to `/api/cron/hotel-rates` (vercel.json crons, 04:15 UTC daily)  |
 
 Secrets live in Vercel project settings, Supabase project secrets (`supabase secrets set`) and
 EAS secrets. Never in git.

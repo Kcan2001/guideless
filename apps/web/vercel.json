@@ -5,5 +5,11 @@
   "buildCommand": "cd ../.. && pnpm turbo run build --filter=web",
   "git": {
     "deploymentEnabled": false
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/hotel-rates",
+      "schedule": "15 4 * * *"
+    }
+  ]
 }

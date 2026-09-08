@@ -115,6 +115,38 @@ by `anon` (read-only, security definer); the checkout sidebar calls it from the 
   decision and notifies the customer. Wiring that button in admin is a small follow-up.
 - Money never moves from the request itself; the request is a ticket with the quote attached.
 
+## Hotel inventory (migration 044)
+
+Supplier rates never set a customer price directly. The chain is:
+
+```
+supplier adapters → hotel_rates (NET, staff-only) → suggest_stay_price() → staff copies a number
+into departure_stay_options.price_delta_amount → quote_booking() as before
+```
+
+- `hotels`, `hotel_rooms` hold the curated catalog; customers read them only through the
+  `hotels_public` and `stay_option_hotels_public` views (name, city, photos, amenities, star rating
+  when confirmed). `departure_stay_options.hotel_id` links a tier to its property.
+- `hotel_rates` rows are what Guideless would pay: `net_amount + taxes_amount + fees_amount =
+total_amount`, integer minor units in `currency`, with `refundable`, `cancellation_policy`,
+  `breakfast_included`, `payment_type`, `fetched_at`, `expires_at`. Ops and finance read; only the
+  service role writes. Cost never reaches a customer (CLAUDE.md rule 11).
+- `pricing_rules` (finance-managed): `markup = max(min_markup_amount, round(total ×
+percentage_markup / 100) + fixed_markup_amount)`. A hotel rule beats a destination rule beats a
+  global rule; ties go to `priority` desc, then the newest rule; `effective_from/to` are judged on
+  the check-in date. `apps/web/lib/hotels/pricing.ts` mirrors this exactly so admin previews match.
+- `suggest_stay_price(hotel, check_in, check_out, adults)` (staff only) returns the latest
+  unexpired rate per equivalent product — same room, bed, occupancy, refundability, cancellation
+  deadline day, breakfast and payment type — with the markup applied: `{rates: [{rate_id, room_name,
+refundable, breakfast_included, payment_type, net_total, markup, customer_total, currency,
+expires_at}], rule_id}`. Equivalent-product grouping is the same fingerprint used by
+  `apps/web/lib/hotels/fingerprint.ts`, so a non-refundable room-only rate is never compared with
+  a refundable rate that includes breakfast.
+- Offer choice is not "cheapest": `apps/web/lib/hotels/compare.ts` scores price, free
+  cancellation, breakfast, supplier reliability and margin with documented default weights.
+- A rate is rechecked with the supplier before any payment (service layer); `hotel_bookings`
+  freezes the purchased rate in `rate_snapshot`.
+
 ## Tests
 
 `supabase/tests/pricing_and_community.test.sql` (28 tests): quote math for rooms, tiers and
@@ -123,3 +155,6 @@ creation with all of the above, confirmation side effects, head-counts, credit a
 roster privacy, group opening and RLS on the catalog. `supabase/tests/cancellations.test.sql`
 (14 tests): ownership, status and reason checks, one open request per booking, notifications,
 withdraw and re-request, staff-only resolution, and the rate limiter's fixed window.
+`supabase/tests/hotels.test.sql` (27 tests): public projections vs staff-only tables, rate privacy,
+rule selection and markup math in `suggest_stay_price()`, and the tier ↔ hotel link. Unit tests for
+the TypeScript mirror live next to `apps/web/lib/hotels/*.ts`.

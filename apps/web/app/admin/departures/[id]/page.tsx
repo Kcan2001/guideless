@@ -305,6 +305,7 @@ export default async function AdminDeparturePage(props: PageProps<"/admin/depart
                     departureId={d.id}
                     stay={st}
                     destinations={extras.destinations}
+                    hotels={extras.hotels}
                     currency={d.currency}
                     disabled={!canOps}
                   />
@@ -328,6 +329,7 @@ export default async function AdminDeparturePage(props: PageProps<"/admin/depart
                   <StayOptionForm
                     departureId={d.id}
                     destinations={extras.destinations}
+                    hotels={extras.hotels}
                     currency={d.currency}
                   />
                 </div>

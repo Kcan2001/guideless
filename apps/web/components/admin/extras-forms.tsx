@@ -158,17 +158,31 @@ export function StayOptionForm({
   departureId,
   stay,
   destinations,
+  hotels,
   currency,
   disabled,
 }: {
   departureId: string;
   stay?: StayOption;
   destinations: { id: string; name: string }[];
+  /** Curated hotels (docs/hotels.md); linking one lets the nightly job price this tier. */
+  hotels?: Array<{
+    id: string;
+    name: string;
+    city: string | null;
+    rooms: Array<{ id: string; name: string }>;
+  }>;
   currency: string;
   disabled?: boolean;
 }) {
   const k = stay?.id ?? "new";
   const details = stayDetails(stay?.details);
+  // TODO(types): `hotel_id` / `hotel_room_id` come from migration 0044.
+  const linkedHotelId = (stay as { hotel_id?: string | null } | undefined)?.hotel_id ?? "";
+  const linkedRoomId = (stay as { hotel_room_id?: string | null } | undefined)?.hotel_room_id ?? "";
+  const roomChoices = (hotels ?? []).flatMap((h) =>
+    h.rooms.map((r) => ({ ...r, hotel: h.name, hotelId: h.id })),
+  );
   return (
     <form action={saveStayOptionAction} className="grid gap-3 sm:grid-cols-2">
       <input type="hidden" name="departureId" value={departureId} />
@@ -226,6 +240,49 @@ export function StayOptionForm({
           disabled={disabled}
         />
       </div>
+      {hotels && hotels.length > 0 && (
+        <>
+          <div>
+            <label htmlFor={`stay-${k}-hotel-id`} className={labelClass}>
+              Linked hotel (catalog; enables live rates)
+            </label>
+            <select
+              id={`stay-${k}-hotel-id`}
+              name="hotelId"
+              defaultValue={linkedHotelId}
+              className={inputClass}
+              disabled={disabled}
+            >
+              <option value="">— not linked —</option>
+              {hotels.map((h) => (
+                <option key={h.id} value={h.id}>
+                  {h.name}
+                  {h.city ? ` · ${h.city}` : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor={`stay-${k}-room-id`} className={labelClass}>
+              Linked room (optional)
+            </label>
+            <select
+              id={`stay-${k}-room-id`}
+              name="hotelRoomId"
+              defaultValue={linkedRoomId}
+              className={inputClass}
+              disabled={disabled}
+            >
+              <option value="">— any room —</option>
+              {roomChoices.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.hotel}: {r.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </>
+      )}
       <div>
         <label htmlFor={`stay-${k}-area`} className={labelClass}>
           Area

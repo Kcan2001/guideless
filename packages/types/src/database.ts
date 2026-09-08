@@ -771,6 +771,13 @@ export type Database = {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "bookings_stay_option_id_fkey";
+            columns: ["stay_option_id"];
+            isOneToOne: false;
+            referencedRelation: "stay_option_hotels_public";
+            referencedColumns: ["stay_option_id"];
+          },
+          {
             foreignKeyName: "bookings_tour_version_id_fkey";
             columns: ["tour_version_id"];
             isOneToOne: false;
@@ -1336,7 +1343,9 @@ export type Database = {
           destination_id: string | null;
           details: Json;
           excludes: string[];
+          hotel_id: string | null;
           hotel_name: string | null;
+          hotel_room_id: string | null;
           id: string;
           image_urls: string[];
           includes: string[];
@@ -1362,7 +1371,9 @@ export type Database = {
           destination_id?: string | null;
           details?: Json;
           excludes?: string[];
+          hotel_id?: string | null;
           hotel_name?: string | null;
+          hotel_room_id?: string | null;
           id?: string;
           image_urls?: string[];
           includes?: string[];
@@ -1388,7 +1399,9 @@ export type Database = {
           destination_id?: string | null;
           details?: Json;
           excludes?: string[];
+          hotel_id?: string | null;
           hotel_name?: string | null;
+          hotel_room_id?: string | null;
           id?: string;
           image_urls?: string[];
           includes?: string[];
@@ -1425,6 +1438,34 @@ export type Database = {
             columns: ["destination_id"];
             isOneToOne: false;
             referencedRelation: "destinations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "departure_stay_options_hotel_id_fkey";
+            columns: ["hotel_id"];
+            isOneToOne: false;
+            referencedRelation: "hotels";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "departure_stay_options_hotel_id_fkey";
+            columns: ["hotel_id"];
+            isOneToOne: false;
+            referencedRelation: "hotels_public";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "departure_stay_options_hotel_id_fkey";
+            columns: ["hotel_id"];
+            isOneToOne: false;
+            referencedRelation: "stay_option_hotels_public";
+            referencedColumns: ["hotel_id"];
+          },
+          {
+            foreignKeyName: "departure_stay_options_hotel_room_id_fkey";
+            columns: ["hotel_room_id"];
+            isOneToOne: false;
+            referencedRelation: "hotel_rooms";
             referencedColumns: ["id"];
           },
         ];
@@ -1847,6 +1888,399 @@ export type Database = {
             columns: ["preferred_tour_id"];
             isOneToOne: false;
             referencedRelation: "tours";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      hotel_bookings: {
+        Row: {
+          booking_id: string;
+          cancellation_deadline: string | null;
+          confirmation_number: string | null;
+          created_at: string;
+          hotel_id: string;
+          id: string;
+          rate_snapshot: Json;
+          status: Database["public"]["Enums"]["hotel_booking_status"];
+          stay_option_id: string | null;
+          supplier: Database["public"]["Enums"]["hotel_supplier"];
+          supplier_booking_id: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          booking_id: string;
+          cancellation_deadline?: string | null;
+          confirmation_number?: string | null;
+          created_at?: string;
+          hotel_id: string;
+          id?: string;
+          rate_snapshot: Json;
+          status?: Database["public"]["Enums"]["hotel_booking_status"];
+          stay_option_id?: string | null;
+          supplier: Database["public"]["Enums"]["hotel_supplier"];
+          supplier_booking_id?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          booking_id?: string;
+          cancellation_deadline?: string | null;
+          confirmation_number?: string | null;
+          created_at?: string;
+          hotel_id?: string;
+          id?: string;
+          rate_snapshot?: Json;
+          status?: Database["public"]["Enums"]["hotel_booking_status"];
+          stay_option_id?: string | null;
+          supplier?: Database["public"]["Enums"]["hotel_supplier"];
+          supplier_booking_id?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "hotel_bookings_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "hotel_bookings_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings_public";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "hotel_bookings_hotel_id_fkey";
+            columns: ["hotel_id"];
+            isOneToOne: false;
+            referencedRelation: "hotels";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "hotel_bookings_hotel_id_fkey";
+            columns: ["hotel_id"];
+            isOneToOne: false;
+            referencedRelation: "hotels_public";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "hotel_bookings_hotel_id_fkey";
+            columns: ["hotel_id"];
+            isOneToOne: false;
+            referencedRelation: "stay_option_hotels_public";
+            referencedColumns: ["hotel_id"];
+          },
+          {
+            foreignKeyName: "hotel_bookings_stay_option_id_fkey";
+            columns: ["stay_option_id"];
+            isOneToOne: false;
+            referencedRelation: "departure_stay_options";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "hotel_bookings_stay_option_id_fkey";
+            columns: ["stay_option_id"];
+            isOneToOne: false;
+            referencedRelation: "stay_option_hotels_public";
+            referencedColumns: ["stay_option_id"];
+          },
+        ];
+      };
+      hotel_rates: {
+        Row: {
+          available: boolean;
+          bed_type: string | null;
+          breakfast_included: boolean;
+          cancellation_policy: Json;
+          check_in: string;
+          check_out: string;
+          currency: string;
+          expires_at: string | null;
+          fees_amount: number;
+          fetched_at: string;
+          hotel_id: string;
+          hotel_room_id: string | null;
+          id: string;
+          net_amount: number;
+          occupancy_adults: number;
+          occupancy_children: number;
+          payment_type: Database["public"]["Enums"]["hotel_payment_type"];
+          raw: Json | null;
+          refundable: boolean;
+          room_name: string;
+          supplier: Database["public"]["Enums"]["hotel_supplier"];
+          supplier_commission_amount: number | null;
+          supplier_rate_id: string;
+          taxes_amount: number;
+          total_amount: number;
+        };
+        Insert: {
+          available?: boolean;
+          bed_type?: string | null;
+          breakfast_included?: boolean;
+          cancellation_policy?: Json;
+          check_in: string;
+          check_out: string;
+          currency: string;
+          expires_at?: string | null;
+          fees_amount?: number;
+          fetched_at?: string;
+          hotel_id: string;
+          hotel_room_id?: string | null;
+          id?: string;
+          net_amount: number;
+          occupancy_adults: number;
+          occupancy_children?: number;
+          payment_type: Database["public"]["Enums"]["hotel_payment_type"];
+          raw?: Json | null;
+          refundable: boolean;
+          room_name: string;
+          supplier: Database["public"]["Enums"]["hotel_supplier"];
+          supplier_commission_amount?: number | null;
+          supplier_rate_id: string;
+          taxes_amount?: number;
+          total_amount: number;
+        };
+        Update: {
+          available?: boolean;
+          bed_type?: string | null;
+          breakfast_included?: boolean;
+          cancellation_policy?: Json;
+          check_in?: string;
+          check_out?: string;
+          currency?: string;
+          expires_at?: string | null;
+          fees_amount?: number;
+          fetched_at?: string;
+          hotel_id?: string;
+          hotel_room_id?: string | null;
+          id?: string;
+          net_amount?: number;
+          occupancy_adults?: number;
+          occupancy_children?: number;
+          payment_type?: Database["public"]["Enums"]["hotel_payment_type"];
+          raw?: Json | null;
+          refundable?: boolean;
+          room_name?: string;
+          supplier?: Database["public"]["Enums"]["hotel_supplier"];
+          supplier_commission_amount?: number | null;
+          supplier_rate_id?: string;
+          taxes_amount?: number;
+          total_amount?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "hotel_rates_hotel_id_fkey";
+            columns: ["hotel_id"];
+            isOneToOne: false;
+            referencedRelation: "hotels";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "hotel_rates_hotel_id_fkey";
+            columns: ["hotel_id"];
+            isOneToOne: false;
+            referencedRelation: "hotels_public";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "hotel_rates_hotel_id_fkey";
+            columns: ["hotel_id"];
+            isOneToOne: false;
+            referencedRelation: "stay_option_hotels_public";
+            referencedColumns: ["hotel_id"];
+          },
+          {
+            foreignKeyName: "hotel_rates_hotel_room_id_fkey";
+            columns: ["hotel_room_id"];
+            isOneToOne: false;
+            referencedRelation: "hotel_rooms";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      hotel_rooms: {
+        Row: {
+          bed_type: string | null;
+          created_at: string;
+          description: string | null;
+          hotel_id: string;
+          id: string;
+          image_urls: string[];
+          max_occupancy: number;
+          name: string;
+          position: number;
+          updated_at: string;
+        };
+        Insert: {
+          bed_type?: string | null;
+          created_at?: string;
+          description?: string | null;
+          hotel_id: string;
+          id?: string;
+          image_urls?: string[];
+          max_occupancy?: number;
+          name: string;
+          position?: number;
+          updated_at?: string;
+        };
+        Update: {
+          bed_type?: string | null;
+          created_at?: string;
+          description?: string | null;
+          hotel_id?: string;
+          id?: string;
+          image_urls?: string[];
+          max_occupancy?: number;
+          name?: string;
+          position?: number;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "hotel_rooms_hotel_id_fkey";
+            columns: ["hotel_id"];
+            isOneToOne: false;
+            referencedRelation: "hotels";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "hotel_rooms_hotel_id_fkey";
+            columns: ["hotel_id"];
+            isOneToOne: false;
+            referencedRelation: "hotels_public";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "hotel_rooms_hotel_id_fkey";
+            columns: ["hotel_id"];
+            isOneToOne: false;
+            referencedRelation: "stay_option_hotels_public";
+            referencedColumns: ["hotel_id"];
+          },
+        ];
+      };
+      hotel_supplier_mappings: {
+        Row: {
+          created_at: string;
+          hotel_id: string;
+          hotel_room_id: string | null;
+          id: string;
+          supplier: Database["public"]["Enums"]["hotel_supplier"];
+          supplier_hotel_id: string;
+          supplier_room_id: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          hotel_id: string;
+          hotel_room_id?: string | null;
+          id?: string;
+          supplier: Database["public"]["Enums"]["hotel_supplier"];
+          supplier_hotel_id: string;
+          supplier_room_id?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          hotel_id?: string;
+          hotel_room_id?: string | null;
+          id?: string;
+          supplier?: Database["public"]["Enums"]["hotel_supplier"];
+          supplier_hotel_id?: string;
+          supplier_room_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "hotel_supplier_mappings_hotel_id_fkey";
+            columns: ["hotel_id"];
+            isOneToOne: false;
+            referencedRelation: "hotels";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "hotel_supplier_mappings_hotel_id_fkey";
+            columns: ["hotel_id"];
+            isOneToOne: false;
+            referencedRelation: "hotels_public";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "hotel_supplier_mappings_hotel_id_fkey";
+            columns: ["hotel_id"];
+            isOneToOne: false;
+            referencedRelation: "stay_option_hotels_public";
+            referencedColumns: ["hotel_id"];
+          },
+          {
+            foreignKeyName: "hotel_supplier_mappings_hotel_room_id_fkey";
+            columns: ["hotel_room_id"];
+            isOneToOne: false;
+            referencedRelation: "hotel_rooms";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      hotels: {
+        Row: {
+          address: string | null;
+          amenities: string[];
+          city: string;
+          country_code: string;
+          created_at: string;
+          description: string | null;
+          destination_id: string;
+          id: string;
+          image_urls: string[];
+          is_active: boolean;
+          latitude: number | null;
+          longitude: number | null;
+          name: string;
+          slug: string;
+          star_rating: number | null;
+          updated_at: string;
+        };
+        Insert: {
+          address?: string | null;
+          amenities?: string[];
+          city: string;
+          country_code: string;
+          created_at?: string;
+          description?: string | null;
+          destination_id: string;
+          id?: string;
+          image_urls?: string[];
+          is_active?: boolean;
+          latitude?: number | null;
+          longitude?: number | null;
+          name: string;
+          slug: string;
+          star_rating?: number | null;
+          updated_at?: string;
+        };
+        Update: {
+          address?: string | null;
+          amenities?: string[];
+          city?: string;
+          country_code?: string;
+          created_at?: string;
+          description?: string | null;
+          destination_id?: string;
+          id?: string;
+          image_urls?: string[];
+          is_active?: boolean;
+          latitude?: number | null;
+          longitude?: number | null;
+          name?: string;
+          slug?: string;
+          star_rating?: number | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "hotels_destination_id_fkey";
+            columns: ["destination_id"];
+            isOneToOne: false;
+            referencedRelation: "destinations";
             referencedColumns: ["id"];
           },
         ];
@@ -2387,6 +2821,77 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "bookings_public";
             referencedColumns: ["id"];
+          },
+        ];
+      };
+      pricing_rules: {
+        Row: {
+          created_at: string;
+          destination_id: string | null;
+          effective_from: string | null;
+          effective_to: string | null;
+          fixed_markup_amount: number;
+          hotel_id: string | null;
+          id: string;
+          is_active: boolean;
+          min_markup_amount: number;
+          percentage_markup: number;
+          priority: number;
+        };
+        Insert: {
+          created_at?: string;
+          destination_id?: string | null;
+          effective_from?: string | null;
+          effective_to?: string | null;
+          fixed_markup_amount?: number;
+          hotel_id?: string | null;
+          id?: string;
+          is_active?: boolean;
+          min_markup_amount?: number;
+          percentage_markup?: number;
+          priority?: number;
+        };
+        Update: {
+          created_at?: string;
+          destination_id?: string | null;
+          effective_from?: string | null;
+          effective_to?: string | null;
+          fixed_markup_amount?: number;
+          hotel_id?: string | null;
+          id?: string;
+          is_active?: boolean;
+          min_markup_amount?: number;
+          percentage_markup?: number;
+          priority?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "pricing_rules_destination_id_fkey";
+            columns: ["destination_id"];
+            isOneToOne: false;
+            referencedRelation: "destinations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "pricing_rules_hotel_id_fkey";
+            columns: ["hotel_id"];
+            isOneToOne: false;
+            referencedRelation: "hotels";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "pricing_rules_hotel_id_fkey";
+            columns: ["hotel_id"];
+            isOneToOne: false;
+            referencedRelation: "hotels_public";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "pricing_rules_hotel_id_fkey";
+            columns: ["hotel_id"];
+            isOneToOne: false;
+            referencedRelation: "stay_option_hotels_public";
+            referencedColumns: ["hotel_id"];
           },
         ];
       };
@@ -4499,6 +5004,62 @@ export type Database = {
           },
         ];
       };
+      hotels_public: {
+        Row: {
+          address: string | null;
+          amenities: string[] | null;
+          city: string | null;
+          country_code: string | null;
+          description: string | null;
+          destination_id: string | null;
+          id: string | null;
+          image_urls: string[] | null;
+          latitude: number | null;
+          longitude: number | null;
+          name: string | null;
+          slug: string | null;
+          star_rating: number | null;
+        };
+        Insert: {
+          address?: string | null;
+          amenities?: string[] | null;
+          city?: string | null;
+          country_code?: string | null;
+          description?: string | null;
+          destination_id?: string | null;
+          id?: string | null;
+          image_urls?: string[] | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          name?: string | null;
+          slug?: string | null;
+          star_rating?: number | null;
+        };
+        Update: {
+          address?: string | null;
+          amenities?: string[] | null;
+          city?: string | null;
+          country_code?: string | null;
+          description?: string | null;
+          destination_id?: string | null;
+          id?: string | null;
+          image_urls?: string[] | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          name?: string | null;
+          slug?: string | null;
+          star_rating?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "hotels_destination_id_fkey";
+            columns: ["destination_id"];
+            isOneToOne: false;
+            referencedRelation: "destinations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       item_rsvp_counts: {
         Row: {
           going: number | null;
@@ -4541,6 +5102,39 @@ export type Database = {
             columns: ["meetup_id"];
             isOneToOne: false;
             referencedRelation: "meetups";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      stay_option_hotels_public: {
+        Row: {
+          amenities: string[] | null;
+          bed_type: string | null;
+          city: string | null;
+          country_code: string | null;
+          departure_id: string | null;
+          hotel_id: string | null;
+          hotel_name: string | null;
+          hotel_slug: string | null;
+          image_urls: string[] | null;
+          max_occupancy: number | null;
+          room_name: string | null;
+          star_rating: number | null;
+          stay_option_id: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "departure_stay_options_departure_id_fkey";
+            columns: ["departure_id"];
+            isOneToOne: false;
+            referencedRelation: "departures";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "departure_stay_options_departure_id_fkey";
+            columns: ["departure_id"];
+            isOneToOne: false;
+            referencedRelation: "departures_public";
             referencedColumns: ["id"];
           },
         ];
@@ -4724,6 +5318,7 @@ export type Database = {
         Args: { p_departure_id: string };
         Returns: boolean;
       };
+      is_finance_staff: { Args: never; Returns: boolean };
       is_moderator: { Args: never; Returns: boolean };
       is_ops_staff: { Args: never; Returns: boolean };
       is_staff: { Args: never; Returns: boolean };
@@ -4802,6 +5397,15 @@ export type Database = {
         Args: { p_email: string; p_source?: string };
         Returns: string;
       };
+      suggest_stay_price: {
+        Args: {
+          p_adults: number;
+          p_check_in: string;
+          p_check_out: string;
+          p_hotel_id: string;
+        };
+        Returns: Json;
+      };
       tour_version_is_public: { Args: { version_id: string }; Returns: boolean };
       trip_add_on_participants: {
         Args: { p_trip_id: string };
@@ -4865,6 +5469,9 @@ export type Database = {
         | "in_progress"
         | "completed"
         | "cancelled";
+      hotel_booking_status: "quoted" | "booked" | "confirmed" | "cancelled" | "failed";
+      hotel_payment_type: "pay_now" | "pay_at_property";
+      hotel_supplier: "duffel" | "expedia" | "hotelbeds" | "manual";
       itinerary_item_status: "planned" | "confirmed" | "pending_supplier" | "changed" | "cancelled";
       itinerary_item_type:
         | "hotel"
@@ -5111,6 +5718,9 @@ export const Constants = {
         "completed",
         "cancelled",
       ],
+      hotel_booking_status: ["quoted", "booked", "confirmed", "cancelled", "failed"],
+      hotel_payment_type: ["pay_now", "pay_at_property"],
+      hotel_supplier: ["duffel", "expedia", "hotelbeds", "manual"],
       itinerary_item_status: ["planned", "confirmed", "pending_supplier", "changed", "cancelled"],
       itinerary_item_type: [
         "hotel",

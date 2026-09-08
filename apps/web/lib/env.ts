@@ -51,6 +51,11 @@ const serverSchema = z.object({
   RESEND_AUDIENCE_ID: z.string().min(1).optional(),
   /** Salts the hashed caller id used by public-form rate limits (lib/rate-limit.ts). */
   RATE_LIMIT_SALT: z.string().min(8).optional(),
+  /** Hotel inventory (docs/hotels.md). "duffel" needs DUFFEL_ACCESS_TOKEN; otherwise the mock supplier runs. */
+  HOTEL_SUPPLIER: z.enum(["mock", "duffel"]).default("mock"),
+  DUFFEL_ACCESS_TOKEN: z.string().min(1).optional(),
+  /** Bearer token Vercel sends to /api/cron/* routes. */
+  CRON_SECRET: z.string().min(16).optional(),
 });
 
 let cachedServerEnv: z.infer<typeof serverSchema> | undefined;
