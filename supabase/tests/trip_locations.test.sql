@@ -12,7 +12,7 @@
 --   and blocking, which the policy does not mention but a traveler would assume.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(19);
+select plan(23);
 
 create schema if not exists tests;
 grant usage on schema tests to anon, authenticated;
@@ -159,6 +159,59 @@ select is((select count(*)::int from public.trip_locations
 select tests.clear_auth();
 select ok(public.purge_stale_trip_locations() >= 1,
   'the hourly purge removes what has lapsed, so we do not keep what we stopped using');
+
+-- ── Blocking means the same thing everywhere (migration 0064) ────────────────
+-- The map fix would be half a fix if a blocked traveler could still read everything you write in
+-- the group room. Same helper, same rule, proved on the other surface it applies to.
+select tests.clear_auth();
+-- The trip's group room and its members already exist: creating a trip makes them. Reusing what
+-- the product actually builds is also a check that the room is really there. A view rather than a
+-- temp table, because the assertions below run as `authenticated` and a temp table is not theirs.
+create or replace view public.room_under_test as
+select id from public.chat_rooms
+where trip_id = 'a8000000-0000-4000-8000-0000000000c1' and type = 'trip_group';
+grant select on public.room_under_test to authenticated;
+
+insert into public.chat_members (room_id, user_id)
+select r.id, u
+from public.room_under_test r
+cross join (values ('a8000000-0000-4000-8000-0000000000a1'::uuid),
+                   ('a8000000-0000-4000-8000-0000000000a2'::uuid)) as t(u)
+on conflict do nothing;
+
+insert into public.messages (room_id, sender_id, body)
+select r.id, 'a8000000-0000-4000-8000-0000000000a1', 'Ana says hello' from public.room_under_test r;
+insert into public.messages (room_id, sender_id, body)
+select r.id, 'a8000000-0000-4000-8000-0000000000a2', 'Ben says hello' from public.room_under_test r;
+-- A system post has nobody behind it, so blocking can never hide it.
+insert into public.messages (room_id, sender_id, is_system, body)
+select r.id, null, true, 'Free today: the morning swim' from public.room_under_test r;
+
+select tests.authenticate_as('a8000000-0000-4000-8000-0000000000a1');
+select is((select count(*)::int from public.messages
+           where room_id = (select id from public.room_under_test)), 3,
+  'with nobody blocked, everyone sees the whole room');
+
+select tests.clear_auth();
+insert into public.user_blocks (blocker_id, blocked_id)
+values ('a8000000-0000-4000-8000-0000000000a2', 'a8000000-0000-4000-8000-0000000000a1');
+
+select tests.authenticate_as('a8000000-0000-4000-8000-0000000000a2');
+select is((select count(*)::int from public.messages
+           where room_id = (select id from public.room_under_test)
+             and sender_id = 'a8000000-0000-4000-8000-0000000000a1'), 0,
+  'Ben blocked Ana, so Ben stops seeing what Ana wrote');
+
+-- The half that was missing before 0064, and the half that actually protects somebody.
+select tests.authenticate_as('a8000000-0000-4000-8000-0000000000a1');
+select is((select count(*)::int from public.messages
+           where room_id = (select id from public.room_under_test)
+             and sender_id = 'a8000000-0000-4000-8000-0000000000a2'), 0,
+  'and Ana, who was blocked, stops seeing what Ben writes');
+
+select is((select count(*)::int from public.messages
+           where room_id = (select id from public.room_under_test) and is_system), 1,
+  'the group post still reaches both of them, because no person sent it');
 
 select tests.clear_auth();
 select * from finish();

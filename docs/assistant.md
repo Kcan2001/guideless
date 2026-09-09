@@ -115,6 +115,9 @@ entirely, and the table is mostly a set of them:
 - **Blocking wins, both ways.** Via `blocked_between()`, which **must** be `security definer`:
   `user_blocks` has its own RLS and a caller can only read blocks they created, so inlining that
   query would let somebody who blocked you carry on watching you. A pgTAP test caught exactly that.
+  Migration 0064 then applied the same helper to **chat**, which had the original one-way version:
+  blocking someone now means they stop seeing your messages too. Moderators still see everything,
+  and a system post has no sender so it always reaches everyone.
 - **Staff cannot see it.** There is no staff policy. An ops screen showing where every traveler is
   standing is a surveillance product. If duty of care ever needs an exception it should be
   deliberate, narrow and logged — not a policy somebody adds because it is convenient.
