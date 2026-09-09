@@ -6,6 +6,8 @@ import { defineConfig, devices } from "@playwright/test";
  */
 export default defineConfig({
   testDir: "./e2e",
+  // Signed-up travelers and booked seats must not outlive the run that made them.
+  globalTeardown: "./e2e/global-teardown.ts",
   timeout: 60_000,
   expect: { timeout: 10_000 },
   fullyParallel: true,

@@ -54,7 +54,12 @@ select tests.authenticate_as('f3000000-0000-4000-8000-0000000000b2');
 select is((select count(*)::int from public.builder_drafts), 0, 'another customer sees no drafts');
 update public.builder_drafts set step = 0 where departure_id = '30000000-0000-4000-8000-000000000004';
 select tests.clear_auth();
-select is((select step from public.builder_drafts where departure_id = '30000000-0000-4000-8000-000000000004'), 3::smallint,
+-- Scoped to this test's own draft. Asserting on the whole table assumed nothing else had ever
+-- written one, and end-to-end runs leaving drafts behind turned that assumption into a failure
+-- that had nothing to do with the policy under test.
+select is((select step from public.builder_drafts
+           where departure_id = '30000000-0000-4000-8000-000000000004'
+             and user_id = 'f3000000-0000-4000-8000-0000000000a1'), 3::smallint,
   'another customer cannot update it either');
 
 -- ── Expiry ───────────────────────────────────────────────────────────────────

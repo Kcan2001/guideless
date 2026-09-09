@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useSyncExternalStore } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
 import { readConsent, writeConsent, type ConsentState } from "@/lib/analytics";
 
@@ -31,11 +31,43 @@ const getServerSnapshot = (): ConsentState | "server" => "server";
 export function ConsentBanner() {
   const pathname = usePathname();
   const consent = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  if (pathname?.startsWith("/admin")) return null;
-  if (!ANALYTICS_CONFIGURED || consent !== "unknown") return null;
+  const ref = useRef<HTMLDivElement | null>(null);
+  const showing = ANALYTICS_CONFIGURED && consent === "unknown" && !pathname?.startsWith("/admin");
+
+  /**
+   * Reserve the space the banner floats over.
+   *
+   * It is `fixed`, so it sits outside the flow and covers whatever is at the bottom of the page. On
+   * a short page that is the primary button: end-to-end testing found the banner intercepting
+   * clicks on "Create account", which means a real visitor could not sign up without dismissing it
+   * first. Padding the body by the banner's own height lets any page scroll clear of it.
+   *
+   * This never fired in CI, because the banner only renders when analytics is configured and CI
+   * builds without those keys. It renders in production.
+   */
+  useEffect(() => {
+    if (!showing) return;
+    const el = ref.current;
+    if (!el) return;
+    const apply = () => {
+      document.body.style.paddingBottom = `${el.offsetHeight + 32}px`;
+    };
+    apply();
+    const observer = new ResizeObserver(apply);
+    observer.observe(el);
+    window.addEventListener("resize", apply);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", apply);
+      document.body.style.paddingBottom = "";
+    };
+  }, [showing]);
+
+  if (!showing) return null;
 
   return (
     <div
+      ref={ref}
       role="dialog"
       aria-live="polite"
       aria-label="Cookie preferences"
