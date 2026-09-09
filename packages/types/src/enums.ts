@@ -302,3 +302,10 @@ export type HotelBookingStatus = (typeof HOTEL_BOOKING_STATUSES)[number];
 
 export const CURRENCIES = ["USD", "EUR", "GBP"] as const;
 export type Currency = (typeof CURRENCIES)[number];
+
+/**
+ * Where a testimonial submission has got to (migration 070). Mirrors the Postgres enum
+ * `submission_status`. "Used" means it became a testimonials row, not that it is published.
+ */
+export const SUBMISSION_STATUSES = ["new", "used", "declined"] as const;
+export type SubmissionStatus = (typeof SUBMISSION_STATUSES)[number];

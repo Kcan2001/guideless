@@ -183,6 +183,36 @@ credibility Guideless has, and none of it can go through `reviews`.
   than the extra placement.
 - Managed at `/admin/testimonials` by content staff.
 
+### The link people fill in themselves (migration 0070)
+
+`/share/<tour-slug>` — e.g. `/share/monaco-grand-prix`. Kyle sends it in a message; the person
+writes their own quote, adds photos, and ticks their own consent box. `/admin/testimonials` lists
+the tour links to copy and everything that has come in.
+
+The reason this exists is not convenience. Migration 0069 already made consent a check constraint,
+but a box staff tick on somebody's behalf records only that staff believed they agreed. A box the
+person ticks, with their name and email against it, is the thing you can point at later. Converting
+a submission into a testimonial inherits that consent and writes the trail into `source_note`.
+
+- **No account, ever.** These people are not customers. The write is anonymous through
+  `submit_testimonial()`, a security-definer function that is the only door — there is no insert
+  policy on the table. It refuses a submission without consent, a bad email, a quote under twenty
+  characters, more than twelve photos, and — the one that matters — any photo path outside the
+  submission's own folder.
+- **The id comes from the browser.** Photos need somewhere to live before there is a row to attach
+  them to, so the form generates a UUID, uploads into a folder of that name, and submits it as the
+  primary key. The function re-checks every path against it, so nothing client-side is trusted.
+- **A submission is not a testimonial.** It holds the email and the unedited words; the testimonial
+  is the curated thing. Trimming a quote for length never destroys what was actually said, which
+  matters because the outreach message promises to show them the wording first. Conversions land as
+  **drafts**, never published.
+- **Uploads are private.** `testimonial-uploads` is a private bucket (15 MB, image types only).
+  Anonymous visitors may insert into a uuid-named folder and nothing else — no read, no list. Staff
+  preview through signed URLs. A photo becomes public only when staff attach it to a draft, which
+  copies it into `social-media`; if the submitter declined photo use, that action refuses.
+- **`/share/<slug>` is `noindex`** and linked from nowhere. It only makes sense to somebody holding
+  the message that explains it.
+
 ### The same bug, found in `reviews`
 
 Building the above surfaced it: `reviews` and `trip_photos` each granted anon `select` on published

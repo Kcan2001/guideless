@@ -234,12 +234,17 @@ group message:
 > I'd keep it separate from the reviews section, since that's only for people who book through the
 > new company.
 >
-> No pressure at all, and I'll send you the exact wording before anything goes up. Also — if you
-> have photos from that weekend I could use, I'd love them.
+> If you're up for it, there's a page here where you can type it straight in and add any photos
+> you've still got: guidelesstravel.com/share/monaco-grand-prix
+>
+> No pressure at all, and I'll send you the exact wording before anything goes up.
 
-Then in admin: paste the quote as they wrote it, tick the consent box, put where it came from in
-the source note (which message, which date, what they agreed to), and publish. Trim for length if
-you must; do not rewrite what somebody said.
+**Send them a link rather than collecting replies.** `/share/monaco-grand-prix` (the exact links
+are listed at the top of `/admin/testimonials`). They write it themselves, add photos from their
+own camera roll, and tick their own consent box — which is a better record than ticking it for
+them, and it saves transcribing quotes out of a chat thread. What arrives shows up in admin;
+"Make a draft from it" carries the quote and their consent across, and you edit and publish from
+there. Trim for length if you must; do not rewrite what somebody said.
 
 Two rules that are not negotiable. **Send them the wording before it goes live** — the message
 promises it. And **never publish a quote you cannot point to**: the source note exists so that in

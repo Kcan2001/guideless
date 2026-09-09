@@ -2,9 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import {
+  submissionPhotoSchema,
   testimonialDeleteSchema,
   testimonialFormSchema,
   testimonialStatusSchema,
+  useSubmissionSchema,
 } from "@guideless/validation";
 import { dbErrorMessage, flash, parseForm } from "@/lib/admin/form";
 import { CONTENT_ROLES, requireStaff } from "@/lib/auth/staff";
@@ -112,4 +114,139 @@ export async function deleteTestimonialAction(fd: FormData): Promise<void> {
 
   revalidatePublic();
   flash(BACK, "ok", "Deleted.");
+}
+
+/**
+ * Turn a submission into a testimonial draft.
+ *
+ * `consent_confirmed` is inherited rather than asked for again: the person ticked it themselves,
+ * with their name and email against it, which is a better record than staff ticking it later. The
+ * source note captures where it came from so the trail survives the person forgetting.
+ *
+ * It lands as a draft, not published — the message we sent promises to show them the wording first.
+ */
+export async function useSubmissionAction(fd: FormData): Promise<void> {
+  await requireStaff(CONTENT_ROLES);
+  const parsed = parseForm(useSubmissionSchema, fd);
+  if (!parsed.ok) flash(BACK, "error", parsed.error);
+
+  const sb = await createClient();
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
+
+  const { data: sub, error: readError } = await sb
+    .from("testimonial_submissions")
+    .select("*")
+    .eq("id", parsed.data.submissionId)
+    .maybeSingle();
+  if (readError) flash(BACK, "error", dbErrorMessage(readError));
+  if (!sub) flash(BACK, "error", "That submission is gone.");
+  if (sub.testimonial_id) flash(BACK, "error", "That one has already been used.");
+
+  let tourName: string | null = null;
+  if (sub.tour_id) {
+    const { data: tour } = await sb
+      .from("tours")
+      .select("name")
+      .eq("id", sub.tour_id)
+      .maybeSingle();
+    tourName = tour?.name ?? null;
+  }
+  const label = [tourName, sub.trip_year].filter(Boolean).join(", ") || "An earlier trip";
+
+  const { data: created, error } = await sb
+    .from("testimonials")
+    .insert({
+      quote: sub.quote,
+      author_name: sub.author_name,
+      trip_label: label,
+      tour_id: sub.tour_id,
+      happened_in: sub.trip_year,
+      consent_confirmed: true,
+      source_note:
+        `Submitted through /share on ${sub.created_at.slice(0, 10)} by ${sub.email}. ` +
+        `They ticked the consent box themselves. ` +
+        (sub.consent_photos ? "Photos allowed." : "Photos NOT allowed — do not publish one."),
+      status: "pending" as const,
+      created_by: user?.id ?? null,
+    })
+    .select("id")
+    .single();
+  if (error) flash(BACK, "error", dbErrorMessage(error));
+
+  const { error: linkError } = await sb
+    .from("testimonial_submissions")
+    .update({ status: "used" as const, testimonial_id: created.id })
+    .eq("id", sub.id);
+  if (linkError) flash(BACK, "error", dbErrorMessage(linkError));
+
+  revalidatePath(BACK);
+  flash(BACK, "ok", "Made a draft from it. Send them the wording, then publish.");
+}
+
+export async function declineSubmissionAction(fd: FormData): Promise<void> {
+  await requireStaff(CONTENT_ROLES);
+  const parsed = parseForm(useSubmissionSchema, fd);
+  if (!parsed.ok) flash(BACK, "error", parsed.error);
+
+  const sb = await createClient();
+  const { error } = await sb
+    .from("testimonial_submissions")
+    .update({ status: "declined" as const })
+    .eq("id", parsed.data.submissionId);
+  if (error) flash(BACK, "error", dbErrorMessage(error));
+
+  revalidatePath(BACK);
+  flash(BACK, "ok", "Set aside.");
+}
+
+/**
+ * Attach one submitted photo to the draft made from that submission.
+ *
+ * This is the moment a file stops being private: it is copied out of testimonial-uploads into the
+ * public social-media bucket, which is the only bucket next/image is allowed to load from. Copy
+ * rather than move, so the original stays with the submission it arrived in.
+ */
+export async function useSubmissionPhotoAction(fd: FormData): Promise<void> {
+  await requireStaff(CONTENT_ROLES);
+  const parsed = parseForm(submissionPhotoSchema, fd);
+  if (!parsed.ok) flash(BACK, "error", parsed.error);
+  const { submissionId, path } = parsed.data;
+
+  const sb = await createClient();
+  const { data: sub } = await sb
+    .from("testimonial_submissions")
+    .select("testimonial_id, consent_photos, photo_paths")
+    .eq("id", submissionId)
+    .maybeSingle();
+  if (!sub) flash(BACK, "error", "That submission is gone.");
+  if (!sub.testimonial_id) flash(BACK, "error", "Make a draft from it first.");
+  if (!sub.consent_photos) flash(BACK, "error", "They did not agree to their photos being used.");
+  // The path comes from a form, so check it against the submission rather than trusting it.
+  if (!(sub.photo_paths ?? []).includes(path)) flash(BACK, "error", "That photo is not theirs.");
+
+  const { data: file, error: downloadError } = await sb.storage
+    .from("testimonial-uploads")
+    .download(path);
+  if (downloadError || !file) flash(BACK, "error", "Could not read that photo.");
+
+  const publicPath = `testimonials/${path.split("/").pop()}`;
+  const { error: uploadError } = await sb.storage
+    .from("social-media")
+    .upload(publicPath, file, { upsert: true, contentType: file.type });
+  if (uploadError) flash(BACK, "error", "Could not copy that photo across.");
+
+  const {
+    data: { publicUrl },
+  } = sb.storage.from("social-media").getPublicUrl(publicPath);
+
+  const { error } = await sb
+    .from("testimonials")
+    .update({ image_url: publicUrl })
+    .eq("id", sub.testimonial_id);
+  if (error) flash(BACK, "error", dbErrorMessage(error));
+
+  revalidatePublic();
+  flash(BACK, "ok", "Photo attached to the draft.");
 }

@@ -81,3 +81,59 @@ export const testimonialStatusSchema = z.object({
 export type TestimonialStatusInput = z.infer<typeof testimonialStatusSchema>;
 
 export const testimonialDeleteSchema = z.object({ testimonialId: uuidSchema });
+
+/**
+ * What a past traveler sends through /share/<tour>.
+ *
+ * Consent is required rather than defaulted, and the message says what it is for. The database
+ * refuses a submission without it, so this is here to turn that refusal into a sentence next to
+ * the checkbox rather than a failure after the upload.
+ */
+export const testimonialSubmissionSchema = z.object({
+  submissionId: uuidSchema,
+  tourSlug: z
+    .string()
+    .trim()
+    .min(1)
+    .max(120)
+    .regex(/^[a-z0-9-]+$/, "That link looks wrong"),
+  authorName: z.string().trim().min(1, "What should we call you?").max(60, "First name is plenty"),
+  email: z.string().trim().toLowerCase().email("That email does not look right").max(254),
+  quote: z
+    .string()
+    .trim()
+    .min(20, "A sentence or two — twenty characters at least")
+    .max(2000, "That is longer than 2,000 characters"),
+  tripYear: z.preprocess(
+    (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
+    z.coerce.number().int().min(2000, "That is a while ago").max(2100).optional(),
+  ),
+  consentPublic: z.preprocess(
+    (v) => v === "on" || v === "true" || v === true,
+    z.literal(true, { message: "We can only use it if you say we can" }),
+  ),
+  consentPhotos: checkbox,
+  photoPaths: z.preprocess(
+    (v) => (v === undefined || v === "" ? [] : typeof v === "string" ? JSON.parse(v) : v),
+    z.array(z.string().max(400)).max(12, "Twelve photos is plenty"),
+  ),
+  // Bots fill hidden fields in; people do not.
+  website: z.string().max(0, "Nope").optional().or(z.literal("")),
+});
+export type TestimonialSubmissionInput = z.infer<typeof testimonialSubmissionSchema>;
+
+export const TESTIMONIAL_PHOTO_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+] as const;
+/** Matches the testimonial-uploads bucket limit in migration 070. */
+export const TESTIMONIAL_PHOTO_MAX_BYTES = 15 * 1024 * 1024;
+
+export const useSubmissionSchema = z.object({ submissionId: uuidSchema });
+
+export const submissionPhotoSchema = z.object({
+  submissionId: uuidSchema,
+  path: z.string().min(1).max(400),
+});

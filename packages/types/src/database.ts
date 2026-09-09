@@ -4706,6 +4706,79 @@ export type Database = {
         };
         Relationships: [];
       };
+      testimonial_submissions: {
+        Row: {
+          author_name: string;
+          consent_photos: boolean;
+          consent_public: boolean;
+          created_at: string;
+          email: string;
+          id: string;
+          photo_paths: string[];
+          quote: string;
+          staff_note: string | null;
+          status: Database["public"]["Enums"]["submission_status"];
+          testimonial_id: string | null;
+          tour_id: string | null;
+          trip_year: number | null;
+          updated_at: string;
+        };
+        Insert: {
+          author_name: string;
+          consent_photos?: boolean;
+          consent_public: boolean;
+          created_at?: string;
+          email: string;
+          id: string;
+          photo_paths?: string[];
+          quote: string;
+          staff_note?: string | null;
+          status?: Database["public"]["Enums"]["submission_status"];
+          testimonial_id?: string | null;
+          tour_id?: string | null;
+          trip_year?: number | null;
+          updated_at?: string;
+        };
+        Update: {
+          author_name?: string;
+          consent_photos?: boolean;
+          consent_public?: boolean;
+          created_at?: string;
+          email?: string;
+          id?: string;
+          photo_paths?: string[];
+          quote?: string;
+          staff_note?: string | null;
+          status?: Database["public"]["Enums"]["submission_status"];
+          testimonial_id?: string | null;
+          tour_id?: string | null;
+          trip_year?: number | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "testimonial_submissions_testimonial_id_fkey";
+            columns: ["testimonial_id"];
+            isOneToOne: false;
+            referencedRelation: "testimonials";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "testimonial_submissions_testimonial_id_fkey";
+            columns: ["testimonial_id"];
+            isOneToOne: false;
+            referencedRelation: "testimonials_public";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "testimonial_submissions_tour_id_fkey";
+            columns: ["tour_id"];
+            isOneToOne: false;
+            referencedRelation: "tours";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       testimonials: {
         Row: {
           author_name: string;
@@ -7305,6 +7378,20 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      submit_testimonial: {
+        Args: {
+          p_author_name: string;
+          p_consent_photos?: boolean;
+          p_consent_public?: boolean;
+          p_email: string;
+          p_id: string;
+          p_photo_paths?: string[];
+          p_quote: string;
+          p_tour_slug: string;
+          p_trip_year?: number;
+        };
+        Returns: undefined;
+      };
       submit_trip_photo: {
         Args: {
           p_booking_id: string;
@@ -7533,6 +7620,7 @@ export type Database = {
       social_platform: "instagram" | "pinterest";
       social_post_status:
         "draft" | "scheduled" | "publishing" | "published" | "failed" | "cancelled";
+      submission_status: "new" | "used" | "declined";
       supplier_service_status: "requested" | "pending" | "confirmed" | "cancelled" | "failed";
       support_category:
         | "hotel"
@@ -7790,6 +7878,7 @@ export const Constants = {
       social_media_kind: ["image", "carousel"],
       social_platform: ["instagram", "pinterest"],
       social_post_status: ["draft", "scheduled", "publishing", "published", "failed", "cancelled"],
+      submission_status: ["new", "used", "declined"],
       supplier_service_status: ["requested", "pending", "confirmed", "cancelled", "failed"],
       support_category: [
         "hotel",
