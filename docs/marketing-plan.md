@@ -45,10 +45,17 @@ the earlier trips. See `docs/growth.md`.
 Every minimum met is about **$92k** of gross bookings. Every seat sold is about **$262k**. Those
 two numbers are eight months and roughly 60 travelers apart, and this plan is about the first one.
 
-**Hard gate before any of this starts.** Every price and date above is placeholder seed data, under
-the pre-sale gate Kyle set on 7 September (`docs/strategy-v3-direction.md` §7). Marketing a price
-we have not sourced is the one mistake here that is expensive to undo, because the first thirty
-travelers are the people we can least afford to re-quote. Real supplier quotes in admin come first.
+**These are real prices, not seed data.** An earlier draft of this plan said they were placeholder,
+citing the pre-sale gate of 7 September. That gate was closed the following day: Monaco was
+re-dated and re-priced from published supplier figures (`5a8c7fa`) and Southern France was checked
+against landed cost (`6b4a012`), which is where the Riviera boat turned out to be selling at $145
+against a real cost near $310. The working is in `docs/pricing.md`. Nothing in this plan is waiting
+on pricing.
+
+Two commercial questions are open, and neither blocks selling. The Amber Lounge yacht on Monaco has
+no trade rate, so we resell at their public price plus margin and a traveler can book direct for
+less — a claim risk more than a margin one. And Southern France's boutique upgrade earns a thinner
+margin than the base trip, which is a decision rather than a defect.
 
 ## 2. The arithmetic that decides everything below
 
@@ -308,9 +315,10 @@ hear that from us in March rather than discover it in April.
 
 ## 10. Decisions this plan is waiting on
 
-1. **Real prices and dates** from supplier quotes, entered in admin. Blocks literally everything
-   here. Nothing in this plan should start before it. Monaco should be the easier half — the
-   weekend has been run before, so the real costs are known rather than estimated.
+1. **The Amber Lounge yacht.** No trade rate, so we sell it above what a traveler can pay Amber
+   Lounge directly. Negotiate an allocation, sell it at cost, or drop it — but decide before the
+   Monaco page is pushed at anyone, because "we organise it" reads badly next to a cheaper direct
+   link.
 2. **Collect the testimonials.** `/admin/testimonials` is built and empty. Getting eight to ten
    quotes and a set of photographs out of past Monaco travelers is the highest-value unblocked task
    in this document, and it is a week of messages rather than a project. Consent is recorded per
