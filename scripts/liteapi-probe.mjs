@@ -31,7 +31,9 @@ const COUNTRY = opt("country", "FR");
 
 if (!KEY) {
   console.error("No key. Pass --key sand_xxx or set LITEAPI_KEY.");
-  console.error("Get a sandbox key (no card needed): https://docs.liteapi.travel/docs/getting-a-sandbox-key");
+  console.error(
+    "Get a sandbox key (no card needed): https://docs.liteapi.travel/docs/getting-a-sandbox-key",
+  );
   process.exit(1);
 }
 
@@ -68,7 +70,8 @@ function shape(value, depth = 0, seen = new Set()) {
     if (!value.length) return `${pad}[] (empty)`;
     return `${pad}[${value.length}] of:\n${shape(value[0], depth + 1, seen)}`;
   }
-  if (typeof value !== "object") return `${pad}${typeof value}: ${JSON.stringify(value)?.slice(0, 70)}`;
+  if (typeof value !== "object")
+    return `${pad}${typeof value}: ${JSON.stringify(value)?.slice(0, 70)}`;
   if (seen.has(value)) return `${pad}<circular>`;
   seen.add(value);
   return Object.entries(value)
@@ -164,10 +167,34 @@ async function main() {
       line("\n  The three things that decide our schema:");
       const s = JSON.stringify(first);
       line(`    cancellation policy present: ${/cancelPolicyInfos|cancellationPolic/i.test(s)}`);
-      const windows = (s.match(/cancelTime/g) ?? []).length;
-      line(`    cancellation windows in this response: ${windows}`);
+
+      // Count windows PER RATE. Matching on the whole response counts every room type at once and
+      // produces a number that means nothing: 200 room types with one window each is not a ladder.
+      const perRate = [];
+      for (const rt of first.roomTypes ?? []) {
+        for (const r of rt.rates ?? []) {
+          const infos = r?.cancellationPolicies?.cancelPolicyInfos;
+          perRate.push({
+            n: Array.isArray(infos) ? infos.length : 0,
+            tag: r?.cancellationPolicies?.refundableTag ?? "?",
+            types: Array.isArray(infos) ? [...new Set(infos.map((i) => i.type))] : [],
+          });
+        }
+      }
+      const maxWindows = perRate.reduce((m, r) => Math.max(m, r.n), 0);
+      const laddered = perRate.filter((r) => r.n > 1).length;
+      line(`    rates inspected: ${perRate.length}`);
       line(
-        `    → ${windows > 1 ? "A LADDER. Our CancellationPolicy holds one deadline and must change before the first live rate." : "One window here, but do not conclude a single-step model; check a refundable rate too."}`,
+        `    windows per rate: max ${maxWindows}, ${laddered} rate(s) with more than one, ${perRate.filter((r) => r.n === 0).length} with none`,
+      );
+      line(`    refundableTag values: ${[...new Set(perRate.map((r) => r.tag))].join(", ")}`);
+      line(
+        `    penalty types: ${[...new Set(perRate.flatMap((r) => r.types))].join(", ") || "none"}`,
+      );
+      line(
+        maxWindows > 1
+          ? "    → A LADDER EXISTS. Our single-deadline model loses the middle step, and the loss is money."
+          : "    → One window on every rate here, but the field is an ARRAY, so a ladder is representable and we must handle N.",
       );
       line(`    taxes/fees itemised: ${/taxesAndFees|taxes/i.test(s)}`);
       line(`    commission disclosed: ${/commission/i.test(s)}`);

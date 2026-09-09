@@ -207,6 +207,56 @@ currently model, because our recheck only compares price.
 **Payouts are weekly and follow the stay**, which matters for working capital if we ever sell on
 commission rather than buying net.
 
+### Probed against a real sandbox key (2026-09-08)
+
+Account created, key in `supabase/.env` as `LITEAPI_SANDBOX_KEY`, probed with
+`node scripts/liteapi-probe.mjs`. This is no longer inference; the findings below are responses.
+
+**Property types are real and rich.** `GET /data/hotelTypes` returns 50 types. The ones that matter
+to us:
+
+| Id  | Type               | Id  | Type                  |
+| --- | ------------------ | --- | --------------------- |
+| 201 | Apartments         | 219 | Aparthotels           |
+| 204 | Hotels             | 220 | Holiday homes         |
+| 207 | Residences         | 222 | Homestays             |
+| 208 | Bed and breakfasts | 229 | Condos                |
+| 213 | Villas             | 250 | Private vacation home |
+| 216 | Guest houses       | 228 | Chalets               |
+
+**219 Aparthotels and 201 Apartments are exactly the product this audit concluded we want**, and
+they are filterable with `hotelTypeIds` on the same endpoints as hotels. The whole-home types are
+there too (213, 220, 250) if we ever decide the per-unit economics work.
+
+**The cancellation ladder is confirmed, and it is the majority case.** One hotel in Nice, one date
+range, 200 rates returned:
+
+| Measure                               | Result         |
+| ------------------------------------- | -------------- |
+| Rates inspected                       | 200            |
+| Maximum windows on a single rate      | **5**          |
+| Rates with more than one window       | **116 of 200** |
+| Rates with no window (non-refundable) | 33             |
+| `refundableTag` values                | `RFN`, `NRFN`  |
+| Penalty type                          | `amount`       |
+
+Our `CancellationPolicy` holds one deadline and one penalty. **Fifty-eight percent of real rates
+would lose their middle steps**, and the loss is money in both directions: we would believe a rate
+is fully refundable on a date the supplier already charges for, or hold a customer to a penalty we
+were not actually charged. This is no longer a theoretical risk to note; it is a defect to fix
+before the adapter goes anywhere near a booking.
+
+**The rest of the rate object maps cleanly onto ours.** `retailRate.total`, `initialPrice`,
+`taxesAndFees[]` with an `included` flag, `boardType` and `boardName`, `commission[]`,
+`paymentTypes`, and `et` (an expiry in seconds; 10800, so three hours). One field to respect:
+`suggestedSellingPrice` carries a `source`, and in the sandbox that source is `booking.com` — it is
+a parity reference, not our price.
+
+**One caution the probe itself taught.** The first version of the script counted `cancelTime`
+across the whole response and reported 302 windows, which was meaningless: 200 room types with one
+window each is not a ladder. Counting per rate gave the real answer. A number from a probe is only
+as good as what it counted.
+
 ### Order of work
 
 1. Fix the cancellation ladder in the rate model. It is a money bug waiting for its first live rate.
