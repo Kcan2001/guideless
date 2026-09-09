@@ -269,6 +269,14 @@ export const TRIP_CHARACTERS = [
 export type TripCharacter = (typeof TRIP_CHARACTERS)[number];
 
 /**
+ * Private feedback, before and after a trip (migration 0057). Distinct from reviews: reviews are
+ * public, moderated and marketing; surveys are private, unmoderated and operational, which is what
+ * lets us ask a blunt question without worrying how the answer reads on a tour page.
+ */
+export const SURVEY_KINDS = ["pre_trip", "post_trip"] as const;
+export type SurveyKind = (typeof SURVEY_KINDS)[number];
+
+/**
  * Who a traveler is coming with (migration 046). A check constraint on profiles.party_type
  * rather than a Postgres enum, like ADD_ON_KINDS — keep the two in step.
  */
