@@ -56,7 +56,7 @@ export const DEFAULT_WEIGHTS: ScoreWeights = {
   breakfast: 6,
   reliability: 5,
   margin: 0.5,
-  supplierReliability: { manual: 1, duffel: 0.9, expedia: 0.85, hotelbeds: 0.75 },
+  supplierReliability: { manual: 1, liteapi: 0.9, duffel: 0.8, expedia: 0.85, hotelbeds: 0.75 },
 };
 
 /**

@@ -1,0 +1,94 @@
+{
+  "data": {
+    "prebookId": "C09wis5Em",
+    "offerId": "3gAWonJzkd4AEaRzcmlk2gEQR1kyRE1aUlhHVTNERU5UREdZMlRFTUJXR00zR0dOUlJHNFpUT01aV0hFM0RHN0JSRU1aREFNUldHRVlUQU9ENEdJWURFTlJSR0VZVEM3REZOWlBWS1UzNEtWSlhZVktUSVI2RENRSlFJTjZESU5KU0hGNkdTVURIS1ZFSFlNSlhIQTREU01SU0dNM0RBT0paSEJHVVFVTEVFTVlUU05SU0hBWlNHTUpTR0kyQzJNSlpHWVpEUU0zNEtKREU0N0JTR0FaRE1NSlJHQTJUQ01CUUdCNkRDN0NTR0VZVElNRDRHTTNEUU1aUkVOSkU2STJTSVpIQ0dNUlFHSTNDMk1KUkZVWURLSUJSR0E1REFNQkSjcHJjy0B3BPXCj1wppW9yX3ByywAAAAAAAAAApW9yX2NtywAAAAAAAAAAomNtywAAAAAAAAAAo3BjZLMyMDI2LTExLTA1IDEwOjAwOjAwonJ0o1JGTqNicmSiUk-kbXJpZMCjbXJuwKNoZHDAo2ZybqCjc3JurkRPVUJMRSBDTEFTU0lDo29jbgGkcHJrc8CjZGV0ywAAAAAAAAAAomNwgqFwkYWhdLMyMDI2LTExLTA1IDEwOjAwOjAwoWHLQF6xR64UeuGhY6NVU0SidHmmYW1vdW50onR6o0dNVKJydKNSRk6kc2hpZKYxOTYyODOjc2lkAqNoaWSnbHAyZmViYqNvY2ORgaFhAaNjdXKjVVNEomduolVTomNpqjIwMjYtMTEtMDiiY2-qMjAyNi0xMS0xMaNnaWSgomNyywAAAAAAAAAApHNzaWTZMHNlc3Npb25fMDFhMDg0MTRmNDk5b1lzeU5DZEVwZVUyTUlFektncEt6ZWpMUmkySqNpc2jCo3NzcKtib29raW5nLmNvbaNpZm3CpWlmY2hywqNpZnLCpXNlYWlkp2xwMmZlYmKibmuxbGl0ZWFwaW9uYm9hcmRpbmeidHiRhKFpw6Fko1RheKFhy0BAvXCj1wo9oWOjVVNEomxwwKNia3QF",
+    "hotelId": "lp2febb",
+    "currency": "USD",
+    "termsAndConditions": "",
+    "roomTypes": [
+      {
+        "rates": [
+          {
+            "rateId": "I5MTERCNLJJFQR2VGNCEKTSUIRDVSMSUIVGUEV2HJUZUOR2OKJJEONC2KRHU2WSXJBCTGRCHG5BFERKNLJCECTKSK5DUKWKUIFHUINCHJFMUIRKOKJJEORKZKRBTORCGJZNFAVSLKUZTIS2WJJMFSVSLKREVENSEINIUUUKJJY3EISKOJJJUQRRWI5JVKRCIJNLEKSCZJVFFQSCBGRCFGTKSKNDU2M2EIFHUUWSIIJDVKUKVJRCUKTKZKRJU4USTJBAVUU2HJVFFGR2JGJBTETKKLJDVSWSEKFGTGNCLJJCEKNBXIJJUOQK2IRGU2SSSI5ATEVCDJVBFCR2CGZCEGN2DKNDUKWKUJFGUINCHJUZUIUKNLJJEKTSKIU3ESMSTJFNEQQ2HJVJFCR2JGNBTETKKKJDFKWKEJNEUEUSHIE2UIQKNIJCHYMZWHAXDGML4GIYDENRNGEYS2MBVEAYTAORQGA5DAMD4KJHXY7D4PRCE6VKCJRCSAQ2MIFJVGSKDPQYC4MBQPQYC4MBQPR6DALRQGB6DALRQGA",
+            "occupancyNumber": 1,
+            "name": "DOUBLE CLASSIC",
+            "maxOccupancy": 1,
+            "adultCount": 1,
+            "childCount": 0,
+            "childrenAges": [],
+            "boardType": "RO",
+            "boardName": "Room Only",
+            "remarks": "<br/><br/>* The city tax to be paid on spot by the guest; it is per person/night is subject to variation according to city council's decision.<br>Baby cot available on request.<br>Groups ( more than 4 rooms ) accepted under request and may have additional charges.<br><br/>TOURIST TAX FRANCE <br/>Local taxes might be payable on spot (per person per night).<br/>",
+            "priceType": "commission",
+            "commission": [
+              {
+                "amount": 0,
+                "currency": "USD"
+              }
+            ],
+            "retailRate": {
+              "total": [
+                {
+                  "amount": 368.31,
+                  "currency": "USD"
+                }
+              ],
+              "suggestedSellingPrice": [
+                {
+                  "amount": 419.88,
+                  "currency": "USD",
+                  "source": "booking.com"
+                }
+              ],
+              "initialPrice": null,
+              "taxesAndFees": [
+                {
+                  "included": true,
+                  "description": "Tax",
+                  "amount": 33.48,
+                  "currency": "USD"
+                }
+              ]
+            },
+            "cancellationPolicies": {
+              "cancelPolicyInfos": [
+                {
+                  "cancelTime": "2026-11-05 10:00:00",
+                  "amount": 122.77,
+                  "currency": "USD",
+                  "type": "amount",
+                  "timezone": "GMT"
+                }
+              ],
+              "hotelRemarks": [],
+              "refundableTag": "RFN"
+            },
+            "paymentTypes": ["NUITEE_PAY"],
+            "providerCommission": {
+              "amount": 0,
+              "currency": ""
+            },
+            "perks": [],
+            "promotions": null
+          }
+        ]
+      }
+    ],
+    "suggestedSellingPrice": 419.88,
+    "isPackageRate": true,
+    "commission": 0,
+    "price": 368.31,
+    "priceType": "commission",
+    "priceDifferencePercent": 0,
+    "cancellationChanged": false,
+    "boardChanged": false,
+    "supplier": "nuitee",
+    "supplierId": 2,
+    "paymentTypes": ["NUITEE_PAY", "ACC_CREDIT_CARD", "WALLET"],
+    "checkin": "2026-11-08",
+    "checkout": "2026-11-11",
+    "sellingPriceToUser": 368.31
+  },
+  "guestLevel": 0,
+  "sandbox": true
+}

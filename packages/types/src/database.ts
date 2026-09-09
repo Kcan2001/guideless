@@ -5819,6 +5819,11 @@ export type Database = {
         Args: { required: Database["public"]["Enums"]["app_role"][] };
         Returns: boolean;
       };
+      hotel_rate_free_until: { Args: { policy: Json }; Returns: string };
+      hotel_rate_penalty_at: {
+        Args: { at: string; policy: Json };
+        Returns: number;
+      };
       invoke_notify_dispatch: { Args: never; Returns: undefined };
       invoke_social_publish: { Args: never; Returns: undefined };
       is_admin: { Args: never; Returns: boolean };
@@ -6141,7 +6146,7 @@ export type Database = {
         | "cancelled";
       hotel_booking_status: "quoted" | "booked" | "confirmed" | "cancelled" | "failed";
       hotel_payment_type: "pay_now" | "pay_at_property";
-      hotel_supplier: "duffel" | "expedia" | "hotelbeds" | "manual";
+      hotel_supplier: "duffel" | "expedia" | "hotelbeds" | "manual" | "liteapi";
       itinerary_item_status: "planned" | "confirmed" | "pending_supplier" | "changed" | "cancelled";
       itinerary_item_type:
         | "hotel"
@@ -6393,7 +6398,7 @@ export const Constants = {
       ],
       hotel_booking_status: ["quoted", "booked", "confirmed", "cancelled", "failed"],
       hotel_payment_type: ["pay_now", "pay_at_property"],
-      hotel_supplier: ["duffel", "expedia", "hotelbeds", "manual"],
+      hotel_supplier: ["duffel", "expedia", "hotelbeds", "manual", "liteapi"],
       itinerary_item_status: ["planned", "confirmed", "pending_supplier", "changed", "cancelled"],
       itinerary_item_type: [
         "hotel",

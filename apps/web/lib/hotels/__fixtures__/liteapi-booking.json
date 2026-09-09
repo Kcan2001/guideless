@@ -1,0 +1,183 @@
+{
+  "data": {
+    "bookingId": "HHcdGBg5_",
+    "clientReference": "",
+    "supplierBookingId": "HHcdGBg5_",
+    "supplierBookingName": "nuitee",
+    "supplier": "nuitee",
+    "supplierId": 2,
+    "status": "CONFIRMED",
+    "hotelConfirmationCode": "test",
+    "checkin": "2026-11-08",
+    "checkout": "2026-11-11",
+    "hotel": {
+      "hotelId": "lp2febb",
+      "name": "Best Western Hotel Lakmi Nice",
+      "parentHotelId": "lp2febb"
+    },
+    "bookedRooms": [
+      {
+        "roomType": {
+          "roomTypeId": "",
+          "name": "Test rate 1"
+        },
+        "boardType": "RO",
+        "boardName": "Room Only",
+        "adults": 1,
+        "children": 0,
+        "rate": {
+          "rateId": "I5MTERCNLJJFQR2VGNCEKTSUIRDVSMSUIVGUEV2HJUZUOR2OKJJEONC2KRHU2WSXJBCTGRCHG5BFERKNLJCECTKSK5DUKWKUIFHUINCHJFMUIRKOKJJEORKZKRBTORCGJZNFAVSLKUZTIS2WJJMFSVSLKREVENSEINIUUUKJJY3EISKOJJJUQRRWI5JVKRCIJNLEKSCZJVFFQSCBGRCFGTKSKNDU2M2EIFHUUWSIIJDVKUKVJRCUKTKZKRJU4USTJBAVUU2HJVFFGR2JGJBTETKKLJDVSWSEKFGTGNCLJJCEKNBXIJJUOQK2IRGU2SSSI5ATEVCDJVBFCR2CGZCEGN2DKNDUKWKUJFGUINCHJUZUIUKNLJJEKTSKIU3ESMSTJFNEQQ2HJVJFCR2JGNBTETKKKJDFKWKEJNEUEUSHIE2UIQKNIJCHYMZWHAXDGML4GIYDENRNGEYS2MBVEAYTAORQGA5DAMD4KJHXY7D4PRCE6VKCJRCSAQ2MIFJVGSKDPQYC4MBQPQYC4MBQPR6DALRQGB6DALRQGA",
+          "retailRate": {
+            "total": {
+              "amount": 368.31,
+              "currency": "USD"
+            },
+            "suggestedSellingPrice": {
+              "source": "booking.com"
+            },
+            "taxesAndFees": [
+              {
+                "included": true,
+                "description": "Tax",
+                "amount": 33.48,
+                "currency": "USD"
+              }
+            ]
+          },
+          "cancellationPolicies": {
+            "cancelPolicyInfos": [
+              {
+                "cancelTime": "2026-11-08 23:59:59",
+                "amount": 368.31,
+                "type": "amount",
+                "timezone": "GMT",
+                "currency": "USD"
+              }
+            ],
+            "hotelRemarks": [],
+            "refundableTag": "RFN"
+          },
+          "maxOccupancy": 1,
+          "boardType": "Room Only",
+          "boardName": "RO",
+          "remarks": "",
+          "perks": []
+        },
+        "firstName": "Test",
+        "lastName": "Traveler",
+        "childrenAges": null,
+        "board": "Room Only",
+        "boardCode": "RO",
+        "cancellationPolicies": {
+          "cancelPolicyInfos": [
+            {
+              "cancelTime": "2026-11-08 23:59:59",
+              "amount": 368.31,
+              "type": "amount",
+              "timezone": "GMT",
+              "currency": "USD"
+            }
+          ],
+          "hotelRemarks": [],
+          "refundableTag": "RFN"
+        },
+        "room_id": "I5MTERCNLJJFQR2VGNCEKTSUIRDVSMSUIVGUEV2HJUZUOR2OKJJEONC2KRHU2WSXJBCTGRCHG5BFERKNLJCECTKSK5DUKWKUIFHUINCHJFMUIRKOKJJEORKZKRBTORCGJZNFAVSLKUZTIS2WJJMFSVSLKREVENSEINIUUUKJJY3EISKOJJJUQRRWI5JVKRCIJNLEKSCZJVFFQSCBGRCFGTKSKNDU2M2EIFHUUWSIIJDVKUKVJRCUKTKZKRJU4USTJBAVUU2HJVFFGR2JGJBTETKKLJDVSWSEKFGTGNCLJJCEKNBXIJJUOQK2IRGU2SSSI5ATEVCDJVBFCR2CGZCEGN2DKNDUKWKUJFGUINCHJUZUIUKNLJJEKTSKIU3ESMSTJFNEQQ2HJVJFCR2JGNBTETKKKJDFKWKEJNEUEUSHIE2UIQKNIJCHYMZWHAXDGML4GIYDENRNGEYS2MBVEAYTAORQGA5DAMD4KJHXY7D4PRCE6VKCJRCSAQ2MIFJVGSKDPQYC4MBQPQYC4MBQPR6DALRQGB6DALRQGA",
+        "occupancy_number": 1,
+        "amount": 368.31,
+        "currency": "USD",
+        "children_count": 0,
+        "remarks": "",
+        "guests": [
+          {
+            "firstName": "Test",
+            "lastName": "Traveler",
+            "email": "sandbox@example.com",
+            "phone": "",
+            "remarks": "",
+            "occupancyNumber": 1
+          }
+        ]
+      }
+    ],
+    "holder": {
+      "firstName": "Test",
+      "lastName": "Traveler",
+      "email": "sandbox@example.com",
+      "phone": ""
+    },
+    "createdAt": "2026-09-09T02:52:44",
+    "updatedAt": "",
+    "cancellationPolicies": {
+      "cancelPolicyInfos": [
+        {
+          "cancelTime": "2026-11-08 23:59:59",
+          "amount": 368.31,
+          "type": "amount",
+          "timezone": "GMT",
+          "currency": "USD"
+        }
+      ],
+      "hotelRemarks": [],
+      "refundableTag": "RFN"
+    },
+    "specialRemarks": "Example special remarks",
+    "optionalFees": "Optional fees",
+    "mandatoryFees": "Mandatory fees",
+    "knowBeforeYouGo": "Know before you go",
+    "price": 368.31,
+    "sellingPriceToUser": 368.31,
+    "commission": 0,
+    "addonsTotalAmount": 0,
+    "currency": "USD",
+    "remarks": "",
+    "voucherCode": "",
+    "voucherTotalAmount": 0,
+    "addons": null,
+    "guestId": 0,
+    "distributorCommission": 0,
+    "distributorPrice": 0,
+    "trackingId": "",
+    "firstName": "Test",
+    "lastName": "Traveler",
+    "adults": 1,
+    "children": "",
+    "childrenCount": 0,
+    "prebookId": "C09wis5Em",
+    "paymentStatus": "succeeded",
+    "paymentTransactionId": "tr_cts_1x86D3MESRTA9EJ6lpKEM",
+    "sellingPrice": "368.31",
+    "exchangeRate": 0.8614489949340535,
+    "exchangeRateUsd": 1,
+    "email": "sandbox@example.com",
+    "tag": "RFN",
+    "lastFreeCancellationDate": "2026-11-08T23:59:59Z",
+    "userId": 384440,
+    "nationality": "US",
+    "holderTitle": "",
+    "hotelId": "lp2febb",
+    "hotelName": "Best Western Hotel Lakmi Nice",
+    "cancelledAt": null,
+    "refundedAt": null,
+    "loyaltyGuestId": null,
+    "sandbox": 1,
+    "clientCommission": 0,
+    "voucherId": null,
+    "voucherTransationId": null,
+    "processingFee": 14.73,
+    "amountRefunded": 0,
+    "refundType": "",
+    "paymentScheduledAt": null,
+    "addonsRedemptions": null,
+    "rebookFrom": "",
+    "agentId": null,
+    "cancelledBy": null,
+    "feed": "liteapionboarding",
+    "goodwillPayment": null,
+    "newCharges": 0,
+    "compensationAmount": 0,
+    "hotelRemarks": "<br/><br/>* The city tax to be paid on spot by the guest; it is per person/night is subject to variation according to city council's decision.<br>Baby cot available on request.<br>Groups ( more than 4 rooms ) accepted under request and may have additional charges.<br><br/>TOURIST TAX FRANCE <br/>Local taxes might be payable on spot (per person per night).<br/>",
+    "payLaterDeadline": null
+  },
+  "guestLevel": 0,
+  "sandbox": true
+}

@@ -277,7 +277,7 @@ export type PartyType = (typeof PARTY_TYPES)[number];
 
 /** ISO 4217 codes we sell in. Extend deliberately; each needs Stripe + pricing support. */
 // Hotel inventory (migration 044). Mirrors of the Postgres enums of the same names.
-export const HOTEL_SUPPLIERS = ["duffel", "expedia", "hotelbeds", "manual"] as const;
+export const HOTEL_SUPPLIERS = ["duffel", "expedia", "hotelbeds", "manual", "liteapi"] as const;
 export type HotelSupplierId = (typeof HOTEL_SUPPLIERS)[number];
 
 export const HOTEL_PAYMENT_TYPES = ["pay_now", "pay_at_property"] as const;

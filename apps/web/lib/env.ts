@@ -52,8 +52,10 @@ const serverSchema = z.object({
   /** Salts the hashed caller id used by public-form rate limits (lib/rate-limit.ts). */
   RATE_LIMIT_SALT: z.string().min(8).optional(),
   /** Hotel inventory (docs/hotels.md). "duffel" needs DUFFEL_ACCESS_TOKEN; otherwise the mock supplier runs. */
-  HOTEL_SUPPLIER: z.enum(["mock", "duffel"]).default("mock"),
+  HOTEL_SUPPLIER: z.enum(["mock", "duffel", "liteapi"]).default("mock"),
   DUFFEL_ACCESS_TOKEN: z.string().min(1).optional(),
+  /** LiteAPI key. A sandbox key starts "sand_"; production keys are separate and cost real money. */
+  LITEAPI_KEY: z.string().min(1).optional(),
   /** Bearer token Vercel sends to /api/cron/* routes. */
   CRON_SECRET: z.string().min(16).optional(),
 });
