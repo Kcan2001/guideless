@@ -93,6 +93,25 @@ test.describe("managing a booking", () => {
     }
   });
 
+  test("the trip calendar is not readable by a URL alone", async ({ page, request }) => {
+    // Anonymous, and with no session at all: a trip id is not a capability. Redirects are not
+    // followed on purpose — following one lands on the sign-in page, which answers 200 and would
+    // have made this assertion pass while proving nothing.
+    const anon = await request.get(`/trips/${booked.bookingId}/calendar.ics`, {
+      maxRedirects: 0,
+    });
+    expect([301, 302, 303, 307, 308]).toContain(anon.status());
+    expect(anon.headers()["location"]).toContain("/login");
+
+    // Signed in as somebody else is the same answer, so the response cannot be used to discover
+    // which trip ids exist.
+    await signUp(page, uniqueEmail("nosy"));
+    await page.waitForURL(/\/account/, { timeout: 30_000 });
+    const res = await page.request.get(`/trips/${booked.bookingId}/calendar.ics`);
+    expect(res.status()).toBe(404);
+    expect(await res.text()).not.toContain("BEGIN:VCALENDAR");
+  });
+
   test("one traveler cannot open another traveler's booking", async ({ page }) => {
     const intruder = uniqueEmail("intruder");
     await signUp(page, intruder);

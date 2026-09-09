@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { Bed, Flag, MapPin, MessageCircle, Sparkles, Users } from "lucide-react";
+import { Bed, CalendarDays, Flag, MapPin, MessageCircle, Sparkles, Users } from "lucide-react";
 import { emails } from "@guideless/config";
 import {
   formatDate,
@@ -214,6 +214,23 @@ export default async function TripPage(props: PageProps<"/trips/[tripId]">) {
               className={cn(buttonVariants({ variant: "inverse", size: "sm" }), "mt-4")}
             >
               Email Guideless
+            </a>
+          </section>
+
+          <section className="rounded-xl border border-border bg-surface p-5">
+            <h2 className="flex items-center gap-2 font-heading text-lg font-semibold">
+              <CalendarDays className="h-4 w-4 text-accent" aria-hidden /> Put it in your calendar
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Every day, train and group moment, with each one in the local time of the place it
+              happens. Opens in Google Calendar, Apple Calendar or anything else that reads .ics.
+            </p>
+            <a
+              href={`/trips/${tripId}/calendar.ics`}
+              className={cn(buttonVariants({ variant: "secondary", size: "sm" }), "mt-4")}
+              download="guideless-trip.ics"
+            >
+              Download the trip calendar
             </a>
           </section>
 
