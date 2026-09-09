@@ -497,4 +497,4 @@ insert into public.departure_tier_briefs (departure_id, tier, brief) values
    'Monaco itself, in something unremarkable. On this weekend being inside the principality is the upgrade, so an ordinary property here outranks a very good one in Nice. Walk to the circuit, no train on race morning.'),
   ('30000000-0000-4000-8000-000000000004', 'elite',
    'Monaco, in something that is not unremarkable. Race-week rates in Monte Carlo are several times normal and this rung pays them. It has to be what a traveler would choose if price were irrelevant.')
-on conflict (departure_id, tier) do nothing;
+on conflict (departure_id, tier) do update set brief = excluded.brief;
