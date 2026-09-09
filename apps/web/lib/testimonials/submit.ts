@@ -5,7 +5,11 @@ import { redirect } from "next/navigation";
 import { testimonialSubmissionSchema } from "@guideless/validation";
 import { formToObject } from "@/lib/admin/form";
 import { RATE_LIMITED_MESSAGE, withinRateLimit } from "@/lib/rate-limit";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
+import { emails } from "@guideless/config";
+import { publicEnv } from "@/lib/env";
+import { sendEmail } from "@/lib/email/send";
+import { staffAlertEmail } from "@/lib/email/templates/campaign";
 
 /**
  * Somebody from an earlier trip sending us their words.
@@ -53,6 +57,29 @@ export async function submitTestimonialAction(fd: FormData): Promise<void> {
     // 23505 means this submission id already went through — a double submit, not a failure.
     if (error.code === "23505") back(v.tourSlug, "notice", "Got it — thank you.");
     back(v.tourSlug, "error_msg", "That didn't send. Try again, or just reply to Kyle's message.");
+  }
+
+  // Tell Kyle it arrived. Deliberately after the insert and deliberately not awaited into the
+  // happy path's success: the submission is saved either way, and a Resend outage must not turn
+  // somebody's contribution into an error message.
+  try {
+    const notice = staffAlertEmail({
+      what: "A testimonial came in",
+      who: `${v.authorName} <${v.email}>`,
+      detail: v.quote,
+      url: `${publicEnv.NEXT_PUBLIC_SITE_URL}/admin/testimonials`,
+    });
+    await sendEmail(createServiceRoleClient(), {
+      to: emails.support,
+      userId: null,
+      template: "staff-testimonial-submission",
+      subject: notice.subject,
+      html: notice.html,
+      text: notice.text,
+      payload: { submission_id: v.submissionId },
+    });
+  } catch (err) {
+    console.error("could not send the testimonial notification", err);
   }
 
   back(

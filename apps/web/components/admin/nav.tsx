@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   LifeBuoy,
   Map,
+  Mail,
   Megaphone,
   Newspaper,
   ReceiptText,
@@ -59,6 +60,7 @@ const NAV: Array<{ href: string; label: string; icon: LucideIcon }> = [
   { href: "/admin/hosts", label: "Hosts", icon: HandHeart },
   { href: "/admin/meetups", label: "Meetups", icon: Wine },
   { href: "/admin/support", label: "Support", icon: LifeBuoy },
+  { href: "/admin/email", label: "Email", icon: Mail },
   { href: "/admin/social", label: "Social", icon: Megaphone },
 ];
 

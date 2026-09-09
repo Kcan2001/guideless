@@ -1982,6 +1982,8 @@ export type Database = {
           party_size: number;
           source: string;
           tour_id: string;
+          unsubscribe_token: string;
+          unsubscribed_at: string | null;
           user_id: string | null;
         };
         Insert: {
@@ -1996,6 +1998,8 @@ export type Database = {
           party_size?: number;
           source?: string;
           tour_id: string;
+          unsubscribe_token?: string;
+          unsubscribed_at?: string | null;
           user_id?: string | null;
         };
         Update: {
@@ -2010,6 +2014,8 @@ export type Database = {
           party_size?: number;
           source?: string;
           tour_id?: string;
+          unsubscribe_token?: string;
+          unsubscribed_at?: string | null;
           user_id?: string | null;
         };
         Relationships: [
@@ -2144,6 +2150,7 @@ export type Database = {
           note: string | null;
           notified_at: string | null;
           source: string;
+          unsubscribe_token: string;
           unsubscribed_at: string | null;
           user_id: string | null;
           wanted_place: string | null;
@@ -2157,6 +2164,7 @@ export type Database = {
           note?: string | null;
           notified_at?: string | null;
           source?: string;
+          unsubscribe_token?: string;
           unsubscribed_at?: string | null;
           user_id?: string | null;
           wanted_place?: string | null;
@@ -2170,6 +2178,7 @@ export type Database = {
           note?: string | null;
           notified_at?: string | null;
           source?: string;
+          unsubscribe_token?: string;
           unsubscribed_at?: string | null;
           user_id?: string | null;
           wanted_place?: string | null;
@@ -2287,6 +2296,86 @@ export type Database = {
           slug?: string;
           summary?: string | null;
           timezone?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      email_campaign_sends: {
+        Row: {
+          campaign_id: string;
+          email: string;
+          error: string | null;
+          ok: boolean;
+          sent_at: string;
+        };
+        Insert: {
+          campaign_id: string;
+          email: string;
+          error?: string | null;
+          ok?: boolean;
+          sent_at?: string;
+        };
+        Update: {
+          campaign_id?: string;
+          email?: string;
+          error?: string | null;
+          ok?: boolean;
+          sent_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "email_campaign_sends_campaign_id_fkey";
+            columns: ["campaign_id"];
+            isOneToOne: false;
+            referencedRelation: "email_campaigns";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      email_campaigns: {
+        Row: {
+          body: string;
+          context: string | null;
+          created_at: string;
+          created_by: string | null;
+          cta_label: string | null;
+          cta_url: string | null;
+          id: string;
+          preheader: string | null;
+          segment: string;
+          sent_at: string | null;
+          status: Database["public"]["Enums"]["campaign_status"];
+          subject: string;
+          updated_at: string;
+        };
+        Insert: {
+          body: string;
+          context?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          cta_label?: string | null;
+          cta_url?: string | null;
+          id?: string;
+          preheader?: string | null;
+          segment: string;
+          sent_at?: string | null;
+          status?: Database["public"]["Enums"]["campaign_status"];
+          subject: string;
+          updated_at?: string;
+        };
+        Update: {
+          body?: string;
+          context?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          cta_label?: string | null;
+          cta_url?: string | null;
+          id?: string;
+          preheader?: string | null;
+          segment?: string;
+          sent_at?: string | null;
+          status?: Database["public"]["Enums"]["campaign_status"];
+          subject?: string;
           updated_at?: string;
         };
         Relationships: [];
@@ -6558,6 +6647,19 @@ export type Database = {
           },
         ];
       };
+      mailing_list: {
+        Row: {
+          can_market: boolean | null;
+          context: string | null;
+          created_at: string | null;
+          email: string | null;
+          name: string | null;
+          purpose: string | null;
+          segment: string | null;
+          unsubscribe_token: string | null;
+        };
+        Relationships: [];
+      };
       meetup_rsvp_counts: {
         Row: {
           going: number | null;
@@ -7149,6 +7251,25 @@ export type Database = {
         };
         Returns: undefined;
       };
+      mailing_list_for_staff: {
+        Args: never;
+        Returns: {
+          can_market: boolean | null;
+          context: string | null;
+          created_at: string | null;
+          email: string | null;
+          name: string | null;
+          purpose: string | null;
+          segment: string | null;
+          unsubscribe_token: string | null;
+        }[];
+        SetofOptions: {
+          from: "*";
+          to: "mailing_list";
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
       notify_booking_paid: {
         Args: {
           p_booking_id: string;
@@ -7345,6 +7466,8 @@ export type Database = {
           stay_option_id: string;
         }[];
       };
+      stop_departure_waitlist: { Args: { p_token: string }; Returns: string };
+      stop_destination_alert: { Args: { p_token: string }; Returns: string };
       submit_review: {
         Args: {
           p_body: string;
@@ -7555,6 +7678,7 @@ export type Database = {
         | "message_deleted";
       booking_status:
         "draft" | "pending_payment" | "confirmed" | "cancelled" | "refunded" | "completed";
+      campaign_status: "draft" | "sending" | "sent" | "failed";
       chat_room_type: "trip_group" | "announcements" | "optional_activities";
       content_visibility: "public_preview" | "booked_customer" | "trip_member" | "staff_only";
       departure_status:
@@ -7810,6 +7934,7 @@ export const Constants = {
         "refunded",
         "completed",
       ],
+      campaign_status: ["draft", "sending", "sent", "failed"],
       chat_room_type: ["trip_group", "announcements", "optional_activities"],
       content_visibility: ["public_preview", "booked_customer", "trip_member", "staff_only"],
       departure_status: [
