@@ -477,3 +477,24 @@ where departure_id = '30000000-0000-4000-8000-000000000004'
 update public.departure_add_ons
 set cancellable_until_days_before = null
 where id in ('32000000-0000-4000-8000-000000000008', '32000000-0000-4000-8000-000000000009');
+-- Monaco: an event weekend. Evenings matter, the harbour matters, and a hotel with somewhere to
+-- drink on the roof beats a quieter one with a better room.
+update public.tour_versions
+set character = array['event', 'social', 'nightlife', 'scenic']::public.trip_character[]
+where id = '21000000-0000-4000-8000-000000000002';
+
+-- Tier brief for Monaco 2027. Kyle's own reading of the weekend, written down so it is an artifact
+-- somebody else can apply rather than something only he knows. The point of it: on this weekend the
+-- ladder is about access, not about the room. Monte Carlo rooms are booked a year ahead and run
+-- several times their normal rate, so a property that would be Explorer in an ordinary week is
+-- Premium here purely because of where it is.
+insert into public.departure_tier_briefs (departure_id, tier, brief) values
+  ('30000000-0000-4000-8000-000000000004', 'explorer',
+   'A hotel in Nice, around 100 to 200 a night, plus the train to the circuit each day. The value play: spend on the weekend rather than the room. Well located for the station, not the cheapest bed in the city.'),
+  ('30000000-0000-4000-8000-000000000004', 'classic',
+   'A better hotel in Nice, around 200 to 500 a night, same train. Buys a real step up in the room and the address without paying Monaco race-week prices. If this and Explorer differ only by price, one of them is wrong.'),
+  ('30000000-0000-4000-8000-000000000004', 'premium',
+   'Monaco itself, in something unremarkable. On this weekend being inside the principality is the upgrade, so an ordinary property here outranks a very good one in Nice. Walk to the circuit, no train on race morning.'),
+  ('30000000-0000-4000-8000-000000000004', 'elite',
+   'Monaco, in something that is not unremarkable. Race-week rates in Monte Carlo are several times normal and this rung pays them. It has to be what a traveler would choose if price were irrelevant.')
+on conflict (departure_id, tier) do nothing;

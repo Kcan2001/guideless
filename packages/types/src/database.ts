@@ -1520,6 +1520,48 @@ export type Database = {
           },
         ];
       };
+      departure_tier_briefs: {
+        Row: {
+          brief: string;
+          created_at: string;
+          departure_id: string;
+          tier: Database["public"]["Enums"]["option_tier"];
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          brief: string;
+          created_at?: string;
+          departure_id: string;
+          tier: Database["public"]["Enums"]["option_tier"];
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          brief?: string;
+          created_at?: string;
+          departure_id?: string;
+          tier?: Database["public"]["Enums"]["option_tier"];
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "departure_tier_briefs_departure_id_fkey";
+            columns: ["departure_id"];
+            isOneToOne: false;
+            referencedRelation: "departures";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "departure_tier_briefs_departure_id_fkey";
+            columns: ["departure_id"];
+            isOneToOne: false;
+            referencedRelation: "departures_public";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       departure_unlocks: {
         Row: {
           created_at: string;
@@ -4325,6 +4367,7 @@ export type Database = {
       };
       tour_versions: {
         Row: {
+          character: Database["public"]["Enums"]["trip_character"][];
           created_at: string;
           created_by: string | null;
           description: string | null;
@@ -4345,6 +4388,7 @@ export type Database = {
           why_this_trip: string | null;
         };
         Insert: {
+          character?: Database["public"]["Enums"]["trip_character"][];
           created_at?: string;
           created_by?: string | null;
           description?: string | null;
@@ -4365,6 +4409,7 @@ export type Database = {
           why_this_trip?: string | null;
         };
         Update: {
+          character?: Database["public"]["Enums"]["trip_character"][];
           created_at?: string;
           created_by?: string | null;
           description?: string | null;
@@ -6162,6 +6207,8 @@ export type Database = {
       tour_version_status: "draft" | "published" | "archived";
       transfer_preference: "group_welcome_transfer" | "own_arrangement";
       transport_type: "train" | "flight" | "transfer" | "ferry" | "bus";
+      trip_character:
+        "social" | "nightlife" | "slow" | "culinary" | "cultural" | "outdoors" | "scenic" | "event";
       trip_status: "upcoming" | "active" | "completed" | "cancelled";
       webhook_event_status: "received" | "processed" | "failed" | "skipped";
     };
@@ -6420,6 +6467,16 @@ export const Constants = {
       tour_version_status: ["draft", "published", "archived"],
       transfer_preference: ["group_welcome_transfer", "own_arrangement"],
       transport_type: ["train", "flight", "transfer", "ferry", "bus"],
+      trip_character: [
+        "social",
+        "nightlife",
+        "slow",
+        "culinary",
+        "cultural",
+        "outdoors",
+        "scenic",
+        "event",
+      ],
       trip_status: ["upcoming", "active", "completed", "cancelled"],
       webhook_event_status: ["received", "processed", "failed", "skipped"],
     },

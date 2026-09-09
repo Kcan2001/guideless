@@ -90,6 +90,7 @@ function item(
       tour_id: id,
       version_number: 1,
       status: "published",
+      character: [],
       tagline: null,
       summary: null,
       description: null,
