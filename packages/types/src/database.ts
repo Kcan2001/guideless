@@ -265,6 +265,77 @@ export type Database = {
           },
         ];
       };
+      add_on_sourcing: {
+        Row: {
+          add_on_id: string;
+          created_at: string;
+          currency: string;
+          drift_amount: number | null;
+          last_checked_at: string | null;
+          net_amount: number;
+          product_id: string;
+          source_rate_id: string | null;
+          supplier: Database["public"]["Enums"]["experience_supplier"];
+          supplier_option_id: string;
+          updated_at: string;
+        };
+        Insert: {
+          add_on_id: string;
+          created_at?: string;
+          currency: string;
+          drift_amount?: number | null;
+          last_checked_at?: string | null;
+          net_amount: number;
+          product_id: string;
+          source_rate_id?: string | null;
+          supplier: Database["public"]["Enums"]["experience_supplier"];
+          supplier_option_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          add_on_id?: string;
+          created_at?: string;
+          currency?: string;
+          drift_amount?: number | null;
+          last_checked_at?: string | null;
+          net_amount?: number;
+          product_id?: string;
+          source_rate_id?: string | null;
+          supplier?: Database["public"]["Enums"]["experience_supplier"];
+          supplier_option_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "add_on_sourcing_add_on_id_fkey";
+            columns: ["add_on_id"];
+            isOneToOne: true;
+            referencedRelation: "add_on_availability";
+            referencedColumns: ["add_on_id"];
+          },
+          {
+            foreignKeyName: "add_on_sourcing_add_on_id_fkey";
+            columns: ["add_on_id"];
+            isOneToOne: true;
+            referencedRelation: "departure_add_ons";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "add_on_sourcing_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "experience_products";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "add_on_sourcing_source_rate_id_fkey";
+            columns: ["source_rate_id"];
+            isOneToOne: false;
+            referencedRelation: "experience_rates";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       ai_conversations: {
         Row: {
           booking_id: string;
@@ -2136,6 +2207,142 @@ export type Database = {
           },
         ];
       };
+      experience_products: {
+        Row: {
+          address: string | null;
+          currency: string | null;
+          description: string | null;
+          destination_id: string | null;
+          duration_minutes: number | null;
+          fetched_at: string;
+          from_amount: number | null;
+          id: string;
+          image_url: string | null;
+          latitude: number | null;
+          longitude: number | null;
+          rating: number | null;
+          rating_count: number | null;
+          raw: Json | null;
+          supplier: Database["public"]["Enums"]["experience_supplier"];
+          supplier_categories: string[];
+          supplier_product_id: string;
+          title: string;
+        };
+        Insert: {
+          address?: string | null;
+          currency?: string | null;
+          description?: string | null;
+          destination_id?: string | null;
+          duration_minutes?: number | null;
+          fetched_at?: string;
+          from_amount?: number | null;
+          id?: string;
+          image_url?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          rating?: number | null;
+          rating_count?: number | null;
+          raw?: Json | null;
+          supplier: Database["public"]["Enums"]["experience_supplier"];
+          supplier_categories?: string[];
+          supplier_product_id: string;
+          title: string;
+        };
+        Update: {
+          address?: string | null;
+          currency?: string | null;
+          description?: string | null;
+          destination_id?: string | null;
+          duration_minutes?: number | null;
+          fetched_at?: string;
+          from_amount?: number | null;
+          id?: string;
+          image_url?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          rating?: number | null;
+          rating_count?: number | null;
+          raw?: Json | null;
+          supplier?: Database["public"]["Enums"]["experience_supplier"];
+          supplier_categories?: string[];
+          supplier_product_id?: string;
+          title?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "experience_products_destination_id_fkey";
+            columns: ["destination_id"];
+            isOneToOne: false;
+            referencedRelation: "destinations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      experience_rates: {
+        Row: {
+          available: boolean;
+          cancellation_policy: Json;
+          capacity: number | null;
+          currency: string;
+          expires_at: string | null;
+          fetched_at: string;
+          id: string;
+          net_amount: number;
+          option_name: string;
+          product_id: string;
+          raw: Json | null;
+          start_time: string | null;
+          supplier: Database["public"]["Enums"]["experience_supplier"];
+          supplier_option_id: string;
+          total_amount: number;
+          travel_date: string;
+        };
+        Insert: {
+          available?: boolean;
+          cancellation_policy?: Json;
+          capacity?: number | null;
+          currency: string;
+          expires_at?: string | null;
+          fetched_at?: string;
+          id?: string;
+          net_amount: number;
+          option_name: string;
+          product_id: string;
+          raw?: Json | null;
+          start_time?: string | null;
+          supplier: Database["public"]["Enums"]["experience_supplier"];
+          supplier_option_id: string;
+          total_amount: number;
+          travel_date: string;
+        };
+        Update: {
+          available?: boolean;
+          cancellation_policy?: Json;
+          capacity?: number | null;
+          currency?: string;
+          expires_at?: string | null;
+          fetched_at?: string;
+          id?: string;
+          net_amount?: number;
+          option_name?: string;
+          product_id?: string;
+          raw?: Json | null;
+          start_time?: string | null;
+          supplier?: Database["public"]["Enums"]["experience_supplier"];
+          supplier_option_id?: string;
+          total_amount?: number;
+          travel_date?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "experience_rates_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "experience_products";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       feature_flags: {
         Row: {
           description: string | null;
@@ -3234,6 +3441,7 @@ export type Database = {
       };
       pricing_rules: {
         Row: {
+          applies_to: string;
           created_at: string;
           destination_id: string | null;
           effective_from: string | null;
@@ -3247,6 +3455,7 @@ export type Database = {
           priority: number;
         };
         Insert: {
+          applies_to?: string;
           created_at?: string;
           destination_id?: string | null;
           effective_from?: string | null;
@@ -3260,6 +3469,7 @@ export type Database = {
           priority?: number;
         };
         Update: {
+          applies_to?: string;
           created_at?: string;
           destination_id?: string | null;
           effective_from?: string | null;
@@ -6154,6 +6364,8 @@ export type Database = {
         Args: { p_departure_id: string };
         Returns: undefined;
       };
+      blocked_between: { Args: { p_a: string; p_b: string }; Returns: boolean };
+      can_read_message: { Args: { p_sender_id: string }; Returns: boolean };
       can_review_booking: { Args: { p_booking_id: string }; Returns: boolean };
       can_survey_booking: {
         Args: {
@@ -6652,6 +6864,10 @@ export type Database = {
         Args: { p_email: string; p_source?: string };
         Returns: string;
       };
+      suggest_experience_price: {
+        Args: { p_net_amount: number; p_product_id: string };
+        Returns: number;
+      };
       suggest_stay_price: {
         Args: {
           p_adults: number;
@@ -6746,6 +6962,7 @@ export type Database = {
         | "in_progress"
         | "completed"
         | "cancelled";
+      experience_supplier: "mock" | "viator";
       hotel_booking_status: "quoted" | "booked" | "confirmed" | "cancelled" | "failed";
       hotel_payment_type: "pay_now" | "pay_at_property";
       hotel_supplier: "duffel" | "expedia" | "hotelbeds" | "manual" | "liteapi";
@@ -6999,6 +7216,7 @@ export const Constants = {
         "completed",
         "cancelled",
       ],
+      experience_supplier: ["mock", "viator"],
       hotel_booking_status: ["quoted", "booked", "confirmed", "cancelled", "failed"],
       hotel_payment_type: ["pay_now", "pay_at_property"],
       hotel_supplier: ["duffel", "expedia", "hotelbeds", "manual", "liteapi"],

@@ -12,6 +12,7 @@ import {
 import { formatDateRange } from "@guideless/utils";
 import { publicEnv } from "@/lib/env";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
+import { verifySourcedAddOns } from "@/lib/experiences/verify";
 import { recheckStayRate } from "@/lib/hotels/recheck";
 import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 
@@ -384,6 +385,20 @@ export async function startAddOnPurchase(input: AddOnPurchaseInput): Promise<Pur
   } = await supabase.auth.getUser();
   if (!user) return { code: "auth_required", error: "Please sign in to continue." };
 
+  // Anything we resell is rechecked with the supplier before Stripe sees the cart: a price we last
+  // saw an hour ago is not a price we should charge. Hand-written extras have no supplier and skip
+  // this entirely. See lib/experiences/verify.ts for why an unreachable supplier lets the sale through.
+  const travelDate = await departureStartDate(supabase, data.bookingId);
+  if (travelDate) {
+    const verified = await verifySourcedAddOns(
+      data.addOns.map((a) => a.addOnId),
+      travelDate,
+    );
+    if (!verified.ok) {
+      return { code: "invalid", error: verified.error ?? "That extra isn't available any more." };
+    }
+  }
+
   const { data: rows, error: rpcError } = await supabase.rpc("start_add_on_purchase", {
     p_booking_id: data.bookingId,
     p_add_ons: data.addOns as unknown as never,
@@ -462,4 +477,21 @@ export async function startAddOnPurchase(input: AddOnPurchaseInput): Promise<Pur
   if (!url)
     return { code: "unknown", error: "We couldn't open the payment page. Nothing was charged." };
   redirect(url as Route);
+}
+
+/**
+ * The date a sourced add-on would be used, for the supplier recheck. The departure's start date is
+ * close enough: suppliers price by day and an add-on's own day_number is optional.
+ */
+async function departureStartDate(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  bookingId: string,
+): Promise<string | null> {
+  const { data } = await supabase
+    .from("bookings")
+    .select("departures(start_date)")
+    .eq("id", bookingId)
+    .maybeSingle();
+  const departure = (data as { departures?: { start_date: string } | null } | null)?.departures;
+  return departure?.start_date ?? null;
 }

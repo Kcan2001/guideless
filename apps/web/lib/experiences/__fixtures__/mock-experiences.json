@@ -1,0 +1,164 @@
+{
+  "note": "Fixtures for the mock experience supplier. Real things that exist in the destinations we sell, priced plausibly in EUR minor units, so an import and a markup can be exercised end to end without a supplier account. Option ids ending -drift re-price on recheck; -gone disappears on recheck; -soldout is unavailable from the start.",
+  "products": [
+    {
+      "supplierProductId": "mock-exp-nice-food-tour",
+      "title": "Old Town Nice food walk, small group",
+      "description": "Three hours through Vieux Nice with a local guide: socca, pissaladière, olive oil, and the market at Cours Saleya. Maximum eight people.",
+      "durationMinutes": 180,
+      "supplierCategories": ["Food & Drink", "Walking Tours"],
+      "address": "Cours Saleya, 06300 Nice",
+      "latitude": 43.6952,
+      "longitude": 7.2757,
+      "rating": 4.8,
+      "ratingCount": 1240,
+      "fromAmount": 6500,
+      "currency": "EUR",
+      "options": [
+        {
+          "supplierOptionId": "mock-exp-nice-food-tour-am",
+          "name": "10:00, English",
+          "startTime": "10:00",
+          "netAmount": 6500,
+          "capacity": 8,
+          "cancellationPolicy": [
+            { "daysBefore": 7, "refundPercentage": 100 },
+            { "daysBefore": 2, "refundPercentage": 50 },
+            { "daysBefore": 0, "refundPercentage": 0 }
+          ]
+        },
+        {
+          "supplierOptionId": "mock-exp-nice-food-tour-pm-drift",
+          "name": "16:00, English",
+          "startTime": "16:00",
+          "netAmount": 6900,
+          "capacity": 8,
+          "cancellationPolicy": [
+            { "daysBefore": 7, "refundPercentage": 100 },
+            { "daysBefore": 0, "refundPercentage": 0 }
+          ]
+        }
+      ]
+    },
+    {
+      "supplierProductId": "mock-exp-nice-sea-kayak",
+      "title": "Sea kayak along the Villefranche coast",
+      "description": "Two hours on the water from Villefranche-sur-Mer, with a swim stop. No experience needed.",
+      "durationMinutes": 120,
+      "supplierCategories": ["Outdoor Activities", "Water Sports"],
+      "address": "Plage des Marinières, 06230 Villefranche-sur-Mer",
+      "latitude": 43.7038,
+      "longitude": 7.3096,
+      "rating": 4.7,
+      "ratingCount": 480,
+      "fromAmount": 4500,
+      "currency": "EUR",
+      "options": [
+        {
+          "supplierOptionId": "mock-exp-nice-sea-kayak-morning",
+          "name": "09:30, guided",
+          "startTime": "09:30",
+          "netAmount": 4500,
+          "capacity": 12,
+          "cancellationPolicy": [
+            { "daysBefore": 1, "refundPercentage": 100 },
+            { "daysBefore": 0, "refundPercentage": 0 }
+          ]
+        },
+        {
+          "supplierOptionId": "mock-exp-nice-sea-kayak-sunset-soldout",
+          "name": "19:00, sunset",
+          "startTime": "19:00",
+          "netAmount": 5200,
+          "capacity": 0,
+          "available": false,
+          "cancellationPolicy": [{ "daysBefore": 1, "refundPercentage": 100 }]
+        }
+      ]
+    },
+    {
+      "supplierProductId": "mock-exp-monaco-old-town",
+      "title": "Monaco old town and palace walk",
+      "description": "Ninety minutes on the Rock: the palace square, the cathedral, and the streets the Grand Prix does not reach.",
+      "durationMinutes": 90,
+      "supplierCategories": ["Walking Tours", "Historical Tours"],
+      "address": "Place du Palais, 98000 Monaco",
+      "latitude": 43.7314,
+      "longitude": 7.4207,
+      "rating": 4.5,
+      "ratingCount": 2100,
+      "fromAmount": 3200,
+      "currency": "EUR",
+      "options": [
+        {
+          "supplierOptionId": "mock-exp-monaco-old-town-am",
+          "name": "11:00, English",
+          "startTime": "11:00",
+          "netAmount": 3200,
+          "capacity": 20,
+          "cancellationPolicy": [{ "daysBefore": 1, "refundPercentage": 100 }]
+        },
+        {
+          "supplierOptionId": "mock-exp-monaco-old-town-pm-gone",
+          "name": "15:00, English",
+          "startTime": "15:00",
+          "netAmount": 3200,
+          "capacity": 20,
+          "cancellationPolicy": [{ "daysBefore": 1, "refundPercentage": 100 }]
+        }
+      ]
+    },
+    {
+      "supplierProductId": "mock-exp-avignon-wine",
+      "title": "Châteauneuf-du-Pape half day from Avignon",
+      "description": "Two domaines, a tasting at each, and the drive through the vineyards. Afternoons only.",
+      "durationMinutes": 300,
+      "supplierCategories": ["Food & Drink", "Wine Tasting", "Day Trips"],
+      "address": "Avignon, France",
+      "latitude": 43.9493,
+      "longitude": 4.8055,
+      "rating": 4.9,
+      "ratingCount": 860,
+      "fromAmount": 11000,
+      "currency": "EUR",
+      "options": [
+        {
+          "supplierOptionId": "mock-exp-avignon-wine-pm",
+          "name": "13:30, small group",
+          "startTime": "13:30",
+          "netAmount": 11000,
+          "capacity": 8,
+          "cancellationPolicy": [
+            { "daysBefore": 14, "refundPercentage": 100 },
+            { "daysBefore": 3, "refundPercentage": 50 },
+            { "daysBefore": 0, "refundPercentage": 0 }
+          ]
+        }
+      ]
+    },
+    {
+      "supplierProductId": "mock-exp-paris-seine",
+      "title": "Seine evening cruise, no commentary",
+      "description": "An hour on the water after dark. No microphone, no soundtrack; just the river.",
+      "durationMinutes": 60,
+      "supplierCategories": ["Cruises & Sailing"],
+      "address": "Port de la Bourdonnais, 75007 Paris",
+      "latitude": 48.8606,
+      "longitude": 2.2946,
+      "rating": 4.4,
+      "ratingCount": 9800,
+      "fromAmount": 2200,
+      "currency": "EUR",
+      "options": [
+        {
+          "supplierOptionId": "mock-exp-paris-seine-2100",
+          "name": "21:00",
+          "startTime": "21:00",
+          "netAmount": 2200,
+          "capacity": 100,
+          "cancellationPolicy": [{ "daysBefore": 1, "refundPercentage": 100 }]
+        }
+      ]
+    }
+  ]
+}
