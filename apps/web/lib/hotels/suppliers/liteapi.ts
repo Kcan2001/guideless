@@ -167,19 +167,24 @@ function toMinor(amount: number | null | undefined): number {
 
 /**
  * `cancelTime` is naive ("2026-11-05 10:00:00") with the zone in a sibling field, and every sandbox
- * response so far says GMT. Anything other than GMT or UTC is left to `Date` rather than guessed
- * at, because inventing an offset would silently move a refund deadline.
+ * response so far says GMT.
+ *
+ * A timestamp with no offset is read as UTC, **always**, including when the zone field says
+ * something we do not understand. The first version left those to `Date`, which parses a naive
+ * string in the *server's* timezone: the same supplier response produced a different refund
+ * deadline on a laptop in New York and on a runner in UTC. A deadline that moves with the machine
+ * reading it is worse than one that is occasionally a few hours out, and CI caught it precisely
+ * because the two disagreed.
+ *
+ * We do not carry IANA zones. If a supplier ever sends one, this needs a real zone library rather
+ * than a guess, and `hotelRemarks` is where that would surface first.
  */
 export function toIsoInstant(cancelTime: string, timezone?: string | null): string | null {
   const raw = cancelTime.trim();
   if (!raw) return null;
-  const zone = (timezone ?? "").trim().toUpperCase();
   const normalized = raw.includes("T") ? raw : raw.replace(" ", "T");
-  const candidate =
-    /[zZ]$|[+-]\d{2}:?\d{2}$/.test(normalized) || !(zone === "GMT" || zone === "UTC" || zone === "")
-      ? normalized
-      : `${normalized}Z`;
-  const parsed = Date.parse(candidate);
+  const hasOffset = /[zZ]$|[+-]\d{2}:?\d{2}$/.test(normalized);
+  const parsed = Date.parse(hasOffset ? normalized : `${normalized}Z`);
   return Number.isNaN(parsed) ? null : new Date(parsed).toISOString();
 }
 

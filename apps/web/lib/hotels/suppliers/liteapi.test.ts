@@ -66,10 +66,17 @@ describe("toIsoInstant", () => {
     expect(toIsoInstant("2026-11-05 10:00:00", "GMT")).toBe("2026-11-05T10:00:00.000Z");
   });
 
-  it("does not invent an offset for a zone it does not understand", () => {
-    // Parsed as local rather than silently stamped UTC: guessing here would move a refund deadline.
-    const out = toIsoInstant("2026-11-05 10:00:00", "Europe/Paris");
-    expect(out).not.toBe("2026-11-05T10:00:00.000Z");
+  it("reads a naive timestamp the same way on every machine", () => {
+    // The first version left an unrecognised zone to Date, which parses naive strings in the
+    // SERVER's timezone: the same response produced different refund deadlines on a laptop in New
+    // York and a runner in UTC. CI caught it. A deadline must not depend on where the code runs.
+    for (const zone of ["GMT", "UTC", "Europe/Paris", "", undefined, null]) {
+      expect(toIsoInstant("2026-11-05 10:00:00", zone)).toBe("2026-11-05T10:00:00.000Z");
+    }
+  });
+
+  it("respects an offset the supplier actually sent", () => {
+    expect(toIsoInstant("2026-11-05T10:00:00+02:00", "GMT")).toBe("2026-11-05T08:00:00.000Z");
   });
 
   it("returns null rather than an Invalid Date", () => {
