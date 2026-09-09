@@ -3,6 +3,10 @@
 How Guideless acquires travelers and measures it. Companion to the master spec §45–47 (SEO,
 GA4, PostHog) and ADR-011 (social publishing). Brand voice rules live in `docs/design-system.md`.
 
+**This document is the machinery — accounts, pipelines, events, UTMs, consent. The plan is
+`docs/marketing-plan.md`: what we are trying to do in the 2027 season, in what order, and what we
+are deliberately not doing yet. Read that first; this one answers "how do I actually post it".**
+
 ## 1. Stack
 
 | Concern              | Tool                                                    | Where it lives                                                        |
