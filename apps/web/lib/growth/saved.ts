@@ -16,8 +16,6 @@ export interface SavedTour {
   tourId: string;
   slug: string;
   name: string;
-  summary: string | null;
-  heroImageUrl: string | null;
   note: string | null;
   savedAt: string;
   /** The soonest departure still to run, so the list is actionable rather than a museum. */
@@ -35,26 +33,26 @@ interface SavedRow {
   tour_id: string;
   note: string | null;
   created_at: string;
-  tours: {
-    slug: string;
-    name: string;
-    summary: string | null;
-    hero_image_url: string | null;
-  } | null;
+  // Only what the account list renders. `tours` has no summary or hero column — those live on
+  // tour_versions — and asking for one here took the whole account page down in CI.
+  tours: { slug: string; name: string } | null;
 }
 
 export async function listSavedTours(): Promise<SavedTour[]> {
   const sb = await createClient();
   const { data, error } = await sb
     .from("saved_tours")
-    .select("tour_id, note, created_at, tours(slug, name, summary, hero_image_url)")
+    .select("tour_id, note, created_at, tours(slug, name)")
     .order("created_at", { ascending: false });
   if (error) {
     if (error.code === "42501") return [];
     throw error;
   }
 
-  const rows = (data ?? []) as unknown as SavedRow[];
+  // Not cast through `unknown`: the select is a single literal, so supabase-js can infer it, and
+  // that inference is the only thing standing between a typo in a column name and a 500 on the
+  // account page. `tours.summary` got through a cast here once and took the whole page down.
+  const rows: SavedRow[] = data ?? [];
   if (rows.length === 0) return [];
 
   // One query for the next departure of each saved tour, rather than one per row.
@@ -87,8 +85,6 @@ export async function listSavedTours(): Promise<SavedTour[]> {
     tourId: r.tour_id,
     slug: r.tours?.slug ?? "",
     name: r.tours?.name ?? "",
-    summary: r.tours?.summary ?? null,
-    heroImageUrl: r.tours?.hero_image_url ?? null,
     note: r.note,
     savedAt: r.created_at,
     nextDeparture: nextByTour.get(r.tour_id) ?? null,
