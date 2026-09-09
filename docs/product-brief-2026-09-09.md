@@ -90,16 +90,34 @@ or the meetups that already exist made more prominent.
 
 There is no plan today. Social strategy, and a real one rather than a posting schedule.
 
-## Needs a decision before it can be built
+## Decided, 9 September 2026
 
-- **WhatsApp, our chat, or both.** Ours keeps the group inside the product and gives us moderation
-  and safety tools; WhatsApp is where people already are and will fragment the trip out of the app.
-  Both means neither works well.
-- **Taste, and how we learn it.** A question set at booking is explicit and dull. Inference from
-  chat is invisible and needs consent. Pick one before building suggestions.
-- **What the AI is allowed to book.** A chatbot that adds a restaurant to a calendar is one thing.
-  One that spends money is another, and would need the same recheck-before-charge discipline as the
-  hotel engine.
+The three questions below blocked items 5, 6 and 8. Kyle answered them; the reasoning is kept so
+the next person can argue with the decision rather than guess at it.
+
+- **Our chat, not WhatsApp.** The group stays inside the product. It is the only place we have
+  moderation, report and block; the only place an AI can post "free hike at 8am, meet at the
+  trailhead"; and the only place the conversation can feed Live Moments and add-ons. The cost is
+  real and accepted: people must open the app, and a quiet room feels quieter than a WhatsApp
+  group. No WhatsApp bridge, no both — both fragments every trip in half.
+- **Taste: explicit seed, behavioural refinement.** Ask first — the pre-trip survey and profile
+  interests already collect it — then adjust from what a traveler actually opens. Explicit alone is
+  dull and static; behavioural alone cold-starts badly, and day one of a first trip is exactly when
+  suggestions matter most. Chat messages are **not** read for this.
+  - Consequence worth noting before it is built: PostHog is analytics, not a system of record, so
+    behavioural refinement needs first-party signals stored in Supabase. Nothing may depend on an
+    analytics sink for a product decision.
+- **The AI may answer, write to the traveler's own itinerary, and make free reservations. It may
+  not spend money.** Reversible, personal writes are fine. Charging is not: Stripe is live, so a
+  bug is a real charge, and anything that spends would need the hotel engine's
+  recheck-before-charge discipline before it could be trusted.
+  - Consequence worth noting: we have no reservation supplier yet. Until item 7 lands, "free
+    reservations" can only mean drafting the request, not completing it.
+
+## Order of work
+
+Item 5, the AI companion, is next. Item 6 (live location and nearby) depends on its recommendation
+source, and item 7 stays behind a proven hotel supplier.
 
 ## Still on the original list
 
