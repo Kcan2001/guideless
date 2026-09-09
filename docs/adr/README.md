@@ -17,6 +17,7 @@ One file per decision, numbered, never deleted. Superseded ADRs get `Status: Sup
 | [ADR-011](./ADR-011-social-publishing-in-house.md)   | Social publishing via Meta Graph API + pg_cron                    | Accepted |
 | [ADR-012](./ADR-012-travel-organizer.md)             | Guideless is a travel organizer, not software                     | Accepted |
 | [ADR-013](./ADR-013-multi-supplier-rate-sourcing.md) | Multi-supplier rate sourcing; customer price fixed before display | Proposed |
+| [ADR-014](./ADR-014-tier-curation.md)                | Tiers are market-relative; AI curates, never selects              | Proposed |
 
 ## Template
 

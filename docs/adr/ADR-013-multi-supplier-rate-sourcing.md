@@ -63,6 +63,13 @@ when someone wants it, not a foundation to build on.
    adapter against real responses.
 3. **Then** fan out. A comparison engine with one unverified adapter compares nothing.
 
+## Amended by ADR-014
+
+This ADR frames supplier choice as a scoring problem. That is right for deciding which of two
+equivalent rooms to buy and wrong for deciding which hotel belongs in which tier, because a tier is
+a market position rather than a property attribute. ADR-014 adds the missing half: judgment belongs
+in curation, before any of the scoring here applies. Nothing in this ADR changes.
+
 ## Consequences
 
 - A supplier outage stops being a checkout outage: the engine can fall back to another supplier's
