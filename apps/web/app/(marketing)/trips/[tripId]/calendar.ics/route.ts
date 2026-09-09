@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { publicEnv } from "@/lib/env";
 import { getMyTrip } from "@/lib/data/trips";
+import { listMyPlans } from "@/lib/plans/queries";
 import { buildCalendar, type CalendarEvent } from "@/lib/trips/ics";
 
 /**
@@ -30,6 +31,10 @@ export async function GET(
   // Not a member, not signed in, or no such trip: all the same answer, so the response cannot be
   // used to discover which trip ids exist.
   if (!detail) return new NextResponse("Not found", { status: 404 });
+
+  // A traveler's own plans belong in their calendar next to the trains. They are read under the
+  // same session, so this feed can only ever contain the plans of the person downloading it.
+  const myPlans = await listMyPlans({ tripId });
 
   const site = publicEnv.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "";
   const tripUrl = site ? `${site}/trips/${tripId}` : null;
@@ -68,6 +73,22 @@ export async function GET(
       endTime: moment.end_at ? new Date(moment.end_at).toISOString().slice(11, 16) : null,
       // Live Moments are stored as instants, so they are already correct in UTC.
       timezone: "UTC",
+      url: tripUrl,
+    });
+  }
+
+  // The traveler's own plans, marked so the calendar shows whose idea each entry was.
+  for (const plan of myPlans) {
+    if (!plan.plan_date) continue; // "sometime this trip" is not a calendar entry.
+    events.push({
+      uid: `plan-${plan.id}@guidelesstravel.com`,
+      title: plan.source === "assistant" ? `${plan.title} (your plan)` : plan.title,
+      description: plan.notes ?? null,
+      location: plan.location_name ?? plan.address ?? null,
+      date: plan.plan_date,
+      startTime: plan.start_time ? plan.start_time.slice(0, 5) : null,
+      endTime: plan.end_time ? plan.end_time.slice(0, 5) : null,
+      timezone: plan.timezone,
       url: tripUrl,
     });
   }

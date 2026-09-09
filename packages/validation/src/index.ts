@@ -14,3 +14,5 @@ export * from "./hotels";
 export * from "./growth";
 export * from "./reviews";
 export * from "./content";
+export * from "./surveys";
+export * from "./assistant";

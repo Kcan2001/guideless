@@ -19,6 +19,7 @@ import {
 } from "@/lib/bookings/self-service-data";
 import { getMyReferral, listMyBookingAddOns, type BookingAddOn } from "@/lib/data/add-on-purchases";
 import { listMyReviews, listReviewableBookings } from "@/lib/reviews/queries";
+import { listOpenSurveys } from "@/lib/surveys/queries";
 import { signOut } from "@/lib/auth/actions";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -76,12 +77,13 @@ export default async function AccountPage(props: PageProps<"/account">) {
   ] = await Promise.all([supabase.auth.getUser(), props.searchParams]);
   if (!user) redirect("/login?next=/account");
 
-  const [bookings, trips, referral, reviewable, myReviews] = await Promise.all([
+  const [bookings, trips, referral, reviewable, myReviews, surveys] = await Promise.all([
     listMyBookings(),
     listMyTrips(),
     getMyReferral(),
     listReviewableBookings(),
     listMyReviews(),
+    listOpenSurveys(),
   ]);
   const travelerIds = bookings.flatMap((b) => b.travelers.map((t) => t.id));
   const bookingIds = bookings.map((b) => b.booking.id);
@@ -300,6 +302,77 @@ export default async function AccountPage(props: PageProps<"/account">) {
               ))}
             </section>
           )}
+          {upcoming.length > 0 && (
+            <section className="mt-12" id="assistant">
+              <h2 className="text-xl font-semibold">Ask about your trip</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Where to eat, what&rsquo;s near the hotel, what to do with a free morning. It knows
+                your route and what we recommend, and anything you save is private to you.
+              </p>
+              <ul className="mt-4 divide-y divide-border rounded-xl border border-border bg-surface">
+                {upcoming.map((b) => (
+                  <li key={b.booking.id} className="flex flex-wrap items-center gap-4 p-5">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium">{b.tour.name}</p>
+                      <p className="mt-0.5 text-sm text-muted-foreground">
+                        {b.departure.start_date && b.departure.end_date
+                          ? formatDateRange(b.departure.start_date, b.departure.end_date)
+                          : "Dates to come"}
+                      </p>
+                    </div>
+                    <Link
+                      href={`/account/assistant/${b.booking.id}`}
+                      className={buttonVariants({ variant: "secondary", size: "sm" })}
+                    >
+                      Open assistant
+                      <ArrowRight className="ml-1 h-4 w-4" aria-hidden />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {surveys.length > 0 && (
+            <section className="mt-12" id="surveys">
+              <h2 className="text-xl font-semibold">Tell us</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Private, and never published. Before a trip it tells us what you are expecting;
+                after one it tells us what to change.
+              </p>
+              <ul className="mt-4 divide-y divide-border rounded-xl border border-border bg-surface">
+                {surveys.map((s) => (
+                  <li key={s.bookingId} className="flex flex-wrap items-center gap-4 p-5">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium">
+                        {s.kind === "pre_trip"
+                          ? `Before ${s.tourName}`
+                          : `After ${s.tripName || s.tourName}`}
+                      </p>
+                      <p className="mt-0.5 text-sm text-muted-foreground">
+                        {s.submittedAt
+                          ? `Answered ${formatDate(s.submittedAt.slice(0, 10))}. You can change it.`
+                          : s.kind === "pre_trip"
+                            ? "Three questions about what you are hoping for."
+                            : "The blunt version, which is the useful one."}
+                      </p>
+                    </div>
+                    <Link
+                      href={`/account/surveys/${s.bookingId}`}
+                      className={buttonVariants({
+                        variant: s.submittedAt ? "secondary" : "primary",
+                        size: "sm",
+                      })}
+                    >
+                      {s.submittedAt ? "Change your answers" : "Answer"}
+                      <ArrowRight className="ml-1 h-4 w-4" aria-hidden />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
           {(reviewable.length > 0 || myReviews.length > 0) && (
             <section className="mt-12" id="reviews">
               <h2 className="text-xl font-semibold">

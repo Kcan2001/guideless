@@ -28,7 +28,7 @@ export const brand = {
    */
   termsVersion: "2026-09-09",
   /** The Privacy Policy revises on its own schedule; it is not part of the booking contract. */
-  privacyVersion: "2026-09-08",
+  privacyVersion: "2026-09-09",
 } as const;
 
 /** Public social profiles. Used in the footer, Organization JSON-LD (`sameAs`) and share links. */

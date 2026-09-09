@@ -112,6 +112,58 @@ test.describe("managing a booking", () => {
     expect(await res.text()).not.toContain("BEGIN:VCALENDAR");
   });
 
+  test("the pre-trip survey can be answered, and then changed", async ({ page }) => {
+    // A booking of its own, because answering leaves a row behind that the other tests would see.
+    const own = await seedConfirmedBooking({ emailPrefix: "surveyed" });
+    try {
+      await signIn(page, own.email);
+      await page.waitForURL(/\/account/, { timeout: 30_000 });
+
+      // The departure has not been activated, so there is no trip yet — which is exactly when the
+      // pre-trip survey is open and the post-trip one is not.
+      const prompt = page.locator("#surveys");
+      await expect(prompt).toContainText(/before/i);
+      await prompt.getByRole("link", { name: /answer/i }).click();
+      await page.waitForURL(/\/account\/surveys\//, { timeout: 30_000 });
+
+      await expect(page.getByRole("main")).toContainText(/hoping for/i);
+      // Nothing on this page may suggest the answers are public; that is what a review is for.
+      await expect(page.getByRole("main")).not.toContainText(/published/i);
+
+      await page
+        .getByRole("textbox")
+        .first()
+        .fill("Somewhere to swim every morning, and no coach at 8am.");
+      await page.getByRole("radio", { name: /balanced/i }).check();
+      await page.getByRole("button", { name: /^send$/i }).click();
+
+      // Not /\/account/: the survey page matches that too, so the wait would resolve at once.
+      await page.waitForURL(/\/account\?/, { timeout: 30_000 });
+      await expect(page.getByRole("main")).toContainText(/thank you/i);
+      // Answering again edits rather than piling up, so the prompt stays, marked.
+      await expect(page.locator("#surveys")).toContainText(/answered/i);
+
+      await page
+        .locator("#surveys")
+        .getByRole("link", { name: /change/i })
+        .click();
+      await page.waitForURL(/\/account\/surveys\//, { timeout: 30_000 });
+      await expect(page.getByRole("textbox").first()).toHaveValue(/swim every morning/);
+    } finally {
+      await cleanUp(own);
+    }
+  });
+
+  test("one traveler cannot see another traveler's survey", async ({ page }) => {
+    const intruder = uniqueEmail("nosysurvey");
+    await signUp(page, intruder);
+    await page.waitForURL(/\/account/, { timeout: 30_000 });
+
+    // `open_surveys()` is scoped to the caller, so this is a 404 rather than somebody else's form.
+    const res = await page.request.get(`/account/surveys/${booked.bookingId}`);
+    expect(res.status()).toBe(404);
+  });
+
   test("one traveler cannot open another traveler's booking", async ({ page }) => {
     const intruder = uniqueEmail("intruder");
     await signUp(page, intruder);

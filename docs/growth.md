@@ -117,6 +117,42 @@ The homepage promises "no invented reviews", so the schema enforces it rather th
   after the trip, each once — the prompt disappears as soon as they have written or the trip is
   no longer reviewable.
 
+## Surveys, before and after (migrations 0057–0058)
+
+A survey is not a review, and keeping them apart is the whole design. Reviews are public,
+moderated and marketing. Surveys are private, unmoderated and operational — which is what lets us
+ask a blunt question without worrying how the answer would read on a tour page.
+
+- **Two kinds, one table, never both at once.** `pre_trip` is open from the moment a booking is
+  confirmed until the day the trip ends; `post_trip` opens the day after and only for a trip that
+  was not cancelled. `can_survey_booking(booking_id, kind)` is the single definition of that, and
+  `open_surveys()` calls it rather than re-implementing it, so the list and the submit can never
+  disagree about who may answer what.
+- **They ask different things.** Before a trip there is nothing to score, so it asks what somebody
+  is hoping for, what kind of week they think they booked, and where they found us — the pace
+  question exists to catch the traveler who booked a "relaxed" week expecting a spa and not a wine
+  cellar. After it, six scores (overall, accommodation, value, group, organisation, freedom), the
+  best and worst part, and whether they would travel again.
+- **Nothing is required.** Every score column is nullable and every question can be skipped: a
+  survey that refuses to submit until it is complete is a survey people abandon. A wholly blank
+  submission is refused client-side rather than written as a row of nulls.
+- **Answering again edits.** `submit_trip_survey()` upserts on `(booking_id, kind)`, so an answered
+  survey stays in the list marked with its date and the form opens filled in. People change their
+  minds on the way home.
+- **Questions without a column go in `answers` jsonb**, keyed by stable ids (`pace`,
+  `heard_about`) defined once in `@guideless/validation` so web and mobile ask the same thing in
+  the same words and the answers stay comparable across departures.
+- **Nobody reads anybody else's.** RLS gives a traveler their own rows and staff all of them; a
+  pgTAP test proves a second traveler reads zero rather than trusting the UI to hide them.
+  `tour_survey_stats` is `security_invoker`, so the same rule applies to the averages.
+- **Where travelers are asked.** `/account#surveys` links to `/account/surveys/[bookingId]`, which
+  has its own page because there are ten questions and because an email prompting somebody to
+  answer needs somewhere to point. In the app, the Trip tab asks before the trip and after it. The
+  post-trip page links to the review form: the survey is what prompts a review.
+- **Staff read them at `/admin/surveys`** — averages per tour and kind with the response count
+  beside them, then every response in full. Read-only: there is no moderation queue because
+  nothing here is ever published.
+
 ## Copy rules
 
 Brand terms only: Your Trip, Your Route, Your Group, Live Moments, Included, Optional. Calm and
