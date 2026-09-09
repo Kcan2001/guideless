@@ -35,10 +35,34 @@ export interface NormalizedHotel {
   amenities: string[];
 }
 
+/**
+ * One step of a supplier's cancellation ladder: from `from` onwards, cancelling costs
+ * `penaltyAmount`. Before the earliest window, cancellation is free.
+ */
+export interface CancellationWindow {
+  /** ISO timestamp. Cancelling at or after this moment costs `penaltyAmount`. */
+  from: string;
+  /** Minor units charged when cancelling on or after `from`. */
+  penaltyAmount: number;
+}
+
+/**
+ * Real suppliers return a ladder, not a deadline. Probing one LiteAPI hotel for one date range
+ * returned 200 rates, of which 116 carried more than one window and the deepest had five. A
+ * single-deadline model silently drops the middle steps, and the loss is money in both directions:
+ * believing a rate is free to cancel on a day the supplier already charges for, or holding a
+ * traveler to a penalty we were never charged.
+ *
+ * `windows` is the truth. `deadline` and `penaltyAmount` remain for rates stored before this
+ * existed, and every reader should go through the helpers in `cancellation-policy.ts` rather than
+ * touching either shape directly.
+ */
 export interface CancellationPolicy {
-  /** ISO timestamp or date after which the rate is non-refundable (or partially). */
+  /** The ladder, ascending by `from`. Absent or empty with `refundable: false` means never refundable. */
+  windows?: CancellationWindow[];
+  /** Legacy single step. Superseded by `windows`; read it through `cancellationWindows()`. */
   deadline?: string;
-  /** Minor units charged when cancelling after the deadline. */
+  /** Legacy single step penalty, in minor units. */
   penaltyAmount?: number;
   description?: string;
 }

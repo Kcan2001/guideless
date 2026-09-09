@@ -64,6 +64,14 @@ const data = fixtures as MockFixtures;
 const DAY = 86_400_000;
 const SUPPLIER = "manual" as const;
 
+/** Midpoint between two ISO dates, used to give the mock a believable second cancellation rung. */
+function halfway(fromIso: string, toIso: string): string {
+  const a = Date.parse(fromIso);
+  const b = Date.parse(toIso);
+  if (Number.isNaN(a) || Number.isNaN(b) || b <= a) return fromIso;
+  return new Date(a + (b - a) / 2).toISOString();
+}
+
 function stayNights(checkIn: string, checkOut: string): number {
   const n = nights(asIsoDate(checkIn), asIsoDate(checkOut));
   if (!Number.isFinite(n) || n < 1)
@@ -141,8 +149,18 @@ function toRate(
     feesAmount: money.fees,
     totalAmount: money.total,
     refundable: rate.refundable,
+    // A two-rung ladder, deliberately: the mock is what the admin screens and tests exercise, and a
+    // single-window mock would let a regression in ladder handling pass unnoticed.
     cancellationPolicy: deadline
-      ? { deadline, penaltyAmount: money.total, description: `Free cancellation until ${deadline}` }
+      ? {
+          windows: [
+            { from: deadline, penaltyAmount: Math.round(money.total / 2) },
+            { from: halfway(deadline, input.checkIn), penaltyAmount: money.total },
+          ],
+          deadline,
+          penaltyAmount: Math.round(money.total / 2),
+          description: `Free cancellation until ${deadline}, then half, then the full stay`,
+        }
       : { description: "Non-refundable" },
     breakfastIncluded: rate.breakfastIncluded,
     paymentType: rate.paymentType,
