@@ -498,3 +498,41 @@ insert into public.departure_tier_briefs (departure_id, tier, brief) values
   ('30000000-0000-4000-8000-000000000004', 'elite',
    'Monaco, in something that is not unremarkable. Race-week rates in Monte Carlo are several times normal and this rung pays them. It has to be what a traveler would choose if price were irrelevant.')
 on conflict (departure_id, tier) do update set brief = excluded.brief;
+
+-- ── Free things we do together (2026-09-09) ──────────────────────────────────
+-- The point of the product, made concrete.
+--
+-- Guideless sells one group across price tiers: someone in a Nice hotel and someone in Monte Carlo
+-- on the same weekend, one on the yacht and one not. Without something everyone does and nobody
+-- pays for, those two travelers share a chat room and nothing else, and "one group" is a claim
+-- rather than an experience.
+--
+-- These are `live_moment` items: optional, arranged by us, free, and anchored to a time and a
+-- place so people can simply turn up. Nobody is counted onto a coach. They are the cheapest thing
+-- in the product and the most important.
+
+-- Monaco: an event weekend where the money gap between travelers is at its widest.
+insert into public.tour_itinerary_items
+  (tour_day_id, position, type, title, description, start_time, end_time, timezone, location_name,
+   latitude, longitude, responsibility, is_optional, visibility, is_anchor)
+values
+  ('22000000-0000-4000-8000-000000000016', 2, 'live_moment', 'Morning swim at the Plage des Ponchettes',
+   'Free, and the best hour of the day here. Meet on the pebbles below the old town at 8. Some people swim, some people watch. Coffee afterwards for whoever wants it.',
+   '08:00', '09:30', 'Europe/Paris', 'Plage des Ponchettes, Nice', 43.6949, 7.2769,
+   'guideless', true, 'public_preview', true),
+  ('22000000-0000-4000-8000-000000000012', 2, 'live_moment', 'Walk up Castle Hill together',
+   'Free. Up the steps from the old town for the view over the bay, an hour before the day gets hot. Nice and slow; nobody is racing anybody.',
+   '09:00', '10:30', 'Europe/Paris', 'Colline du Château, Nice', 43.6949, 7.2822,
+   'guideless', true, 'public_preview', true),
+  ('22000000-0000-4000-8000-000000000013', 3, 'live_moment', 'Breakfast before qualifying',
+   'Free to join, everyone pays for their own coffee. The group meets at a cafe near the station before heading in, whichever seat you are in later.',
+   '08:30', '09:15', 'Europe/Paris', 'Near Nice-Ville station', 43.7045, 7.2620,
+   'guideless', true, 'public_preview', false)
+on conflict (tour_day_id, position) do nothing;
+
+
+-- Say it on the tour page, because it is a reason to book rather than a detail of the itinerary.
+insert into public.tour_included_items (tour_version_id, position, title, description) values
+  ('21000000-0000-4000-8000-000000000002', 5, 'Free things we do together',
+   'A morning swim off the old town, the walk up Castle Hill, breakfast before qualifying. No charge and no sign-up. Whether you are in Nice or Monte Carlo, on the yacht or in the grandstand, these are the bits everyone is at.')
+on conflict do nothing;

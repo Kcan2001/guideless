@@ -106,7 +106,8 @@ values
   ('22000000-0000-4000-8000-000000000008', 2, 'activity',    'Farewell dinner', 'A neighbourhood bistro, one long table. Optional add-on; reserve when you book or any time in the app.', '20:00', '22:30', 'Europe/Paris', 'Le Marais', 'guideless', true, 'public_preview'),
   -- Day 9
   ('22000000-0000-4000-8000-000000000009', 1, 'check_out',   'Check out', 'Bags can be stored if your flight is later.', null, '11:00', 'Europe/Paris', 'Your Paris hotel', 'guideless', false, 'public_preview'),
-  ('22000000-0000-4000-8000-000000000009', 2, 'flight',      'Fly home', 'RER B to CDG is about 45 minutes; Orlyval to ORY about 35. Or add an extra night and leave tomorrow.', null, null, 'Europe/Paris', 'CDG / ORY', 'traveler', false, 'public_preview');
+  ('22000000-0000-4000-8000-000000000009', 2, 'flight',      'Fly home', 'RER B to CDG is about 45 minutes; Orlyval to ORY about 35. Or add an extra night and leave tomorrow.', null, null, 'Europe/Paris', 'CDG / ORY', 'traveler', false, 'public_preview')
+on conflict (tour_day_id, position) do nothing;
 
 -- ── Character and tier briefs (migration 0053) ───────────────────────────────
 -- Character is what kind of trip this is, which is what decides whether a property fits it. The
@@ -119,3 +120,42 @@ update public.tour_versions
 set character = array['slow', 'culinary', 'cultural', 'social']::public.trip_character[]
 where id = '21000000-0000-4000-8000-000000000001';
 
+
+-- ── Free things we do together (2026-09-09) ──────────────────────────────────
+-- The point of the product, made concrete.
+--
+-- Guideless sells one group across price tiers: someone in a Nice hotel and someone in Monte Carlo
+-- on the same weekend, one on the yacht and one not. Without something everyone does and nobody
+-- pays for, those two travelers share a chat room and nothing else, and "one group" is a claim
+-- rather than an experience.
+--
+-- These are `live_moment` items: optional, arranged by us, free, and anchored to a time and a
+-- place so people can simply turn up. Nobody is counted onto a coach. They are the cheapest thing
+-- in the product and the most important.
+
+-- Southern France: a slower trip, so the free moments are the shape of the days rather than a break
+-- from them.
+insert into public.tour_itinerary_items
+  (tour_day_id, position, type, title, description, start_time, end_time, timezone, location_name,
+   latitude, longitude, responsibility, is_optional, visibility, is_anchor)
+-- A fixed position per moment, not row_number(): a window function renumbers when the list
+-- changes, which on a re-run inserts the same moment again at a new position.
+select d.id, 90 + m.ord, 'live_moment', m.title, m.description,
+       m.start_time::time, m.end_time::time, 'Europe/Paris', m.location, m.lat, m.lng,
+       'guideless', true, 'public_preview', m.anchor
+from public.tour_days d
+join (values
+  (1, 2, 'Morning jog along the Promenade', 'Free. Out along the Promenade des Anglais at 7:30 and back for breakfast. Go at whatever pace you like, or walk it.', '07:30', '08:30', 'Promenade des Anglais, Nice', 43.6947::double precision, 7.2588::double precision, false),
+  (3, 4, 'Evening walk around the ramparts', 'Free. A slow loop of the old walls after dinner, an hour, no agenda.', '20:30', '21:30', 'Remparts, Avignon', 43.9493::double precision, 4.8055::double precision, false),
+  (4, 7, 'Morning run along the Seine', 'Free. Down to the river at 7:30 for a flat, easy few kilometres before Paris wakes up.', '07:30', '08:30', 'Quai de la Tournelle, Paris', 48.8500::double precision, 2.3540::double precision, false)
+) as m(ord, day_number, title, description, start_time, end_time, location, lat, lng, anchor)
+  on m.day_number = d.day_number
+where d.tour_version_id = '21000000-0000-4000-8000-000000000001'
+on conflict (tour_day_id, position) do nothing;
+
+
+-- Say it on the tour page, because it is a reason to book rather than a detail of the itinerary.
+insert into public.tour_included_items (tour_version_id, position, title, description) values
+  ('21000000-0000-4000-8000-000000000001', 7, 'Free things we do together',
+   'A morning jog on the Promenade, sunset at Castle Hill, the ramparts after dinner in Avignon, a run along the Seine. No charge, no sign-up, turn up or do not. They are how a group that booked different rooms ends up on the same trip.')
+on conflict do nothing;

@@ -109,8 +109,23 @@ export const terms: LegalDocument = {
       ],
     },
     {
+      id: "missed-connections",
+      title: "9. Missed connections, late arrivals and no-shows",
+      paragraphs: [
+        "Some things are outside what we organise, and this section says plainly what happens when one of them goes wrong. We would rather you read it now than discover it on the day.",
+      ],
+      list: [
+        "If you miss a flight you booked yourself, arrive after the trip has started, or leave before it ends, the trip price stays the same. Nights, trains and experiences you did not use are not refunded, because we have already bought them for you.",
+        "If you miss a train or a transfer we arranged, we will help you find the next one. The cost of getting yourself back on schedule is yours.",
+        "If you miss an optional extra you paid for, that money is gone: the supplier holds the ticket in your name and does not give it back. Race viewing, event tickets and the harbour parties are non-refundable from the moment you buy them, and say so before you add them.",
+        "If you are refused boarding or entry to a country because of your passport, visa, vaccination record or conduct, the trip is treated as cancelled by you on that day, and the published refund tiers apply.",
+        "If a hotel refuses you a room for reasons of your own conduct, or you are asked to leave the trip under section 10, the trip is over for you and nothing is refunded.",
+        "We will always try to help. Message support in the app and a person will answer. What we cannot do is make a supplier give back money they have already kept.",
+      ],
+    },
+    {
       id: "group-and-live-moments",
-      title: "9. Your Group and Live Moments",
+      title: "10. Your Group and Live Moments",
       paragraphs: [
         "The group features of the app (the roster, group chat, Live Moments, seeing who chose the same add-ons) are optional. You choose what other travelers see about you.",
         "Be decent to each other. We may remove content or suspend a traveler from the group features for harassment, discrimination, threats or persistent disrespect, and in serious cases end their participation in the trip without refund. You can report messages or people from within the app.",
@@ -119,7 +134,7 @@ export const terms: LegalDocument = {
     },
     {
       id: "suppliers-and-liability",
-      title: "10. Suppliers and liability",
+      title: "11. Suppliers and liability",
       list: [
         "Hotels, rail operators, transfer companies and activity providers are independent businesses. We select and book them with care, but we do not run them, and we are not liable for their acts or omissions beyond what applicable law requires of a travel organizer.",
         "To the extent the law allows, our total liability to you for a booking is limited to the amount you paid us for that booking, and we are not liable for indirect or consequential losses such as missed flights you booked yourself, lost earnings or disappointment.",
@@ -128,14 +143,14 @@ export const terms: LegalDocument = {
     },
     {
       id: "app-and-content",
-      title: "11. The app, the site and our content",
+      title: "12. The app, the site and our content",
       paragraphs: [
         "You may use the Guideless app and website for your own trip planning and travel. The content, design and software are ours or our licensors' and may not be copied or resold. Recommendations in the app are suggestions, not endorsements, and prices at third-party venues can change.",
       ],
     },
     {
       id: "law-and-disputes",
-      title: "12. Governing law and disputes",
+      title: "13. Governing law and disputes",
       paragraphs: [
         "These terms are governed by the laws of Delaware, United States, without regard to conflict-of-law rules, and any court proceedings take place there unless consumer protection law where you live gives you additional rights, which these terms do not remove.",
         "If something goes wrong, tell us first. Most issues are resolved by email within a few days, and we would rather fix a trip than argue about one.",
@@ -143,14 +158,14 @@ export const terms: LegalDocument = {
     },
     {
       id: "changes-to-terms",
-      title: "13. Changes to these terms",
+      title: "14. Changes to these terms",
       paragraphs: [
         `We may update these terms. The version number at the top changes when we do, and the version you accepted is stored on your booking. Changes do not reduce your rights on a booking you have already made.`,
       ],
     },
     {
       id: "contact",
-      title: "14. Contact",
+      title: "15. Contact",
       paragraphs: [`${brand.legalName}, trading as ${brand.name}. Email: ${brand.supportEmail}.`],
     },
   ],

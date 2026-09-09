@@ -16,13 +16,13 @@ Those are the things every decision below should serve.
 
 Worth knowing before commissioning any of it again.
 
-| In the brief | Where it already is |
-| --- | --- |
-| A map in the mobile app | `apps/mobile/src/app/(tabs)/map.tsx`: hotels, route, group moments, recommendations and add-ons |
-| Chatting with other users | Group chat over Supabase Realtime, with rooms per trip and per activity, plus report and block |
-| Add-ons highlighted in the app | The Explore tab sells them, and they can be bought after booking from the account |
-| Payment tracking | Deposit and balance exist with a due date; the account page pays the balance |
-| Daily suggestions | `recommendations`, curated per destination, surfaced in Explore |
+| In the brief                   | Where it already is                                                                             |
+| ------------------------------ | ----------------------------------------------------------------------------------------------- |
+| A map in the mobile app        | `apps/mobile/src/app/(tabs)/map.tsx`: hotels, route, group moments, recommendations and add-ons |
+| Chatting with other users      | Group chat over Supabase Realtime, with rooms per trip and per activity, plus report and block  |
+| Add-ons highlighted in the app | The Explore tab sells them, and they can be bought after booking from the account               |
+| Payment tracking               | Deposit and balance exist with a due date; the account page pays the balance                    |
+| Daily suggestions              | `recommendations`, curated per destination, surfaced in Explore                                 |
 
 The gap in most of these is prominence and polish, not existence.
 

@@ -26,7 +26,7 @@ export const brand = {
    * point of the field is to prove which document a given customer agreed to. Bump on the day the
    * Terms, the cancellation policy or the waiver text changes materially.
    */
-  termsVersion: "2026-09-08",
+  termsVersion: "2026-09-09",
   /** The Privacy Policy revises on its own schedule; it is not part of the booking contract. */
   privacyVersion: "2026-09-08",
 } as const;
