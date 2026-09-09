@@ -43,6 +43,26 @@ for third-party paying customers. Silence is not permission.
 Use Airbnb only as a deliberate one-off, for a specific villa we cannot source any other way,
 priced knowing we earn nothing on it.
 
+## Update, same day: the API audit changed the answer
+
+This document asked a commercial question and answered it with commercial channels. A follow-up
+audit asked the technical one and landed somewhere better, so read `docs/hotel-provider-audit.md`
+after this. The short version:
+
+- **LiteAPI is self-serve, offers net rates and carries structured cancellation ladders.** It is
+  the first integration, and it needs no accreditation at all.
+- **Serviced apartments and aparthotels are available inside ordinary hotel APIs.** We get most of
+  what made Airbnb attractive without a separate channel.
+- **Whole-home rentals are the wrong product**, not merely a hard one to source. A three-bedroom
+  apartment is one indivisible booking with one cancellation ladder, not three sellable rooms, and
+  our whole model is a per-traveler room.
+- **RateHawk is sales-gated**, contrary to what this document implies below. Its own documentation
+  says sandbox credentials come from an account manager after certification. The easier account is
+  LiteAPI.
+
+The Bedsonline recommendation below still stands as a trade account worth opening. The California
+seller-of-travel finding at the end is unaffected and still needs a lawyer.
+
 ## What to use instead
 
 Ordered by how quickly a company with no trading history can actually get in.
