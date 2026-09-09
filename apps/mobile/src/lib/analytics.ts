@@ -31,6 +31,7 @@ export type ProductEvent =
   | "onboarding_skipped"
   | "avatar_set" // props: where it was set, never the image or its URL
   | "review_submitted" // props: rating and whether a photo came with it, never the words
+  | "survey_submitted" // props: which survey and how many scores, never the words
   | "trip_photo_added"
   | "app_opened";
 

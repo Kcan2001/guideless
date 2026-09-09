@@ -1,11 +1,14 @@
--- pgTAP tests for migration 0057: private trip surveys.
+-- pgTAP tests for migrations 0057 and 0058: private trip surveys, and the prompt that finds them.
 --
 -- The rules that matter: a traveler answers only for their own booking, the post-trip survey does
 -- not open until the trip has ended, and nobody reads anybody else's answers. Surveys are blunt on
 -- purpose, so they must never leak the way a review is meant to.
+--
+-- `open_surveys()` has one extra rule of its own: it must never offer a form the database would
+-- then refuse, which is why it is tested against the same bookings as `can_survey_booking`.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(14);
+select plan(21);
 
 create schema if not exists tests;
 grant usage on schema tests to anon, authenticated;
@@ -54,6 +57,15 @@ insert into public.trip_members (trip_id, user_id, booking_id)
 values ('a6000000-0000-4000-8000-0000000000c1', 'f5000000-0000-4000-8000-0000000000a1',
         'a6000000-0000-4000-8000-0000000000b1');
 
+-- A second confirmed booking whose departure has not been activated yet, so it has no trip and no
+-- members. This is the ordinary state between paying and the group being formed, and it is exactly
+-- when the pre-trip survey is worth asking.
+insert into public.bookings (id, confirmation_number, departure_id, tour_version_id, customer_id,
+                             status, payment_status, currency, subtotal_amount, total_amount, deposit_amount)
+values ('a6000000-0000-4000-8000-0000000000b2', 'GL-SURVEY2', '30000000-0000-4000-8000-000000000001',
+        '21000000-0000-4000-8000-000000000001', 'f5000000-0000-4000-8000-0000000000a1',
+        'confirmed', 'deposit_paid', 'USD', 349500, 349500, 75000);
+
 -- ── Structure ────────────────────────────────────────────────────────────────
 select has_table('public', 'trip_surveys', 'trip_surveys exists');
 select has_view('public', 'tour_survey_stats', 'staff can read averages per tour');
@@ -72,6 +84,24 @@ select ok(public.can_survey_booking('a6000000-0000-4000-8000-0000000000b1', 'pos
 select throws_ok(
   $$ select public.submit_trip_survey('a6000000-0000-4000-8000-0000000000b1', 'post_trip', 5::smallint) $$,
   '42501', null, 'and is refused if they try');
+
+-- ── What the traveler is offered ─────────────────────────────────────────────
+select tests.authenticate_as('f5000000-0000-4000-8000-0000000000a1');
+select is((select count(*)::int from public.open_surveys()), 2,
+  'both bookings have a survey open: one before, one after');
+select is((select kind::text from public.open_surveys() where booking_id = 'a6000000-0000-4000-8000-0000000000b1'),
+  'post_trip', 'the finished trip is offered the post-trip survey');
+select is((select kind::text from public.open_surveys() where booking_id = 'a6000000-0000-4000-8000-0000000000b2'),
+  'pre_trip', 'a booking whose departure has no trip yet is offered the pre-trip one');
+select is((select end_date from public.open_surveys() where booking_id = 'a6000000-0000-4000-8000-0000000000b2'),
+  (select end_date from public.departures where id = '30000000-0000-4000-8000-000000000001'),
+  'and falls back to the departure dates, because there is no trip to take them from');
+select is((select submitted_at from public.open_surveys() where booking_id = 'a6000000-0000-4000-8000-0000000000b1'),
+  null, 'nothing is marked answered before anybody answers');
+
+select tests.authenticate_as('f5000000-0000-4000-8000-0000000000a2');
+select is((select count(*)::int from public.open_surveys()), 0,
+  'a traveler with no bookings is offered nothing');
 
 -- ── Submitting ───────────────────────────────────────────────────────────────
 select tests.authenticate_as('f5000000-0000-4000-8000-0000000000a1');
@@ -92,6 +122,11 @@ select lives_ok(
   'answering again is allowed');
 select is((select count(*)::int from public.trip_surveys where booking_id = 'a6000000-0000-4000-8000-0000000000b1'),
   1, 'and updates the same row rather than adding another');
+
+-- An answered survey stays in the list, marked, because answering again edits it. Hiding it would
+-- mean a traveler who mistyped a score has no way back to it.
+select isnt((select submitted_at from public.open_surveys() where booking_id = 'a6000000-0000-4000-8000-0000000000b1'),
+  null, 'the answered survey is still listed, and says when it was answered');
 
 -- ── Privacy ──────────────────────────────────────────────────────────────────
 select tests.authenticate_as('f5000000-0000-4000-8000-0000000000a2');

@@ -6013,6 +6013,20 @@ export type Database = {
         Returns: number;
       };
       open_due_groups: { Args: never; Returns: number };
+      open_surveys: {
+        Args: never;
+        Returns: {
+          booking_id: string;
+          end_date: string;
+          kind: Database["public"]["Enums"]["survey_kind"];
+          start_date: string;
+          submitted_at: string;
+          tour_id: string;
+          tour_name: string;
+          trip_id: string;
+          trip_name: string;
+        }[];
+      };
       purge_stale_builder_drafts: { Args: never; Returns: number };
       quote_booking: {
         Args: {
