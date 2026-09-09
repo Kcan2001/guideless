@@ -76,6 +76,60 @@ prompt, and it does three jobs:
 After approval the runtime is unchanged from ADR-013: stored rates, deterministic scoring among
 equivalent products, a fixed customer price, a recheck before charging.
 
+### Amendment, same day: curation is not a one-off
+
+The paragraphs above say curation "happens once per departure". That is wrong, and the reason is
+worth stating because it changes the design.
+
+Tier membership is partly a function of price, and prices move daily. A property at $150 tonight is
+an Explorer; at $200 next week it is not, and something that fell in price has taken its place. If
+curation ran once, the ladder would be accurate on the day it was written and wrong within a week.
+
+So the work splits in two, and only one half is stable:
+
+**The candidate pool** is the set of properties acceptable for this trip at all: right area, right
+character, actually bookable through a connected supplier, good enough that we would not be
+embarrassed. This is the judgement half. It is slow, it needs reasoning about the market and the
+trip, a human approves it, and it changes rarely.
+
+**Tier placement** is which rung a pooled property occupies today. It is computed from the live
+rate against the bands in the tier brief, on every rate refresh. It is arithmetic, it is
+deterministic, and no model is involved. A property can move between rungs, or out of all of them,
+without anybody rewriting anything.
+
+This is why the brief should state **bands, not names**. "Around 100 to 200 a night in Nice, plus
+the train" survives a property changing price. "The Hyatt" does not.
+
+Two consequences worth being explicit about:
+
+- Nothing here changes the **customer** price. The traveler buys a tier at a fixed package price;
+  the pool and the placement decide which room _we_ buy behind it. This is already what our copy
+  promises, because tier cards say the property is named at booking rather than naming one up
+  front. It is also how tour operators genuinely work.
+- A rung can go **empty**. If every pooled property has priced itself out of Classic this week,
+  Classic has nothing behind it, and that is information rather than a failure. The departure sells
+  the rungs that have inventory.
+
+### Amendment: four tiers is a vocabulary, not a quota
+
+A related question was whether four rungs is one too many, since Explorer and Elite are obvious
+while Classic and Premium blur together.
+
+The count is not the problem. The definitions were. Classic and Premium were written relative to
+each other — "the standard experience" versus "better hotels" — which is not a definition, it is an
+adjective. Anchored to a band in a specific market they separate cleanly, and Kyle's own Monaco
+brief proves it: Nice standard, Nice better, Monaco unremarkable, Monaco not. Four crisp rungs,
+because on that weekend the ladder has two axes, city and quality.
+
+The real fix is to stop treating four as a quota. **A departure sells the rungs that exist for that
+trip**, and the schema already allows it — Monaco offers two stay options today. On a trip whose
+ladder is only quality, three rungs may be the honest answer, and offering a fourth would be
+inventing a distinction to fill a slot. Dropping the vocabulary to three globally would instead
+force Monaco to merge two positions that are genuinely different.
+
+So: keep four as the vocabulary, define each rung as a band in the brief rather than an adjective,
+and sell only the rungs the trip actually has.
+
 ## Consequences
 
 - The judgment that currently exists only in Kyle's head becomes an artifact that someone else can

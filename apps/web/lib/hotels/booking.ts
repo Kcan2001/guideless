@@ -1,6 +1,8 @@
 import "server-only";
 
 import { createServiceRoleClient } from "@/lib/supabase/server";
+import { freeUntil } from "./cancellation-policy";
+import type { CancellationPolicy } from "./types";
 import { bestStoredRate, resolveStayContext, type HotelBookingRow } from "./catalog";
 import { getHotelSupplier, getHotelSupplierId, HotelSupplierError } from "./suppliers";
 
@@ -83,7 +85,7 @@ export async function bookHotelForBooking(
     }
   }
 
-  const deadline = (rate.cancellation_policy as { deadline?: string } | null)?.deadline ?? null;
+  const deadline = freeUntil(rate.cancellation_policy as CancellationPolicy | null);
   const { data: row, error } = await sb
     .from("hotel_bookings")
     .insert({

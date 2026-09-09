@@ -1,5 +1,6 @@
 import type {
   CancellationPolicy,
+  CancellationWindow,
   HotelBookingContact,
   HotelGuest,
   HotelSearchInput,
@@ -339,8 +340,13 @@ function bedType(room: DuffelRoom): string | undefined {
 }
 
 /**
- * Duffel's cancellation_timeline lists refund amounts valid before each instant. The Guideless
- * policy keeps the last moment a full refund is still possible and the penalty after it.
+ * Duffel's cancellation_timeline lists the refund still available *before* each instant. Our ladder
+ * states the penalty charged *from* each instant, so a step's window opens where that step's refund
+ * stops applying and carries the next step's refund — or nothing at all after the last one.
+ *
+ * This used to collapse the timeline to a single deadline, which threw away every middle rung. A
+ * LiteAPI probe found 116 of 200 real rates carrying more than one window, so the middle rungs are
+ * the common case rather than an edge one, and dropping them costs real money in both directions.
  */
 export function policyFromTimeline(
   steps: DuffelCancellationStep[] | null | undefined,
@@ -355,26 +361,42 @@ export function policyFromTimeline(
     }))
     .sort((a, b) => a.before.localeCompare(b.before));
   if (parsed.length === 0) return { policy: { description: "Non-refundable" }, refundable: false };
+
+  const windows: CancellationWindow[] = parsed.map((s, i) => ({
+    from: s.before,
+    penaltyAmount: Math.max(0, total - (parsed[i + 1]?.refund ?? 0)),
+  }));
+
+  // When even the earliest step refunds less than the total, the rate was never free to cancel, so
+  // the ladder has to start before its first step rather than implying a free period that does not
+  // exist. A window opening at the epoch says "this has always cost something", which is the truth.
+  if (parsed[0]!.refund < total) {
+    windows.unshift({
+      from: new Date(0).toISOString(),
+      penaltyAmount: Math.max(0, total - parsed[0]!.refund),
+    });
+  }
+
   const fullSteps = parsed.filter((s) => s.refund >= total);
   const free = fullSteps.length ? fullSteps[fullSteps.length - 1]! : null;
   const refundable = Boolean(free && new Date(free.before).getTime() > Date.now());
-  if (!free) {
-    const best = parsed[parsed.length - 1]!;
-    return {
-      policy: {
-        deadline: best.before,
-        penaltyAmount: Math.max(0, total - best.refund),
-        description: `Partial refund until ${best.before}`,
-      },
-      refundable: false,
-    };
-  }
-  const after = parsed.find((s) => s.before > free.before);
+
+  // The legacy pair keeps its original meaning for anything not yet reading the ladder: the last
+  // moment the best refund still applies, and what cancelling up to then costs.
+  const last = parsed[parsed.length - 1]!;
+  const afterFree = free ? parsed.find((s) => s.before > free.before) : null;
   return {
     policy: {
-      deadline: free.before,
-      penaltyAmount: after ? Math.max(0, total - after.refund) : total,
-      description: `Free cancellation until ${free.before}`,
+      windows,
+      deadline: free ? free.before : last.before,
+      penaltyAmount: free
+        ? afterFree
+          ? Math.max(0, total - afterFree.refund)
+          : total
+        : Math.max(0, total - last.refund),
+      description: free
+        ? `Free cancellation until ${free.before}`
+        : `Partial refund until ${last.before}`,
     },
     refundable,
   };

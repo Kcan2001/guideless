@@ -1,6 +1,12 @@
 import { expect, test } from "@playwright/test";
+import { acceptCookies, resetRateLimit } from "./helpers";
 
 test.describe("marketing site", () => {
+  // A returning visitor has already answered the cookie banner; consent.spec.ts covers the banner.
+  test.beforeEach(async ({ page }) => {
+    await acceptCookies(page);
+  });
+
   test("home renders the promise and primary navigation", async ({ page, isMobile }) => {
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Travel with a plan.");
@@ -141,6 +147,9 @@ test.describe("marketing site", () => {
   });
 
   test("host application submits and thanks the applicant", async ({ page }) => {
+    // Public forms are rate limited per IP per hour. Correct in production, and it makes this test
+    // fail on the seventh local run, so clear the window rather than weaken the assertion.
+    await resetRateLimit("host_application");
     await page.goto("/host");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("travel free");
     await page.locator("#host-name").fill("E2E Host");

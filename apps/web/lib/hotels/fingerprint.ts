@@ -1,3 +1,4 @@
+import { freeUntilDay } from "./cancellation-policy";
 import { normalizeBedType, normalizeText } from "./normalize";
 import type { NormalizedRate, RateFingerprint } from "./types";
 
@@ -7,7 +8,7 @@ import type { NormalizedRate, RateFingerprint } from "./types";
  * "beating" a refundable rate with breakfast (docs/strategy-v3-direction.md §3).
  *
  * Mirrors the DISTINCT ON key in public.suggest_stay_price(): room name, bed type, occupancy,
- * refundable, cancellation deadline day, breakfast, payment type.
+ * refundable, the day free cancellation ends, breakfast, payment type.
  */
 export type RateWithHotel = NormalizedRate & {
   /** Guideless hotel id resolved through hotel_supplier_mappings; lets suppliers share a key. */
@@ -15,7 +16,8 @@ export type RateWithHotel = NormalizedRate & {
 };
 
 export function rateFingerprint(rate: RateWithHotel): RateFingerprint {
-  const deadlineDay = rate.cancellationPolicy.deadline?.slice(0, 10) ?? "";
+  // Group by the day free cancellation ends, which is the first rung of the ladder.
+  const deadlineDay = freeUntilDay(rate.cancellationPolicy);
   return [
     `h:${rate.guidelessHotelId ?? `${rate.supplier}:${rate.supplierHotelId}`}`,
     `r:${normalizeText(rate.roomName)}`,

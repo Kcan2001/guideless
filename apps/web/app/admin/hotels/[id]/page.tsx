@@ -8,6 +8,8 @@ import { HotelRoomForm } from "@/components/admin/hotel-room-form";
 import { SubmitButton } from "@/components/admin/submit-button";
 import { DL, PageHeader, Section, Table, money } from "@/components/admin/ui";
 import { Badge } from "@/components/ui/badge";
+import { freeUntil } from "@/lib/hotels/cancellation-policy";
+import type { CancellationPolicy } from "@/lib/hotels/types";
 import {
   deleteHotelMappingAction,
   refreshHotelRatesAction,
@@ -19,7 +21,7 @@ import { getHotelAdmin, suggestStayPrice, type HotelRateRow } from "@/lib/hotels
 
 function policySummary(rate: HotelRateRow): string {
   if (!rate.refundable) return "Non-refundable";
-  const deadline = (rate.cancellation_policy as { deadline?: string } | null)?.deadline;
+  const deadline = freeUntil(rate.cancellation_policy as CancellationPolicy | null) ?? undefined;
   return deadline ? `Free until ${new Date(deadline).toLocaleDateString("en-GB")}` : "Refundable";
 }
 

@@ -117,6 +117,12 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ steps.supabase.outputs.API_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ steps.supabase.outputs.ANON_KEY }}
           NEXT_PUBLIC_SITE_URL: http://localhost:3100
+          # The consent banner only renders when an analytics tool is configured, so a build without
+          # this renders a different page from production. That gap hid a real defect: the banner
+          # floats over the bottom of the page and was intercepting clicks on the sign-up button.
+          # Nothing is sent anywhere — PostHog is never initialised against a placeholder host.
+          NEXT_PUBLIC_POSTHOG_KEY: phc_e2e_placeholder_not_a_real_project
+          NEXT_PUBLIC_POSTHOG_HOST: http://127.0.0.1:9
 
       - name: Run end-to-end tests
         run: pnpm --filter web test:e2e
@@ -125,6 +131,12 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ steps.supabase.outputs.API_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ steps.supabase.outputs.ANON_KEY }}
           NEXT_PUBLIC_SITE_URL: http://localhost:3100
+          NEXT_PUBLIC_POSTHOG_KEY: phc_e2e_placeholder_not_a_real_project
+          NEXT_PUBLIC_POSTHOG_HOST: http://127.0.0.1:9
+          # Confirms a seeded booking the way the Stripe webhook does, so the account, add-on and
+          # cancellation flows have something real to act on. This is the local stack's well-known
+          # demo key, not a secret.
+          SUPABASE_SERVICE_ROLE_KEY: ${{ steps.supabase.outputs.SERVICE_ROLE_KEY }}
 
       - uses: actions/upload-artifact@v4
         if: failure()

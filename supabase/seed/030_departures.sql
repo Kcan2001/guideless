@@ -34,10 +34,10 @@ insert into public.departure_tier_briefs (departure_id, tier, brief)
 select d.id, b.tier::public.option_tier, b.brief
 from public.departures d
 cross join (values
-  ('explorer', 'Comfortable, well located, walkable to the centre of each city. The trip most people book. Never the cheapest room in town.'),
-  ('classic',  'A clearly better room or a better street than Explorer, in the same neighbourhoods. Boutique rather than chain where the price allows.'),
-  ('premium',  'Design-led properties in the best part of each city. Buys quality Classic cannot, not proximity, because nothing here is hard to reach.'),
-  ('elite',    'The best in each city for these dates. On this trip that means the room and the building, since access is not scarce in May, June or September.')
+  ('explorer', 'Comfortable, well located, walkable to the centre of each city. Researched band, per night with breakfast: Nice 150-185, Avignon 110-120, Paris 165-195 EUR. Never the cheapest room in town, and never priced above the band just because a property is nicer.'),
+  ('classic',  'A clearly better room or a better street than Explorer, in the same neighbourhoods. NO RESEARCHED BAND YET: this rung has no supplier figures behind it and must not be sold until it does. Sits between the Explorer and Premium bands.'),
+  ('premium',  'Design-led properties in the best part of each city. Researched band, per night with breakfast: Nice 225-290, Avignon 175-190, Paris 230-270 EUR. Buys quality Classic cannot, not proximity, because nothing on this route is hard to reach.'),
+  ('elite',    'The best in each city for these dates: on this trip that means the room and the building, since access is not scarce in May, June or September. NO RESEARCHED BAND YET, and the top of the Paris market is wide. Do not sell until researched.')
 ) as b(tier, brief)
 where d.tour_id = '20000000-0000-4000-8000-000000000001'
-on conflict (departure_id, tier) do nothing;
+on conflict (departure_id, tier) do update set brief = excluded.brief;

@@ -164,6 +164,99 @@ negotiation.
 aparthotel properties within it. Only add a property type to the schema if that filtering proves
 the demand is real.
 
+### LiteAPI, verified against their own documentation (2026-09-08)
+
+Checked before signing up, because the earlier pass drew on third-party sources. Everything here is
+from LiteAPI or Nuitée's own pages.
+
+**Apartments and villas are in the supply, which corrects what this document said above.** There is
+a real property-type filter: `hotelTypeIds` on both `/hotels/rates` and `/data/hotels`, a
+`hotelTypeId` on each hotel record, and a `GET /data/hotelTypes` endpoint that returns the id-to-
+name mapping. Their own sample data includes properties called "Apartmani Ani" and "Villa Rosa". So
+the aparthotel and serviced-apartment strategy works here rather than needing a separate channel.
+The value list is not published, so **pull `/data/hotelTypes` on day one** and record what the ids
+actually mean before filtering on them.
+
+**Sign-up is genuinely free.** A sandbox key needs an account and no credit card. Production needs a
+card and a payout method, with no contract or KYC step documented. The core workflow, rates then
+prebook then book, is free, "assuming a reasonable look-to-book ratio". Paid extras are small and
+optional: a price index at $0.05 a request, places at $0.01.
+
+**We choose net or commission.** A `margin` parameter set to 0 gives net rates; set to 15 it adds
+15% commission. That is the flexibility a packager needs, and it is the thing Duffel cannot offer.
+Note `suggestedSellingPrice`, which is a rate-parity floor on public display; packaging a room
+inside a trip price is normally outside that, but it is worth confirming rather than assuming.
+
+**Prebook is the freshness guard, and it is a good one.** It returns `priceDifferencePercent`,
+`cancellationChanged` and `boardChanged` — their documentation calls these the three fields to
+check. That maps exactly onto our `recheckRate`, and `cancellationChanged` is better than we
+currently model, because our recheck only compares price.
+
+**Two things they do not publish, and both need to come from them in writing before we build:**
+
+1. **How many bedbanks sit behind it.** They claim two to three million properties, and the figure
+   is inconsistent across their own pages. Their only stated multi-source claim is for flights, not
+   hotels, and the rates response carries a single `supplier` of `nuitee` by default. So treat this
+   as one broad normalized pool, **not** as a substitute for integrating several wholesalers. If the
+   goal is genuinely comparing wholesalers against each other, LiteAPI alone may not deliver it.
+2. **The look-to-book ratio.** The published rate limit is 500 requests a second, which a daily
+   refresh of a fixed property set never approaches. The real constraint is a look-to-book threshold
+   in their terms that is not given a number for hotels. Since our whole design refreshes rates on a
+   schedule, agree an expected ratio before building the scheduler.
+
+**Payouts are weekly and follow the stay**, which matters for working capital if we ever sell on
+commission rather than buying net.
+
+### Probed against a real sandbox key (2026-09-08)
+
+Account created, key in `supabase/.env` as `LITEAPI_SANDBOX_KEY`, probed with
+`node scripts/liteapi-probe.mjs`. This is no longer inference; the findings below are responses.
+
+**Property types are real and rich.** `GET /data/hotelTypes` returns 50 types. The ones that matter
+to us:
+
+| Id  | Type               | Id  | Type                  |
+| --- | ------------------ | --- | --------------------- |
+| 201 | Apartments         | 219 | Aparthotels           |
+| 204 | Hotels             | 220 | Holiday homes         |
+| 207 | Residences         | 222 | Homestays             |
+| 208 | Bed and breakfasts | 229 | Condos                |
+| 213 | Villas             | 250 | Private vacation home |
+| 216 | Guest houses       | 228 | Chalets               |
+
+**219 Aparthotels and 201 Apartments are exactly the product this audit concluded we want**, and
+they are filterable with `hotelTypeIds` on the same endpoints as hotels. The whole-home types are
+there too (213, 220, 250) if we ever decide the per-unit economics work.
+
+**The cancellation ladder is confirmed, and it is the majority case.** One hotel in Nice, one date
+range, 200 rates returned:
+
+| Measure                               | Result         |
+| ------------------------------------- | -------------- |
+| Rates inspected                       | 200            |
+| Maximum windows on a single rate      | **5**          |
+| Rates with more than one window       | **116 of 200** |
+| Rates with no window (non-refundable) | 33             |
+| `refundableTag` values                | `RFN`, `NRFN`  |
+| Penalty type                          | `amount`       |
+
+Our `CancellationPolicy` holds one deadline and one penalty. **Fifty-eight percent of real rates
+would lose their middle steps**, and the loss is money in both directions: we would believe a rate
+is fully refundable on a date the supplier already charges for, or hold a customer to a penalty we
+were not actually charged. This is no longer a theoretical risk to note; it is a defect to fix
+before the adapter goes anywhere near a booking.
+
+**The rest of the rate object maps cleanly onto ours.** `retailRate.total`, `initialPrice`,
+`taxesAndFees[]` with an `included` flag, `boardType` and `boardName`, `commission[]`,
+`paymentTypes`, and `et` (an expiry in seconds; 10800, so three hours). One field to respect:
+`suggestedSellingPrice` carries a `source`, and in the sandbox that source is `booking.com` — it is
+a parity reference, not our price.
+
+**One caution the probe itself taught.** The first version of the script counted `cancelTime`
+across the whole response and reported 302 windows, which was meaningless: 200 room types with one
+window each is not a ladder. Counting per rate gave the real answer. A number from a probe is only
+as good as what it counted.
+
 ### Order of work
 
 1. Fix the cancellation ladder in the rate model. It is a money bug waiting for its first live rate.

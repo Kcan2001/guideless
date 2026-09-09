@@ -1,0 +1,80 @@
+{
+  "data": [
+    {
+      "id": "lp2febb",
+      "primaryHotelId": null,
+      "name": "Best Western Hotel Lakmi Nice",
+      "hotelDescription": "<p><strong>Central Location on Avenue Jean Medecin</strong><br>Best Western Hotel Lakmi Nice is centrally located on Avenue Jean Medecin, the main shopping street in Nice. With proximity to Place Massena and the Nice Etoile Shopping Centre, our hotel offers the perfect starting point for exploring the city.</p><p><strong>Comfortable Rooms with Modern Amenities</strong><br>Our spacious air-conditioned guest rooms are designed for your comfort, featuring flat-screen TVs, private bathrooms with hairdryers, and complimentary WiFi. Select rooms even boast wrought iron furniture and balconies, ensuring a relaxing stay.</p><p><strong>Convenient Facilities and Services</strong><br>Start your day with a delicious buffet breakfast in our breakfast room, complemented by a selection of newspapers. Unwind at our on-site bar or take a leisurely stroll to the Promenade des Anglais and Vieux Nice. For added convenience, we offer private parking spaces on site. Experience the best of Nice at Best Western Hotel Lakmi Nice.</p>",
+      "hotelTypeId": 204,
+      "chainId": 1029,
+      "chain": "Best Western",
+      "currency": "EUR",
+      "country": "fr",
+      "city": "Nice",
+      "latitude": 43.702746,
+      "longitude": 7.267241,
+      "address": "44 Avenue Marechal Foch",
+      "zip": "6000",
+      "main_photo": "https://static.cupid.travel/hotels/613091398.jpg",
+      "thumbnail": "https://static.cupid.travel/hotels/thumbnail/613091398.jpg",
+      "stars": 3,
+      "rating": 9,
+      "reviewCount": 5340,
+      "facilityIds": [
+        47, 107, 2, 16, 109, 8, 80, 28, 4, 48, 22, 91, 51, 78, 64, 44, 23, 43, 161, 135, 136, 218,
+        455, 450, 451, 449, 462, 457, 461, 425, 459, 467, 460, 468, 422, 456, 466, 453, 454, 424,
+        423, 464, 484
+      ],
+      "accessibilityAttributes": {
+        "attributes": null,
+        "showerChair": null,
+        "entranceType": null,
+        "petFriendly": "",
+        "rampAngle": 0,
+        "rampLength": 0,
+        "entranceDoorWidth": 0,
+        "roomMaxGuestsNumber": 0,
+        "distanceFromTheElevatorToTheAccessibleRoom": 0
+      },
+      "deletedAt": null
+    },
+    {
+      "id": "lp1d8be",
+      "primaryHotelId": null,
+      "name": "Apollinaire Nice, WorldHotels Distinctive",
+      "hotelDescription": "<p><strong>Central Location</strong>:<br>Hotel Apollinaire is conveniently situated in Nice city centre, just 1 km from the beach and the famous Promenade des Anglais. With key attractions like Place Massena and Promenade du Paillon Park within walking distance, our hotel offers the perfect base for exploring the vibrant city of Nice.</p><p><strong>Modern Amenities</strong>:<br>Each of our air-conditioned guest rooms features a sleek contemporary decor and is well-appointed with essential amenities such as a flat-screen TV, electric kettle, safety deposit box, and minibar. The private bathrooms come with a luxurious bath or shower, ensuring a comfortable stay for our guests.</p><p><strong>Delicious Breakfast Options</strong>:<br>Start your day right with a delicious buffet breakfast served every morning in our dining room. For a special experience, guests can also enjoy their breakfast on the terrace upon request, soaking in the beautiful surroundings.</p><p>Experience the best of Nice at Hotel Apollinaire - book your stay now for a memorable and convenient visit!</p>",
+      "hotelTypeId": 204,
+      "chainId": 12918,
+      "chain": "WorldHotels Distinctive",
+      "currency": "EUR",
+      "country": "fr",
+      "city": "Nice",
+      "latitude": 43.701413,
+      "longitude": 7.271272,
+      "address": "25 Boulevard Dubouchage",
+      "zip": "6000",
+      "main_photo": "https://static.cupid.travel/hotels/513504252.jpg",
+      "thumbnail": "https://static.cupid.travel/hotels/thumbnail/513504252.jpg",
+      "stars": 4,
+      "rating": 9.6,
+      "reviewCount": 5033,
+      "facilityIds": [
+        492, 47, 107, 16, 109, 11, 8, 5, 80, 15, 28, 14, 4, 48, 22, 91, 51, 7, 81, 64, 25, 44, 6,
+        23, 43, 54, 79, 108, 118, 158, 110, 143, 170, 124, 133, 185, 117, 222, 203, 219, 218, 455,
+        450, 451, 449, 457, 425, 459, 465, 468, 422, 456, 424, 423, 421, 420
+      ],
+      "accessibilityAttributes": {
+        "attributes": null,
+        "showerChair": null,
+        "entranceType": null,
+        "petFriendly": "",
+        "rampAngle": 0,
+        "rampLength": 0,
+        "entranceDoorWidth": 0,
+        "roomMaxGuestsNumber": 0,
+        "distanceFromTheElevatorToTheAccessibleRoom": 0
+      },
+      "deletedAt": null
+    }
+  ]
+}

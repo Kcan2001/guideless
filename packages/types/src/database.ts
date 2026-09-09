@@ -5061,6 +5061,104 @@ export type Database = {
           },
         ];
       };
+      trip_surveys: {
+        Row: {
+          accommodation: number | null;
+          answers: Json;
+          best_bit: string | null;
+          booking_id: string;
+          created_at: string;
+          expectations: string | null;
+          freedom: number | null;
+          group_feeling: number | null;
+          id: string;
+          kind: Database["public"]["Enums"]["survey_kind"];
+          organisation: number | null;
+          overall: number | null;
+          submitted_at: string;
+          tour_id: string | null;
+          trip_id: string | null;
+          updated_at: string;
+          user_id: string;
+          value_for_money: number | null;
+          worst_bit: string | null;
+          would_repeat: boolean | null;
+        };
+        Insert: {
+          accommodation?: number | null;
+          answers?: Json;
+          best_bit?: string | null;
+          booking_id: string;
+          created_at?: string;
+          expectations?: string | null;
+          freedom?: number | null;
+          group_feeling?: number | null;
+          id?: string;
+          kind: Database["public"]["Enums"]["survey_kind"];
+          organisation?: number | null;
+          overall?: number | null;
+          submitted_at?: string;
+          tour_id?: string | null;
+          trip_id?: string | null;
+          updated_at?: string;
+          user_id: string;
+          value_for_money?: number | null;
+          worst_bit?: string | null;
+          would_repeat?: boolean | null;
+        };
+        Update: {
+          accommodation?: number | null;
+          answers?: Json;
+          best_bit?: string | null;
+          booking_id?: string;
+          created_at?: string;
+          expectations?: string | null;
+          freedom?: number | null;
+          group_feeling?: number | null;
+          id?: string;
+          kind?: Database["public"]["Enums"]["survey_kind"];
+          organisation?: number | null;
+          overall?: number | null;
+          submitted_at?: string;
+          tour_id?: string | null;
+          trip_id?: string | null;
+          updated_at?: string;
+          user_id?: string;
+          value_for_money?: number | null;
+          worst_bit?: string | null;
+          would_repeat?: boolean | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "trip_surveys_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "trip_surveys_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings_public";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "trip_surveys_tour_id_fkey";
+            columns: ["tour_id"];
+            isOneToOne: false;
+            referencedRelation: "tours";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "trip_surveys_trip_id_fkey";
+            columns: ["trip_id"];
+            isOneToOne: false;
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       trips: {
         Row: {
           created_at: string;
@@ -5620,6 +5718,29 @@ export type Database = {
           },
         ];
       };
+      tour_survey_stats: {
+        Row: {
+          accommodation: number | null;
+          freedom: number | null;
+          group_feeling: number | null;
+          kind: Database["public"]["Enums"]["survey_kind"] | null;
+          organisation: number | null;
+          overall: number | null;
+          responses: number | null;
+          tour_id: string | null;
+          value_for_money: number | null;
+          would_repeat: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "trip_surveys_tour_id_fkey";
+            columns: ["tour_id"];
+            isOneToOne: false;
+            referencedRelation: "tours";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Functions: {
       account_credit_balance: {
@@ -5649,6 +5770,13 @@ export type Database = {
         Returns: undefined;
       };
       can_review_booking: { Args: { p_booking_id: string }; Returns: boolean };
+      can_survey_booking: {
+        Args: {
+          p_booking_id: string;
+          p_kind: Database["public"]["Enums"]["survey_kind"];
+        };
+        Returns: boolean;
+      };
       check_group_code: {
         Args: { p_code: string; p_departure_id: string };
         Returns: Json;
@@ -5818,6 +5946,11 @@ export type Database = {
       has_any_role: {
         Args: { required: Database["public"]["Enums"]["app_role"][] };
         Returns: boolean;
+      };
+      hotel_rate_free_until: { Args: { policy: Json }; Returns: string };
+      hotel_rate_penalty_at: {
+        Args: { at: string; policy: Json };
+        Returns: number;
       };
       invoke_notify_dispatch: { Args: never; Returns: undefined };
       invoke_social_publish: { Args: never; Returns: undefined };
@@ -6058,6 +6191,51 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      submit_trip_survey: {
+        Args: {
+          p_accommodation?: number;
+          p_answers?: Json;
+          p_best_bit?: string;
+          p_booking_id: string;
+          p_expectations?: string;
+          p_freedom?: number;
+          p_group_feeling?: number;
+          p_kind: Database["public"]["Enums"]["survey_kind"];
+          p_organisation?: number;
+          p_overall?: number;
+          p_value_for_money?: number;
+          p_worst_bit?: string;
+          p_would_repeat?: boolean;
+        };
+        Returns: {
+          accommodation: number | null;
+          answers: Json;
+          best_bit: string | null;
+          booking_id: string;
+          created_at: string;
+          expectations: string | null;
+          freedom: number | null;
+          group_feeling: number | null;
+          id: string;
+          kind: Database["public"]["Enums"]["survey_kind"];
+          organisation: number | null;
+          overall: number | null;
+          submitted_at: string;
+          tour_id: string | null;
+          trip_id: string | null;
+          updated_at: string;
+          user_id: string;
+          value_for_money: number | null;
+          worst_bit: string | null;
+          would_repeat: boolean | null;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "trip_surveys";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       subscribe_newsletter: {
         Args: { p_email: string; p_source?: string };
         Returns: string;
@@ -6141,7 +6319,7 @@ export type Database = {
         | "cancelled";
       hotel_booking_status: "quoted" | "booked" | "confirmed" | "cancelled" | "failed";
       hotel_payment_type: "pay_now" | "pay_at_property";
-      hotel_supplier: "duffel" | "expedia" | "hotelbeds" | "manual";
+      hotel_supplier: "duffel" | "expedia" | "hotelbeds" | "manual" | "liteapi";
       itinerary_item_status: "planned" | "confirmed" | "pending_supplier" | "changed" | "cancelled";
       itinerary_item_type:
         | "hotel"
@@ -6204,6 +6382,7 @@ export type Database = {
         | "other";
       support_thread_status:
         "open" | "waiting_on_customer" | "waiting_on_staff" | "resolved" | "closed";
+      survey_kind: "pre_trip" | "post_trip";
       tour_version_status: "draft" | "published" | "archived";
       transfer_preference: "group_welcome_transfer" | "own_arrangement";
       transport_type: "train" | "flight" | "transfer" | "ferry" | "bus";
@@ -6393,7 +6572,7 @@ export const Constants = {
       ],
       hotel_booking_status: ["quoted", "booked", "confirmed", "cancelled", "failed"],
       hotel_payment_type: ["pay_now", "pay_at_property"],
-      hotel_supplier: ["duffel", "expedia", "hotelbeds", "manual"],
+      hotel_supplier: ["duffel", "expedia", "hotelbeds", "manual", "liteapi"],
       itinerary_item_status: ["planned", "confirmed", "pending_supplier", "changed", "cancelled"],
       itinerary_item_type: [
         "hotel",
@@ -6464,6 +6643,7 @@ export const Constants = {
         "resolved",
         "closed",
       ],
+      survey_kind: ["pre_trip", "post_trip"],
       tour_version_status: ["draft", "published", "archived"],
       transfer_preference: ["group_welcome_transfer", "own_arrangement"],
       transport_type: ["train", "flight", "transfer", "ferry", "bus"],

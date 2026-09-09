@@ -41,7 +41,9 @@ insert into public.user_roles (user_id, role) values ('f4000000-0000-4000-8000-0
 
 -- ── Schema ───────────────────────────────────────────────────────────────────
 select has_enum('public', 'hotel_supplier', 'hotel_supplier enum exists');
-select enum_has_labels('public', 'hotel_supplier', array['duffel', 'expedia', 'hotelbeds', 'manual'], 'supplier labels');
+-- Exact, and in Postgres order, because this enum mirrors HOTEL_SUPPLIERS in @guideless/types.
+-- Adding a supplier should fail here until both sides move together.
+select enum_has_labels('public', 'hotel_supplier', array['duffel', 'expedia', 'hotelbeds', 'manual', 'liteapi'], 'supplier labels');
 select has_table('public', 'hotel_rates', 'hotel_rates exists');
 select has_view('public', 'hotels_public', 'hotels_public view exists');
 select has_view('public', 'stay_option_hotels_public', 'stay_option_hotels_public view exists');

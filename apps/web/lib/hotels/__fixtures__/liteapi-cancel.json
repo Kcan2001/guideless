@@ -1,0 +1,10 @@
+{
+  "data": {
+    "bookingId": "HHcdGBg5_",
+    "cancellation_fee": 0,
+    "currency": "USD",
+    "refund_amount": 368.31,
+    "status": "CANCELLED"
+  },
+  "sandbox": true
+}
