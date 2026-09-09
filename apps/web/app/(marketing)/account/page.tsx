@@ -302,6 +302,37 @@ export default async function AccountPage(props: PageProps<"/account">) {
               ))}
             </section>
           )}
+          {upcoming.length > 0 && (
+            <section className="mt-12" id="assistant">
+              <h2 className="text-xl font-semibold">Ask about your trip</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Where to eat, what&rsquo;s near the hotel, what to do with a free morning. It knows
+                your route and what we recommend, and anything you save is private to you.
+              </p>
+              <ul className="mt-4 divide-y divide-border rounded-xl border border-border bg-surface">
+                {upcoming.map((b) => (
+                  <li key={b.booking.id} className="flex flex-wrap items-center gap-4 p-5">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium">{b.tour.name}</p>
+                      <p className="mt-0.5 text-sm text-muted-foreground">
+                        {b.departure.start_date && b.departure.end_date
+                          ? formatDateRange(b.departure.start_date, b.departure.end_date)
+                          : "Dates to come"}
+                      </p>
+                    </div>
+                    <Link
+                      href={`/account/assistant/${b.booking.id}`}
+                      className={buttonVariants({ variant: "secondary", size: "sm" })}
+                    >
+                      Open assistant
+                      <ArrowRight className="ml-1 h-4 w-4" aria-hidden />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
           {surveys.length > 0 && (
             <section className="mt-12" id="surveys">
               <h2 className="text-xl font-semibold">Tell us</h2>

@@ -265,6 +265,183 @@ export type Database = {
           },
         ];
       };
+      ai_conversations: {
+        Row: {
+          booking_id: string;
+          created_at: string;
+          id: string;
+          title: string | null;
+          trip_id: string | null;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          booking_id: string;
+          created_at?: string;
+          id?: string;
+          title?: string | null;
+          trip_id?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          booking_id?: string;
+          created_at?: string;
+          id?: string;
+          title?: string | null;
+          trip_id?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ai_conversations_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "ai_conversations_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings_public";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "ai_conversations_trip_id_fkey";
+            columns: ["trip_id"];
+            isOneToOne: false;
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      ai_messages: {
+        Row: {
+          actions: Json;
+          content: string;
+          conversation_id: string;
+          created_at: string;
+          id: string;
+          role: string;
+          user_id: string;
+        };
+        Insert: {
+          actions?: Json;
+          content: string;
+          conversation_id: string;
+          created_at?: string;
+          id?: string;
+          role: string;
+          user_id: string;
+        };
+        Update: {
+          actions?: Json;
+          content?: string;
+          conversation_id?: string;
+          created_at?: string;
+          id?: string;
+          role?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ai_messages_conversation_id_fkey";
+            columns: ["conversation_id"];
+            isOneToOne: false;
+            referencedRelation: "ai_conversations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      ai_usage: {
+        Row: {
+          booking_id: string | null;
+          cost_micros: number;
+          input_tokens: number;
+          messages: number;
+          output_tokens: number;
+          updated_at: string;
+          usage_date: string;
+          user_id: string;
+        };
+        Insert: {
+          booking_id?: string | null;
+          cost_micros?: number;
+          input_tokens?: number;
+          messages?: number;
+          output_tokens?: number;
+          updated_at?: string;
+          usage_date: string;
+          user_id: string;
+        };
+        Update: {
+          booking_id?: string | null;
+          cost_micros?: number;
+          input_tokens?: number;
+          messages?: number;
+          output_tokens?: number;
+          updated_at?: string;
+          usage_date?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ai_usage_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "ai_usage_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings_public";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      assistant_group_posts: {
+        Row: {
+          created_at: string;
+          item_count: number;
+          message_id: string | null;
+          post_date: string;
+          trip_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          item_count?: number;
+          message_id?: string | null;
+          post_date: string;
+          trip_id: string;
+        };
+        Update: {
+          created_at?: string;
+          item_count?: number;
+          message_id?: string | null;
+          post_date?: string;
+          trip_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "assistant_group_posts_message_id_fkey";
+            columns: ["message_id"];
+            isOneToOne: false;
+            referencedRelation: "messages";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "assistant_group_posts_trip_id_fkey";
+            columns: ["trip_id"];
+            isOneToOne: false;
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       audit_logs: {
         Row: {
           action: Database["public"]["Enums"]["audit_action"];
@@ -2769,9 +2946,10 @@ export type Database = {
           deleted_by: string | null;
           edited_at: string | null;
           id: string;
+          is_system: boolean;
           reply_to_id: string | null;
           room_id: string;
-          sender_id: string;
+          sender_id: string | null;
         };
         Insert: {
           attachments?: Json;
@@ -2781,9 +2959,10 @@ export type Database = {
           deleted_by?: string | null;
           edited_at?: string | null;
           id?: string;
+          is_system?: boolean;
           reply_to_id?: string | null;
           room_id: string;
-          sender_id: string;
+          sender_id?: string | null;
         };
         Update: {
           attachments?: Json;
@@ -2793,9 +2972,10 @@ export type Database = {
           deleted_by?: string | null;
           edited_at?: string | null;
           id?: string;
+          is_system?: boolean;
           reply_to_id?: string | null;
           room_id?: string;
-          sender_id?: string;
+          sender_id?: string | null;
         };
         Relationships: [
           {
@@ -4589,6 +4769,104 @@ export type Database = {
           },
         ];
       };
+      traveler_plans: {
+        Row: {
+          address: string | null;
+          booking_id: string | null;
+          created_at: string;
+          end_time: string | null;
+          id: string;
+          latitude: number | null;
+          location_name: string | null;
+          longitude: number | null;
+          maps_url: string | null;
+          notes: string | null;
+          place_ref: string | null;
+          plan_date: string | null;
+          recommendation_id: string | null;
+          source: string;
+          start_time: string | null;
+          timezone: string;
+          title: string;
+          trip_id: string | null;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          address?: string | null;
+          booking_id?: string | null;
+          created_at?: string;
+          end_time?: string | null;
+          id?: string;
+          latitude?: number | null;
+          location_name?: string | null;
+          longitude?: number | null;
+          maps_url?: string | null;
+          notes?: string | null;
+          place_ref?: string | null;
+          plan_date?: string | null;
+          recommendation_id?: string | null;
+          source?: string;
+          start_time?: string | null;
+          timezone: string;
+          title: string;
+          trip_id?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          address?: string | null;
+          booking_id?: string | null;
+          created_at?: string;
+          end_time?: string | null;
+          id?: string;
+          latitude?: number | null;
+          location_name?: string | null;
+          longitude?: number | null;
+          maps_url?: string | null;
+          notes?: string | null;
+          place_ref?: string | null;
+          plan_date?: string | null;
+          recommendation_id?: string | null;
+          source?: string;
+          start_time?: string | null;
+          timezone?: string;
+          title?: string;
+          trip_id?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "traveler_plans_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "traveler_plans_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings_public";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "traveler_plans_recommendation_id_fkey";
+            columns: ["recommendation_id"];
+            isOneToOne: false;
+            referencedRelation: "recommendations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "traveler_plans_trip_id_fkey";
+            columns: ["trip_id"];
+            isOneToOne: false;
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       traveler_profiles: {
         Row: {
           accessibility_notes: string | null;
@@ -4643,6 +4921,33 @@ export type Database = {
           travel_preferences?: Json;
           updated_at?: string;
           user_id?: string | null;
+        };
+        Relationships: [];
+      };
+      traveler_signals: {
+        Row: {
+          categories: Database["public"]["Enums"]["recommendation_category"][];
+          created_at: string;
+          id: number;
+          kind: string;
+          ref_id: string | null;
+          user_id: string;
+        };
+        Insert: {
+          categories?: Database["public"]["Enums"]["recommendation_category"][];
+          created_at?: string;
+          id?: number;
+          kind: string;
+          ref_id?: string | null;
+          user_id: string;
+        };
+        Update: {
+          categories?: Database["public"]["Enums"]["recommendation_category"][];
+          created_at?: string;
+          id?: number;
+          kind?: string;
+          ref_id?: string | null;
+          user_id?: string;
         };
         Relationships: [];
       };
@@ -5352,6 +5657,33 @@ export type Database = {
           },
         ];
       };
+      ai_cost_by_booking: {
+        Row: {
+          booking_id: string | null;
+          cost_micros: number | null;
+          input_tokens: number | null;
+          last_used: string | null;
+          messages: number | null;
+          output_tokens: number | null;
+          travelers: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ai_usage_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "ai_usage_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings_public";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       bookings_public: {
         Row: {
           amount_paid: number | null;
@@ -5765,6 +6097,21 @@ export type Database = {
           user_id: string;
         }[];
       };
+      ai_claim_message: {
+        Args: { p_booking_id: string; p_user_id: string };
+        Returns: boolean;
+      };
+      ai_daily_limit: { Args: never; Returns: number };
+      ai_messages_left: { Args: { p_user_id?: string }; Returns: number };
+      ai_record_cost: {
+        Args: {
+          p_cost_micros: number;
+          p_input_tokens: number;
+          p_output_tokens: number;
+          p_user_id: string;
+        };
+        Returns: undefined;
+      };
       assert_departure_capacity: {
         Args: { p_departure_id: string };
         Returns: undefined;
@@ -5931,6 +6278,16 @@ export type Database = {
       format_money: {
         Args: { p_amount: number; p_currency: string };
         Returns: string;
+      };
+      free_activities_on: {
+        Args: { p_date: string; p_trip_id: string };
+        Returns: {
+          instructions: string;
+          item_id: string;
+          location_name: string;
+          start_time: string;
+          title: string;
+        }[];
       };
       generate_confirmation_number: { Args: never; Returns: string };
       generate_referral_code: { Args: never; Returns: string };
@@ -6269,6 +6626,14 @@ export type Database = {
         Returns: number;
       };
       tour_version_is_public: { Args: { version_id: string }; Returns: boolean };
+      traveler_pace: { Args: { p_booking_id: string }; Returns: string };
+      traveler_taste: {
+        Args: { p_user_id?: string };
+        Returns: {
+          category: Database["public"]["Enums"]["recommendation_category"];
+          weight: number;
+        }[];
+      };
       trip_add_on_participants: {
         Args: { p_trip_id: string };
         Returns: {
@@ -6276,6 +6641,15 @@ export type Database = {
           display_name: string;
           first_name: string;
           user_id: string;
+        }[];
+      };
+      trips_running_on: {
+        Args: { p_date: string };
+        Returns: {
+          room_id: string;
+          timezone: string;
+          trip_id: string;
+          trip_name: string;
         }[];
       };
       unsubscribe_newsletter: { Args: { p_token: string }; Returns: boolean };

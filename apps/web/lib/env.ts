@@ -58,6 +58,16 @@ const serverSchema = z.object({
   LITEAPI_KEY: z.string().min(1).optional(),
   /** Bearer token Vercel sends to /api/cron/* routes. */
   CRON_SECRET: z.string().min(16).optional(),
+  /** The trip assistant (docs/assistant.md). Without a key the assistant is off, not degraded. */
+  ANTHROPIC_API_KEY: z.string().min(1).optional(),
+  /** Overridable so a model change is a deploy, not a release. */
+  ASSISTANT_MODEL: z.string().min(1).default("claude-opus-5"),
+  /** Where "what's good near me" comes from. "google" needs GOOGLE_PLACES_KEY and billing. */
+  PLACES_PROVIDER: z.enum(["mock", "google"]).default("mock"),
+  /** Server-side Places key. Never NEXT_PUBLIC_: it is billable and unrestricted by referrer. */
+  GOOGLE_PLACES_KEY: z.string().min(1).optional(),
+  /** Bookable experiences. Only the stub exists until item 7 brings a real provider. */
+  RESERVATION_PROVIDER: z.enum(["stub"]).default("stub"),
 });
 
 let cachedServerEnv: z.infer<typeof serverSchema> | undefined;

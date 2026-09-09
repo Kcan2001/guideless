@@ -13,6 +13,7 @@
     "clean": "rimraf .next .turbo"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.124.0",
     "@guideless/config": "workspace:*",
     "@guideless/types": "workspace:*",
     "@guideless/utils": "workspace:*",

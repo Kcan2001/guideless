@@ -34,11 +34,13 @@ import { useInbox } from "@/hooks/use-inbox";
 import { useMoments } from "@/hooks/use-moments";
 import { useReviewable } from "@/hooks/use-reviewable";
 import { useOpenSurveys } from "@/hooks/use-open-surveys";
+import { useMyPlans } from "@/hooks/use-plans";
 import { useTheme } from "@/hooks/use-theme";
 import { useTripAddOns } from "@/hooks/use-add-ons";
 import { useCurrentTrip } from "@/hooks/use-trip";
 import { track } from "@/lib/analytics";
 import { momentsForToday, momentsNotShown } from "@/lib/moments/today";
+import { plansForDate } from "@/lib/plans/service";
 import {
   currentDay,
   greeting,
@@ -58,6 +60,7 @@ export default function TripHomeScreen() {
   const inbox = useInbox();
   const { addOns, bookingId } = useTripAddOns(detail);
   const { moments, toggle: toggleMoment } = useMoments(detail?.trip.id ?? null);
+  const plans = useMyPlans(detail?.trip.id ?? null);
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 60_000);
@@ -120,6 +123,9 @@ export default function TripHomeScreen() {
       null)
     : (accommodations[0] ?? null);
   const todayMoments = momentsForToday(moments, now);
+  // The traveler's own plans for today, shown beside the itinerary rather than inside it:
+  // they are private, and the distinction is the point.
+  const todayPlans = plansForDate(plans.data ?? [], todayISO);
   const moreMoments = momentsNotShown(moments, now);
 
   return (
@@ -275,6 +281,41 @@ export default function TripHomeScreen() {
               Nothing else is scheduled today.{" "}
               {day.destination ? `${day.destination.name} is yours.` : "The day is yours."}
             </Body>
+          </Card>
+        )}
+
+        {todayPlans.length > 0 && (
+          <Card>
+            <Eyebrow>Your own plans today</Eyebrow>
+            <Muted>Private to you — nobody else on the trip sees these.</Muted>
+            {todayPlans.map((p) => (
+              <View key={p.id} style={{ marginTop: Spacing.two }}>
+                <Text style={{ color: c.text, fontFamily: "Inter_500Medium" }}>
+                  {p.start_time ? `${p.start_time.slice(0, 5)} · ` : ""}
+                  {p.title}
+                </Text>
+                {p.location_name ? <Muted>{p.location_name}</Muted> : null}
+              </View>
+            ))}
+          </Card>
+        )}
+
+        {bookingId && (
+          <Card>
+            <Eyebrow>Ask anything</Eyebrow>
+            <H2>Where&rsquo;s good, right now?</H2>
+            <Body>
+              Dinner tonight, what&rsquo;s near you, what to do with a free morning. It knows your
+              route and what we recommend.
+            </Body>
+            <Button
+              title="Ask the assistant"
+              variant="secondary"
+              onPress={() => {
+                track("assistant_opened", {});
+                router.push(`/assistant?bookingId=${bookingId}`);
+              }}
+            />
           </Card>
         )}
 

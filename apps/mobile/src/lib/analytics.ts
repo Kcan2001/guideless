@@ -32,6 +32,8 @@ export type ProductEvent =
   | "avatar_set" // props: where it was set, never the image or its URL
   | "review_submitted" // props: rating and whether a photo came with it, never the words
   | "survey_submitted" // props: which survey and how many scores, never the words
+  | "assistant_asked" // props: how many actions it took, never the question or the answer
+  | "assistant_opened"
   | "trip_photo_added"
   | "app_opened";
 

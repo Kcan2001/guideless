@@ -81,7 +81,9 @@ export default function ChatRoomScreen() {
   const readOnly = room.data?.type === "announcements";
 
   function onLongPress(m: Message) {
-    if (!user || m.sender_id === user.id) return;
+    // A system post has no sender: there is nobody to report and nobody to block.
+    if (!user || m.is_system || !m.sender_id || m.sender_id === user.id) return;
+    const senderId = m.sender_id;
     Alert.alert("This message", undefined, [
       {
         text: "Report",
@@ -96,7 +98,7 @@ export default function ChatRoomScreen() {
         style: "destructive",
         onPress: () =>
           chatService
-            .block(user.id, m.sender_id)
+            .block(user.id, senderId)
             .then(() => qc.invalidateQueries({ queryKey: ["messages", roomId] })),
       },
       { text: "Cancel", style: "cancel" },
@@ -131,7 +133,7 @@ export default function ChatRoomScreen() {
               />
             }
             renderItem={({ item: m }) => {
-              const mine = m.sender_id === user?.id;
+              const mine = !m.is_system && m.sender_id === user?.id;
               return (
                 <Pressable
                   onLongPress={() => onLongPress(m)}
@@ -146,6 +148,11 @@ export default function ChatRoomScreen() {
                       },
                     ]}
                   >
+                    {m.is_system && (
+                      <Text style={[styles.meta, { color: c.accent, marginBottom: 2 }]}>
+                        Guideless
+                      </Text>
+                    )}
                     <Text style={[styles.body, { color: mine ? c.primaryText : c.text }]}>
                       {m.body}
                     </Text>
