@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { AddOnKind, Currency } from "@guideless/types";
+import { attributeViatorUrl } from "@/lib/experiences/attribution";
 import { getExperienceSupplier } from "@/lib/experiences";
 import type { ExperienceOption, ExperienceProduct } from "@/lib/experiences/types";
 import { createClient } from "@/lib/supabase/server";
@@ -126,6 +127,15 @@ export async function fetchAndCacheOptions(
   return options;
 }
 
+/** Whose name goes on the card. A bought-in experience says who actually runs it. */
+const OPERATOR_NAMES: Record<string, string> = { viator: "Viator", mock: "Viator" };
+
+/** The terms that actually govern the traveler's ticket, linked wherever the operator is named. */
+const SUPPLIER_TERMS: Record<string, string> = {
+  viator: "https://www.viator.com/support/termsAndConditions",
+  mock: "https://www.viator.com/support/termsAndConditions",
+};
+
 export interface ImportResult {
   addOnId: string;
   title: string;
@@ -161,7 +171,9 @@ export async function importOptionAsAddOn(input: {
   const [{ data: product }, { data: rate }] = await Promise.all([
     sb
       .from("experience_products")
-      .select("id, supplier, title, description, address, latitude, longitude, duration_minutes")
+      .select(
+        "id, supplier, title, description, address, latitude, longitude, duration_minutes, product_url",
+      )
       .eq("id", input.productId)
       .maybeSingle(),
     sb
@@ -203,6 +215,15 @@ export async function importOptionAsAddOn(input: {
       longitude: product.longitude,
       // In the trip, not the shop: Explore and the assistant, never the public tour page.
       in_trip_only: true,
+      // Said out loud, on purpose. We are not pretending a bought-in ticket is one of ours, and the
+      // traveler needs the operator's terms because those are the terms that govern their ticket.
+      operated_by: OPERATOR_NAMES[product.supplier] ?? null,
+      supplier_terms_url: SUPPLIER_TERMS[product.supplier] ?? null,
+      // Offered next to "add it to your trip", not instead of it: anyone who would rather book it
+      // themselves can, and the attribution means that referral still counts.
+      supplier_booking_url: product.product_url
+        ? attributeViatorUrl(product.product_url, { campaign: "guideless-extras" })
+        : null,
       // Off until a person has read it. An imported description is the supplier's marketing copy.
       is_active: false,
     })

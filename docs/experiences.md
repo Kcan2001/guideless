@@ -100,6 +100,45 @@ belong. `listDepartureExtras(id)` is the shop and excludes them; `listDepartureE
 includeInTripOnly: true })` is the trip and includes them, which is what the post-booking page and
 the app use.
 
+## How a bought-in experience is actually sold (migration 0067)
+
+Decided 2026-09-09. The traveler checks out **normally** — our site, our Stripe, one cart with
+everything else, no separate flow and nothing to explain at the point of payment. We are the
+merchant of record. **Afterwards** we buy the experience from the operator on their behalf.
+
+That splits paying from being booked, and the gap is the whole risk:
+
+- Confirming a bought-in `booking_add_ons` row fires a trigger that creates a **pending
+  `add_on_fulfilments` row**. It hangs off the status change rather than off the Stripe webhook, so
+  there is no route to "paid" that skips creating the obligation.
+- `/admin/fulfilment` ("To book") is the queue, sorted by the date the traveler needs the thing.
+  Ops buys it, pastes the reference, and the traveler sees it immediately.
+- `fail_fulfilment` exists because sometimes we will not be able to buy it. It demands a reason and
+  the admin copy says out loud that somebody has paid for something they are not getting and must
+  be refunded. A silent failure here is money we kept for nothing.
+
+**The traveler is told whose experience it is.** `departure_add_ons.operated_by` is public and
+carries a name, not a flag — "Operated by Viator", their terms linked, and their own page offered
+via `supplier_booking_url` for anyone who would rather book direct. That link carries our partner
+attribution, so a referral still counts (`lib/experiences/attribution.ts`, tested — an unattributed
+link earns nothing and looks identical to one that works).
+
+**`add_on_fulfilments` holds no money.** It is the one supplier-side table a traveler can read, and
+row-level security is per row rather than per column, so the only safe design is for there to be
+nothing in it they should not see. What we paid stays in `add_on_sourcing`.
+
+Cancellation follows the **operator's** ladder, not the trip's, and the terms are copied onto the
+fulfilment when it is booked so they cannot change under the traveler afterwards — the same
+reasoning as the frozen review byline.
+
+### The licence question
+
+The affiliate licence accepted for the API key says the content "can only be used to drive affiliate
+traffic to Viator.com." Selling on our own site and fulfilling separately is a normal travel-agent
+arrangement, but it is probably not what that licence describes — that is likely what their Merchant
+agreement is for. We also link out to them, which is genuine affiliate traffic. **Confirm the right
+agreement with Viator before this is live.** The code is identical either way.
+
 ## Recheck before charge
 
 `verifySourcedAddOns` runs in `startAddOnPurchase`, before Stripe. Only sourced add-ons are checked;

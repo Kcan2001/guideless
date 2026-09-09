@@ -9,6 +9,7 @@ import { CancelBooking } from "@/components/account/cancel-booking";
 import { OnboardingChecklist } from "@/components/account/onboarding-checklist";
 import { GroupCodeCard } from "@/components/account/group-code-card";
 import { ReferralCard } from "@/components/account/referral-card";
+import { BookedExperiences } from "@/components/account/booked-experiences";
 import { ReviewForm } from "@/components/reviews/review-form";
 import { TravelerDetails } from "@/components/account/traveler-details";
 import { previewRefund } from "@/lib/bookings/cancellations";
@@ -19,6 +20,7 @@ import {
 } from "@/lib/bookings/self-service-data";
 import { getMyReferral, listMyBookingAddOns, type BookingAddOn } from "@/lib/data/add-on-purchases";
 import { listMyReviews, listReviewableBookings } from "@/lib/reviews/queries";
+import { listMyFulfilments } from "@/lib/experiences/fulfilments";
 import { listOpenSurveys } from "@/lib/surveys/queries";
 import { signOut } from "@/lib/auth/actions";
 import { Badge } from "@/components/ui/badge";
@@ -100,6 +102,9 @@ export default async function AccountPage(props: PageProps<"/account">) {
     listMyCancellationRequests(bookingIds),
     listRefundableAddOns(bookingIds),
   ]);
+  // Experiences we bought in on their behalf. Shown with the operator named, because a traveler who
+  // finds out on the day that this is somebody else's ticket has been mildly misled.
+  const fulfilments = await listMyFulfilments(bookingIds);
   const { data: leads } = travelerIds.length
     ? await supabase
         .from("booking_travelers")
@@ -332,6 +337,8 @@ export default async function AccountPage(props: PageProps<"/account">) {
               </ul>
             </section>
           )}
+
+          <BookedExperiences fulfilments={fulfilments} />
 
           {surveys.length > 0 && (
             <section className="mt-12" id="surveys">

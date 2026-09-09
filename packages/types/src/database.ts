@@ -265,6 +265,108 @@ export type Database = {
           },
         ];
       };
+      add_on_fulfilments: {
+        Row: {
+          add_on_id: string;
+          booked_at: string | null;
+          booked_by: string | null;
+          booking_add_on_id: string;
+          booking_id: string;
+          cancellation_terms: Json;
+          created_at: string;
+          failure_reason: string | null;
+          id: string;
+          instructions: string | null;
+          status: Database["public"]["Enums"]["fulfilment_status"];
+          supplier: Database["public"]["Enums"]["experience_supplier"];
+          supplier_booking_id: string | null;
+          supplier_option_id: string;
+          supplier_reference: string | null;
+          travel_date: string;
+          travelers: number;
+          updated_at: string;
+          voucher_url: string | null;
+        };
+        Insert: {
+          add_on_id: string;
+          booked_at?: string | null;
+          booked_by?: string | null;
+          booking_add_on_id: string;
+          booking_id: string;
+          cancellation_terms?: Json;
+          created_at?: string;
+          failure_reason?: string | null;
+          id?: string;
+          instructions?: string | null;
+          status?: Database["public"]["Enums"]["fulfilment_status"];
+          supplier: Database["public"]["Enums"]["experience_supplier"];
+          supplier_booking_id?: string | null;
+          supplier_option_id: string;
+          supplier_reference?: string | null;
+          travel_date: string;
+          travelers?: number;
+          updated_at?: string;
+          voucher_url?: string | null;
+        };
+        Update: {
+          add_on_id?: string;
+          booked_at?: string | null;
+          booked_by?: string | null;
+          booking_add_on_id?: string;
+          booking_id?: string;
+          cancellation_terms?: Json;
+          created_at?: string;
+          failure_reason?: string | null;
+          id?: string;
+          instructions?: string | null;
+          status?: Database["public"]["Enums"]["fulfilment_status"];
+          supplier?: Database["public"]["Enums"]["experience_supplier"];
+          supplier_booking_id?: string | null;
+          supplier_option_id?: string;
+          supplier_reference?: string | null;
+          travel_date?: string;
+          travelers?: number;
+          updated_at?: string;
+          voucher_url?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "add_on_fulfilments_add_on_id_fkey";
+            columns: ["add_on_id"];
+            isOneToOne: false;
+            referencedRelation: "add_on_availability";
+            referencedColumns: ["add_on_id"];
+          },
+          {
+            foreignKeyName: "add_on_fulfilments_add_on_id_fkey";
+            columns: ["add_on_id"];
+            isOneToOne: false;
+            referencedRelation: "departure_add_ons";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "add_on_fulfilments_booking_add_on_id_fkey";
+            columns: ["booking_add_on_id"];
+            isOneToOne: true;
+            referencedRelation: "booking_add_ons";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "add_on_fulfilments_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "add_on_fulfilments_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings_public";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       add_on_sourcing: {
         Row: {
           add_on_id: string;
@@ -1436,11 +1538,14 @@ export type Database = {
           longitude: number | null;
           meeting_point: string | null;
           min_age: number | null;
+          operated_by: string | null;
           position: number;
           price_amount: number;
           pricing_basis: string;
           start_time: string | null;
+          supplier_booking_url: string | null;
           supplier_service_id: string | null;
+          supplier_terms_url: string | null;
           tier: Database["public"]["Enums"]["option_tier"] | null;
           tier_group: string | null;
           title: string;
@@ -1473,11 +1578,14 @@ export type Database = {
           longitude?: number | null;
           meeting_point?: string | null;
           min_age?: number | null;
+          operated_by?: string | null;
           position?: number;
           price_amount: number;
           pricing_basis?: string;
           start_time?: string | null;
+          supplier_booking_url?: string | null;
           supplier_service_id?: string | null;
+          supplier_terms_url?: string | null;
           tier?: Database["public"]["Enums"]["option_tier"] | null;
           tier_group?: string | null;
           title: string;
@@ -1510,11 +1618,14 @@ export type Database = {
           longitude?: number | null;
           meeting_point?: string | null;
           min_age?: number | null;
+          operated_by?: string | null;
           position?: number;
           price_amount?: number;
           pricing_basis?: string;
           start_time?: string | null;
+          supplier_booking_url?: string | null;
           supplier_service_id?: string | null;
+          supplier_terms_url?: string | null;
           tier?: Database["public"]["Enums"]["option_tier"] | null;
           tier_group?: string | null;
           title?: string;
@@ -2223,6 +2334,7 @@ export type Database = {
           image_url: string | null;
           latitude: number | null;
           longitude: number | null;
+          product_url: string | null;
           rating: number | null;
           rating_count: number | null;
           raw: Json | null;
@@ -2243,6 +2355,7 @@ export type Database = {
           image_url?: string | null;
           latitude?: number | null;
           longitude?: number | null;
+          product_url?: string | null;
           rating?: number | null;
           rating_count?: number | null;
           raw?: Json | null;
@@ -2263,6 +2376,7 @@ export type Database = {
           image_url?: string | null;
           latitude?: number | null;
           longitude?: number | null;
+          product_url?: string | null;
           rating?: number | null;
           rating_count?: number | null;
           raw?: Json | null;
@@ -6110,6 +6224,39 @@ export type Database = {
           },
         ];
       };
+      fulfilment_queue: {
+        Row: {
+          booking_id: string | null;
+          confirmation_number: string | null;
+          created_at: string | null;
+          days_until: number | null;
+          id: string | null;
+          operated_by: string | null;
+          status: Database["public"]["Enums"]["fulfilment_status"] | null;
+          supplier: Database["public"]["Enums"]["experience_supplier"] | null;
+          supplier_option_id: string | null;
+          title: string | null;
+          tour_name: string | null;
+          travel_date: string | null;
+          travelers: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "add_on_fulfilments_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "add_on_fulfilments_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings_public";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       hotels_public: {
         Row: {
           address: string | null;
@@ -6528,6 +6675,36 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      fail_fulfilment: {
+        Args: { p_fulfilment_id: string; p_reason: string };
+        Returns: {
+          add_on_id: string;
+          booked_at: string | null;
+          booked_by: string | null;
+          booking_add_on_id: string;
+          booking_id: string;
+          cancellation_terms: Json;
+          created_at: string;
+          failure_reason: string | null;
+          id: string;
+          instructions: string | null;
+          status: Database["public"]["Enums"]["fulfilment_status"];
+          supplier: Database["public"]["Enums"]["experience_supplier"];
+          supplier_booking_id: string | null;
+          supplier_option_id: string;
+          supplier_reference: string | null;
+          travel_date: string;
+          travelers: number;
+          updated_at: string;
+          voucher_url: string | null;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "add_on_fulfilments";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       format_money: {
         Args: { p_amount: number; p_currency: string };
         Returns: string;
@@ -6652,6 +6829,43 @@ export type Database = {
           p_stay_option_id?: string;
         };
         Returns: Json;
+      };
+      record_fulfilment: {
+        Args: {
+          p_cancellation_terms?: Json;
+          p_fulfilment_id: string;
+          p_instructions?: string;
+          p_reference: string;
+          p_supplier_booking_id?: string;
+          p_voucher_url?: string;
+        };
+        Returns: {
+          add_on_id: string;
+          booked_at: string | null;
+          booked_by: string | null;
+          booking_add_on_id: string;
+          booking_id: string;
+          cancellation_terms: Json;
+          created_at: string;
+          failure_reason: string | null;
+          id: string;
+          instructions: string | null;
+          status: Database["public"]["Enums"]["fulfilment_status"];
+          supplier: Database["public"]["Enums"]["experience_supplier"];
+          supplier_booking_id: string | null;
+          supplier_option_id: string;
+          supplier_reference: string | null;
+          travel_date: string;
+          travelers: number;
+          updated_at: string;
+          voucher_url: string | null;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "add_on_fulfilments";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
       };
       referral_progress: { Args: { p_currency?: string }; Returns: Json };
       refund_percentage_for: {
@@ -6966,6 +7180,7 @@ export type Database = {
         | "completed"
         | "cancelled";
       experience_supplier: "mock" | "viator";
+      fulfilment_status: "pending" | "booked" | "failed" | "cancelled";
       hotel_booking_status: "quoted" | "booked" | "confirmed" | "cancelled" | "failed";
       hotel_payment_type: "pay_now" | "pay_at_property";
       hotel_supplier: "duffel" | "expedia" | "hotelbeds" | "manual" | "liteapi";
@@ -7220,6 +7435,7 @@ export const Constants = {
         "cancelled",
       ],
       experience_supplier: ["mock", "viator"],
+      fulfilment_status: ["pending", "booked", "failed", "cancelled"],
       hotel_booking_status: ["quoted", "booked", "confirmed", "cancelled", "failed"],
       hotel_payment_type: ["pay_now", "pay_at_property"],
       hotel_supplier: ["duffel", "expedia", "hotelbeds", "manual", "liteapi"],

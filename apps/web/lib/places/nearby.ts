@@ -4,7 +4,7 @@ import type { RecommendationCategory } from "@guideless/types";
 import { placeSearchSchema } from "@guideless/validation";
 import { distanceMeters } from "@/lib/places/mock";
 import { getPlacesProvider } from "@/lib/places";
-import { rankNearby, type NearbyPlace, type NearbySource } from "@/lib/places/ranking";
+import { rankNearby, type NearbyPlace } from "@/lib/places/ranking";
 import type { Place } from "@/lib/places/types";
 import { createClient } from "@/lib/supabase/server";
 

@@ -1,4 +1,4 @@
--- pgTAP tests for migrations 0065 and 0066: sourcing extras from a supplier.
+-- pgTAP tests for migrations 0065-0067: sourcing extras, and fulfilling them afterwards.
 --
 -- The rule this file exists to enforce is rule 11: never expose supplier costs to customers. The
 -- extras list on a tour page is readable by **anon**, so the whole design rests on none of the
@@ -6,7 +6,7 @@
 -- `departure_add_ons` for convenience, these tests are what should stop them.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(21);
+select plan(29);
 
 create schema if not exists tests;
 grant usage on schema tests to anon, authenticated;
@@ -149,6 +149,57 @@ select tests.authenticate_as('a9000000-0000-4000-8000-0000000000a1');
 select throws_ok(
   $$ select public.suggest_experience_price('a9000000-0000-4000-8000-0000000000f1', 6500::bigint) $$,
   '42501', null, 'a traveler cannot ask what we would charge for a given cost');
+
+-- ── Paid means owed (0067) ───────────────────────────────────────────────────
+-- We take the money first and buy the experience afterwards. That gap is only acceptable if it is
+-- impossible to forget, so the debt is created by the row becoming confirmed, not by the webhook.
+select tests.clear_auth();
+insert into public.bookings (id, confirmation_number, departure_id, tour_version_id, customer_id,
+                             status, payment_status, currency, subtotal_amount, total_amount, deposit_amount)
+values ('a9000000-0000-4000-8000-0000000000c1', 'GL-FULFIL1', '30000000-0000-4000-8000-000000000001',
+        '21000000-0000-4000-8000-000000000001', 'a9000000-0000-4000-8000-0000000000a1',
+        'confirmed', 'paid', 'EUR', 100000, 100000, 20000);
+
+select is((select count(*)::int from public.add_on_fulfilments), 0, 'nothing owed to begin with');
+
+-- A pending add-on is not yet paid for, so it owes nothing.
+insert into public.booking_add_ons (id, booking_id, add_on_id, quantity, unit_amount, total_amount, currency, status)
+values ('a9000000-0000-4000-8000-0000000000c2', 'a9000000-0000-4000-8000-0000000000c1',
+        'a9000000-0000-4000-8000-0000000000d1', 2, 9500, 19000, 'EUR', 'pending');
+select is((state.count)::int, 0, 'an unpaid add-on creates no obligation')
+from (select count(*) as count from public.add_on_fulfilments) state;
+
+-- Confirming it is what creates the debt.
+update public.booking_add_ons set status = 'confirmed'
+where id = 'a9000000-0000-4000-8000-0000000000c2';
+select is((select count(*)::int from public.add_on_fulfilments), 1,
+  'paying for a bought-in add-on puts it in the queue to be booked');
+select is((select status::text from public.add_on_fulfilments
+           where booking_add_on_id = 'a9000000-0000-4000-8000-0000000000c2'), 'pending',
+  'and it starts as something somebody still has to do');
+select is((select travelers from public.add_on_fulfilments
+           where booking_add_on_id = 'a9000000-0000-4000-8000-0000000000c2'), 2,
+  'for the number of people who were paid for');
+
+-- An add-on we run ourselves has no supplier and must not enter the queue.
+insert into public.departure_add_ons
+  (id, departure_id, title, kind, price_amount, currency, pricing_basis, is_active)
+values ('a9000000-0000-4000-8000-0000000000d3', '30000000-0000-4000-8000-000000000001',
+        'Welcome drinks, ours', 'activity', 0, 'EUR', 'per_booking', true);
+insert into public.booking_add_ons (booking_id, add_on_id, quantity, unit_amount, total_amount, currency, status)
+values ('a9000000-0000-4000-8000-0000000000c1', 'a9000000-0000-4000-8000-0000000000d3',
+        1, 0, 0, 'EUR', 'confirmed');
+select is((select count(*)::int from public.add_on_fulfilments), 1,
+  'something we run ourselves has nothing to fulfil and is not queued');
+
+-- ── Who sees it ──────────────────────────────────────────────────────────────
+-- Unlike every other supplier table here, the traveler reads this one — which is exactly why it
+-- holds no money.
+select tests.authenticate_as('a9000000-0000-4000-8000-0000000000a1');
+select is((select count(*)::int from public.add_on_fulfilments), 1,
+  'the traveler can see the experience we are booking for them');
+select hasnt_column('public', 'add_on_fulfilments', 'net_amount',
+  'and there is nothing in that row about what it cost us');
 
 select tests.clear_auth();
 select * from finish();
