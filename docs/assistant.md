@@ -70,7 +70,7 @@ is deliberate: the assistant is only useful if people ask it blunt things.
 
 ## The morning group post
 
-An hourly cron (`/api/cron/group-activities`) posts the day's free activities into each trip's group
+An hourly cron (`/api/cron/hourly`) posts the day's free activities into each trip's group
 room, once, in that trip's own morning (07:00–10:00 local). Hourly rather than daily because trips
 are in different zones and one daily run would land at 3am for somebody.
 
@@ -89,6 +89,43 @@ weights are crude and visible on purpose: when a suggestion is wrong, the functi
 
 Chat messages are **not** read for this. `traveler_pace()` reads the pre-trip survey's pace answer
 and changes how _much_ the assistant suggests, not what.
+
+## Location: two different things
+
+Worth separating, because they are easy to conflate and only one of them stores anything.
+
+**"What's good near me"** (`GET /api/places/nearby`, mobile `app/nearby.tsx`). The position is a
+query parameter, used to rank one list, and never written down. Our curated recommendations and the
+live lookup are merged and **labelled** — "Our pick" versus "Live search" — because a traveler who
+follows a bad suggestion should be able to tell whose fault it was. Ranking is pure and tested in
+`lib/places/ranking.ts`: closeness dominates, closed sinks, unknown hours are neutral rather than
+treated as closed, our own pick wins a tie, and taste only ever reorders — it never removes
+anything, because that is how a recommender narrows into a rut.
+
+**Sharing with the group** (`trip_locations`, migration 0063, mobile map). A different promise
+entirely, and the table is mostly a set of them:
+
+- **Opt-in.** A row exists only because somebody turned it on. No default, no backfill.
+- **Going dark is deletion.** Stopping deletes the row; "I turned it off" and "you cannot see where
+  I was" are the same statement.
+- **It lapses.** `sharing_until` is required and clamped to `location_sharing_max()` (12 h) by a
+  trigger, so a client bug cannot make somebody share for a year.
+- **It goes stale.** RLS hides a position older than `location_freshness()` (15 min); the hourly
+  cron deletes it. The trigger stamps `updated_at` on every write, so it cannot be backdated.
+- **Blocking wins, both ways.** Via `blocked_between()`, which **must** be `security definer`:
+  `user_blocks` has its own RLS and a caller can only read blocks they created, so inlining that
+  query would let somebody who blocked you carry on watching you. A pgTAP test caught exactly that.
+- **Staff cannot see it.** There is no staff policy. An ops screen showing where every traveler is
+  standing is a surveillance product. If duty of care ever needs an exception it should be
+  deliberate, narrow and logged — not a policy somebody adds because it is convenient.
+
+Every one of those corresponds to a sentence in the privacy policy, and every one has an assertion
+in `supabase/tests/trip_locations.test.sql`. A promise in a policy document that nothing enforces
+is not a promise.
+
+Foreground only: `expo-location` is configured with background explicitly disabled on both
+platforms, and the permission strings in `app.config.ts` are the whole story a traveler reads
+before deciding.
 
 ## Working on it locally
 

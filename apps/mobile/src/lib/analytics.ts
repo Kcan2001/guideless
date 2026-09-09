@@ -34,6 +34,9 @@ export type ProductEvent =
   | "survey_submitted" // props: which survey and how many scores, never the words
   | "assistant_asked" // props: how many actions it took, never the question or the answer
   | "assistant_opened"
+  | "nearby_viewed" // props: how many results, never where they were standing
+  | "location_sharing_started" // props: chosen duration in hours, never a coordinate
+  | "location_sharing_stopped"
   | "trip_photo_added"
   | "app_opened";
 

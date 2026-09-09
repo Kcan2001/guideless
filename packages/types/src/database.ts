@@ -5198,6 +5198,44 @@ export type Database = {
           },
         ];
       };
+      trip_locations: {
+        Row: {
+          accuracy_meters: number | null;
+          latitude: number;
+          longitude: number;
+          sharing_until: string;
+          trip_id: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          accuracy_meters?: number | null;
+          latitude: number;
+          longitude: number;
+          sharing_until: string;
+          trip_id: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          accuracy_meters?: number | null;
+          latitude?: number;
+          longitude?: number;
+          sharing_until?: string;
+          trip_id?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "trip_locations_trip_id_fkey";
+            columns: ["trip_id"];
+            isOneToOne: false;
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       trip_members: {
         Row: {
           booking_id: string | null;
@@ -6335,6 +6373,8 @@ export type Database = {
         };
         Returns: string;
       };
+      location_freshness: { Args: never; Returns: string };
+      location_sharing_max: { Args: never; Returns: string };
       log_audit: {
         Args: {
           p_action: Database["public"]["Enums"]["audit_action"];
@@ -6385,6 +6425,7 @@ export type Database = {
         }[];
       };
       purge_stale_builder_drafts: { Args: never; Returns: number };
+      purge_stale_trip_locations: { Args: never; Returns: number };
       quote_booking: {
         Args: {
           p_add_ons?: Json;

@@ -33,6 +33,20 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     },
     plugins: [
       ...(config.plugins ?? []),
+      // Foreground location only. The strings are the entire permission story a traveler reads
+      // before deciding, so they say what it is for and what it is not — no background tracking,
+      // and sharing with the group is a separate opt-in inside the app.
+      [
+        "expo-location",
+        {
+          locationAlwaysAndWhenInUsePermission:
+            "Guideless uses your location while the app is open to show what is near you and how far your next stop is.",
+          locationWhenInUsePermission:
+            "Guideless uses your location while the app is open to show what is near you and how far your next stop is.",
+          isIosBackgroundLocationEnabled: false,
+          isAndroidBackgroundLocationEnabled: false,
+        },
+      ],
       ...(firebase
         ? [
             "@react-native-firebase/app",

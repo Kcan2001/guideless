@@ -10,6 +10,8 @@ import { EmptyState, Eyebrow, H1, Muted } from "@/components/ui";
 import { Radius, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { useTripAddOns } from "@/hooks/use-add-ons";
+import { useLocationSharing } from "@/hooks/use-location-sharing";
+import { LocationSharing } from "@/components/location-sharing";
 import { useCurrentTrip } from "@/hooks/use-trip";
 import { track } from "@/lib/analytics";
 import { useSession } from "@/lib/auth/session";
@@ -35,6 +37,7 @@ export default function MapScreen() {
   const mapRef = useRef<MapView>(null);
   const today = detail ? currentDay(detail.days, new Date()) : null;
   const [dayFilter, setDayFilter] = useState<"all" | string>(() => today?.date ?? "all");
+  const sharing = useLocationSharing(detail?.trip.id ?? null, user?.id ?? null);
 
   const destinationId = today?.destination?.id ?? detail?.destinations[0]?.id ?? null;
   const recommendations = useQuery({
@@ -138,6 +141,20 @@ export default function MapScreen() {
         ))}
       </ScrollView>
 
+      <View style={{ paddingHorizontal: Spacing.three, gap: Spacing.two }}>
+        <LocationSharing sharing={sharing} count={sharing.others.length} />
+        <Pressable
+          onPress={() => router.push("/nearby")}
+          accessibilityRole="button"
+          style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingBottom: Spacing.two }}
+        >
+          <Ionicons name="compass-outline" size={18} color={c.link} />
+          <Text style={{ color: c.link, fontFamily: "Inter_500Medium" }}>
+            What&rsquo;s good near me right now
+          </Text>
+        </Pressable>
+      </View>
+
       {region ? (
         <View style={{ flex: 1 }}>
           <MapView
@@ -176,6 +193,16 @@ export default function MapScreen() {
                   </View>
                 </Callout>
               </Marker>
+            ))}
+            {sharing.others.map((m) => (
+              <Marker
+                key={`member-${m.user_id}`}
+                coordinate={{ latitude: m.latitude, longitude: m.longitude }}
+                pinColor="#17B1DF"
+                title={memberName(detail, m.user_id)}
+                description={`Sharing · ${minutesAgo(m.updated_at)}`}
+                accessibilityLabel={`${memberName(detail, m.user_id)} is here`}
+              />
             ))}
           </MapView>
           <View
@@ -316,3 +343,20 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
   },
 });
+
+/** A first name from the trip's members, or a neutral label — never a bare user id on a map. */
+function memberName(
+  detail: { members: { user_id: string; profile: { display_name: string } | null }[] } | null,
+  userId: string,
+): string {
+  const member = detail?.members.find((m) => m.user_id === userId);
+  const name = member?.profile?.display_name?.trim();
+  return name && name.length > 0 ? name : "Someone in your group";
+}
+
+/** How old a position is, because a dot with no age is a claim about the present. */
+function minutesAgo(iso: string): string {
+  const minutes = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+  if (minutes < 1) return "just now";
+  return minutes === 1 ? "1 minute ago" : `${minutes} minutes ago`;
+}

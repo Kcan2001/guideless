@@ -12,7 +12,7 @@
       "schedule": "15 4 * * *"
     },
     {
-      "path": "/api/cron/group-activities",
+      "path": "/api/cron/hourly",
       "schedule": "20 * * * *"
     }
   ]

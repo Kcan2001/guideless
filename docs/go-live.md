@@ -326,6 +326,31 @@ resolve. Keep Squarespace as the registrar and DNS host; nothing needs to transf
 9. Set `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` in Vercel, redeploy, verify the property in Search
    Console and submit `https://guidelesstravel.com/sitemap.xml` (checklist in docs/growth.md).
 
+## 4b. Waiting on Kyle: keys the assistant needs (added 2026-09-09)
+
+Neither of these blocks a deploy. The trip assistant ships switched **off** and everything around it
+works without them; the catch is that "off" and "broken" look similar to a traveler who was not
+told, so the page says plainly that it is not switched on yet. See docs/assistant.md.
+
+1. **`ANTHROPIC_API_KEY`** → Vercel, Production and Preview, server-side (never `NEXT_PUBLIC_`).
+   Until it is set, `/account/assistant/[bookingId]` and the app's assistant screen say the
+   assistant is not switched on. Personal plans, the calendar merge and the morning group post are
+   independent of it and already work. `/admin/assistant` shows a banner saying the same.
+   Optional alongside it: `ASSISTANT_MODEL` (defaults to `claude-opus-5`).
+
+2. **`GOOGLE_PLACES_KEY`** → Vercel, server-side, plus **billing enabled on the Google Cloud
+   project** (Places API New). Then set `PLACES_PROVIDER=google`. Until then it runs on the mock
+   provider: real coordinates in Nice, Monaco, Avignon and Paris with opening hours evaluated in
+   local time, and every result carries `source: "mock"` so it is labelled rather than passed off
+   as a live lookup. A missing key with `PLACES_PROVIDER=google` falls back to the mock and logs a
+   warning rather than failing silently.
+   The same Cloud billing account is what unblocks the Android Maps key and the Map-tab screenshot
+   (docs/mobile.md), so it is worth doing once for both.
+
+Cost note before switching either on: the assistant is capped at `ai_daily_limit()` = 40 messages
+per traveler per day, enforced in the database before any billable call, and `/admin/assistant`
+shows spend per booking and who hit the cap.
+
 ## 5. What is intentionally not automated yet
 
 - Mobile builds in CI: an `EXPO_TOKEN` (personal access token) already exists; adding it as a GitHub
