@@ -1425,6 +1425,7 @@ export type Database = {
           excludes: string[];
           id: string;
           image_urls: string[];
+          in_trip_only: boolean;
           includes: string[];
           is_active: boolean;
           is_featured: boolean;
@@ -1461,6 +1462,7 @@ export type Database = {
           excludes?: string[];
           id?: string;
           image_urls?: string[];
+          in_trip_only?: boolean;
           includes?: string[];
           is_active?: boolean;
           is_featured?: boolean;
@@ -1497,6 +1499,7 @@ export type Database = {
           excludes?: string[];
           id?: string;
           image_urls?: string[];
+          in_trip_only?: boolean;
           includes?: string[];
           is_active?: boolean;
           is_featured?: boolean;
@@ -6865,7 +6868,7 @@ export type Database = {
         Returns: string;
       };
       suggest_experience_price: {
-        Args: { p_net_amount: number; p_product_id: string };
+        Args: { p_product_id: string; p_retail_amount: number };
         Returns: number;
       };
       suggest_stay_price: {

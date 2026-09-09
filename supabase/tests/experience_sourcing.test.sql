@@ -1,4 +1,4 @@
--- pgTAP tests for migration 0065: sourcing extras from a supplier.
+-- pgTAP tests for migrations 0065 and 0066: sourcing extras from a supplier.
 --
 -- The rule this file exists to enforce is rule 11: never expose supplier costs to customers. The
 -- extras list on a tour page is readable by **anon**, so the whole design rests on none of the
@@ -6,7 +6,7 @@
 -- `departure_add_ons` for convenience, these tests are what should stop them.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(17);
+select plan(21);
 
 create schema if not exists tests;
 grant usage on schema tests to anon, authenticated;
@@ -97,17 +97,51 @@ select is((select net_amount from public.add_on_sourcing
            where add_on_id = 'a9000000-0000-4000-8000-0000000000d1'), 6500::bigint,
   'including what it cost, which is the point of the screen');
 
--- ── Pricing ──────────────────────────────────────────────────────────────────
+-- ── Where a sourced extra may appear (0066) ──────────────────────────────────
+-- The shop sells what we curated; the trip is where sourced activities live.
+select tests.clear_auth();
+insert into public.departure_add_ons
+  (id, departure_id, title, kind, price_amount, currency, pricing_basis, is_active, in_trip_only)
+values ('a9000000-0000-4000-8000-0000000000d2', '30000000-0000-4000-8000-000000000001',
+        'Sea kayak, sourced', 'activity', 4500, 'EUR', 'per_traveler', true, true);
+
+select tests.be_anon();
+select is((select count(*)::int from public.departure_add_ons
+           where departure_id = '30000000-0000-4000-8000-000000000001'
+             and is_active and not in_trip_only
+             and id in ('a9000000-0000-4000-8000-0000000000d1',
+                        'a9000000-0000-4000-8000-0000000000d2')), 1,
+  'the shop query returns the curated extra and not the sourced one');
+select is((select in_trip_only from public.departure_add_ons
+           where id = 'a9000000-0000-4000-8000-0000000000d2'), true,
+  'though the sourced one is still readable — it is shown in the trip, not hidden from the world');
+
+-- ── Pricing: match, do not mark up (0066) ────────────────────────────────────
+select tests.authenticate_as('a9000000-0000-4000-8000-0000000000a2');
+select is(public.suggest_experience_price('a9000000-0000-4000-8000-0000000000f1', 6500::bigint),
+  6500::bigint,
+  'with no rule the suggestion is the supplier''s own price — we match and take the commission');
+
 select tests.clear_auth();
 insert into public.pricing_rules (destination_id, applies_to, percentage_markup, min_markup_amount, priority, is_active)
-select p.destination_id, 'experience', 40, 1000, 10, true
+select p.destination_id, 'hotel', 40, 1000, 10, true
 from public.experience_products p where p.id = 'a9000000-0000-4000-8000-0000000000f1';
 
 select tests.authenticate_as('a9000000-0000-4000-8000-0000000000a2');
 select is(public.suggest_experience_price('a9000000-0000-4000-8000-0000000000f1', 6500::bigint),
-  9100::bigint, 'a 40% markup on 65.00 suggests 91.00');
+  6500::bigint,
+  'a markup somebody wrote for hotels does not quietly start marking up activities');
+
+select tests.clear_auth();
+insert into public.pricing_rules (destination_id, applies_to, percentage_markup, min_markup_amount, priority, is_active)
+select p.destination_id, 'experience', 40, 1000, 20, true
+from public.experience_products p where p.id = 'a9000000-0000-4000-8000-0000000000f1';
+
+select tests.authenticate_as('a9000000-0000-4000-8000-0000000000a2');
+select is(public.suggest_experience_price('a9000000-0000-4000-8000-0000000000f1', 6500::bigint),
+  9100::bigint, 'but a rule written for experiences is honoured, as a deliberate exception');
 select is(public.suggest_experience_price('a9000000-0000-4000-8000-0000000000f1', 1000::bigint),
-  2000::bigint, 'and the minimum markup floors a cheap one rather than earning us four euros');
+  2000::bigint, 'and its minimum markup still floors a cheap one');
 
 -- A cost is an argument to this function, so a traveler must not be able to call it and learn
 -- anything by feeding it numbers.

@@ -139,9 +139,12 @@ export interface ImportResult {
  * row, which anon can read and which contains nothing about where it came from, and the
  * `add_on_sourcing` row, which holds the supplier, the option id and what it costs us.
  *
- * The price is passed in rather than computed. `suggest_experience_price` offers a number and a
- * person accepts or overrides it, because a supplier's cost plus a markup rule is an input to that
- * decision and not the decision itself.
+ * The price is passed in rather than computed. `suggest_experience_price` offers the supplier's own
+ * public price — we match it and earn the partner commission, because a traveler can check the same
+ * activity in one search and finding it cheaper elsewhere is corrosive. A person still confirms.
+ *
+ * Imports land `in_trip_only`: sourced activities belong in Explore and the assistant, where the
+ * free time is, not in the pre-sale extras list next to the things we negotiated ourselves.
  */
 export async function importOptionAsAddOn(input: {
   departureId: string;
@@ -198,8 +201,9 @@ export async function importOptionAsAddOn(input: {
       location_name: product.address,
       latitude: product.latitude,
       longitude: product.longitude,
-      // Off until a person has read it. An imported description is the supplier's marketing copy,
-      // not ours, and it goes on a public page.
+      // In the trip, not the shop: Explore and the assistant, never the public tour page.
+      in_trip_only: true,
+      // Off until a person has read it. An imported description is the supplier's marketing copy.
       is_active: false,
     })
     .select("id, title, price_amount")

@@ -3,6 +3,32 @@
 Brief item 7: stop hand-building the extras catalog per departure. The same problem as hotels,
 solved the same way and reusing the same words — search, rates, recheck, book, cancel.
 
+## Decisions (2026-09-09)
+
+Four answers from Kyle shape this, and two of them changed the schema after it was written:
+
+1. **We resell** — our price, our checkout, in the app with the group. Needs Viator's
+   **Full + Booking** tier, which requires approval and certification.
+2. **Basic access first.** Viator's Basic tier needs no approval at all — product search plus
+   single-product pricing and availability, key in minutes. Enough to probe against and to write
+   `search`/`getOptions` from real responses while the booking tier is applied for.
+3. **In the trip, not the shop.** Sourced activities are `in_trip_only`: Explore and the assistant,
+   never the pre-sale tour page. A long tail of commodity tickets next to the yacht and the
+   grandstand would read like an OTA.
+4. **Match the supplier's public price**, earn the commission, do not mark up. A traveler can check
+   the same activity in one search, and finding it cheaper elsewhere is corrosive to the brand.
+
+## Alternatives considered
+
+- **Amadeus Tours and Activities** would have been ideal — one API aggregating ~45 platforms
+  including Viator, GetYourGuide, Klook and Musement. Its self-service portal was **decommissioned
+  on 17 July 2026** and existing keys deactivated. Only Enterprise customers retain access.
+- **GetYourGuide** is stronger in Europe, which matters for Nice, Monaco and Avignon, but its
+  partner API requires three-phase certification and a floor of 100,000 monthly website visits.
+  Worth revisiting if traffic ever clears that.
+- **Viator Basic** turned out to be the least gated option, not the most: no approval, no
+  certification, instant key. The barrier applies to booking on our own site, not to finding things.
+
 ## There is no Viator adapter yet, on purpose
 
 `EXPERIENCE_SUPPLIER=viator` is accepted by the config and falls back to the mock with a warning,
@@ -51,18 +77,28 @@ table later for convenience.
 table, because two tables of markup rules is how a company ends up with two different margins by
 accident. Existing rows default to `hotel`, which is what they were written for.
 
-`suggest_experience_price(product, net)` mirrors `suggest_stay_price`: highest-priority matching
-rule, percentage and fixed markups add, minimum markup floors the result, `null` when nobody has set
-a margin for that destination. It **suggests** — a person still types the number, and the import
-refuses a price below cost outright.
+`suggest_experience_price(product, retail)` **returns the supplier's own price by default**. We
+match it and take the partner commission; that is the decision, not an accident of the code.
+
+A markup happens only when somebody has written a pricing rule scoped to `experience`. Rules scoped
+to `hotel` are deliberately excluded, and so is `any` — a markup set for beds must not quietly start
+marking up activities. When a rule does apply it behaves like `suggest_stay_price`:
+highest-priority match, percentage and fixed markups add, minimum markup floors the result.
+
+The import still refuses a price below what the activity costs us.
 
 ## Import
 
 `/admin/experiences` (ops roles): search → price a date → import an option onto a departure.
 
 Two rows are written, and if the second fails the first is removed — an add-on with no sourcing row
-is one nobody can trace or recheck. **Imports land inactive**: the description is the supplier's
-marketing copy and it is about to sit on a public page, so somebody reads it before it goes live.
+is one nobody can trace or recheck.
+
+**Imports land inactive and `in_trip_only`.** Inactive because the description is the supplier's
+marketing copy and somebody should read it first; in-trip because that is where sourced activities
+belong. `listDepartureExtras(id)` is the shop and excludes them; `listDepartureExtras(id, {
+includeInTripOnly: true })` is the trip and includes them, which is what the post-booking page and
+the app use.
 
 ## Recheck before charge
 

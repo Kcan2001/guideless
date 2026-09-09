@@ -147,7 +147,7 @@ export default async function AdminExperiencesPage(props: PageProps<"/admin/expe
       {selected && travelDate && (
         <Section
           title={`Options for ${selected.title}`}
-          description={`What the supplier will sell us on ${formatDate(travelDate)}. Import one to create a hidden add-on you can then review and switch on.`}
+          description={`What the supplier sells on ${formatDate(travelDate)}. We match their public price and earn the commission rather than marking up — a traveler can check the same activity in one search. Imports land hidden and in-trip only: Explore and the assistant, never the tour page.`}
         >
           {(options ?? []).length === 0 ? (
             <p className="text-sm text-muted-foreground">
@@ -169,7 +169,7 @@ export default async function AdminExperiencesPage(props: PageProps<"/admin/expe
                     <p className="font-medium">{o.option_name}</p>
                     {!o.available && <Badge variant="danger">unavailable</Badge>}
                     <p className="text-sm text-muted-foreground">
-                      costs us {money(o.net_amount, o.currency)}
+                      public price {money(o.net_amount, o.currency)}
                       {o.capacity !== null ? ` · ${o.capacity} places` : ""}
                       {o.start_time ? ` · ${o.start_time.slice(0, 5)}` : ""}
                     </p>
@@ -188,7 +188,7 @@ export default async function AdminExperiencesPage(props: PageProps<"/admin/expe
                       </select>
                     </div>
                     <div>
-                      <label className={labelClass}>Sell at (per traveler)</label>
+                      <label className={labelClass}>Sell at (matches theirs)</label>
                       <input
                         name="price"
                         type="number"
@@ -221,10 +221,10 @@ export default async function AdminExperiencesPage(props: PageProps<"/admin/expe
 
       <Section
         title="What we have sourced"
-        description="Add-ons that came from a supplier, with what they cost us and how far that has moved since. Nothing reprices itself — a price a traveler is looking at should not change under them."
+        description="Add-ons that came from a supplier, and how far their price has moved since we set ours. Nothing reprices itself — a price a traveler is looking at should not change under them."
       >
         <Table
-          head={["Add-on", "Live", "Costs us", "We charge", "Margin", "Drift", "Checked"]}
+          head={["Add-on", "Live", "Their price", "We charge", "Difference", "Drift", "Checked"]}
           rows={(sourced ?? []).map((s) => {
             const addOn = (
               s as unknown as {

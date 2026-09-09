@@ -52,7 +52,18 @@ function addDays(iso: string, days: number): string {
  * Everything a departure offers beyond the base trip: stay tiers and add-ons with live
  * availability and head-counts. Public data (RLS: active rows for anyone); cached with the page.
  */
-export async function listDepartureExtras(departureId: string): Promise<DepartureExtras> {
+/**
+ * The extras for a departure.
+ *
+ * `includeInTripOnly` is the difference between the shop and the trip. Sourced activities are
+ * marked `in_trip_only` and are deliberately absent from the public tour page and the builder: a
+ * long tail of commodity tickets there would read like an OTA and would cheapen the four or five
+ * things somebody actually chose. Once a traveler has booked, they see everything.
+ */
+export async function listDepartureExtras(
+  departureId: string,
+  { includeInTripOnly = false }: { includeInTripOnly?: boolean } = {},
+): Promise<DepartureExtras> {
   const sb = createPublicClient();
   const [{ data: departure }, { data: stays, error: sErr }, { data: addOns, error: aErr }] =
     await Promise.all([
@@ -68,10 +79,14 @@ export async function listDepartureExtras(departureId: string): Promise<Departur
         .eq("departure_id", departureId)
         .eq("is_active", true)
         .order("position"),
-      sb
-        .from("departure_add_ons")
-        .select("*")
-        .eq("departure_id", departureId)
+      (includeInTripOnly
+        ? sb.from("departure_add_ons").select("*").eq("departure_id", departureId)
+        : sb
+            .from("departure_add_ons")
+            .select("*")
+            .eq("departure_id", departureId)
+            .eq("in_trip_only", false)
+      )
         .eq("is_active", true)
         .order("position"),
     ]);
