@@ -4706,6 +4706,68 @@ export type Database = {
         };
         Relationships: [];
       };
+      testimonials: {
+        Row: {
+          author_name: string;
+          consent_confirmed: boolean;
+          created_at: string;
+          created_by: string | null;
+          happened_in: number | null;
+          id: string;
+          image_url: string | null;
+          position: number;
+          published_at: string | null;
+          quote: string;
+          source_note: string | null;
+          status: Database["public"]["Enums"]["review_status"];
+          tour_id: string | null;
+          trip_label: string;
+          updated_at: string;
+        };
+        Insert: {
+          author_name: string;
+          consent_confirmed?: boolean;
+          created_at?: string;
+          created_by?: string | null;
+          happened_in?: number | null;
+          id?: string;
+          image_url?: string | null;
+          position?: number;
+          published_at?: string | null;
+          quote: string;
+          source_note?: string | null;
+          status?: Database["public"]["Enums"]["review_status"];
+          tour_id?: string | null;
+          trip_label: string;
+          updated_at?: string;
+        };
+        Update: {
+          author_name?: string;
+          consent_confirmed?: boolean;
+          created_at?: string;
+          created_by?: string | null;
+          happened_in?: number | null;
+          id?: string;
+          image_url?: string | null;
+          position?: number;
+          published_at?: string | null;
+          quote?: string;
+          source_note?: string | null;
+          status?: Database["public"]["Enums"]["review_status"];
+          tour_id?: string | null;
+          trip_label?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "testimonials_tour_id_fkey";
+            columns: ["tour_id"];
+            isOneToOne: false;
+            referencedRelation: "tours";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       tour_days: {
         Row: {
           day_number: number;
@@ -6438,6 +6500,50 @@ export type Database = {
           },
         ];
       };
+      reviews_public: {
+        Row: {
+          author_name: string | null;
+          body: string | null;
+          id: string | null;
+          published_at: string | null;
+          rating: number | null;
+          title: string | null;
+          tour_id: string | null;
+          trip_end_date: string | null;
+          would_repeat: boolean | null;
+        };
+        Insert: {
+          author_name?: string | null;
+          body?: string | null;
+          id?: string | null;
+          published_at?: string | null;
+          rating?: number | null;
+          title?: string | null;
+          tour_id?: string | null;
+          trip_end_date?: string | null;
+          would_repeat?: boolean | null;
+        };
+        Update: {
+          author_name?: string | null;
+          body?: string | null;
+          id?: string | null;
+          published_at?: string | null;
+          rating?: number | null;
+          title?: string | null;
+          tour_id?: string | null;
+          trip_end_date?: string | null;
+          would_repeat?: boolean | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "reviews_tour_id_fkey";
+            columns: ["tour_id"];
+            isOneToOne: false;
+            referencedRelation: "tours";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       stay_option_availability: {
         Row: {
           capacity: number | null;
@@ -6510,6 +6616,47 @@ export type Database = {
           },
         ];
       };
+      testimonials_public: {
+        Row: {
+          author_name: string | null;
+          id: string | null;
+          image_url: string | null;
+          position: number | null;
+          published_at: string | null;
+          quote: string | null;
+          tour_id: string | null;
+          trip_label: string | null;
+        };
+        Insert: {
+          author_name?: string | null;
+          id?: string | null;
+          image_url?: string | null;
+          position?: number | null;
+          published_at?: string | null;
+          quote?: string | null;
+          tour_id?: string | null;
+          trip_label?: string | null;
+        };
+        Update: {
+          author_name?: string | null;
+          id?: string | null;
+          image_url?: string | null;
+          position?: number | null;
+          published_at?: string | null;
+          quote?: string | null;
+          tour_id?: string | null;
+          trip_label?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "testimonials_tour_id_fkey";
+            columns: ["tour_id"];
+            isOneToOne: false;
+            referencedRelation: "tours";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       tour_review_stats: {
         Row: {
           average_rating: number | null;
@@ -6558,6 +6705,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "trip_surveys_tour_id_fkey";
+            columns: ["tour_id"];
+            isOneToOne: false;
+            referencedRelation: "tours";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      trip_photos_public: {
+        Row: {
+          author_name: string | null;
+          caption: string | null;
+          id: string | null;
+          published_at: string | null;
+          storage_path: string | null;
+          tour_id: string | null;
+        };
+        Insert: {
+          author_name?: string | null;
+          caption?: string | null;
+          id?: string | null;
+          published_at?: string | null;
+          storage_path?: string | null;
+          tour_id?: string | null;
+        };
+        Update: {
+          author_name?: string | null;
+          caption?: string | null;
+          id?: string | null;
+          published_at?: string | null;
+          storage_path?: string | null;
+          tour_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "trip_photos_tour_id_fkey";
             columns: ["tour_id"];
             isOneToOne: false;
             referencedRelation: "tours";

@@ -153,6 +153,46 @@ ask a blunt question without worrying how the answer would read on a tour page.
   beside them, then every response in full. Read-only: there is no moderation queue because
   nothing here is ever published.
 
+## Testimonials from earlier trips (migration 0069)
+
+Monaco weekends have been run before, just not under this company name. That is the strongest
+credibility Guideless has, and none of it can go through `reviews`.
+
+- **Why not reviews.** `submit_review()` requires a completed Guideless booking, deliberately, and
+  published rows feed `tour_review_stats`, which feeds the `AggregateRating` in a tour page's
+  structured data. A star rating told to a search engine that averages trips this entity did not
+  sell is a misrepresentation, and it would break the promise on `/reviews` that every review is
+  written by someone who took the trip.
+- **The separation is structural, not a convention.** `testimonials` has **no rating column** —
+  absent, not nullable. A number nobody can store is a number nobody can average in by accident
+  two years from now.
+- **Consent is a constraint.** `check (status <> 'published' or consent_confirmed)`. Quoting
+  somebody publicly who did not agree is the one mistake here that cannot be fixed by editing a
+  row, so it is refused by the database rather than by a code path someone could forget.
+- **The table is staff-only**; the public reads `testimonials_public` (`security_invoker = false`),
+  a projection of published rows carrying the quote, first name, trip label and photo. The consent
+  flag, the `source_note` (provenance: where the quote came from, who ran the trip, how consent was
+  recorded) and the year never leave admin. RLS is row-level, so a public policy on the table would
+  have published those columns alongside the quote.
+- **Attribution of who ran the earlier trips is deliberately omitted** (Kyle, 9 Sep 2026). The row
+  carries a neutral `trip_label` — "Monaco, 2025" — and the honesty lives in the section heading
+  ("From past weekends" / "This weekend has been run before"), which should not be softened into
+  implying these were Guideless bookings.
+- **Tour pages only.** Not `/reviews`: that page tells a visitor outright it will not be filled
+  with anything but real reviews while it waits for the first one, and that promise is worth more
+  than the extra placement.
+- Managed at `/admin/testimonials` by content staff.
+
+### The same bug, found in `reviews`
+
+Building the above surfaced it: `reviews` and `trip_photos` each granted anon `select` on published
+rows, and each row carries `staff_note` — the moderator's private note — and `user_id`. RLS is
+row-level, so "published rows are public" published those too, readable straight off the REST
+endpoint, against CLAUDE.md rule 11. Migration 0069 drops both public policies and adds
+`reviews_public` / `trip_photos_public`; `lib/reviews/queries.ts` reads the views. Narrowing the
+policy to rows with an empty note was rejected — it would hide any review a moderator annotated,
+which is worse than the leak.
+
 ## Something to come back to (migration 0068)
 
 Brief item 8. The problem in one line: between trips we gave people nothing — you either booked or

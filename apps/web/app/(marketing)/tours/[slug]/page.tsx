@@ -34,6 +34,8 @@ import { getTourBySlug, listTourSlugs } from "@/lib/data/tours";
 import { tourFromPrice } from "@/lib/data/tour-filters";
 import { TourReviews } from "@/components/reviews/tour-reviews";
 import { getTourReviewStats, listReviewsForTour } from "@/lib/reviews/queries";
+import { TestimonialStrip } from "@/components/testimonials/testimonial-strip";
+import { listTestimonialsForTour } from "@/lib/testimonials/queries";
 import { withAggregateRating } from "@/lib/reviews/seo";
 import { breadcrumbJsonLd, faqJsonLd, tourJsonLd } from "@/lib/seo";
 import { cn } from "@/lib/utils";
@@ -108,9 +110,12 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
     ? await Promise.all([listDepartureExtras(next.id), getRoomRule(next.id)])
     : [null, null];
   // Reviews appear only once real travelers have written them; both are empty until then.
-  const [reviewStats, reviews] = await Promise.all([
+  // Testimonials are the separate thing: quotes from trips run before Guideless existed, with no
+  // rating, so they can stand on the page without touching the star count above them.
+  const [reviewStats, reviews, testimonials] = await Promise.all([
     getTourReviewStats(tour.id),
     listReviewsForTour(tour.id),
+    listTestimonialsForTour(tour.id),
   ]);
   const currency = next?.currency ?? version.starting_price_currency;
   const anchor = days
@@ -519,6 +524,15 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
       </section>
 
       <TourReviews stats={reviewStats} reviews={reviews} tourName={tour.name} />
+      <TestimonialStrip
+        testimonials={testimonials}
+        heading={isEvent ? "From past weekends" : "From past trips"}
+        title={
+          isEvent
+            ? "This weekend has been run before."
+            : "People who have travelled this route before."
+        }
+      />
 
       {/* FAQ */}
       {faqs.length > 0 && (

@@ -1,21 +1,39 @@
 # Marketing plan — the 2027 season
 
-_Brief item 9, written 9 September 2026. `docs/marketing.md` is the machinery: accounts, pipelines,
+_Brief item 9, written 9 September 2026, revised the same day once a wrong assumption came out
+(see §0). `docs/marketing.md` is the machinery: accounts, pipelines,
 events, UTMs, consent, the Instagram and Pinterest queues. All of that is built. This is the thing
 the brief said was missing — the plan. What we are actually trying to do, in what order, and what
 we are deliberately not doing yet._
 
+## 0. The correction that reshaped this plan
+
+The first draft said Guideless had no track record, inferred from an empty `reviews` table. Wrong:
+**Monaco weekends have been run before, several times, just not under this company name.** That is
+the single strongest asset in this document and the first version did not contain it.
+
+Three consequences, worked through in the sections below: Monaco becomes the acquisition flagship
+rather than the risky pre-proof departure; the April deadline problem mostly dissolves; and we can
+make real trip content immediately, because real trips happened.
+
+What it does **not** change is the review system. Those travelers cannot write reviews —
+`submit_review()` requires a completed Guideless booking, and published rows feed the
+`AggregateRating` a tour page hands to search engines. They become **testimonials** instead:
+migration 0069, `/admin/testimonials`, no rating, clearly separated, and unattributed as to who ran
+the earlier trips. See `docs/growth.md`.
+
 ## 1. Where we actually stand
 
-|                                             |                                                                           |
-| ------------------------------------------- | ------------------------------------------------------------------------- |
-| Seats to sell in 2027                       | **90** across four departures                                             |
-| Seats needed to make every minimum          | **30**                                                                    |
-| First departure                             | **14 May 2027** — eight months out                                        |
-| Travelers who have been on a Guideless trip | **0**                                                                     |
-| Published reviews                           | **0**, by design — `submit_review()` refuses anyone who has not travelled |
-| Photos and video of an actual departure     | **0**                                                                     |
-| People doing this                           | **1**                                                                     |
+|                                                      |                                                                           |
+| ---------------------------------------------------- | ------------------------------------------------------------------------- |
+| Seats to sell in 2027                                | **90** across four departures                                             |
+| Seats needed to make every minimum                   | **30**                                                                    |
+| First departure                                      | **14 May 2027** — eight months out                                        |
+| Travelers who have been on a Guideless trip          | **0**                                                                     |
+| Monaco weekends run before, under other arrangements | **several** — the strongest asset here; get the exact number              |
+| Published reviews                                    | **0**, by design — `submit_review()` refuses anyone who has not travelled |
+| Photos and video of an actual departure              | **0**                                                                     |
+| People doing this                                    | **1**                                                                     |
 
 | Departure         | Dates          | Price  | Capacity | Minimum | Books by    |
 | ----------------- | -------------- | ------ | -------- | ------- | ----------- |
@@ -50,13 +68,22 @@ That is the whole strategy. Everything below is a consequence of it.
 It is worth being precise about why cold converts so badly _for us specifically right now_, because
 three of the four reasons expire:
 
-1. No proof. Nobody has been. The reviews table is empty and will stay empty until someone travels.
+1. No proof **under this name**. The reviews table is empty and stays empty until somebody travels
+   with us — but Monaco has been run before, and testimonials and photographs from those weekends
+   are usable today. This reason is largely already spent for Monaco, and fully intact for France.
 2. You have to go with strangers. That is the product, and it is a real ask without faces attached.
 3. $3,495, with $750 due today.
 4. The trip is eight months away, so nobody has to decide now — and a decision nobody has to make
    is a decision nobody makes.
 
-Reasons 1–3 are all fixed by running **one** trip. That is the actual objective of this season.
+Reasons 1–3 are all fixed by running **one** trip — and for Monaco, reason 1 is already most of the
+way there. That is the actual objective of this season.
+
+One qualification to the cold-versus-warm split above. Monaco is the exception that has a real cold
+channel: an event with a fixed date creates active search intent ("Monaco GP 2027 packages"), which
+is one of the few places a stranger arrives already shopping rather than browsing. With prior
+photographs and testimonials on the page, that traffic is worth competing for. Southern France has
+no equivalent and stays entirely warm.
 
 ## 3. The objective
 
@@ -70,12 +97,18 @@ start doing the work the marketing was doing. Fill one, then the next.
 May is the right one to concentrate on: the lowest minimum (six), the earliest date, and it runs
 three weeks before Monaco.
 
-**A scheduling problem to decide now.** Monaco's booking deadline is 20 April 2027 — three and a
-half weeks _before_ Southern France runs. So the proof from the first trip cannot help sell Monaco,
-which is the departure with fifty seats and the strongest hook. Either the Monaco deadline moves
-later, or we accept Monaco sells entirely on pre-proof credibility, or we put a much smaller,
-cheaper trip on the calendar in **January or February 2027** whose only job is to exist and be
-photographed before the deadline. The third option is the one worth costing.
+**Monaco is the flagship for selling; Southern France is the first run under the name.** These are
+different jobs and they do not compete. Monaco has fifty seats, the lower ticket, an event hook, a
+fixed date nobody can move, active search intent, and — the thing the first draft of this plan
+missed — weekends that have already been run and can be shown. It is the departure most likely to
+sell to somebody who has never met Kyle. Southern France is the one that proves Guideless can
+operate, and it runs first, on 14 May.
+
+The scheduling worry the first draft raised has mostly dissolved with it. Monaco books by 20 April,
+three and a half weeks before Southern France runs, so proof from that trip arrives too late — but
+Monaco no longer needs it, because it has proof of its own. Worth keeping in view rather than
+acting on: if Monaco is short in March, a small documented trip in January or February would help,
+and that is a decision for the March review, not for now.
 
 ## 4. Phase 0 — now to May 2027: this is selling, not marketing
 
@@ -125,16 +158,25 @@ generic content section 5 rules out.
 
 ## 5. What we say — the content strategy, as opposed to a posting schedule
 
-We cannot make aspirational travel content, because we have never run a trip. Every operator on
-Instagram is already making it, most of it stock or licensed, and ours would be indistinguishable
-from theirs while also being slightly dishonest. Skip it entirely.
+For Monaco we can make trip content, because the trips happened: photographs, video and quotes from
+earlier weekends, published as what they are. That is the most persuasive material available to us
+and it should carry the Monaco page and most of the Monaco posting.
+
+For Southern France we cannot, because that route has not been run. Do not fill the gap with stock
+or licensed travel imagery — every operator on Instagram is already posting it, ours would be
+indistinguishable from theirs, and it would be slightly dishonest besides. Skip it entirely and use
+the formats below.
 
 The one thing we can make that nobody can copy is **the reasoning**. A company is being built in the
 open, by one person, and the decisions are unusually opinionated. That is genuinely interesting to
 the exact person who would book this, and it recruits people who are buying the judgement rather
 than a brand — which is the only kind of customer available before there are reviews.
 
-Five recurring formats:
+Six recurring formats:
+
+- **Past Monaco weekends.** What the weekend actually looks like, from the ones already run.
+  Attributed as its own thing, never as a Guideless departure — that separation is enforced in the
+  schema (`docs/growth.md`) and the copy should match it.
 
 - **What $3,495 buys, line by line.** What is included, what is not, and what the same trip costs
   as a guided package. Ends at the trip page. This one carries the most weight: the objection is
@@ -163,8 +205,10 @@ is not an awkward request on day one), **video of the free days** — the moment
 legible in two seconds, **the group meeting on night one**, **the route as it actually looked**, and
 **four to six reviews** written through `submit_review()` in the week the survey prompt fires.
 
-The single best marketing spend available this year is making sure someone competent is holding a
-camera on that trip. Comping a seat to someone who shoots well, in exchange for footage rights, is
+This matters less than the first draft claimed, because Monaco footage already exists — but it is
+still the only way to get Southern France content, and the first Guideless-branded trip is worth
+documenting properly whatever else we have. The single best marketing spend available this year is
+making sure someone competent is holding a camera on that trip. Comping a seat to someone who shoots well, in exchange for footage rights, is
 cheaper than any advertising we could buy with the same money and produces an asset that keeps
 working. That is the creator lever from `docs/strategy-v3-direction.md` §5 applied at the only point
 in the company's life where it actually pays: _before_ there is content, not after.
@@ -172,6 +216,38 @@ in the company's life where it actually pays: _before_ there is content, not aft
 Only once that exists does the rest of the strategy addendum's flywheel — creators, destination
 ambassadors, UGC share cards, quizzes, programmatic SEO, paid retargeting — stop being multiplication
 by zero. Revisit §5 of that document in June 2027, not before.
+
+## 6b. Collecting the testimonials
+
+The one unblocked task in this plan that pays immediately. `/admin/testimonials` exists and is
+empty; eight to ten quotes and a folder of photographs is a week of messages.
+
+Three things make the difference between a 20% reply rate and a 70% one: ask for something small,
+say exactly where it goes, and make saying no easy. A draft to send individually — never as a
+group message:
+
+> Hey — I've finally turned the Monaco weekends into a proper thing. It's called Guideless, and
+> the 2027 one is up on the site.
+>
+> Would you mind if I used a line or two from you about the weekend you came on? Just a sentence
+> about what it was actually like. It'd go on the trip page with your first name and the year, and
+> I'd keep it separate from the reviews section, since that's only for people who book through the
+> new company.
+>
+> No pressure at all, and I'll send you the exact wording before anything goes up. Also — if you
+> have photos from that weekend I could use, I'd love them.
+
+Then in admin: paste the quote as they wrote it, tick the consent box, put where it came from in
+the source note (which message, which date, what they agreed to), and publish. Trim for length if
+you must; do not rewrite what somebody said.
+
+Two rules that are not negotiable. **Send them the wording before it goes live** — the message
+promises it. And **never publish a quote you cannot point to**: the source note exists so that in
+a year's time there is an answer to "where did this come from", and the consent flag exists so
+that publishing without one is refused rather than merely discouraged.
+
+Photographs are worth as much as the quotes. Ask for the camera roll, not for "a good photo" —
+people underestimate their own.
 
 ## 7. Not doing, and why
 
@@ -228,16 +304,21 @@ hear that from us in March rather than discover it in April.
 ## 10. Decisions this plan is waiting on
 
 1. **Real prices and dates** from supplier quotes, entered in admin. Blocks literally everything
-   here. Nothing in this plan should start before it.
-2. **The Monaco deadline problem** (§3). Move the deadline, sell without proof, or add a small
-   documented trip in January or February 2027.
-3. **Referral economics.** What is built is 5% off the base for the friend and a $75 credit for the
+   here. Nothing in this plan should start before it. Monaco should be the easier half — the
+   weekend has been run before, so the real costs are known rather than estimated.
+2. **Collect the testimonials.** `/admin/testimonials` is built and empty. Getting eight to ten
+   quotes and a set of photographs out of past Monaco travelers is the highest-value unblocked task
+   in this document, and it is a week of messages rather than a project. Consent is recorded per
+   quote and the database refuses to publish without it.
+3. **Monaco's 20 April deadline** (§3). Probably fine as it stands now. Revisit at the March
+   review if Monaco is short.
+4. **Referral economics.** What is built is 5% off the base for the friend and a $75 credit for the
    referrer. On a $3,495 trip that is roughly $250 of a contribution the strategy addendum estimates
    at ~$600, which is a lot to pay, while $75 is probably too small to actually motivate anyone —
    the worst of both. The addendum proposed $100–500 tiers. Pick real numbers once real margins
    exist, and change `referral_discount_percent` / `referral_reward_amount` in `system_settings`.
-4. **Who documents the first departure**, and whether that is a comped seat. Decide by January so it
+5. **Who documents the first departure**, and whether that is a comped seat. Decide by January so it
    can be offered as a seat rather than bought as a service.
-5. **Whether Kyle is on camera.** The building-in-public format in §5 is materially stronger with a
+6. **Whether Kyle is on camera.** The building-in-public format in §5 is materially stronger with a
    face attached, and materially harder to sustain. It is a real preference, not an oversight, and
    the plan works either way — it is just slower without.
