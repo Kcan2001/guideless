@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
+import { SaveTourButton } from "@/components/growth/save-tour-button";
+import { getSaveCount } from "@/lib/growth/saved";
 import { notFound } from "next/navigation";
 import { ArrowRight, CalendarDays, Gauge, MapPin, MoonStar, Sparkles, Users } from "lucide-react";
 import { brand } from "@guideless/config";
@@ -121,6 +123,12 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
   const bookable = !!next && next.availability.available > 0;
   const buildHref = bookable ? (`/tours/${tour.slug}/build?departure=${next.id}` as Route) : null;
   const eventShortName = tour.event_name?.replace(/^Formula 1 /, "") ?? null;
+
+  // The count only — deliberately not whether *you* saved it. This page is statically generated
+  // and revalidated; reading the session here would force it dynamic and cost the cache on the
+  // page that matters most. The count is anonymous, so it caches fine, and "what I saved" lives on
+  // the account page where per-person state belongs.
+  const saveCount = await getSaveCount(tour.id);
 
   return (
     <>
@@ -470,6 +478,9 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
             Prices are per traveler in your own room and include everything under &ldquo;Guideless
             handles&rdquo;. Reserve with a deposit; the balance is due before departure.
           </p>
+          <div className="mt-6">
+            <SaveTourButton tourId={tour.id} slug={tour.slug} saveCount={saveCount} />
+          </div>
           <div className="mt-8">
             <DepartureList tourSlug={tour.slug} tourId={tour.id} departures={departures} />
             {departures.length === 0 && (

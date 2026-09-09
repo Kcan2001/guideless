@@ -2134,6 +2134,56 @@ export type Database = {
           },
         ];
       };
+      destination_alerts: {
+        Row: {
+          created_at: string;
+          destination_id: string | null;
+          email: string;
+          id: string;
+          name: string | null;
+          note: string | null;
+          notified_at: string | null;
+          source: string;
+          unsubscribed_at: string | null;
+          user_id: string | null;
+          wanted_place: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          destination_id?: string | null;
+          email: string;
+          id?: string;
+          name?: string | null;
+          note?: string | null;
+          notified_at?: string | null;
+          source?: string;
+          unsubscribed_at?: string | null;
+          user_id?: string | null;
+          wanted_place?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          destination_id?: string | null;
+          email?: string;
+          id?: string;
+          name?: string | null;
+          note?: string | null;
+          notified_at?: string | null;
+          source?: string;
+          unsubscribed_at?: string | null;
+          user_id?: string | null;
+          wanted_place?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "destination_alerts_destination_id_fkey";
+            columns: ["destination_id"];
+            isOneToOne: false;
+            referencedRelation: "destinations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       destination_guides: {
         Row: {
           body_markdown: string;
@@ -4120,6 +4170,35 @@ export type Database = {
           role?: Database["public"]["Enums"]["app_role"];
         };
         Relationships: [];
+      };
+      saved_tours: {
+        Row: {
+          created_at: string;
+          note: string | null;
+          tour_id: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          note?: string | null;
+          tour_id: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          note?: string | null;
+          tour_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "saved_tours_tour_id_fkey";
+            columns: ["tour_id"];
+            isOneToOne: false;
+            referencedRelation: "tours";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       social_accounts: {
         Row: {
@@ -6448,6 +6527,21 @@ export type Database = {
           },
         ];
       };
+      tour_save_counts: {
+        Row: {
+          saves: number | null;
+          tour_id: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "saved_tours_tour_id_fkey";
+            columns: ["tour_id"];
+            isOneToOne: false;
+            referencedRelation: "tours";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       tour_survey_stats: {
         Row: {
           accommodation: number | null;
@@ -6470,6 +6564,30 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      wanted_places: {
+        Row: {
+          first_asked: string | null;
+          from_travelers: number | null;
+          last_asked: string | null;
+          place: string | null;
+          requests: number | null;
+        };
+        Relationships: [];
+      };
+      whats_coming: {
+        Row: {
+          city: string | null;
+          end_date: string | null;
+          happens_at: string | null;
+          id: string | null;
+          kind: string | null;
+          opens_at: string | null;
+          slug: string | null;
+          start_date: string | null;
+          title: string | null;
+        };
+        Relationships: [];
       };
     };
     Functions: {

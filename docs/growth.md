@@ -153,6 +153,34 @@ ask a blunt question without worrying how the answer would read on a tour page.
   beside them, then every response in full. Read-only: there is no moderation queue because
   nothing here is ever published.
 
+## Something to come back to (migration 0068)
+
+Brief item 8. The problem in one line: between trips we gave people nothing — you either booked or
+you left. The brief offered four options (a wishlist, a feed of departures opening, destination
+alerts, meetups made more prominent), but they are one feature. A saved list nothing alerts you
+about is a dead list, and an alert with nothing saved has nothing to fire on.
+
+- **Saving needs an account; alerting does not.** There is nothing else to key a saved list to, and
+  it is only useful if it follows you. An alert takes an email, exactly like the departure waitlist
+  — the person most worth reaching read a tour page, liked it, and left without signing up.
+- **Saving is private.** `saved_tours` is readable only by its owner, _including from staff_. The
+  public artefact is `tour_save_counts`, a `security_definer` view of counts with no names, shown
+  on the tour page only above a floor of five — "1 person saved this" is worse than silence, the
+  same rule the roster stats follow.
+- **The tour page stays static.** It deliberately does **not** read whether _you_ saved something:
+  that would touch the session, force the route dynamic and cost the ISR cache on the page that
+  matters most. The button says "Save for later" regardless and the action toggles; per-person
+  state lives on `/account`.
+- **`wanted_place` is the point.** An alert names a destination we sell _or_ somewhere we do not,
+  in the traveler's own words. A company running two trips and choosing a third should read that
+  rather than guess. `/admin/demand` ranks it, and a request from somebody who has actually
+  travelled with us is flagged.
+- **Unsubscribing keeps the row.** Wanting to stop the email does not make it untrue that somebody
+  asked; deleting it would erase the demand signal along with the subscription. `wanted_places`
+  excludes them from the waiting count but the history stands.
+- **`/whats-coming`** is one public feed — drops about to open, departures still to run, city
+  evenings — revalidated every ten minutes. It asks for an email, not a booking.
+
 ## Copy rules
 
 Brand terms only: Your Trip, Your Route, Your Group, Live Moments, Included, Optional. Calm and

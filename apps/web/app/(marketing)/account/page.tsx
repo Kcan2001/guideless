@@ -10,6 +10,7 @@ import { OnboardingChecklist } from "@/components/account/onboarding-checklist";
 import { GroupCodeCard } from "@/components/account/group-code-card";
 import { ReferralCard } from "@/components/account/referral-card";
 import { BookedExperiences } from "@/components/account/booked-experiences";
+import { SavedAndAlerts } from "@/components/account/saved-and-alerts";
 import { ReviewForm } from "@/components/reviews/review-form";
 import { TravelerDetails } from "@/components/account/traveler-details";
 import { previewRefund } from "@/lib/bookings/cancellations";
@@ -21,6 +22,7 @@ import {
 import { getMyReferral, listMyBookingAddOns, type BookingAddOn } from "@/lib/data/add-on-purchases";
 import { listMyReviews, listReviewableBookings } from "@/lib/reviews/queries";
 import { listMyFulfilments } from "@/lib/experiences/fulfilments";
+import { listMyAlerts, listSavedTours } from "@/lib/growth/saved";
 import { listOpenSurveys } from "@/lib/surveys/queries";
 import { signOut } from "@/lib/auth/actions";
 import { Badge } from "@/components/ui/badge";
@@ -104,7 +106,11 @@ export default async function AccountPage(props: PageProps<"/account">) {
   ]);
   // Experiences we bought in on their behalf. Shown with the operator named, because a traveler who
   // finds out on the day that this is somebody else's ticket has been mildly misled.
-  const fulfilments = await listMyFulfilments(bookingIds);
+  const [fulfilments, savedTours, alerts] = await Promise.all([
+    listMyFulfilments(bookingIds),
+    listSavedTours(),
+    listMyAlerts(),
+  ]);
   const { data: leads } = travelerIds.length
     ? await supabase
         .from("booking_travelers")
@@ -339,6 +345,8 @@ export default async function AccountPage(props: PageProps<"/account">) {
           )}
 
           <BookedExperiences fulfilments={fulfilments} />
+
+          <SavedAndAlerts saved={savedTours} alerts={alerts} />
 
           {surveys.length > 0 && (
             <section className="mt-12" id="surveys">
