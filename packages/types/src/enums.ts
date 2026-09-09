@@ -252,6 +252,23 @@ export const OPTION_TIERS = ["explorer", "classic", "premium", "elite"] as const
 export type OptionTier = (typeof OPTION_TIERS)[number];
 
 /**
+ * What kind of trip this is (migration 0053), used to judge whether a property fits it. Distinct
+ * from ACTIVITY_LEVELS, which is pace: a race weekend and a wine week can both be "relaxed" and
+ * still want completely different hotels.
+ */
+export const TRIP_CHARACTERS = [
+  "social",
+  "nightlife",
+  "slow",
+  "culinary",
+  "cultural",
+  "outdoors",
+  "scenic",
+  "event",
+] as const;
+export type TripCharacter = (typeof TRIP_CHARACTERS)[number];
+
+/**
  * Who a traveler is coming with (migration 046). A check constraint on profiles.party_type
  * rather than a Postgres enum, like ADD_ON_KINDS — keep the two in step.
  */

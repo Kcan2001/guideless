@@ -107,3 +107,15 @@ values
   -- Day 9
   ('22000000-0000-4000-8000-000000000009', 1, 'check_out',   'Check out', 'Bags can be stored if your flight is later.', null, '11:00', 'Europe/Paris', 'Your Paris hotel', 'guideless', false, 'public_preview'),
   ('22000000-0000-4000-8000-000000000009', 2, 'flight',      'Fly home', 'RER B to CDG is about 45 minutes; Orlyval to ORY about 35. Or add an extra night and leave tomorrow.', null, null, 'Europe/Paris', 'CDG / ORY', 'traveler', false, 'public_preview');
+
+-- ── Character and tier briefs (migration 0053) ───────────────────────────────
+-- Character is what kind of trip this is, which is what decides whether a property fits it. The
+-- two trips are both "relaxed" on pace and want completely different hotels, which is exactly why
+-- pace could not do this job.
+
+-- Southern France: a slow week built around food, wine and old towns, with a group you meet rather
+-- than one you are herded with. Quiet is a feature here.
+update public.tour_versions
+set character = array['slow', 'culinary', 'cultural', 'social']::public.trip_character[]
+where id = '21000000-0000-4000-8000-000000000001';
+

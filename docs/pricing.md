@@ -182,3 +182,121 @@ withdraw and re-request, staff-only resolution, and the rate limiter's fixed win
 `supabase/tests/hotels.test.sql` (27 tests): public projections vs staff-only tables, rate privacy,
 rule selection and markup math in `suggest_stay_price()`, and the tier ↔ hotel link. Unit tests for
 the TypeScript mirror live next to `apps/web/lib/hotels/*.ts`.
+
+## Monaco Grand Prix 2027: where the numbers came from (2026-09-08)
+
+The catalog shipped with placeholder prices against live Stripe keys, which meant any booking was
+a real charge at an invented number. These are the replacements and the reasoning behind each, so
+the next person to change them knows what they are overriding.
+
+**Dates.** The 2027 Grand Prix runs Friday 4 to Sunday 6 June, race at 15:00 Sunday. The trip is
+Wednesday 2 to Monday 7 June, five nights. Wednesday arrival puts welcome drinks two days before
+the track opens and gives the group a free Thursday on the coast; Monday departure means nobody
+flies out the evening of the race.
+
+**Assumptions.** Roughly 1.09 USD to the euro. Ticket prices about 9% above 2026, which is the
+year-on-year step the circuit has held recently. No trade rate agreed with any supplier, so every
+cost below is retail plus our margin.
+
+| Line                                  | Cost basis                                                                                   | We charge |
+| ------------------------------------- | -------------------------------------------------------------------------------------------- | --------- |
+| Base trip, Nice, 5 nights             | Room about EUR 280/night race week, plus train pass, welcome round, ops: about $1,650 landed | $2,450    |
+| Monte Carlo upgrade                   | EUR 900–1,200/night against EUR 280: about $3,900 more over five nights                      | $4,450    |
+| Grandstand K, three-day pass          | 2026 K1–K2 face EUR 1,420, plus 9%: about $1,690                                             | $2,190    |
+| Terrace, Saturday and Sunday, catered | Hospitality rate about EUR 2,300/day                                                         | $5,450    |
+| Amber Lounge yacht, Sunday            | EUR 4,500 + 20% VAT + 3% card fee = EUR 5,562, about $6,060                                  | $6,750    |
+| Amber Lounge yacht, Saturday          | EUR 3,200 grossed up = EUR 3,955, about $4,310                                               | $4,950    |
+| Amber Lounge yacht, both days         | EUR 7,700 grossed up = EUR 9,518, about $10,370                                              | $11,400   |
+| Friday night party                    | EUR 1,100 grossed up, about $1,480                                                           | $1,690    |
+| Sunday after party                    | EUR 1,500 grossed up, about $2,020                                                           | $2,290    |
+| Private airport transfer              | A car from Nice airport runs EUR 90–140                                                      | $150      |
+
+**Grandstand K was described as a product that does not exist.** Monaco sells grandstand seats as
+three-day passes covering Friday, Saturday and Sunday. There is no Saturday-and-Sunday seat. The
+add-on now says three days and is priced as one.
+
+**The yacht has a commercial problem worth deciding on.** Amber Lounge publish a per-person day
+rate and add 20% French VAT and a 3% card fee on top, so their advertised EUR 4,500 race day is
+really EUR 5,562. Our $6,750 is that plus about 11%. A traveler who checks amberlounge.com will
+find they can book the same day directly for less than we charge, and nothing stops them. Three
+ways out, none taken yet:
+
+1. Negotiate a trade rate or an allocation. This is the real fix and needs a conversation with
+   Amber Lounge before the trip goes on sale with the yacht attached.
+2. Sell it at cost and make the margin on the trip. Defensible: the yacht is a reason to book the
+   weekend with us, not a profit centre.
+3. Drop it and point people at the operator. Honest, and it costs us the tier.
+
+Until one of those is chosen, the yacht add-ons are priced above what a customer can find
+themselves. That is a claim risk as much as a pricing one.
+
+**Refunds.** Race viewing and both parties are non-refundable from purchase
+(`cancellable_until_days_before` is null), because they are bought in a named traveler's name
+months ahead and no supplier takes them back. The boat and the transfer keep real windows. The
+departure runs the event cancellation ladder, which reaches zero sixty days out rather than the
+fifteen a touring route gets.
+
+## Southern France: checking the prices against real costs (2026-09-08)
+
+Monaco was repriced from scratch because its numbers were invented. Southern France turned out
+differently: the advertised price was invented too, but it happens to sit on a defensible margin,
+so it stays. What changed is the handful of things the research showed to be actually wrong.
+
+**Assumptions.** Roughly 1.16 USD to the euro. Costs are what a supplier publishes; no trade rate
+is agreed with anyone.
+
+### Landed cost per traveler, own room, standard tier
+
+| Line                                                                         | Cost                              |
+| ---------------------------------------------------------------------------- | --------------------------------- |
+| 8 nights with breakfast: 3 Nice, 2 Avignon, 3 Paris                          | about EUR 1,270                   |
+| TGV Nice to Avignon and Avignon to Paris, 2nd class reserved                 | EUR 115                           |
+| Shared airport minibus, Nice airport to the old town, split across the group | EUR 23                            |
+| Chateauneuf-du-Pape afternoon with lunch                                     | EUR 140                           |
+| Welcome round                                                                | EUR 10                            |
+| **Total**                                                                    | **about EUR 1,560, or USD 1,810** |
+
+Against an advertised $3,495 that is a gross margin near 48% before overhead. That is a normal
+operator margin, so the price holds.
+
+### What changed
+
+**The June premium is gone.** June charged $200 more than May and September for a week that costs
+within 2.5% of them. The seasonal curves cancel: the Cannes Film Festival runs 11 to 22 May 2027
+and lifts Nice hotel rates by roughly 30%, but May is the cheapest month in Paris and wins most of
+it back. September is the reverse, dearest in Paris and cheapest in Nice. Charging more for June
+was charging for a difference we do not pay.
+
+**The Riviera boat was sold at half cost, and this is the real find.** A skippered boat out of Nice
+runs about EUR 2,250 for six hours, and boats at that price seat ten, not the twelve the add-on
+advertised. Ten aboard with lunch is about EUR 265 a head, roughly USD 310, against the USD 145 we
+were charging. Every sale lost money, and it lost more the fuller it got. It is now $395 with
+capacity ten, which is the boat that actually exists.
+
+**Three smaller ones.** The second cellar tasting retails at EUR 90 to 100 with no trade rate
+anywhere, so $95 was under cost; it is now $135. An extra Marais night costs EUR 165 to 195, so
+$210 left nothing; it is now $245. The farewell dinner sat at the bottom of the EUR 50 to 80 range
+for three courses with wine; it is now $95. The private transfer at $90 was already right against a
+EUR 44 to 50 vehicle cost and only lacked a stated basis.
+
+### Left for Kyle rather than changed
+
+The boutique upgrade sells at $850 against a cost difference of about $720 across the eight nights.
+That is positive but a thinner margin than the base trip earns, proportionally. It is not a bug, so
+it is not a correction, and moving it is a pricing decision rather than a fix.
+
+### What could not be verified
+
+No 2027 hotel inventory is bookable yet, so the per-night figures are monthly estimates built on
+firm current rates rather than quotes. No wine tour publishes a trade rate. No operator publishes a
+six-hour shared boat day with lunch as a product, so that one has to be put out to tender. No
+Marais bistro publishes a fixed group menu including wine. Each of those needs a real quote before
+a departure sells, and each is a place where the price could move.
+
+### Where this sits in the market
+
+Land-only, eight or nine nights, southern France and Paris: Gate 1 at $1,649, Road Scholar at
+$2,899, Trafalgar at $2,966, Globus at $5,529, Tauck at $6,390 and up for the closest itinerary
+match. Ours is $3,495 with every traveler in their own room as standard, where most of that field
+charges a single supplement of 30 to 100% on top. That is the comparison to make on the trip page,
+and it is a genuinely strong one.

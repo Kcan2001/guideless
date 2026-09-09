@@ -4,6 +4,9 @@ const TOUR_SLUG = "southern-france";
 const DEPARTURE_ID = "30000000-0000-4000-8000-000000000001"; // seeded May 2027 Southern France
 const BUILD = `/tours/${TOUR_SLUG}/build?departure=${DEPARTURE_ID}`;
 
+/** "$1,145" → 1145, so a test can compare two totals without knowing either one. */
+const dollars = (text: string) => Number(text.replace(/[^0-9.]/g, ""));
+
 /**
  * Full customer funnel against local Supabase: sign up → Trip Builder → payment step.
  * Without STRIPE_SECRET_KEY the action must refuse before creating any booking or hold.
@@ -30,7 +33,7 @@ test("a new customer can build a trip up to the payment step, and is refused cle
   // Dates: the departure from the link is preselected, one traveler
   await expect(page.getByRole("heading", { name: /when do you want to go/i })).toBeVisible();
   await expect(page.getByRole("radio", { checked: true })).toBeVisible();
-  await expect(summary.getByTestId("quote-due-now")).toHaveText(/\$750/);
+  await expect(summary.getByTestId("quote-due-now")).toHaveText(/^\$[\d,]+/);
   await next();
 
   // Stay: the default tier is preselected
@@ -38,12 +41,16 @@ test("a new customer can build a trip up to the payment step, and is refused cle
   await expect(page.getByTestId("stay-tiers").getByRole("radio", { checked: true })).toBeVisible();
   await next();
 
-  // Experiences: the seeded boat raises today's total by $145
+  // Experiences: choosing one raises today's total and puts a line in the summary. Assert the
+  // movement, not the amount — what the boat costs is a supplier price that changes with every
+  // reprice, and pinning it here turns a legitimate catalog edit into a failing build.
   await expect(page.getByRole("heading", { name: /what do you want to add/i })).toBeVisible();
+  const dueNow = async () => dollars(await summary.getByTestId("quote-due-now").innerText());
+  const beforeBoat = await dueNow();
   const boat = page.getByRole("article", { name: /boat day along the riviera/i });
   await boat.getByRole("checkbox").check();
-  await expect(summary.getByTestId("quote-due-now")).toHaveText(/\$895/);
   await expect(summary.getByText("Boat day along the Riviera")).toBeVisible();
+  await expect.poll(dueNow).toBeGreaterThan(beforeBoat);
   await next();
 
   // Transfers (if the departure offers any) — skip through

@@ -74,7 +74,8 @@ select results_eq(
 select is(
   (select amount_due_now from public.create_booking('30000000-0000-4000-8000-000000000002',
      '[{"firstName":"Solo","lastName":"Traveler","dateOfBirth":"1980-01-01"}]'::jsonb, null, '{}'::jsonb, 'full', 'v1')),
-  369500::bigint, 'full option: due now = total (June departure price)');
+  (select price_amount from public.departures where id = '30000000-0000-4000-8000-000000000002')::bigint,
+  'full option: due now = the whole departure price, not the deposit');
 
 select tests.clear_auth();
 

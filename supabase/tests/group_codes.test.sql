@@ -86,7 +86,9 @@ select * from public.create_booking(
   '{"name":"Pat","relationship":"Friend","phone":"+14155550123"}'::jsonb, '{}'::jsonb,
   'deposit', 'v1', null, '[]'::jsonb, null, 'kyle-monaco-27');
 
-select is((select total_amount from gc_sarah), 189000::bigint, 'a group code never changes the price');
+select is((select total_amount from gc_sarah),
+  (select price_amount from public.departures where id = '30000000-0000-4000-8000-000000000004')::bigint,
+  'a group code never changes the price');
 select is(
   (select group_code_id from public.bookings where id = (select booking_id from gc_sarah)),
   (select id from gc_code),

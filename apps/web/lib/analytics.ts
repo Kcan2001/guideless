@@ -61,6 +61,20 @@ export function readConsent(): ConsentState {
   }
 }
 
+/**
+ * Withdraw a stored choice. The banner reappears (no stored choice) and, until a new choice is
+ * made, analytics is treated as denied — withdrawing consent has to be as easy and as immediate as
+ * giving it. This is what the Privacy Policy's "cookie settings link in the footer" refers to.
+ */
+export function clearConsent(): void {
+  try {
+    window.localStorage.removeItem(CONSENT_STORAGE_KEY);
+  } catch {
+    // Blocked storage: nothing was stored to begin with.
+  }
+  window.dispatchEvent(new CustomEvent("guideless:consent", { detail: "unknown" }));
+}
+
 export function writeConsent(state: Exclude<ConsentState, "unknown">): void {
   try {
     window.localStorage.setItem(CONSENT_STORAGE_KEY, state);

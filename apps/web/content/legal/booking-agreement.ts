@@ -125,7 +125,7 @@ export const bookingAgreement: LegalDocument = {
         "Being where the itinerary says, when it says. Trains and transfers do not wait. If you miss one, getting yourself to the next place is at your cost.",
         "Telling us before you book about any medical condition, mobility need, allergy or dietary requirement that affects what we book for you, so we can say honestly whether the trip works for you. Some routes involve walking on uneven ground, stairs without lifts, and long days.",
         "Your own behaviour, and complying with local law and with the terms of the hotels and providers you use.",
-        "Travel insurance. We strongly recommend cover for medical care abroad, cancellation, delay and belongings, bought when you book rather than later. Some departures require it, and say so. We do not sell insurance and we do not advise on which policy to buy.",
+        "Travel insurance. We strongly recommend cover for medical care abroad, cancellation, delay and belongings, bought when you book rather than later. We do not make it a condition of booking and we do not check it. We do not sell insurance and we do not advise on which policy to buy.",
         "Being 18 or older at the start of the trip, unless the departure says otherwise.",
       ],
     },

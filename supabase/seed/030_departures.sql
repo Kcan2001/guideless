@@ -28,3 +28,16 @@ set cancellation_policy = '[
 ]'::jsonb
 from public.tours t
 where t.id = d.tour_id and t.kind is distinct from 'event';
+-- Southern France runs three departures on ordinary dates, so its ladder is the usual one: the room
+-- and the address, not access.
+insert into public.departure_tier_briefs (departure_id, tier, brief)
+select d.id, b.tier::public.option_tier, b.brief
+from public.departures d
+cross join (values
+  ('explorer', 'Comfortable, well located, walkable to the centre of each city. The trip most people book. Never the cheapest room in town.'),
+  ('classic',  'A clearly better room or a better street than Explorer, in the same neighbourhoods. Boutique rather than chain where the price allows.'),
+  ('premium',  'Design-led properties in the best part of each city. Buys quality Classic cannot, not proximity, because nothing here is hard to reach.'),
+  ('elite',    'The best in each city for these dates. On this trip that means the room and the building, since access is not scarce in May, June or September.')
+) as b(tier, brief)
+where d.tour_id = '20000000-0000-4000-8000-000000000001'
+on conflict (departure_id, tier) do nothing;

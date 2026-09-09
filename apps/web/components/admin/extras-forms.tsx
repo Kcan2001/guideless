@@ -1,4 +1,5 @@
 import type { Tables } from "@guideless/types";
+import { optionTiers } from "@guideless/config/brand";
 import { ADD_ON_KINDS, OPTION_LABELS, OPTION_TIERS } from "@guideless/validation";
 import { SubmitButton } from "@/components/admin/submit-button";
 import { inputClass, labelClass } from "@/components/admin/ui";
@@ -16,12 +17,10 @@ const LABEL_TEXT: Record<(typeof OPTION_LABELS)[number], string> = {
   social: "Social",
   luxury: "Luxury",
 };
-const TIER_TEXT: Record<(typeof OPTION_TIERS)[number], string> = {
-  explorer: "Explorer — best price, more basic, maximum value",
-  classic: "Classic — the standard Guideless experience",
-  premium: "Premium — better hotels and upgraded experiences",
-  elite: "Elite — luxury, the best available",
-};
+// Tier copy is canonical in @guideless/config (ADR-014). It used to be restated here, which meant
+// the company's definition of a tier lived in a dropdown and nothing else could read it.
+const tierText = (t: (typeof OPTION_TIERS)[number]) =>
+  `${optionTiers[t].name} — ${optionTiers[t].blurb}`;
 type StayDetails = {
   neighborhood?: string;
   station_distance?: string;
@@ -91,7 +90,7 @@ function PresentationFields({
           <option value="">Untiered (transfer, dinner, extra night)</option>
           {OPTION_TIERS.map((t) => (
             <option key={t} value={t}>
-              {TIER_TEXT[t]}
+              {tierText(t)}
             </option>
           ))}
         </select>

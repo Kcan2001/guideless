@@ -145,3 +145,94 @@ where name = 'Boutique 4★ upgrade';
 -- extra night, farewell dinner) are single experiences, not levels of one another, so they stay untiered.
 update public.departure_stay_options set tier = 'explorer' where name = 'Well-located hotels';
 update public.departure_stay_options set tier = 'premium'  where name = 'Boutique upgrade';
+
+-- ── Insurance wording, corrected (2026-09-08) ────────────────────────────────
+-- The policy audit rewrote the Terms and the FAQ to say travel insurance is strongly recommended
+-- and explicitly not a condition of booking, because nothing in the schema can mark a departure as
+-- requiring it and nobody checks. This line was missed because it lives in seed data rather than in
+-- code, so the trip page went on telling travelers insurance was required while the Terms two
+-- clicks away said the opposite. Contradicting ourselves about a contract term is worse than either
+-- position on its own.
+update public.tour_excluded_items
+set description = 'Strongly recommended, and yours to arrange. Our cancellation policy refunds what we control; insurance covers your flights, your health and everything you booked yourself.'
+where tour_version_id = '21000000-0000-4000-8000-000000000001'
+  and title = 'Travel insurance';
+
+-- ── Prices checked against real costs (2026-09-08) ───────────────────────────
+-- These were seed placeholders behind live Stripe keys, so any booking was a real charge at a
+-- number nobody had derived. Costs are now researched and written up in docs/pricing.md. About
+-- 1.16 USD to the euro.
+--
+-- Landed cost per traveler in their own room, standard tier: roughly EUR 1,560, about USD 1,810.
+-- That is 8 nights with breakfast, both TGV legs, the shared airport transfer, the Chateauneuf
+-- afternoon and the welcome round. The advertised $3,495 turns out to sit on a healthy margin, so
+-- it stays. A placeholder that happens to be defensible is still worth keeping once it is checked.
+-- Only the things the research showed to be actually wrong are changed here.
+
+-- 1. The June departure charged $200 more than May and September. The research says the three
+-- weeks cost within 2.5% of each other, and June is if anything the cheapest: the Cannes Film
+-- Festival runs 11-22 May 2027 and lifts Nice, but May is the cheapest month in Paris and wins most
+-- of it back. There is no June premium to pass on, so there is no June premium.
+update public.departures
+set price_amount = 349500
+where tour_id = '20000000-0000-4000-8000-000000000001';
+
+update public.tour_versions
+set starting_price_amount = 349500
+where id = '21000000-0000-4000-8000-000000000001';
+
+-- 2. The Riviera boat was sold at roughly half what it costs. A skippered boat out of Nice runs
+-- about EUR 2,250 for the day, and boats at that price seat ten, not the twelve we advertised. Ten
+-- aboard with lunch is about EUR 265 a head, roughly USD 310, against the $145 we were charging.
+-- Every booking of it lost money. Capacity now matches the boats that actually exist.
+update public.departure_add_ons a
+set price_amount = 39500,
+    capacity = 10,
+    why_price_note = 'A skippered boat for the day out of the old port, split across the ten people aboard, plus lunch. Boats at this price seat ten, which is why this one fills before the trip does.'
+from public.departures d
+where a.departure_id = d.id
+  and d.tour_id = '20000000-0000-4000-8000-000000000001'
+  and a.title = 'Boat day along the Riviera';
+
+-- 3. A second cellar visit retails at EUR 90 to 100 and no operator publishes a trade rate, so $95
+-- was under cost before we added anything.
+update public.departure_add_ons a
+set price_amount = 13500,
+    why_price_note = 'A second tasting in the cellar after the included afternoon, at the going rate for a small-group visit plus our booking. Nobody sells this at a trade rate, so this is retail.'
+from public.departures d
+where a.departure_id = d.id
+  and d.tour_id = '20000000-0000-4000-8000-000000000001'
+  and a.title = 'Châteauneuf-du-Pape cellar afternoon';
+
+-- 4. A private car from Nice airport into the old town is EUR 44 to 50 for the vehicle. $90 was
+-- already right; it just had no stated basis.
+update public.departure_add_ons a
+set why_price_note = 'One car per booking, so it costs the same whether you travel alone or as a pair. A private car on that route runs EUR 44 to 50.'
+from public.departures d
+where a.departure_id = d.id
+  and d.tour_id = '20000000-0000-4000-8000-000000000001'
+  and a.title = 'Private airport transfer';
+
+-- 5. A Marais room with breakfast is EUR 165 to 195 on the standard tier, about USD 190 to 225.
+-- $210 sat inside that range with nothing left over, so it moves just clear of the top of it.
+update public.departure_add_ons a
+set price_amount = 24500,
+    why_price_note = 'One more night in the same hotel plus breakfast, at the rate we pay for it. Book it with the trip; Marais hotels are usually full by the time you land.'
+from public.departures d
+where a.departure_id = d.id
+  and d.tour_id = '20000000-0000-4000-8000-000000000001'
+  and a.title = 'Extra night in Paris';
+
+-- 6. Three courses with wine at a Marais bistro runs EUR 50 to 80. $85 was at the bottom of that.
+update public.departure_add_ons a
+set price_amount = 9500,
+    why_price_note = 'Three courses with wine at a neighbourhood bistro, which is what a long table in the Marais costs. No markup on the wine.'
+from public.departures d
+where a.departure_id = d.id
+  and d.tour_id = '20000000-0000-4000-8000-000000000001'
+  and a.title = 'Farewell dinner';
+
+-- Left alone deliberately, and flagged in docs/pricing.md rather than changed here: the boutique
+-- upgrade sells at $850 against a cost difference of about $720, which is a thinner margin than the
+-- base trip earns. It is positive, so it is not a bug, but it is a pricing decision rather than a
+-- correction and it is Kyle's to make.

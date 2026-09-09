@@ -20,8 +20,15 @@ export const brand = {
   /** Category language, used as an eyebrow or secondary line only. */
   category: "Minimal intervention travel",
   supportEmail: "hello@guidelesstravel.com",
-  /** Bump when terms / cancellation policy / waiver text changes; stored on each booking. */
-  termsVersion: "2026-09",
+  /**
+   * The Terms edition a booking accepted, stored on the booking row. Dated, not month-numbered:
+   * a month string cannot tell two revisions apart when both ship in the same month, and the whole
+   * point of the field is to prove which document a given customer agreed to. Bump on the day the
+   * Terms, the cancellation policy or the waiver text changes materially.
+   */
+  termsVersion: "2026-09-08",
+  /** The Privacy Policy revises on its own schedule; it is not part of the booking contract. */
+  privacyVersion: "2026-09-08",
 } as const;
 
 /** Public social profiles. Used in the footer, Organization JSON-LD (`sameAs`) and share links. */
@@ -84,3 +91,45 @@ export const responsibilityLabels = {
   guideless: "Guideless handles",
   traveler: "You book",
 } as const;
+
+/**
+ * The four public tiers (ADR-014). These are the canonical definitions: web, admin, mobile and any
+ * curation step read them from here rather than restating them, because a tier the company cannot
+ * define consistently is a tier it cannot sell.
+ *
+ * A tier is a **market position, not a property attribute.** It is drawn relative to what a given
+ * trip on given dates actually costs. During the Monaco Grand Prix a three-star in Monte Carlo is
+ * Premium, because the tier there is set by access and scarcity rather than by the room. The same
+ * property in an ordinary week is Explorer. Never map a star rating straight onto a tier.
+ *
+ * `blurb` is customer-facing. `rubric` is the internal instruction used when deciding what belongs
+ * in a tier for a specific departure; it is never shown to a traveler.
+ */
+export const optionTiers = {
+  explorer: {
+    name: "Explorer",
+    blurb: "The best price. Simpler rooms, everything that matters still included.",
+    rubric:
+      "The value position for this trip on these dates. Comfortable and well located for the price, never the cheapest thing available. If the destination is expensive on these dates, this rung may be a nearby town with easy transport rather than a worse room in the centre.",
+  },
+  classic: {
+    name: "Classic",
+    blurb: "The standard Guideless trip. What most people book.",
+    rubric:
+      "The default. A clearly better room or a better address than Explorer, without paying for scarcity. If this rung and Explorer differ only by price, one of them is wrong.",
+  },
+  premium: {
+    name: "Premium",
+    blurb: "Better rooms, better addresses, upgraded experiences.",
+    rubric:
+      "Buys proximity or quality that Classic cannot. On an event trip this is usually the first rung actually inside the event's town, even when the property itself is unremarkable, because on those dates being there is the upgrade.",
+  },
+  elite: {
+    name: "Elite",
+    blurb: "The best available. Luxury, and the addresses that sell out first.",
+    rubric:
+      "The best that can genuinely be bought for these dates. Not merely the most expensive: it has to be the one a traveler would choose if price were irrelevant.",
+  },
+} as const;
+
+export type OptionTierKey = keyof typeof optionTiers;

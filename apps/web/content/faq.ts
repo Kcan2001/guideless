@@ -38,7 +38,7 @@ export const FAQ: FaqItem[] = [
     id: "flights",
     question: "Do I book my own flights?",
     answer:
-      "Yes. Flying from many different cities is what makes a group work, so you book the flight that suits you. We tell you exactly when to land and where to walk when you do, and the welcome transfer is arranged around it.",
+      "Yes. Flying from many different cities is what makes a group work, so you book the flight that suits you. We tell you exactly when to land and where to go when you do. Where a trip includes an airport transfer it is listed in what is included, and on trips without one the walk or the train from the airport is in your itinerary.",
   },
   {
     id: "tiers",
@@ -104,13 +104,13 @@ export const FAQ: FaqItem[] = [
     id: "ages",
     question: "What ages are travelers?",
     answer:
-      "Travelers must be 18 or older at the start of the trip unless a departure states otherwise. Beyond that there is no target age; each trip page shows an age range once enough people have booked.",
+      "Travelers must be 18 or older at the start of the trip unless a departure states otherwise. Beyond that there is no target age and no upper limit. Groups tend to skew toward people who want the logistics handled and the days free, which is a temperament more than an age.",
   },
   {
     id: "insurance",
     question: "Is travel insurance included?",
     answer:
-      "No. Travel insurance covering medical care, cancellation and belongings is strongly recommended, and required on departures where stated. Our cancellation policy refunds what we control; insurance covers your flights and the rest.",
+      "No. Travel insurance covering medical care, cancellation and belongings is strongly recommended on every trip. We do not make it a condition of booking. Our cancellation policy refunds what we control; insurance covers your flights, your health and everything you booked yourself.",
   },
   {
     id: "extend",

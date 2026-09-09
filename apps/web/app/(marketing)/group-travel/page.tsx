@@ -36,7 +36,7 @@ const HOW = [
   {
     icon: MessageCircle,
     title: "See who is in",
-    body: "Every optional experience shows how many of your group have added it. The group chat opens weeks before departure so plans form in the open.",
+    body: "Once a few of you have added the same optional experience, it shows how many are going, so you can follow the crowd or avoid it. The group chat opens weeks before departure, so plans form in the open.",
   },
 ];
 

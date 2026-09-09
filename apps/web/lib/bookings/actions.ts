@@ -142,7 +142,12 @@ export async function startCheckout(input: StartCheckoutInput): Promise<Checkout
       });
       return {
         code: "invalid",
-        error: "The hotel price for this option changed. Please choose again. Nothing was charged.",
+        error:
+          check.reason === "supplier_error"
+            ? "We could not confirm the hotel price just now. Nothing was charged. Try again in a moment."
+            : check.reason === "rate_gone"
+              ? "The room behind this option was taken while you were booking. Please choose again. Nothing was charged."
+              : "The hotel price for this option changed. Please choose again. Nothing was charged.",
       };
     }
   }

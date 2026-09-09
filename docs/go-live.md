@@ -292,9 +292,16 @@ resolve. Keep Squarespace as the registrar and DNS host; nothing needs to transf
   site-verification records were left in place. The `www` 308 redirect to the apex was paused for the
   first four hours after the switch (cached Squarespace apex + Vercel www looped for some resolvers)
   and restored the same evening once every public resolver returned 76.76.21.21.
-- **Pre-sale gate:** all catalog prices and dates are placeholder seed values (Monaco 3–7 June 2027 at
-  $1,890 base, Southern France departures, tier deltas, add-on prices). Replace them in admin from
-  supplier quotes before selling; Stripe is live, so a placeholder price is a real charge.
+- **Pre-sale gate, partly closed (2026-09-08).** Monaco now carries real dates (Wed 2 to Mon 7 June 2027) and real prices researched from published supplier figures; the working is in
+  `docs/pricing.md`. Push it to a hosted project with
+  `node scripts/seed-catalog.mjs --db-url "<URI>" --only 050`, which is idempotent. Southern France
+  was checked the same day and closed too: its $3,495 turned out to sit on a real margin so it
+  stays, but the June premium, the Riviera boat (sold below cost), the cellar tasting, the extra
+  Paris night and the farewell dinner were all corrected. Push it with `--only 040`. Both trips now
+  publish prices we can honour.
+- **Open commercial question on Monaco:** the Amber Lounge yacht add-ons are priced from the
+  operator's public retail rate with no trade discount, so a traveler can book the same day direct
+  for less than we charge. Negotiate an allocation, sell it at cost, or drop it. See `docs/pricing.md`.
 - Still to do by hand: first sign-up on the live site and the admin grant (§4 step 6), Stripe
   account activation and live keys (test keys are deliberately in Vercel until then), Pinterest
   trial-access re-application once `guidelesstravel.com/privacy` resolves.
