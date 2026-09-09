@@ -36,14 +36,16 @@ insert into public.tour_included_items (tour_version_id, position, title, descri
   ('21000000-0000-4000-8000-000000000001', 3, 'Trains: Nice → Avignon → Paris', 'Reserved seats. Tickets in your app.'),
   ('21000000-0000-4000-8000-000000000001', 4, 'Châteauneuf-du-Pape wine afternoon', 'A small-producer tasting with a long lunch on day 5. Included in the price; join if you like.'),
   ('21000000-0000-4000-8000-000000000001', 5, 'Welcome drinks on night one', 'First round on us at a bar in the old town at 8 pm. Meet Your Group, then do what you want.'),
-  ('21000000-0000-4000-8000-000000000001', 6, 'Your Guide, in the app', 'Your Route day by day, maps, our recommendations, Your Group chat and a human on support.');
+  ('21000000-0000-4000-8000-000000000001', 6, 'Your Guide, in the app', 'Your Route day by day, maps, our recommendations, Your Group chat and a human on support.')
+on conflict do nothing;
 
 insert into public.tour_excluded_items (tour_version_id, position, title, description) values
   ('21000000-0000-4000-8000-000000000001', 1, 'Flights', 'Fly into Nice (NCE) and out of Paris (CDG or ORY). We tell you exactly when to arrive.'),
   ('21000000-0000-4000-8000-000000000001', 2, 'Most meals', 'Breakfast is included. The rest is yours — we have recommendations.'),
   ('21000000-0000-4000-8000-000000000001', 3, 'Travel insurance', 'Required. Bring your own.'),
   ('21000000-0000-4000-8000-000000000001', 4, 'Museum and attraction tickets', 'Except where an experience is listed as included.'),
-  ('21000000-0000-4000-8000-000000000001', 5, 'Optional add-ons', 'Boat day, cellar afternoon, farewell dinner, private transfer, extra night. Pick them at booking or any time in the app, and pay only for what you choose.');
+  ('21000000-0000-4000-8000-000000000001', 5, 'Optional add-ons', 'Boat day, cellar afternoon, farewell dinner, private transfer, extra night. Pick them at booking or any time in the app, and pay only for what you choose.')
+on conflict do nothing;
 
 insert into public.tour_faqs (tour_version_id, position, question, answer) values
   ('21000000-0000-4000-8000-000000000001', 1, 'Is there really no guide?', 'There is no tour guide. Your itinerary, maps, recommendations and support live in the Guideless app, and a small Guideless team is reachable whenever you need a human.'),
@@ -51,7 +53,8 @@ insert into public.tour_faqs (tour_version_id, position, question, answer) value
   ('21000000-0000-4000-8000-000000000001', 3, 'What if my train is late or a hotel has a problem?', 'Message support in the app. We see your trip, your location and your itinerary, and we fix it.'),
   ('21000000-0000-4000-8000-000000000001', 4, 'Can I book for two people?', 'Yes. Add each traveler at checkout. Everyone gets their own room unless two of you choose to share one, which lowers the price for both.'),
   ('21000000-0000-4000-8000-000000000001', 5, 'What are add-ons?', 'Optional extras with their own price: the Riviera boat day, a cellar afternoon in Châteauneuf, the farewell dinner, a private airport transfer, an extra night in Paris. Choose them when you book or later in the app. The app shows who else from Your Group is doing each one.'),
-  ('21000000-0000-4000-8000-000000000001', 6, 'When do I meet the group?', 'Your Group opens in the app about a month before departure: see who is coming, say hello, or don''t. In person, it starts with welcome drinks at 8 pm on night one.');
+  ('21000000-0000-4000-8000-000000000001', 6, 'When do I meet the group?', 'Your Group opens in the app about a month before departure: see who is coming, say hello, or don''t. In person, it starts with welcome drinks at 8 pm on night one.')
+on conflict do nothing;
 
 -- Days
 insert into public.tour_days (id, tour_version_id, day_number, destination_id, title, summary) values

@@ -3,6 +3,10 @@
 How Guideless acquires travelers and measures it. Companion to the master spec §45–47 (SEO,
 GA4, PostHog) and ADR-011 (social publishing). Brand voice rules live in `docs/design-system.md`.
 
+**This document is the machinery — accounts, pipelines, events, UTMs, consent. The plan is
+`docs/marketing-plan.md`: what we are trying to do in the 2027 season, in what order, and what we
+are deliberately not doing yet. Read that first; this one answers "how do I actually post it".**
+
 ## 1. Stack
 
 | Concern              | Tool                                                    | Where it lives                                                        |
@@ -249,6 +253,62 @@ newsletter email footer  ──►  /newsletter/unsubscribe?token=…  ──►
   `Guideless Travel <hello@guidelesstravel.com>`, plain and short, one departure or theme per email,
   every link with `utm_source=newsletter&utm_medium=email&utm_campaign=<theme>`.
 - Staff can see and export the list in Supabase (content roles); an admin screen is not needed yet.
+
+## 11. The mailing list and campaigns (migration 0071)
+
+We had been collecting addresses in five places and sending to none of them. `/admin/email` is
+where that stops.
+
+### One list, with what each address is for
+
+`mailing_list` unions every address we hold and marks it:
+
+| Segment             | `can_market` | They agreed to            |
+| ------------------- | ------------ | ------------------------- |
+| `newsletter`        | yes          | anything                  |
+| `destination_alert` | yes          | **that destination only** |
+| `waitlist`          | yes          | **that trip only**        |
+| `host_applicant`    | no           | their application         |
+| `testimonial`       | no           | their testimonial         |
+
+The consent split is the point and it is not a setting. Somebody who applied to host, or sent a
+quote about a weekend in 2025, gave us an address to do that one thing; putting them in a blast is
+how a sending domain gets burned and it is a promise we never made. `sendCampaign()` throws rather
+than sends if a segment's `can_market` is false, and the composer will not offer those segments.
+Purpose is narrower still: a campaign with a `context` of "Lisbon" reaches only the people who
+asked about Lisbon.
+
+### Unsubscribe, which two lists did not have
+
+`destination_alerts` and `departure_waitlist` both take an email from somebody with **no account** —
+that is their whole point — but the only way to stop either was a button on the account page. Both
+now carry an `unsubscribe_token` and a token-based stop function, and `/unsubscribe?kind=…&token=…`
+acts on GET without a sign-in or a confirmation step, because mail clients do not post forms and a
+link that needs a second click leaves people subscribed. An unknown token gets the same answer as a
+good one, so the link cannot be used to check whether an address is on a list.
+
+### Writing one
+
+Plain text in a textarea, blank lines between paragraphs. There is no HTML field and no rich text
+editor on purpose. `lib/email/layout.ts` renders it: `renderEmail()` takes blocks (`text`,
+`bullets`, `facts`, `quote`, `rule`) and produces the HTML **and** the text part from the same
+input, so the text version cannot drift. `kind: "marketing"` requires an `unsubscribeUrl` — the
+type will not compile without one.
+
+`email_campaign_sends` has a primary key of (campaign, email), so a send that dies halfway can be
+run again and nobody gets it twice. And a campaign cannot be sent until it has been sent to the
+author first: that guard protects Kyle rather than the recipient, and it costs one click.
+
+Legacy note: `templates/booking-confirmed.ts` predates the layout kit and still builds its own
+HTML. It works and is left alone; migrate it the next time it needs a change.
+
+### What sends automatically
+
+Only one thing: a note to the support mailbox when a testimonial submission arrives, so ten links
+sent out do not mean checking `/admin/testimonials` all week. Departure-opening and destination
+alerts are **not** automatic — with a list this size, a person deciding to press send is better
+than a cron that emails the wrong forty people, and the composer's segment picker is that
+mechanism. Revisit when the list is big enough that it stops being feasible.
 
 ## 10. Pinterest
 

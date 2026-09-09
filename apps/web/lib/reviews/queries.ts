@@ -5,9 +5,10 @@ import { createClient } from "@/lib/supabase/server";
 import { createPublicClient } from "@/lib/supabase/public";
 
 /**
- * Reading reviews. Everything public goes through the anonymous client, which RLS limits to
- * published rows, so a marketing page can be statically generated and can never accidentally
- * render something a moderator has not seen.
+ * Reading reviews. Everything public goes through `reviews_public` (migration 0069), a view of
+ * published rows that cannot select `staff_note` or `user_id` — the table itself is no longer
+ * anon-readable. A marketing page can still be statically generated and can never accidentally
+ * render something a moderator has not seen, or a note a moderator wrote about it.
  *
  * There is deliberately no "0 reviews" anywhere in here: when nothing is published the queries
  * return an empty array and `null` stats, and every caller is expected to render nothing at all.
@@ -42,22 +43,38 @@ interface ReviewRow {
   published_at: string | null;
   author_name: string;
   trip_end_date: string | null;
-  tours: { name: string; slug: string } | null;
 }
 
 // `author_name` and `trip_end_date` are stored on the review rather than joined: anonymous
 // visitors can read neither `profiles` nor `trips`, and a published byline should not change
 // because someone later renamed themselves.
 const SELECT =
-  "id, tour_id, rating, title, body, would_repeat, published_at, author_name, trip_end_date, " +
-  "tours(name, slug)";
+  "id, tour_id, rating, title, body, would_repeat, published_at, author_name, trip_end_date";
 
-function toReview(row: ReviewRow): PublishedReview {
+/**
+ * Tour names for a set of reviews, as a second query rather than a PostgREST embed.
+ * `reviews_public` is a view, and embedding through one relies on PostgREST inferring the foreign
+ * key from the view's column origins. It usually manages it; this does not have to care.
+ */
+async function tourNames(tourIds: string[]): Promise<Map<string, { name: string; slug: string }>> {
+  const out = new Map<string, { name: string; slug: string }>();
+  const ids = [...new Set(tourIds)];
+  if (ids.length === 0) return out;
+  const sb = createPublicClient();
+  const { data } = await sb.from("tours").select("id, name, slug").in("id", ids);
+  for (const t of data ?? []) out.set(t.id, { name: t.name, slug: t.slug });
+  return out;
+}
+
+function toReview(
+  row: ReviewRow,
+  tours: Map<string, { name: string; slug: string }>,
+): PublishedReview {
   return {
     id: row.id,
     tourId: row.tour_id,
-    tourName: row.tours?.name ?? "",
-    tourSlug: row.tours?.slug ?? "",
+    tourName: tours.get(row.tour_id)?.name ?? "",
+    tourSlug: tours.get(row.tour_id)?.slug ?? "",
     rating: row.rating,
     title: row.title,
     body: row.body,
@@ -72,26 +89,28 @@ function toReview(row: ReviewRow): PublishedReview {
 export async function listPublishedReviews(limit = 50): Promise<PublishedReview[]> {
   const sb = createPublicClient();
   const { data, error } = await sb
-    .from("reviews")
+    .from("reviews_public")
     .select(SELECT)
-    .eq("status", "published")
     .order("published_at", { ascending: false })
     .limit(limit);
   if (error) throw error;
-  return ((data ?? []) as unknown as ReviewRow[]).map(toReview);
+  const rows = (data ?? []) as unknown as ReviewRow[];
+  const tours = await tourNames(rows.map((r) => r.tour_id));
+  return rows.map((r) => toReview(r, tours));
 }
 
 export async function listReviewsForTour(tourId: string, limit = 4): Promise<PublishedReview[]> {
   const sb = createPublicClient();
   const { data, error } = await sb
-    .from("reviews")
+    .from("reviews_public")
     .select(SELECT)
-    .eq("status", "published")
     .eq("tour_id", tourId)
     .order("published_at", { ascending: false })
     .limit(limit);
   if (error) throw error;
-  return ((data ?? []) as unknown as ReviewRow[]).map(toReview);
+  const rows = (data ?? []) as unknown as ReviewRow[];
+  const tours = await tourNames(rows.map((r) => r.tour_id));
+  return rows.map((r) => toReview(r, tours));
 }
 
 /**

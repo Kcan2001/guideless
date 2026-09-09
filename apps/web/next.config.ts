@@ -36,6 +36,10 @@ const nextConfig: NextConfig = {
   ],
   typedRoutes: true,
   images: {
+    // Next 16 will only serve a quality it has been told about. `PhotoHero` asks for 78 and the
+    // rest of the site takes the 75 default, so without this the hero photo on every marketing
+    // page — the largest image we serve — silently falls back instead of being optimised.
+    qualities: [70, 75, 78],
     remotePatterns: [
       // Supabase Storage (public buckets and signed URLs).
       { protocol: "https", hostname: "*.supabase.co", pathname: "/storage/v1/object/**" },

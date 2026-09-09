@@ -153,6 +153,104 @@ ask a blunt question without worrying how the answer would read on a tour page.
   beside them, then every response in full. Read-only: there is no moderation queue because
   nothing here is ever published.
 
+## Testimonials from earlier trips (migration 0069)
+
+Monaco weekends have been run before, just not under this company name. That is the strongest
+credibility Guideless has, and none of it can go through `reviews`.
+
+- **Why not reviews.** `submit_review()` requires a completed Guideless booking, deliberately, and
+  published rows feed `tour_review_stats`, which feeds the `AggregateRating` in a tour page's
+  structured data. A star rating told to a search engine that averages trips this entity did not
+  sell is a misrepresentation, and it would break the promise on `/reviews` that every review is
+  written by someone who took the trip.
+- **The separation is structural, not a convention.** `testimonials` has **no rating column** —
+  absent, not nullable. A number nobody can store is a number nobody can average in by accident
+  two years from now.
+- **Consent is a constraint.** `check (status <> 'published' or consent_confirmed)`. Quoting
+  somebody publicly who did not agree is the one mistake here that cannot be fixed by editing a
+  row, so it is refused by the database rather than by a code path someone could forget.
+- **The table is staff-only**; the public reads `testimonials_public` (`security_invoker = false`),
+  a projection of published rows carrying the quote, first name, trip label and photo. The consent
+  flag, the `source_note` (provenance: where the quote came from, who ran the trip, how consent was
+  recorded) and the year never leave admin. RLS is row-level, so a public policy on the table would
+  have published those columns alongside the quote.
+- **Attribution of who ran the earlier trips is deliberately omitted** (Kyle, 9 Sep 2026). The row
+  carries a neutral `trip_label` — "Monaco, 2025" — and the honesty lives in the section heading
+  ("From past weekends" / "This weekend has been run before"), which should not be softened into
+  implying these were Guideless bookings.
+- **Tour pages only.** Not `/reviews`: that page tells a visitor outright it will not be filled
+  with anything but real reviews while it waits for the first one, and that promise is worth more
+  than the extra placement.
+- Managed at `/admin/testimonials` by content staff.
+
+### The link people fill in themselves (migration 0070)
+
+`/share/<tour-slug>` — e.g. `/share/monaco-grand-prix`. Kyle sends it in a message; the person
+writes their own quote, adds photos, and ticks their own consent box. `/admin/testimonials` lists
+the tour links to copy and everything that has come in.
+
+The reason this exists is not convenience. Migration 0069 already made consent a check constraint,
+but a box staff tick on somebody's behalf records only that staff believed they agreed. A box the
+person ticks, with their name and email against it, is the thing you can point at later. Converting
+a submission into a testimonial inherits that consent and writes the trail into `source_note`.
+
+- **No account, ever.** These people are not customers. The write is anonymous through
+  `submit_testimonial()`, a security-definer function that is the only door — there is no insert
+  policy on the table. It refuses a submission without consent, a bad email, a quote under twenty
+  characters, more than twelve photos, and — the one that matters — any photo path outside the
+  submission's own folder.
+- **The id comes from the browser.** Photos need somewhere to live before there is a row to attach
+  them to, so the form generates a UUID, uploads into a folder of that name, and submits it as the
+  primary key. The function re-checks every path against it, so nothing client-side is trusted.
+- **A submission is not a testimonial.** It holds the email and the unedited words; the testimonial
+  is the curated thing. Trimming a quote for length never destroys what was actually said, which
+  matters because the outreach message promises to show them the wording first. Conversions land as
+  **drafts**, never published.
+- **Uploads are private.** `testimonial-uploads` is a private bucket (15 MB, image types only).
+  Anonymous visitors may insert into a uuid-named folder and nothing else — no read, no list. Staff
+  preview through signed URLs. A photo becomes public only when staff attach it to a draft, which
+  copies it into `social-media`; if the submitter declined photo use, that action refuses.
+- **`/share/<slug>` is `noindex`** and linked from nowhere. It only makes sense to somebody holding
+  the message that explains it.
+
+### The same bug, found in `reviews`
+
+Building the above surfaced it: `reviews` and `trip_photos` each granted anon `select` on published
+rows, and each row carries `staff_note` — the moderator's private note — and `user_id`. RLS is
+row-level, so "published rows are public" published those too, readable straight off the REST
+endpoint, against CLAUDE.md rule 11. Migration 0069 drops both public policies and adds
+`reviews_public` / `trip_photos_public`; `lib/reviews/queries.ts` reads the views. Narrowing the
+policy to rows with an empty note was rejected — it would hide any review a moderator annotated,
+which is worse than the leak.
+
+## Something to come back to (migration 0068)
+
+Brief item 8. The problem in one line: between trips we gave people nothing — you either booked or
+you left. The brief offered four options (a wishlist, a feed of departures opening, destination
+alerts, meetups made more prominent), but they are one feature. A saved list nothing alerts you
+about is a dead list, and an alert with nothing saved has nothing to fire on.
+
+- **Saving needs an account; alerting does not.** There is nothing else to key a saved list to, and
+  it is only useful if it follows you. An alert takes an email, exactly like the departure waitlist
+  — the person most worth reaching read a tour page, liked it, and left without signing up.
+- **Saving is private.** `saved_tours` is readable only by its owner, _including from staff_. The
+  public artefact is `tour_save_counts`, a `security_definer` view of counts with no names, shown
+  on the tour page only above a floor of five — "1 person saved this" is worse than silence, the
+  same rule the roster stats follow.
+- **The tour page stays static.** It deliberately does **not** read whether _you_ saved something:
+  that would touch the session, force the route dynamic and cost the ISR cache on the page that
+  matters most. The button says "Save for later" regardless and the action toggles; per-person
+  state lives on `/account`.
+- **`wanted_place` is the point.** An alert names a destination we sell _or_ somewhere we do not,
+  in the traveler's own words. A company running two trips and choosing a third should read that
+  rather than guess. `/admin/demand` ranks it, and a request from somebody who has actually
+  travelled with us is flagged.
+- **Unsubscribing keeps the row.** Wanting to stop the email does not make it untrue that somebody
+  asked; deleting it would erase the demand signal along with the subscription. `wanted_places`
+  excludes them from the waiting count but the history stands.
+- **`/whats-coming`** is one public feed — drops about to open, departures still to run, city
+  evenings — revalidated every ten minutes. It asks for an email, not a booking.
+
 ## Copy rules
 
 Brand terms only: Your Trip, Your Route, Your Group, Live Moments, Included, Optional. Calm and

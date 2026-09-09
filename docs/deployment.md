@@ -45,6 +45,7 @@ Observability variables (all optional; the features are no-ops when unset):
 | `HOTEL_SUPPLIER`, `DUFFEL_ACCESS_TOKEN`               | web (server)    | Hotel inventory supplier (`mock` default; `duffel` + token for live rates), docs/hotels.md                   |
 | `ANTHROPIC_API_KEY`, `ASSISTANT_MODEL`                | web (server)    | The trip assistant. No key means it is off, not degraded, docs/assistant.md                                  |
 | `PLACES_PROVIDER`, `GOOGLE_PLACES_KEY`                | web (server)    | Live place lookups (`mock` default; `google` needs a billed Cloud project)                                   |
+| `EXPERIENCE_SUPPLIER`, `VIATOR_API_KEY`               | web (server)    | Experience sourcing (`mock` default; no Viator adapter until a probe, docs/experiences.md)                   |
 | `CRON_SECRET`                                         | web (server)    | Bearer token Vercel sends to `/api/cron/*` (hotel rates 04:15 UTC daily; group post + location purge hourly) |
 
 Secrets live in Vercel project settings, Supabase project secrets (`supabase secrets set`) and

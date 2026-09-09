@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
+import { SaveTourButton } from "@/components/growth/save-tour-button";
+import { getSaveCount } from "@/lib/growth/saved";
 import { notFound } from "next/navigation";
 import { ArrowRight, CalendarDays, Gauge, MapPin, MoonStar, Sparkles, Users } from "lucide-react";
 import { brand } from "@guideless/config";
@@ -32,6 +34,8 @@ import { getTourBySlug, listTourSlugs } from "@/lib/data/tours";
 import { tourFromPrice } from "@/lib/data/tour-filters";
 import { TourReviews } from "@/components/reviews/tour-reviews";
 import { getTourReviewStats, listReviewsForTour } from "@/lib/reviews/queries";
+import { TestimonialStrip } from "@/components/testimonials/testimonial-strip";
+import { listTestimonialsForTour } from "@/lib/testimonials/queries";
 import { withAggregateRating } from "@/lib/reviews/seo";
 import { breadcrumbJsonLd, faqJsonLd, tourJsonLd } from "@/lib/seo";
 import { cn } from "@/lib/utils";
@@ -106,9 +110,12 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
     ? await Promise.all([listDepartureExtras(next.id), getRoomRule(next.id)])
     : [null, null];
   // Reviews appear only once real travelers have written them; both are empty until then.
-  const [reviewStats, reviews] = await Promise.all([
+  // Testimonials are the separate thing: quotes from trips run before Guideless existed, with no
+  // rating, so they can stand on the page without touching the star count above them.
+  const [reviewStats, reviews, testimonials] = await Promise.all([
     getTourReviewStats(tour.id),
     listReviewsForTour(tour.id),
+    listTestimonialsForTour(tour.id),
   ]);
   const currency = next?.currency ?? version.starting_price_currency;
   const anchor = days
@@ -121,6 +128,12 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
   const bookable = !!next && next.availability.available > 0;
   const buildHref = bookable ? (`/tours/${tour.slug}/build?departure=${next.id}` as Route) : null;
   const eventShortName = tour.event_name?.replace(/^Formula 1 /, "") ?? null;
+
+  // The count only — deliberately not whether *you* saved it. This page is statically generated
+  // and revalidated; reading the session here would force it dynamic and cost the cache on the
+  // page that matters most. The count is anonymous, so it caches fine, and "what I saved" lives on
+  // the account page where per-person state belongs.
+  const saveCount = await getSaveCount(tour.id);
 
   return (
     <>
@@ -470,6 +483,9 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
             Prices are per traveler in your own room and include everything under &ldquo;Guideless
             handles&rdquo;. Reserve with a deposit; the balance is due before departure.
           </p>
+          <div className="mt-6">
+            <SaveTourButton tourId={tour.id} slug={tour.slug} saveCount={saveCount} />
+          </div>
           <div className="mt-8">
             <DepartureList tourSlug={tour.slug} tourId={tour.id} departures={departures} />
             {departures.length === 0 && (
@@ -508,6 +524,15 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
       </section>
 
       <TourReviews stats={reviewStats} reviews={reviews} tourName={tour.name} />
+      <TestimonialStrip
+        testimonials={testimonials}
+        heading={isEvent ? "From past weekends" : "From past trips"}
+        title={
+          isEvent
+            ? "This weekend has been run before."
+            : "People who have travelled this route before."
+        }
+      />
 
       {/* FAQ */}
       {faqs.length > 0 && (

@@ -1,0 +1,206 @@
+-- pgTAP tests for migrations 0065-0067: sourcing extras, and fulfilling them afterwards.
+--
+-- The rule this file exists to enforce is rule 11: never expose supplier costs to customers. The
+-- extras list on a tour page is readable by **anon**, so the whole design rests on none of the
+-- commercial detail living on that table. If somebody later adds a `net_amount` column to
+-- `departure_add_ons` for convenience, these tests are what should stop them.
+begin;
+create extension if not exists pgtap with schema extensions;
+select plan(29);
+
+create schema if not exists tests;
+grant usage on schema tests to anon, authenticated;
+create or replace function tests.authenticate_as(uid uuid) returns void language plpgsql as $$
+begin
+  perform set_config('request.jwt.claims', json_build_object('sub', uid, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claim.sub', uid::text, true);
+  perform set_config('role', 'authenticated', true);
+end $$;
+create or replace function tests.be_anon() returns void language plpgsql as $$
+begin
+  perform set_config('request.jwt.claims', '', true);
+  perform set_config('role', 'anon', true);
+end $$;
+create or replace function tests.clear_auth() returns void language plpgsql as $$
+begin
+  perform set_config('request.jwt.claims', '', true);
+  perform set_config('request.jwt.claim.sub', '', true);
+  perform set_config('role', 'postgres', true);
+end $$;
+create or replace function tests.create_user(uid uuid, email text) returns void language plpgsql as $$
+begin
+  insert into auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at,
+                          raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
+                          confirmation_token, recovery_token, email_change_token_new, email_change)
+  values (uid, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', email, 'x', now(),
+          '{"provider":"email","providers":["email"]}', '{}'::jsonb, now(), now(), '', '', '', '');
+end $$;
+
+select tests.create_user('a9000000-0000-4000-8000-0000000000a1', 'exp.traveler@example.com');
+select tests.create_user('a9000000-0000-4000-8000-0000000000a2', 'exp.ops@example.com');
+insert into public.user_roles (user_id, role) values ('a9000000-0000-4000-8000-0000000000a2', 'trip_staff');
+
+insert into public.experience_products
+  (id, supplier, supplier_product_id, destination_id, title, from_amount, currency)
+select 'a9000000-0000-4000-8000-0000000000f1', 'mock', 'mock-exp-test', d.id,
+       'Old Town food walk', 6500, 'EUR'
+from public.destinations d limit 1;
+
+insert into public.experience_rates
+  (id, product_id, supplier, supplier_option_id, option_name, travel_date, currency,
+   net_amount, total_amount, capacity, available)
+values ('a9000000-0000-4000-8000-0000000000e1', 'a9000000-0000-4000-8000-0000000000f1', 'mock',
+        'mock-exp-test-am', '10:00 English', current_date + 30, 'EUR', 6500, 6500, 8, true);
+
+insert into public.departure_add_ons
+  (id, departure_id, title, kind, price_amount, currency, pricing_basis, is_active)
+values ('a9000000-0000-4000-8000-0000000000d1', '30000000-0000-4000-8000-000000000001',
+        'Old Town food walk', 'activity', 9500, 'EUR', 'per_traveler', true);
+
+insert into public.add_on_sourcing
+  (add_on_id, product_id, supplier, supplier_option_id, net_amount, currency, source_rate_id)
+values ('a9000000-0000-4000-8000-0000000000d1', 'a9000000-0000-4000-8000-0000000000f1', 'mock',
+        'mock-exp-test-am', 6500, 'EUR', 'a9000000-0000-4000-8000-0000000000e1');
+
+-- ── Structure ────────────────────────────────────────────────────────────────
+select has_table('public', 'experience_products', 'the supplier catalog is cached');
+select has_table('public', 'experience_rates', 'with prices per date');
+select has_table('public', 'add_on_sourcing', 'and a link from what we sell to what we bought');
+select has_column('public', 'pricing_rules', 'applies_to', 'one markup table, scoped, not two');
+
+-- The load-bearing assertion of the whole design.
+select hasnt_column('public', 'departure_add_ons', 'net_amount',
+  'the customer-facing add-on carries no supplier cost');
+select hasnt_column('public', 'departure_add_ons', 'supplier_option_id',
+  'nor a supplier product id somebody could go and buy direct');
+
+-- ── What a customer can see ──────────────────────────────────────────────────
+select tests.be_anon();
+select is((select count(*)::int from public.departure_add_ons
+           where id = 'a9000000-0000-4000-8000-0000000000d1'), 1,
+  'anyone can see the add-on itself — it is on a public tour page');
+select is((select count(*)::int from public.add_on_sourcing), 0,
+  'and nobody signed out can see what it cost us');
+select is((select count(*)::int from public.experience_rates), 0, 'nor the supplier prices');
+select is((select count(*)::int from public.experience_products), 0, 'nor the supplier catalog');
+
+select tests.authenticate_as('a9000000-0000-4000-8000-0000000000a1');
+select is((select count(*)::int from public.add_on_sourcing), 0,
+  'and neither can a signed-in traveler, who is the one being charged');
+select is((select count(*)::int from public.experience_rates), 0,
+  'a traveler cannot price-check us against the supplier');
+
+-- ── What staff can see ───────────────────────────────────────────────────────
+select tests.authenticate_as('a9000000-0000-4000-8000-0000000000a2');
+select is((select count(*)::int from public.add_on_sourcing), 1, 'ops staff see the sourcing');
+select is((select net_amount from public.add_on_sourcing
+           where add_on_id = 'a9000000-0000-4000-8000-0000000000d1'), 6500::bigint,
+  'including what it cost, which is the point of the screen');
+
+-- ── Where a sourced extra may appear (0066) ──────────────────────────────────
+-- The shop sells what we curated; the trip is where sourced activities live.
+select tests.clear_auth();
+insert into public.departure_add_ons
+  (id, departure_id, title, kind, price_amount, currency, pricing_basis, is_active, in_trip_only)
+values ('a9000000-0000-4000-8000-0000000000d2', '30000000-0000-4000-8000-000000000001',
+        'Sea kayak, sourced', 'activity', 4500, 'EUR', 'per_traveler', true, true);
+
+select tests.be_anon();
+select is((select count(*)::int from public.departure_add_ons
+           where departure_id = '30000000-0000-4000-8000-000000000001'
+             and is_active and not in_trip_only
+             and id in ('a9000000-0000-4000-8000-0000000000d1',
+                        'a9000000-0000-4000-8000-0000000000d2')), 1,
+  'the shop query returns the curated extra and not the sourced one');
+select is((select in_trip_only from public.departure_add_ons
+           where id = 'a9000000-0000-4000-8000-0000000000d2'), true,
+  'though the sourced one is still readable — it is shown in the trip, not hidden from the world');
+
+-- ── Pricing: match, do not mark up (0066) ────────────────────────────────────
+select tests.authenticate_as('a9000000-0000-4000-8000-0000000000a2');
+select is(public.suggest_experience_price('a9000000-0000-4000-8000-0000000000f1', 6500::bigint),
+  6500::bigint,
+  'with no rule the suggestion is the supplier''s own price — we match and take the commission');
+
+select tests.clear_auth();
+insert into public.pricing_rules (destination_id, applies_to, percentage_markup, min_markup_amount, priority, is_active)
+select p.destination_id, 'hotel', 40, 1000, 10, true
+from public.experience_products p where p.id = 'a9000000-0000-4000-8000-0000000000f1';
+
+select tests.authenticate_as('a9000000-0000-4000-8000-0000000000a2');
+select is(public.suggest_experience_price('a9000000-0000-4000-8000-0000000000f1', 6500::bigint),
+  6500::bigint,
+  'a markup somebody wrote for hotels does not quietly start marking up activities');
+
+select tests.clear_auth();
+insert into public.pricing_rules (destination_id, applies_to, percentage_markup, min_markup_amount, priority, is_active)
+select p.destination_id, 'experience', 40, 1000, 20, true
+from public.experience_products p where p.id = 'a9000000-0000-4000-8000-0000000000f1';
+
+select tests.authenticate_as('a9000000-0000-4000-8000-0000000000a2');
+select is(public.suggest_experience_price('a9000000-0000-4000-8000-0000000000f1', 6500::bigint),
+  9100::bigint, 'but a rule written for experiences is honoured, as a deliberate exception');
+select is(public.suggest_experience_price('a9000000-0000-4000-8000-0000000000f1', 1000::bigint),
+  2000::bigint, 'and its minimum markup still floors a cheap one');
+
+-- A cost is an argument to this function, so a traveler must not be able to call it and learn
+-- anything by feeding it numbers.
+select tests.authenticate_as('a9000000-0000-4000-8000-0000000000a1');
+select throws_ok(
+  $$ select public.suggest_experience_price('a9000000-0000-4000-8000-0000000000f1', 6500::bigint) $$,
+  '42501', null, 'a traveler cannot ask what we would charge for a given cost');
+
+-- ── Paid means owed (0067) ───────────────────────────────────────────────────
+-- We take the money first and buy the experience afterwards. That gap is only acceptable if it is
+-- impossible to forget, so the debt is created by the row becoming confirmed, not by the webhook.
+select tests.clear_auth();
+insert into public.bookings (id, confirmation_number, departure_id, tour_version_id, customer_id,
+                             status, payment_status, currency, subtotal_amount, total_amount, deposit_amount)
+values ('a9000000-0000-4000-8000-0000000000c1', 'GL-FULFIL1', '30000000-0000-4000-8000-000000000001',
+        '21000000-0000-4000-8000-000000000001', 'a9000000-0000-4000-8000-0000000000a1',
+        'confirmed', 'paid', 'EUR', 100000, 100000, 20000);
+
+select is((select count(*)::int from public.add_on_fulfilments), 0, 'nothing owed to begin with');
+
+-- A pending add-on is not yet paid for, so it owes nothing.
+insert into public.booking_add_ons (id, booking_id, add_on_id, quantity, unit_amount, total_amount, currency, status)
+values ('a9000000-0000-4000-8000-0000000000c2', 'a9000000-0000-4000-8000-0000000000c1',
+        'a9000000-0000-4000-8000-0000000000d1', 2, 9500, 19000, 'EUR', 'pending');
+select is((state.count)::int, 0, 'an unpaid add-on creates no obligation')
+from (select count(*) as count from public.add_on_fulfilments) state;
+
+-- Confirming it is what creates the debt.
+update public.booking_add_ons set status = 'confirmed'
+where id = 'a9000000-0000-4000-8000-0000000000c2';
+select is((select count(*)::int from public.add_on_fulfilments), 1,
+  'paying for a bought-in add-on puts it in the queue to be booked');
+select is((select status::text from public.add_on_fulfilments
+           where booking_add_on_id = 'a9000000-0000-4000-8000-0000000000c2'), 'pending',
+  'and it starts as something somebody still has to do');
+select is((select travelers from public.add_on_fulfilments
+           where booking_add_on_id = 'a9000000-0000-4000-8000-0000000000c2'), 2,
+  'for the number of people who were paid for');
+
+-- An add-on we run ourselves has no supplier and must not enter the queue.
+insert into public.departure_add_ons
+  (id, departure_id, title, kind, price_amount, currency, pricing_basis, is_active)
+values ('a9000000-0000-4000-8000-0000000000d3', '30000000-0000-4000-8000-000000000001',
+        'Welcome drinks, ours', 'activity', 0, 'EUR', 'per_booking', true);
+insert into public.booking_add_ons (booking_id, add_on_id, quantity, unit_amount, total_amount, currency, status)
+values ('a9000000-0000-4000-8000-0000000000c1', 'a9000000-0000-4000-8000-0000000000d3',
+        1, 0, 0, 'EUR', 'confirmed');
+select is((select count(*)::int from public.add_on_fulfilments), 1,
+  'something we run ourselves has nothing to fulfil and is not queued');
+
+-- ── Who sees it ──────────────────────────────────────────────────────────────
+-- Unlike every other supplier table here, the traveler reads this one — which is exactly why it
+-- holds no money.
+select tests.authenticate_as('a9000000-0000-4000-8000-0000000000a1');
+select is((select count(*)::int from public.add_on_fulfilments), 1,
+  'the traveler can see the experience we are booking for them');
+select hasnt_column('public', 'add_on_fulfilments', 'net_amount',
+  'and there is nothing in that row about what it cost us');
+
+select tests.clear_auth();
+select * from finish();
+rollback;

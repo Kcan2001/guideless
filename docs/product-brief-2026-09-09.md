@@ -90,6 +90,12 @@ or the meetups that already exist made more prominent.
 
 There is no plan today. Social strategy, and a real one rather than a posting schedule.
 
+**Written 9 September 2026: `docs/marketing-plan.md`.** Its conclusion, so it is not lost: thirty
+deposits is either ten thousand qualified cold visitors or three hundred warm conversations, and
+only one of those is achievable by one person in eight months. So the season is sold, not marketed
+— hosts, meetups and conversations — and the objective is to fill one departure and come home with
+proof, not to fill the season.
+
 ## Decided, 9 September 2026
 
 The three questions below blocked items 5, 6 and 8. Kyle answered them; the reasoning is kept so

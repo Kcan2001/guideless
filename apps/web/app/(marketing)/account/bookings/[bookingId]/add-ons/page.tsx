@@ -39,7 +39,8 @@ export default async function BookingAddOnsPage(
   const { booking: b, departure, tour, travelers } = booking;
 
   const [extras, { data: layout }] = await Promise.all([
-    listDepartureExtras(b.departure_id),
+    // Already booked, so this is the trip rather than the shop: sourced activities belong here.
+    listDepartureExtras(b.departure_id, { includeInTripOnly: true }),
     supabase
       .from("booking_travelers")
       .select("traveler_id, room_index, is_lead, created_at")

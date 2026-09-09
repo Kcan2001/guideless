@@ -68,6 +68,12 @@ const serverSchema = z.object({
   GOOGLE_PLACES_KEY: z.string().min(1).optional(),
   /** Bookable experiences. Only the stub exists until item 7 brings a real provider. */
   RESERVATION_PROVIDER: z.enum(["stub"]).default("stub"),
+  /**
+   * Experience sourcing (docs/experiences.md). `viator` needs VIATOR_API_KEY *and* an adapter
+   * written against a probed sandbox — see scripts/viator-probe.mjs before switching it on.
+   */
+  EXPERIENCE_SUPPLIER: z.enum(["mock", "viator"]).default("mock"),
+  VIATOR_API_KEY: z.string().min(1).optional(),
 });
 
 let cachedServerEnv: z.infer<typeof serverSchema> | undefined;

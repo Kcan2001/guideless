@@ -4,7 +4,7 @@
 -- rows, and the aggregate never counts anything unpublished.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(34);
+select plan(35);
 
 create schema if not exists tests;
 grant usage on schema tests to anon, authenticated;
@@ -117,7 +117,7 @@ select is((select count(*)::int from public.reviewable_bookings()), 0,
 
 -- ── Visibility while pending ─────────────────────────────────────────────────
 select tests.act_as_anon();
-select is((select count(*)::int from public.reviews), 0, 'anon sees no pending review');
+select is((select count(*)::int from public.reviews_public), 0, 'anon sees no pending review');
 select is((select count(*)::int from public.tour_review_stats), 0,
   'the aggregate has no row while nothing is published');
 
@@ -143,7 +143,12 @@ select lives_ok(
   'a moderator can publish');
 
 select tests.act_as_anon();
-select is((select count(*)::int from public.reviews), 1, 'anon now sees the published review');
+-- Note the moderator published it with a staff note attached. Migration 0069 stopped anon reading
+-- the table for exactly that reason: the row carries the note and the author's user id, and RLS is
+-- row-level, so "published rows are public" published those too. Anon reads the projection now.
+select is((select count(*)::int from public.reviews_public), 1, 'anon now sees the published review');
+select is((select count(*)::int from public.reviews), 0,
+  'but not through the table, which still holds the moderator note and the author user id');
 select is((select review_count from public.tour_review_stats limit 1), 1,
   'the aggregate counts the published review');
 select is((select average_rating from public.tour_review_stats limit 1), 5.00::numeric,
@@ -186,7 +191,7 @@ select is((select author_name from public.trip_photos limit 1),
   (select author_name from public.reviews limit 1), 'a photo carries the same frozen byline');
 
 select tests.act_as_anon();
-select is((select count(*)::int from public.trip_photos), 0, 'anon sees no pending photo');
+select is((select count(*)::int from public.trip_photos_public), 0, 'anon sees no pending photo');
 
 select * from finish();
 rollback;

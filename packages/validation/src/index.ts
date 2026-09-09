@@ -13,6 +13,8 @@ export * from "./community";
 export * from "./hotels";
 export * from "./growth";
 export * from "./reviews";
+export * from "./testimonials";
+export * from "./email";
 export * from "./content";
 export * from "./surveys";
 export * from "./assistant";
