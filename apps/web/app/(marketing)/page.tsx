@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, CalendarDays, MapPin } from "lucide-react";
 import { brand } from "@guideless/config";
@@ -24,6 +25,11 @@ import { listPublishedTours } from "@/lib/data/tours";
 import { sitePhotos } from "@/lib/photos";
 import { faqJsonLd } from "@/lib/seo";
 import { cn } from "@/lib/utils";
+
+// Title and description come from the root layout; this is only here so the homepage declares a
+// canonical like every other indexable page. Without it the site's most-linked URL is the one page
+// that never told a crawler which version of itself is authoritative.
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 export const revalidate = 300;
 

@@ -19,6 +19,7 @@ export const metadata: Metadata = {
   title: "What's coming",
   description:
     "Trips opening, departures still to run and city evenings — everything Guideless has coming up, in one place.",
+  alternates: { canonical: "/whats-coming" },
 };
 
 /**
