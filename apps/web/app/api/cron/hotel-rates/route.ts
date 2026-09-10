@@ -6,8 +6,16 @@ export const runtime = "nodejs";
 export const maxDuration = 300;
 
 /**
- * Nightly hotel-rate refresh (vercel.json crons). Vercel calls with `Authorization: Bearer CRON_SECRET`.
+ * Weekly hotel-rate refresh (vercel.json crons). Vercel calls with `Authorization: Bearer CRON_SECRET`.
  * Refreshes every active, hotel-linked stay option on departures in the next 400 days.
+ *
+ * WHY WEEKLY, AND NOT MORE OFTEN
+ * This job exists to stop the figure on a tour page going stale-stale, and that page says "as of"
+ * with the date, so a week-old estimate is an honest estimate. It is NOT what a traveler decides
+ * on: opening the Trip Builder re-derives every tier from a fresh rate, and checkout re-checks once
+ * more before charging. Running this four times a day bought nothing a traveler ever saw and spent
+ * supplier calls we will want later — at twenty trips it was heading for about 1,900 requests a
+ * day, and LiteAPI throttles well below that.
  */
 /** Anything can be thrown. Say what it was rather than reducing it to "failed". */
 function describeError(err: unknown): string {
