@@ -6,7 +6,7 @@ import { JsonLd } from "@/components/site/json-ld";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Field, FormError, FormMessage, Input, Select, Textarea } from "@/components/ui/field";
 import { applyToHost } from "@/lib/community/actions";
-import { HOST_FREE_SPOT_THRESHOLD } from "@/lib/data/community";
+import { HOST_CREDIT_CAP, HOST_CREDIT_PER_TRAVELER } from "@/lib/data/community";
 import { listPublishedTours } from "@/lib/data/tours";
 import { breadcrumbJsonLd } from "@/lib/seo";
 import { cn } from "@/lib/utils";
@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 export const revalidate = 300;
 export const metadata: Metadata = {
   title: "Host a trip",
-  description: `Bring ${HOST_FREE_SPOT_THRESHOLD} travelers from your community and travel free. You host the welcome drinks; Guideless books everything else.`,
+  description: `Earn $${HOST_CREDIT_PER_TRAVELER / 100} off your own trip for every traveler you bring, up to $${HOST_CREDIT_CAP / 100}. You host the welcome drinks; Guideless books everything else.`,
   alternates: { canonical: "/host" },
 };
 
@@ -22,7 +22,7 @@ const HOW = [
   ["Pick a route and a date", "Any open departure, or ask us to open one for your group."],
   [
     "Share it",
-    `Your people book normally, with your name on it. At ${HOST_FREE_SPOT_THRESHOLD} confirmed travelers your own place is free.`,
+    `Your people book normally, with your name on it. Every confirmed traveler takes $${HOST_CREDIT_PER_TRAVELER / 100} off your own trip.`,
   ],
   [
     "Host night one",
@@ -42,7 +42,7 @@ export default async function HostPage(props: PageProps<"/host">) {
           Host program
         </p>
         <h1 className="mt-3 max-w-3xl text-5xl font-bold md:text-6xl">
-          Bring {HOST_FREE_SPOT_THRESHOLD}, travel free.
+          Bring your people, pay less.
         </h1>
         <p className="mt-6 max-w-xl text-lg text-muted-foreground">
           Running clubs, alumni groups, a company social committee, a newsletter, a group chat that
@@ -65,8 +65,8 @@ export default async function HostPage(props: PageProps<"/host">) {
         </ol>
         <ul className="mt-8 grid gap-3 text-sm sm:grid-cols-2">
           {[
-            `${HOST_FREE_SPOT_THRESHOLD} confirmed travelers = your trip is free (own room, base trip).`,
-            "Below that, you still get a credit for every traveler you bring.",
+            `$${HOST_CREDIT_PER_TRAVELER / 100} off your own trip per confirmed traveler, up to $${HOST_CREDIT_CAP / 100}.`,
+            "The same amount whichever tier you pick, so a big trip is not a bigger favour.",
             "You never handle money or logistics. Everyone books and pays on this site.",
             "Your group sits inside a departure with other travelers, or fills one on its own.",
           ].map((t) => (

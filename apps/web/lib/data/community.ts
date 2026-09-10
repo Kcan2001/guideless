@@ -177,5 +177,15 @@ export async function getMeetupAdmin(id: string) {
   };
 }
 
-/** Threshold for "bring N, travel free". system_settings is staff-only, so the public page uses this. */
-export const HOST_FREE_SPOT_THRESHOLD = 8;
+/**
+ * What a host earns, in minor units. Mirrors `host_credit_per_traveler` and `host_credit_cap` in
+ * system_settings, which is staff-only, so the public page reads these.
+ *
+ * The old offer was "bring 8 and travel free", and it was retired on 2026-09-10 because a free
+ * place is the most expensive thing we can give away: on the Monaco departure it is between $1,670
+ * and $31,640, and on the two tiers nearest the circuit it is a room we have already paid for and
+ * cannot resell. A flat credit per traveler costs the same whichever tier the host picks, which is
+ * the whole point.
+ */
+export const HOST_CREDIT_PER_TRAVELER = 10000;
+export const HOST_CREDIT_CAP = 100000;

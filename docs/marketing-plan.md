@@ -9,7 +9,8 @@ we are deliberately not doing yet._
 ## 0. The correction that reshaped this plan
 
 The first draft said Guideless had no track record, inferred from an empty `reviews` table. Wrong:
-**Monaco weekends have been run before, several times, just not under this company name.** That is
+**Monaco weekends have been run before, just not under this company name.** Not "several times" — Monaco
+runs one Grand Prix a year, so that phrasing claimed a decade we do not have (Kyle, 2026-09-10). That is
 the single strongest asset in this document and the first version did not contain it.
 
 Three consequences, worked through in the sections below: Monaco becomes the acquisition flagship
@@ -24,16 +25,16 @@ the earlier trips. See `docs/growth.md`.
 
 ## 1. Where we actually stand
 
-|                                                      |                                                                           |
-| ---------------------------------------------------- | ------------------------------------------------------------------------- |
-| Seats to sell in 2027                                | **90** across four departures                                             |
-| Seats needed to make every minimum                   | **30**                                                                    |
-| First departure                                      | **14 May 2027** — eight months out                                        |
-| Travelers who have been on a Guideless trip          | **0**                                                                     |
-| Monaco weekends run before, under other arrangements | **several** — the strongest asset here; get the exact number              |
-| Published reviews                                    | **0**, by design — `submit_review()` refuses anyone who has not travelled |
-| Photos and video of an actual departure              | **0**                                                                     |
-| People doing this                                    | **1**                                                                     |
+|                                                      |                                                                                                                                                                        |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Seats to sell in 2027                                | **90** across four departures                                                                                                                                          |
+| Seats needed to make every minimum                   | **30**                                                                                                                                                                 |
+| First departure                                      | **14 May 2027** — eight months out                                                                                                                                     |
+| Travelers who have been on a Guideless trip          | **0**                                                                                                                                                                  |
+| Monaco weekends run before, under other arrangements | **one a year at most** — Monaco runs a single GP annually, so "several" was never available. Say the real number or say the format is familiar and the company is new. |
+| Published reviews                                    | **0**, by design — `submit_review()` refuses anyone who has not travelled                                                                                              |
+| Photos and video of an actual departure              | **0**                                                                                                                                                                  |
+| People doing this                                    | **1**                                                                                                                                                                  |
 
 | Departure         | Dates          | Price  | Capacity | Minimum | Books by    |
 | ----------------- | -------------- | ------ | -------- | ------- | ----------- |

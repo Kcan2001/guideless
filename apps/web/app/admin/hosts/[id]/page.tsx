@@ -13,7 +13,11 @@ import {
 } from "@/components/admin/ui";
 import { decideHostApplicationAction } from "@/lib/admin/actions/community";
 import { requireStaff } from "@/lib/auth/staff";
-import { getHostApplication, HOST_FREE_SPOT_THRESHOLD } from "@/lib/data/community";
+import {
+  getHostApplication,
+  HOST_CREDIT_CAP,
+  HOST_CREDIT_PER_TRAVELER,
+} from "@/lib/data/community";
 
 export default async function AdminHostApplicationPage(props: PageProps<"/admin/hosts/[id]">) {
   const [{ id }, sp] = await Promise.all([props.params, props.searchParams, requireStaff()]);
@@ -68,7 +72,7 @@ export default async function AdminHostApplicationPage(props: PageProps<"/admin/
         </Section>
         <Section
           title="Decision"
-          description={`Approved hosts travel free at ${HOST_FREE_SPOT_THRESHOLD} confirmed travelers (system setting host_free_spot_threshold).`}
+          description={`Approved hosts earn $${HOST_CREDIT_PER_TRAVELER / 100} off their own trip per confirmed traveler, capped at $${HOST_CREDIT_CAP / 100} (system settings host_credit_per_traveler, host_credit_cap). The free-place offer was retired on 2026-09-10.`}
         >
           <form action={decideHostApplicationAction} className="space-y-3">
             <input type="hidden" name="applicationId" value={a.id} />
