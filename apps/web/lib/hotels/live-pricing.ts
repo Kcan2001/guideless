@@ -99,7 +99,7 @@ export async function repriceDepartureFromLiveRates(
   const { data: options } = await sb
     .from("departure_stay_options")
     .select(
-      "id, name, tier, position, is_default, auto_price, cost_multiple, fixed_cost_amount, price_delta_amount, priced_room_amount, hotel_id",
+      "id, name, tier, position, is_default, auto_price, cost_multiple, fixed_cost_amount, price_delta_amount, priced_room_amount, hotel_id, details",
     )
     .eq("departure_id", departureId)
     .eq("is_active", true)
@@ -120,13 +120,20 @@ export async function repriceDepartureFromLiveRates(
   // One room cost per tier, at single occupancy: the base price is per traveler in their own room,
   // and the shared-room discount is applied separately from the same room cost.
   const costs = new Map<string, number>();
-  for (const o of options) {
-    const ctx = await resolveStayContext(o.id);
-    if (!ctx) continue;
-    const rate = await bestStoredRate(ctx, 1);
-    if (rate?.total_amount == null) continue;
-    costs.set(o.id, rate.total_amount);
-  }
+  await Promise.all(
+    options.map(async (o) => {
+      const ctx = await resolveStayContext(o.id);
+      if (!ctx) return;
+      // Price the room we actually sell. A tier that says "Breakfast: Included" must not be costed
+      // from a room-only rate — that is a hole the size of the breakfast, and it was live.
+      const requireBreakfast = /^included/i.test(
+        String((o.details as { breakfast?: string } | null)?.breakfast ?? ""),
+      );
+      const rate = await bestStoredRate(ctx, 1, { requireBreakfast });
+      if (rate?.total_amount == null) return;
+      costs.set(o.id, rate.total_amount);
+    }),
+  );
 
   const priceFor = (o: (typeof options)[number]) => {
     const room = costs.get(o.id);

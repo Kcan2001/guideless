@@ -45,7 +45,7 @@ export function DepartureStep({
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-3xl font-bold">{title}</h1>
+        <h2 className="text-3xl font-bold">{title}</h2>
         <p className="mt-2 text-muted-foreground">Prices are per traveler in their own room.</p>
       </header>
 

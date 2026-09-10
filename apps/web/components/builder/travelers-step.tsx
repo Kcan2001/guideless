@@ -91,7 +91,7 @@ export function TravelersStep({
   return (
     <form id={STEP_FORM_ID} onSubmit={form.handleSubmit(onNext)} className="space-y-8" noValidate>
       <header>
-        <h1 className="text-3xl font-bold">{title}</h1>
+        <h2 className="text-3xl font-bold">{title}</h2>
         <p className="mt-2 text-muted-foreground">
           Names as on passports. Only what hotels and rail operators need.
         </p>

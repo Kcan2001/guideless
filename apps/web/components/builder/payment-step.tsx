@@ -115,7 +115,7 @@ export function PaymentStep({
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-3xl font-bold">{title}</h1>
+        <h2 className="text-3xl font-bold">{title}</h2>
         <p className="mt-2 text-muted-foreground">
           Card details go to Stripe&rsquo;s secure page. We never see your card.
         </p>
