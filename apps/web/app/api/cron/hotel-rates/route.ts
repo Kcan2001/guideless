@@ -9,6 +9,22 @@ export const maxDuration = 300;
  * Nightly hotel-rate refresh (vercel.json crons). Vercel calls with `Authorization: Bearer CRON_SECRET`.
  * Refreshes every active, hotel-linked stay option on departures in the next 400 days.
  */
+/** Anything can be thrown. Say what it was rather than reducing it to "failed". */
+function describeError(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  if (err && typeof err === "object") {
+    const e = err as { message?: string; code?: string; details?: string; hint?: string };
+    const parts = [e.code, e.message, e.details, e.hint].filter(Boolean);
+    if (parts.length) return parts.join(" · ");
+    try {
+      return JSON.stringify(err).slice(0, 300);
+    } catch {
+      return "unserialisable error";
+    }
+  }
+  return String(err);
+}
+
 export async function GET(req: Request) {
   const secret = getServerEnv().CRON_SECRET;
   if (!secret)
@@ -31,7 +47,11 @@ export async function GET(req: Request) {
       for (const s of r.suppliers)
         if (!s.ok) failures.push({ stayOptionId: id, error: s.error ?? "failed" });
     } catch (err) {
-      failures.push({ stayOptionId: id, error: err instanceof Error ? err.message : "failed" });
+      // Supabase throws PostgrestError, which is a plain object rather than an Error, so the old
+      // `instanceof Error ? … : "failed"` reported every database rejection as the word "failed"
+      // and threw the reason away. A constraint violation is the most useful thing this endpoint
+      // can tell us; do not let it be swallowed again.
+      failures.push({ stayOptionId: id, error: describeError(err) });
     }
   }
   return NextResponse.json({
