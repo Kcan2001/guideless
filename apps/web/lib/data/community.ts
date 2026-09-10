@@ -189,3 +189,15 @@ export async function getMeetupAdmin(id: string) {
  */
 export const HOST_CREDIT_PER_TRAVELER = 10000;
 export const HOST_CREDIT_CAP = 100000;
+
+/**
+ * What a referral is worth, in minor units. Mirrors `referral_discount_amount` and
+ * `referral_reward_amount` in system_settings (staff-only), which `quote_booking()` reads.
+ *
+ * Flat on every trip, never a percentage: 5% of a $1,385 Nice trip is $69 and 5% of a $31,640
+ * Monte Carlo one is $1,580, which is twenty-three times the giveaway for the same act of telling
+ * a friend, at exactly the end of the catalogue where the margin is already committed to a
+ * non-refundable room. Migration 20260910000800 has the full reasoning and the competitor figures.
+ */
+export const REFERRAL_FRIEND_DISCOUNT = 5000;
+export const REFERRAL_REWARD = 10000;
