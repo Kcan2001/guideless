@@ -10,6 +10,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "test:e2e:paid": "playwright test e2e/paid-booking.spec.ts --project=desktop",
     "clean": "rimraf .next .turbo"
   },
   "dependencies": {

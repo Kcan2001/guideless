@@ -9,10 +9,13 @@ import { createClient } from "@supabase/supabase-js";
  * pgTAP test that had assumed it was the only writer. Test data that outlives its test becomes
  * somebody else's flake.
  *
- * Only addresses this suite generates are touched, and only on a stack that handed us a service
- * key, which is the local one.
+ * Only addresses this suite generates are touched, and only against the local stack. A sweep that
+ * deletes every `@example.com` account is safe when the database is thrown away after the run and
+ * is not the kind of thing to point at a hosted project, so a run against a deployed environment
+ * (`E2E_BASE_URL`) skips this entirely — those specs clean up the rows they created themselves.
  */
 export default async function globalTeardown(): Promise<void> {
+  if (process.env.E2E_BASE_URL) return;
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) return;
