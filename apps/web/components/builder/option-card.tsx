@@ -67,7 +67,10 @@ export function OptionCard({
       aria-labelledby={titleId}
       data-selected={selected || undefined}
       className={cn(
-        "relative flex flex-col overflow-hidden rounded-xl border bg-surface transition-colors",
+        // A container, not just a box: what is inside should lay out against the card's own
+        // width. These cards sit one-up on a quiet day and two-up on a busy one, so a viewport
+        // breakpoint splits a narrow card into two crushed columns on a wide screen.
+        "@container relative flex flex-col overflow-hidden rounded-xl border bg-surface transition-colors",
         selected ? "border-ink ring-1 ring-ink" : "border-border",
         disabled && "opacity-60",
       )}
@@ -134,7 +137,7 @@ export function OptionCard({
         {description && <p className="text-sm text-muted-foreground">{description}</p>}
 
         {((includes?.length ?? 0) > 0 || (excludes?.length ?? 0) > 0) && (
-          <div className="grid gap-3 text-sm sm:grid-cols-2">
+          <div className="grid gap-3 text-sm @md:grid-cols-2">
             {includes && includes.length > 0 && (
               <ul className="space-y-1">
                 {includes.map((line) => (

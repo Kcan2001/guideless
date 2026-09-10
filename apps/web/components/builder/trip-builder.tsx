@@ -261,6 +261,7 @@ export function TripBuilder({
       title={current.title}
       departure={departure}
       draft={draft}
+      quote={quoteState.quote ?? null}
       userSignedIn={Boolean(user)}
       onBack={back}
       onPaymentOption={(paymentOption) => update({ paymentOption })}

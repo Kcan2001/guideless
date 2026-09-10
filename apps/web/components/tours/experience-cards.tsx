@@ -57,6 +57,11 @@ function when(a: AddOnWithCounts): string | null {
  * included, why it costs that, who is going (aggregate, real), how many are left (only when
  * few), the cancellation window and any age rule. Selection happens in checkout; the card links
  * there. `size="large"` is for mutually exclusive tiers (race views), `"grid"` for the rest.
+ *
+ * `pickOne` says the set is exclusive, and the card works out how to phrase it. Since migration
+ * 0073 the rule is one per *day*, not one per trip, so a group spread across several days reads
+ * "one per day" — saying "choose one" there would tell a Monaco traveler they must pick between
+ * Saturday and Sunday when they can have both.
  */
 export function ExperienceCards({
   addOns,
@@ -78,6 +83,18 @@ export function ExperienceCards({
 }) {
   if (addOns.length === 0) return null;
   const today = new Date().toISOString().slice(0, 10);
+  // Distinct days the exclusive set touches, spans included.
+  const groupDays = new Set(
+    addOns.flatMap((a) =>
+      a.day_number == null
+        ? []
+        : Array.from(
+            { length: Math.max(a.end_day_number ?? a.day_number, a.day_number) - a.day_number + 1 },
+            (_, i) => a.day_number! + i,
+          ),
+    ),
+  );
+  const exclusiveCopy = groupDays.size > 1 ? "one per day" : "choose one";
   return (
     <ul
       className={cn(
@@ -126,7 +143,9 @@ export function ExperienceCards({
                 <p className="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                   {!image && <TierBadge tier={a.tier} />}
                   {KIND_LABEL[a.kind]}
-                  {pickOne && <span className="normal-case tracking-normal">· choose one</span>}
+                  {pickOne && (
+                    <span className="normal-case tracking-normal">· {exclusiveCopy}</span>
+                  )}
                   {!image && <OptionLabelBadge label={a.label} />}
                 </p>
                 <h3 className="mt-2 font-heading text-xl font-bold md:text-2xl">{a.title}</h3>
