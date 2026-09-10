@@ -1,16 +1,17 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { Route } from "next";
 import { BedDouble, Check, Coffee, Info, MapPin, Minus, Star, TrainFront } from "lucide-react";
 import { formatMoney } from "@guideless/utils";
 import type { Currency } from "@guideless/types";
+import { DetailModal } from "@/components/tours/detail-modal";
+import { HotelCarousel } from "@/components/tours/hotel-carousel";
 import { OptionLabelBadge, TierBadge } from "@/components/tours/option-label";
 import { buttonVariants } from "@/components/ui/button";
 import { PricedAsOf } from "@/components/tours/priced-as-of";
 import { StayHotelPanel } from "@/components/tours/stay-hotel-panel";
 import { StayScarcity } from "@/components/tours/stay-scarcity";
 import { stayDetails, type StayOption } from "@/lib/data/extras";
-import { photoAlt, photoPosition } from "@/lib/photos";
+import { photoAlt } from "@/lib/photos";
 import { cn } from "@/lib/utils";
 
 function money(amount: number, currency: Currency) {
@@ -18,10 +19,17 @@ function money(amount: number, currency: Currency) {
 }
 
 /**
- * Accommodation tiers as editorial cards: photo, label, tagline, price, the practical facts a
- * traveler compares on (neighbourhood, station, train time, breakfast, room), what is and is not
- * in the price, and why the tier costs what it costs. Every fact comes from the row; nothing is
- * inferred. Star ratings render only when set, and an unconfirmed property says so.
+ * Accommodation tiers, as cards you can compare at a glance.
+ *
+ * The card carries only what a traveler chooses BETWEEN: the property's own photographs, the price,
+ * how many places are left, and three facts. Everything else — the full description, what is and is
+ * not in the price, why it costs what it does, the address and the amenities — is one click away in
+ * a modal. The previous version put all of that inline, three cards across, which made a wall of
+ * text nobody reads and buried the price below the fold.
+ *
+ * Photographs come from the property itself where we have a hotel linked, and fall back to a
+ * destination photo otherwise. Star ratings render only when set, and an unconfirmed property says
+ * so rather than implying a booking we have not made.
  */
 export function StayTierCards({
   options,
@@ -46,16 +54,24 @@ export function StayTierCards({
     >
       {options.map((o) => {
         const d = stayDetails(o);
-        const image = o.image_urls[0];
         const saving = o.shared_room_discount_amount ?? sharedRoomDiscountAmount;
-        const facts: Array<{ icon: typeof MapPin; label: string; value: string }> = [];
-        if (d.neighborhood) facts.push({ icon: MapPin, label: "Where", value: d.neighborhood });
+
+        // The property's own photography wins; the seeded destination shot is the fallback.
+        const gallery = o.hotel?.imageUrls?.length ? o.hotel.imageUrls : o.image_urls;
+        const galleryAlt = o.hotel?.name ?? photoAlt(o.image_urls[0] ?? "", o.name);
+
+        const allFacts: Array<{ icon: typeof MapPin; label: string; value: string }> = [];
+        if (d.neighborhood) allFacts.push({ icon: MapPin, label: "Where", value: d.neighborhood });
         if (d.stationDistance)
-          facts.push({ icon: TrainFront, label: "Station", value: d.stationDistance });
+          allFacts.push({ icon: TrainFront, label: "Station", value: d.stationDistance });
         if (d.trainTime)
-          facts.push({ icon: TrainFront, label: "To the action", value: d.trainTime });
-        if (d.breakfast) facts.push({ icon: Coffee, label: "Breakfast", value: d.breakfast });
-        if (d.roomType) facts.push({ icon: BedDouble, label: "Room", value: d.roomType });
+          allFacts.push({ icon: TrainFront, label: "To the action", value: d.trainTime });
+        if (d.breakfast) allFacts.push({ icon: Coffee, label: "Breakfast", value: d.breakfast });
+        if (d.roomType) allFacts.push({ icon: BedDouble, label: "Room", value: d.roomType });
+
+        // Three on the card. The rest are in the sheet.
+        const summaryFacts = allFacts.slice(0, 3);
+
         return (
           <li
             key={o.id}
@@ -64,35 +80,27 @@ export function StayTierCards({
               o.is_default ? "border-ink" : "border-border",
             )}
           >
-            {image && (
-              <div className="relative aspect-[16/10] overflow-hidden bg-sand">
-                <Image
-                  src={image}
-                  alt={photoAlt(image, `${o.name}${o.area ? `, ${o.area}` : ""}`)}
-                  fill
-                  sizes="(min-width: 1024px) 560px, 100vw"
-                  className="object-cover"
-                  style={{ objectPosition: photoPosition(image) }}
+            {gallery.length > 0 && (
+              <div className="relative aspect-[16/10]">
+                <HotelCarousel
+                  images={gallery}
+                  alt={galleryAlt}
+                  sizes="(min-width: 1280px) 420px, (min-width: 768px) 50vw, 100vw"
+                  className="h-full w-full"
                 />
-                {(o.tier || o.label) && (
-                  <div className="absolute top-4 left-4 flex flex-wrap items-center gap-2">
-                    <TierBadge tier={o.tier} />
-                    <OptionLabelBadge label={o.label} />
-                  </div>
-                )}
+                <div className="pointer-events-none absolute left-3 top-3 flex flex-wrap gap-1.5">
+                  <TierBadge tier={o.tier} />
+                  <OptionLabelBadge label={o.label} />
+                </div>
               </div>
             )}
-            <div className="flex flex-1 flex-col gap-5 p-6 md:p-7">
+
+            <div className="flex flex-1 flex-col gap-3 p-5">
               <div>
-                <p className="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                  {!image && <TierBadge tier={o.tier} />}
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {o.area ?? "Where you stay"}
-                  {!image && <OptionLabelBadge label={o.label} />}
-                  {o.is_default && !o.label && (
-                    <span className="normal-case tracking-normal">· included in the base trip</span>
-                  )}
                 </p>
-                <h3 className="mt-2 font-heading text-2xl font-bold">
+                <h3 className="mt-1.5 font-heading text-xl font-bold">
                   {o.name}
                   {o.star_rating ? (
                     <span
@@ -105,12 +113,10 @@ export function StayTierCards({
                     </span>
                   ) : null}
                 </h3>
-                {o.tagline && (
-                  <p className="mt-1 font-heading text-lg text-muted-foreground">{o.tagline}</p>
-                )}
+                {o.hotel && <p className="mt-1 text-sm text-muted-foreground">{o.hotel.name}</p>}
               </div>
 
-              <div className="flex flex-wrap items-baseline justify-between gap-2 border-y border-border py-3">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-y border-border py-3">
                 <p className="font-heading text-xl font-bold">
                   {o.price_delta_amount === 0
                     ? "Included"
@@ -127,90 +133,29 @@ export function StayTierCards({
                     spotsLeft={o.spotsLeft}
                     isLimited={o.isLimited}
                     soldOut={o.soldOut}
-                    allocationHeld={stayDetails(o).hotelConfirmed}
+                    allocationHeld={d.hotelConfirmed}
                   />
                 </span>
-                {saving > 0 && (
-                  <p className="text-sm text-muted-foreground">
-                    Two sharing each save {money(saving, currency)}
-                  </p>
-                )}
               </div>
 
-              {o.description && <p className="text-muted-foreground">{o.description}</p>}
-
-              {facts.length > 0 && (
-                <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
-                  {facts.map((f) => (
-                    <div key={f.label} className="flex items-start gap-2">
-                      <f.icon className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden />
-                      <div>
+              {summaryFacts.length > 0 && (
+                <dl className="grid gap-x-4 gap-y-2 text-sm sm:grid-cols-2">
+                  {summaryFacts.map(({ icon: Icon, label, value }) => (
+                    <div key={label} className="flex gap-2">
+                      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden />
+                      <div className="min-w-0">
                         <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-                          {f.label}
+                          {label}
                         </dt>
-                        <dd>{f.value}</dd>
+                        <dd>{value}</dd>
                       </div>
                     </div>
                   ))}
                 </dl>
               )}
 
-              {(o.includes.length > 0 || o.excludes.length > 0) && (
-                <div className="grid gap-4 text-sm sm:grid-cols-2">
-                  {o.includes.length > 0 && (
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                        In the price
-                      </p>
-                      <ul className="mt-2 space-y-1.5">
-                        {o.includes.map((line) => (
-                          <li key={line} className="flex gap-2">
-                            <Check className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden />
-                            <span>{line}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {o.excludes.length > 0 && (
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                        Not in the price
-                      </p>
-                      <ul className="mt-2 space-y-1.5 text-muted-foreground">
-                        {o.excludes.map((line) => (
-                          <li key={line} className="flex gap-2">
-                            <Minus className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-                            <span>{line}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {o.why_price_note && (
-                <p className="rounded-lg bg-cloud p-4 text-sm">
-                  <span className="font-semibold">Why this price. </span>
-                  {o.why_price_note}
-                </p>
-              )}
-
-              {o.hotel ? (
-                <StayHotelPanel hotel={o.hotel} confirmed={d.hotelConfirmed} />
-              ) : (
-                !d.hotelConfirmed && (
-                  <p className="flex items-start gap-2 text-sm text-muted-foreground">
-                    <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-                    Property confirmed at booking. We name the hotel in your confirmation, never a
-                    star rating we cannot stand behind.
-                  </p>
-                )
-              )}
-
-              {ctaHref && (
-                <div className="mt-auto pt-2">
+              <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-2 pt-2">
+                {ctaHref && (
                   <Link
                     href={ctaHref}
                     className={buttonVariants({
@@ -220,8 +165,92 @@ export function StayTierCards({
                   >
                     {ctaLabel}
                   </Link>
-                </div>
-              )}
+                )}
+                <DetailModal
+                  trigger="See the detail"
+                  title={o.name}
+                  subtitle={o.hotel?.name ?? o.area}
+                >
+                  {o.tagline && <p className="font-heading text-lg">{o.tagline}</p>}
+                  {o.description && <p className="text-sm">{o.description}</p>}
+
+                  {allFacts.length > 0 && (
+                    <dl className="grid gap-x-4 gap-y-3 text-sm sm:grid-cols-2">
+                      {allFacts.map(({ icon: Icon, label, value }) => (
+                        <div key={label} className="flex gap-2">
+                          <Icon className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden />
+                          <div className="min-w-0">
+                            <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+                              {label}
+                            </dt>
+                            <dd>{value}</dd>
+                          </div>
+                        </div>
+                      ))}
+                    </dl>
+                  )}
+
+                  {saving > 0 && (
+                    <p className="text-sm text-muted-foreground">
+                      Two sharing a room each save {money(saving, currency)}.
+                    </p>
+                  )}
+
+                  {(o.includes.length > 0 || o.excludes.length > 0) && (
+                    <div className="grid gap-4 text-sm sm:grid-cols-2">
+                      {o.includes.length > 0 && (
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            In the price
+                          </p>
+                          <ul className="mt-2 space-y-1.5">
+                            {o.includes.map((line) => (
+                              <li key={line} className="flex gap-2">
+                                <Check className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden />
+                                <span>{line}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {o.excludes.length > 0 && (
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            Not in the price
+                          </p>
+                          <ul className="mt-2 space-y-1.5 text-muted-foreground">
+                            {o.excludes.map((line) => (
+                              <li key={line} className="flex gap-2">
+                                <Minus className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+                                <span>{line}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {o.why_price_note && (
+                    <p className="rounded-lg bg-cloud p-4 text-sm">
+                      <span className="font-semibold">Why this price. </span>
+                      {o.why_price_note}
+                    </p>
+                  )}
+
+                  {o.hotel ? (
+                    <StayHotelPanel hotel={o.hotel} confirmed={d.hotelConfirmed} />
+                  ) : (
+                    !d.hotelConfirmed && (
+                      <p className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+                        Property confirmed at booking. We name the hotel in your confirmation, never
+                        a star rating we cannot stand behind.
+                      </p>
+                    )
+                  )}
+                </DetailModal>
+              </div>
             </div>
           </li>
         );

@@ -44,6 +44,9 @@ const nextConfig: NextConfig = {
       // Supabase Storage (public buckets and signed URLs).
       { protocol: "https", hostname: "*.supabase.co", pathname: "/storage/v1/object/**" },
       { protocol: "http", hostname: "127.0.0.1", port: "54321", pathname: "/storage/v1/object/**" },
+      // Hotel photography, hosted by the supplier rather than copied into the repo: these are the
+      // property's own current images and they change when the property changes them.
+      { protocol: "https", hostname: "static.cupid.travel", pathname: "/hotels/**" },
     ],
   },
   async headers() {
