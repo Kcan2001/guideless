@@ -89,12 +89,17 @@ select is(
      '[{"addOnId":"a3000000-0000-4000-8000-0000000000a3","travelerIndexes":[1]},{"addOnId":"a3000000-0000-4000-8000-0000000000a4","travelerIndexes":[1]}]'::jsonb, null, 'deposit', false) -> 'problems' -> 0 ->> 'code'),
   'tier_conflict', 'one traveler cannot hold two tickets from the same tier group');
 
--- Referral code: Frank books with Erin's code and gets 5% off the base trip.
+-- Referral code: Frank books with Erin's code and gets a FLAT amount off the base trip.
+-- Flat since migration 20260910000800. A percentage was $69 on a Nice trip and would have been
+-- $1,580 on a Monte Carlo one; the thank-you should not scale with the scarcity of the room.
 select tests.authenticate_as('e2000000-0000-4000-8000-0000000000e2');
 select is(
   (public.quote_booking('30000000-0000-4000-8000-000000000001', array[1], null, '[]',
      tests.code_of('e1000000-0000-4000-8000-0000000000e1'), 'full', true) ->> 'discount_amount')::int,
-  (349500 * 5) / 100, 'a friend''s referral code takes the configured percent off the base trip');
+  -- 5000 = system_settings.referral_discount_amount. Hardcoded because this assertion runs as a
+  -- traveler and system_settings is staff-only, so a subselect here reads NULL rather than failing.
+  5000,
+  'a friend''s referral code takes the flat configured amount off the base trip, not a percentage');
 select is(
   (public.quote_booking('30000000-0000-4000-8000-000000000001', array[1], null, '[]',
      tests.code_of('e2000000-0000-4000-8000-0000000000e2'), 'full', true) -> 'problems' -> 0 ->> 'code'),
@@ -119,7 +124,9 @@ select tests.clear_auth();
 
 select is(
   (select total_amount::int from public.bookings where customer_id = 'e2000000-0000-4000-8000-0000000000e2'),
-  ((349500 + 85000 - 35000) * 2) - (((349500 + 85000 - 35000) * 2 * 5) / 100) + 14500 * 2 + 9000,
+  ((349500 + 85000 - 35000) * 2)
+    - (select (value #>> '{}')::int from public.system_settings where key = 'referral_discount_amount')
+    + 14500 * 2 + 9000,
   'the booking total equals the quote: base with tier and shared discount, minus referral, plus add-ons');
 select is(
   (select count(distinct room_index)::int from public.booking_travelers bt join public.bookings b on b.id = bt.booking_id

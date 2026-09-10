@@ -4,7 +4,7 @@
 
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(33);
+select plan(32);
 
 create schema if not exists tests;
 grant usage on schema tests to anon, authenticated;
@@ -80,40 +80,42 @@ begin
         reward_amount = 7500, currency = 'USD';
 end $$;
 
+-- Flat since migration 20260910000800: $100 a friend, however many. The escalating ladder was
+-- retired because the fourth referral is not worth five times the first, and "an experience on us"
+-- at the top of it was an uncosted promise.
 select tests.earn_referral(1);
 select is(public.sync_referral_tier('f9000000-0000-4000-8000-0000000000b2', 'USD'), 10000::bigint,
-  'the first friend pays the first tier in full');
+  'the first friend earns the flat reward');
 select tests.earn_referral(2);
-select is(public.sync_referral_tier('f9000000-0000-4000-8000-0000000000b2', 'USD'), 15000::bigint,
-  'the second friend pays only the difference to the second tier');
+select is(public.sync_referral_tier('f9000000-0000-4000-8000-0000000000b2', 'USD'), 10000::bigint,
+  'the second friend earns the same as the first, not an escalating tier');
 select tests.earn_referral(3);
 select tests.earn_referral(4);
-select is(public.sync_referral_tier('f9000000-0000-4000-8000-0000000000b2', 'USD'), 25000::bigint,
-  'two more friends settle straight to the fourth tier');
+select is(public.sync_referral_tier('f9000000-0000-4000-8000-0000000000b2', 'USD'), 20000::bigint,
+  'two more friends settle two more flat rewards');
 select is((select coalesce(sum(amount), 0)::bigint from public.account_credits
-           where user_id = 'f9000000-0000-4000-8000-0000000000b2' and source = 'referral_tier'), 50000::bigint,
-  'the ladder totals the fourth tier, not the sum of every tier');
+           where user_id = 'f9000000-0000-4000-8000-0000000000b2' and source = 'referral_tier'), 40000::bigint,
+  'four friends total four flat rewards and nothing more');
 select is(public.sync_referral_tier('f9000000-0000-4000-8000-0000000000b2', 'USD'), 0::bigint,
   'syncing again pays nothing: a referral is never rewarded twice');
 
 update public.referrals set status = 'void'
 where referrer_id = 'f9000000-0000-4000-8000-0000000000b2' and code = 'GL-TIER01'
   and booking_id in (select id from growth_bookings where n > 1);
-select is(public.sync_referral_tier('f9000000-0000-4000-8000-0000000000b2', 'USD'), -40000::bigint,
-  'voided referrals claw the ladder back down');
+select is(public.sync_referral_tier('f9000000-0000-4000-8000-0000000000b2', 'USD'), -30000::bigint,
+  'voided referrals claw their flat rewards back');
 select is((select coalesce(sum(amount), 0)::bigint from public.account_credits
            where user_id = 'f9000000-0000-4000-8000-0000000000b2' and source = 'referral_tier'), 10000::bigint,
-  'one earned referral leaves exactly the first tier standing');
+  'one earned referral leaves exactly one flat reward standing');
 
 select tests.authenticate_as('f9000000-0000-4000-8000-0000000000b2');
 select is((public.referral_progress('USD') ->> 'earned')::int, 1,
   'referral_progress reports the traveler own earned count');
-select is(jsonb_array_length(public.referral_progress('USD') -> 'tiers'), 4,
-  'referral_progress returns the whole ladder');
-select is(((public.referral_progress('USD') -> 'tiers' -> 0) ->> 'reached')::boolean, true,
-  'the first tier reads as reached');
-select is(((public.referral_progress('USD') -> 'tiers' -> 1) ->> 'reached')::boolean, false,
-  'the second tier does not');
+-- No ladder to report any more. The account card shows the flat reward and the earned count.
+select is(jsonb_array_length(public.referral_progress('USD') -> 'tiers'), 0,
+  'referral_progress reports no ladder, because there is not one');
+select is((public.referral_progress('USD') ->> 'baseReward')::bigint, 10000::bigint,
+  'referral_progress reports the flat reward a friend is worth');
 select tests.clear_auth();
 
 -- ── Waitlist ─────────────────────────────────────────────────────────────────
