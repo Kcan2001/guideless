@@ -6,6 +6,8 @@ import { formatMoney } from "@guideless/utils";
 import type { Currency } from "@guideless/types";
 import { OptionLabelBadge, TierBadge } from "@/components/tours/option-label";
 import { buttonVariants } from "@/components/ui/button";
+import { StayHotelPanel } from "@/components/tours/stay-hotel-panel";
+import { StayScarcity } from "@/components/tours/stay-scarcity";
 import { stayDetails, type StayOption } from "@/lib/data/extras";
 import { photoAlt, photoPosition } from "@/lib/photos";
 import { cn } from "@/lib/utils";
@@ -118,6 +120,12 @@ export function StayTierCards({
                     </span>
                   )}
                 </p>
+                <StayScarcity
+                  spotsLeft={o.spotsLeft}
+                  isLimited={o.isLimited}
+                  soldOut={o.soldOut}
+                  allocationHeld={stayDetails(o).hotelConfirmed}
+                />
                 {saving > 0 && (
                   <p className="text-sm text-muted-foreground">
                     Two sharing each save {money(saving, currency)}
@@ -185,12 +193,16 @@ export function StayTierCards({
                 </p>
               )}
 
-              {!d.hotelConfirmed && (
-                <p className="flex items-start gap-2 text-sm text-muted-foreground">
-                  <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-                  Property confirmed at booking. We name the hotel in your confirmation, never a
-                  star rating we cannot stand behind.
-                </p>
+              {o.hotel ? (
+                <StayHotelPanel hotel={o.hotel} confirmed={d.hotelConfirmed} />
+              ) : (
+                !d.hotelConfirmed && (
+                  <p className="flex items-start gap-2 text-sm text-muted-foreground">
+                    <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+                    Property confirmed at booking. We name the hotel in your confirmation, never a
+                    star rating we cannot stand behind.
+                  </p>
+                )
               )}
 
               {ctaHref && (
