@@ -91,6 +91,7 @@ function item(
       version_number: 1,
       status: "published",
       character: [],
+      minimum_age: null,
       tagline: null,
       summary: null,
       description: null,

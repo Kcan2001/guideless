@@ -6,6 +6,7 @@ import type { AddOnKind } from "@guideless/types";
 import { formatDate, formatMoney, formatWallTime } from "@guideless/utils";
 import type { AddOnSelection } from "@guideless/validation";
 import { OptionCard } from "@/components/builder/option-card";
+import { InfoNote } from "@/components/tours/info-note";
 import { StepNav } from "@/components/builder/step-nav";
 import type { CheckoutDeparture } from "@/components/checkout/types";
 import { Badge } from "@/components/ui/badge";
@@ -40,7 +41,9 @@ const KIND_LABEL: Record<AddOnKind, string> = {
 };
 
 const GOING_MIN = 3;
-const LEFT_MAX = 5;
+// Under ten is "only a few", the same threshold the stay tiers use, so the two do not disagree
+// on what scarce means on the same page.
+const LEFT_MAX = 9;
 
 /**
  * Everything optional, laid out as the days of the trip.
@@ -268,7 +271,7 @@ export function DayPlanStep({
           ) : closed ? (
             <Badge variant="neutral">Sales closed</Badge>
           ) : a.available !== null && a.available <= LEFT_MAX ? (
-            <Badge variant="warning">{a.available} left</Badge>
+            <Badge variant="warning">Only a few left · {a.available}</Badge>
           ) : spansDays(a) ? (
             <Badge variant="info">{entry.days.length} days</Badge>
           ) : null
@@ -281,7 +284,27 @@ export function DayPlanStep({
         selected={count > 0}
         disabled={disabled}
         control={control}
-        footnote={a.min_age != null && a.min_age > 0 ? `Ages ${a.min_age}+` : null}
+        footnote={
+          <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            {a.min_age != null && a.min_age > 0 ? <span>Ages {a.min_age}+</span> : null}
+            {!a.supplier_confirmed && (
+              <span className="inline-flex items-center gap-1">
+                Price not yet confirmed with the venue
+                <InfoNote label="Why is this price not confirmed?" align="left">
+                  We do not hold a contract or an allocation with this supplier yet, so the price
+                  comes from their published rates plus our booking rather than from an agreed rate.
+                  It can move before the trip.
+                  <br />
+                  <br />
+                  Monaco&rsquo;s clubs and hospitality operators sell no tickets through any API and
+                  most take names only from January, so nothing on this weekend can be locked in
+                  this far out. If a confirmed price ends up higher than this, we tell you and you
+                  can drop it &mdash; we will not quietly bill the difference.
+                </InfoNote>
+              </span>
+            )}
+          </span>
+        }
       />
     );
   }

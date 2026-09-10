@@ -116,9 +116,11 @@ insert into public.departures (id, tour_id, tour_version_id, status, start_date,
                                price_amount, deposit_amount, currency)
 values ('30000000-0000-4000-8000-0000000000ff', '20000000-0000-4000-8000-000000000001', '21000000-0000-4000-8000-000000000001',
         'open', '2027-10-01', '2027-10-09', 'Europe/Paris', 1, 100000, 0, 'USD');
-insert into public.traveler_profiles (id, owner_user_id, first_name, last_name)
-values ('60000000-0000-4000-8000-00000000000b', 'b0000000-0000-4000-8000-00000000000b', 'Bob', 'Traveler'),
-       ('60000000-0000-4000-8000-00000000000c', 'b0000000-0000-4000-8000-00000000000b', 'Bobs', 'Friend');
+-- Dates of birth because migration 20260910000200 enforces tour_versions.minimum_age on insert
+-- into booking_travelers. These fixtures exist to test RLS, so they are all comfortably adult.
+insert into public.traveler_profiles (id, owner_user_id, first_name, last_name, date_of_birth)
+values ('60000000-0000-4000-8000-00000000000b', 'b0000000-0000-4000-8000-00000000000b', 'Bob', 'Traveler', '1990-01-01'),
+       ('60000000-0000-4000-8000-00000000000c', 'b0000000-0000-4000-8000-00000000000b', 'Bobs', 'Friend', '1990-01-01');
 insert into public.bookings (id, customer_id, departure_id, tour_version_id, status, hold_expires_at, currency, subtotal_amount, total_amount)
 values ('70000000-0000-4000-8000-0000000000ff', 'b0000000-0000-4000-8000-00000000000b',
         '30000000-0000-4000-8000-0000000000ff', '21000000-0000-4000-8000-000000000001', 'pending_payment', now() + interval '30 minutes', 'USD', 200000, 200000);

@@ -20,6 +20,7 @@ export type TourItineraryItem = Tables<"tour_itinerary_items">;
 export type TourFaq = Tables<"tour_faqs">;
 export type TourIncludedItem = Tables<"tour_included_items">;
 export type TourExcludedItem = Tables<"tour_excluded_items">;
+export type TourRequirement = Tables<"tour_requirements">;
 
 export interface RouteStop {
   destination: Destination;
@@ -45,6 +46,8 @@ export interface TourDetail {
   days: Array<TourDay & { items: TourItineraryItem[]; destination: Destination | null }>;
   included: TourIncludedItem[];
   excluded: TourExcludedItem[];
+  /** Conditions of joining: passport, minimum age, insurance. */
+  requirements: TourRequirement[];
   faqs: TourFaq[];
   departures: DepartureWithAvailability[];
 }
@@ -202,6 +205,7 @@ export async function getTourBySlug(slug: string): Promise<TourDetail | null> {
     { data: included, error: iErr },
     { data: excluded, error: eErr },
     { data: faqs, error: fErr },
+    { data: requirements, error: rErr },
     departures,
   ] = await Promise.all([
     sb
@@ -220,6 +224,7 @@ export async function getTourBySlug(slug: string): Promise<TourDetail | null> {
     sb.from("tour_included_items").select("*").eq("tour_version_id", versionId).order("position"),
     sb.from("tour_excluded_items").select("*").eq("tour_version_id", versionId).order("position"),
     sb.from("tour_faqs").select("*").eq("tour_version_id", versionId).order("position"),
+    sb.from("tour_requirements").select("*").eq("tour_version_id", versionId).order("position"),
     loadUpcomingDepartures([tour.id]),
   ]);
   if (vErr) throw vErr;
@@ -227,6 +232,7 @@ export async function getTourBySlug(slug: string): Promise<TourDetail | null> {
   if (iErr) throw iErr;
   if (eErr) throw eErr;
   if (fErr) throw fErr;
+  if (rErr) throw rErr;
   if (!version) return null;
 
   return {
@@ -240,6 +246,7 @@ export async function getTourBySlug(slug: string): Promise<TourDetail | null> {
     })),
     included,
     excluded,
+    requirements,
     faqs,
     departures: await withAvailability(departures),
   };

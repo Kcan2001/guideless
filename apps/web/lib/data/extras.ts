@@ -3,8 +3,35 @@ import "server-only";
 import type { Tables, Views } from "@guideless/types";
 import { createPublicClient } from "@/lib/supabase/public";
 
-export type StayOption = Tables<"departure_stay_options">;
+export type StayOptionRow = Tables<"departure_stay_options">;
 export type AddOn = Tables<"departure_add_ons">;
+
+/** The public profile of the property a tier is priced against (migration 20260910000300). */
+export interface StayHotel {
+  name: string;
+  address: string | null;
+  city: string | null;
+  countryCode: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  starRating: number | null;
+  description: string | null;
+  amenities: string[];
+  imageUrls: string[];
+}
+
+export interface StayOption extends StayOptionRow {
+  /**
+   * Places left on this tier, or null when it is uncapped. TRAVELERS, not rooms — two people
+   * sharing one room consume two places — so never render this as "rooms left".
+   */
+  spotsLeft: number | null;
+  /** 1-9 left. Drives the "Only a few left" badge. */
+  isLimited: boolean;
+  soldOut: boolean;
+  /** Null until a tier is linked to a hotel. */
+  hotel: StayHotel | null;
+}
 
 export interface AddOnWithCounts extends AddOn {
   /** Units still available, or null when the add-on has no capacity limit. */
@@ -65,31 +92,40 @@ export async function listDepartureExtras(
   { includeInTripOnly = false }: { includeInTripOnly?: boolean } = {},
 ): Promise<DepartureExtras> {
   const sb = createPublicClient();
-  const [{ data: departure }, { data: stays, error: sErr }, { data: addOns, error: aErr }] =
-    await Promise.all([
-      // departures_public predates these columns; the base table is readable for open departures.
-      sb
-        .from("departures")
-        .select("start_date, end_date, shared_room_discount_amount, group_opens_days_before")
-        .eq("id", departureId)
-        .maybeSingle(),
-      sb
-        .from("departure_stay_options")
-        .select("*")
-        .eq("departure_id", departureId)
-        .eq("is_active", true)
-        .order("position"),
-      (includeInTripOnly
-        ? sb.from("departure_add_ons").select("*").eq("departure_id", departureId)
-        : sb
-            .from("departure_add_ons")
-            .select("*")
-            .eq("departure_id", departureId)
-            .eq("in_trip_only", false)
-      )
-        .eq("is_active", true)
-        .order("position"),
-    ]);
+  const [
+    { data: departure },
+    { data: stays, error: sErr },
+    { data: addOns, error: aErr },
+    { data: stayAvailability },
+    { data: stayHotels },
+  ] = await Promise.all([
+    // departures_public predates these columns; the base table is readable for open departures.
+    sb
+      .from("departures")
+      .select("start_date, end_date, shared_room_discount_amount, group_opens_days_before")
+      .eq("id", departureId)
+      .maybeSingle(),
+    sb
+      .from("departure_stay_options")
+      .select("*")
+      .eq("departure_id", departureId)
+      .eq("is_active", true)
+      .order("position"),
+    (includeInTripOnly
+      ? sb.from("departure_add_ons").select("*").eq("departure_id", departureId)
+      : sb
+          .from("departure_add_ons")
+          .select("*")
+          .eq("departure_id", departureId)
+          .eq("in_trip_only", false)
+    )
+      .eq("is_active", true)
+      .order("position"),
+    // Places left per tier. Computed on read from bookings, so it is never stale.
+    sb.rpc("stay_option_availability_public", { p_departure_id: departureId }),
+    // The property each tier is priced against: name, address, coordinates, amenities.
+    sb.from("stay_option_hotels_public").select("*").eq("departure_id", departureId),
+  ]);
   if (sErr) throw sErr;
   if (aErr) throw aErr;
   const ids = (addOns ?? []).map((a) => a.id);
@@ -103,6 +139,8 @@ export async function listDepartureExtras(
         { data: [] as Views<"add_on_headcounts">[] },
       ];
   const availById = new Map((availability ?? []).map((a) => [a.add_on_id, a]));
+  const seatsById = new Map((stayAvailability ?? []).map((a) => [a.stay_option_id, a]));
+  const hotelById = new Map((stayHotels ?? []).map((h) => [h.stay_option_id, h]));
   const goingById = new Map((headcounts ?? []).map((h) => [h.add_on_id, h.going ?? 0]));
   const start = departure?.start_date ?? null;
   const end = departure?.end_date ?? null;
@@ -110,7 +148,30 @@ export async function listDepartureExtras(
   return {
     sharedRoomDiscountAmount: departure?.shared_room_discount_amount ?? 0,
     groupOpensDaysBefore: departure?.group_opens_days_before ?? 30,
-    stayOptions: stays ?? [],
+    stayOptions: (stays ?? []).map((s) => {
+      const seats = seatsById.get(s.id);
+      const h = hotelById.get(s.id);
+      return {
+        ...s,
+        spotsLeft: seats?.spots_left ?? null,
+        isLimited: seats?.is_limited ?? false,
+        soldOut: seats?.sold_out ?? false,
+        hotel: h?.hotel_name
+          ? {
+              name: h.hotel_name,
+              address: h.address,
+              city: h.city,
+              countryCode: h.country_code,
+              latitude: h.latitude,
+              longitude: h.longitude,
+              starRating: h.star_rating,
+              description: h.description,
+              amenities: h.amenities ?? [],
+              imageUrls: h.image_urls ?? [],
+            }
+          : null,
+      };
+    }),
     addOns: (addOns ?? []).map((a) => {
       const av = availById.get(a.id);
       const date =

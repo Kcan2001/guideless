@@ -16,8 +16,12 @@
 // The key is never printed. Nothing is written anywhere unless you pass --save; this only reads.
 //
 // Questions to answer before writing the adapter:
-//   1. Search: what identifies a destination? A numeric id, a name, coordinates? Is there a text
-//      search that takes "Nice, France" or must we resolve a destination id first?
+//   1. ANSWERED 2026-09-10: /products/search takes a NUMERIC destination id and rejects a name
+//      ("Invalid destination: not a number: Nice"). Resolve it from /destinations first. Ids that
+//      matter to us: Nice 478, Monaco 948, Monaco-Ville 50270, French Riviera 179, Avignon 483,
+//      Provence 184, Villefranche 50322, Cannes 786, Antibes 21941, Aix 5228.
+//      Sandbox 500s on some destinations (478 and 179 both did) while others work; retry rather
+//      than concluding the id is wrong.
 //   2. Does a product carry a price, or only its options ("product options" / "tour grades")?
 //      Our schema assumes the second — one product, several bookable options per date.
 //   3. Is the price we see the NET price to us, or the retail price with a commission implied?
@@ -37,7 +41,12 @@ const opt = (name, fallback) => {
 const has = (name) => args.includes(`--${name}`);
 
 const KEY = opt("key", process.env.VIATOR_API_KEY);
-const BASE = (opt("base", process.env.VIATOR_BASE) ?? "https://api.viator.com/partner").replace(
+// Sandbox by default. The key in supabase/.env is a sandbox key: pointed at the production host it
+// returns 401 Invalid API Key, which reads like a bad key rather than the wrong host and cost an
+// afternoon once already. Pass --base https://api.viator.com/partner once a production key exists.
+const BASE = (
+  opt("base", process.env.VIATOR_BASE) ?? "https://api.sandbox.viator.com/partner"
+).replace(
   /\/$/,
   "",
 );

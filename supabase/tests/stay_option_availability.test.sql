@@ -49,15 +49,17 @@ select has_function('public', 'stay_option_availability_for', array['uuid'],
 --   one pending booking, live hold, 1 traveler → held 1
 --   one pending booking, lapsed hold, 3 travelers → ignored, the release job will clear it
 --   one cancelled booking, 2 travelers        → ignored
-insert into public.traveler_profiles (id, owner_user_id, first_name, last_name)
-values ('f8100000-0000-4000-8000-000000000001', 'f8000000-0000-4000-8000-0000000000b2', 'Ada', 'Confirmed'),
-       ('f8100000-0000-4000-8000-000000000002', 'f8000000-0000-4000-8000-0000000000b2', 'Ben', 'Confirmed'),
-       ('f8100000-0000-4000-8000-000000000003', 'f8000000-0000-4000-8000-0000000000b2', 'Cal', 'Holding'),
-       ('f8100000-0000-4000-8000-000000000004', 'f8000000-0000-4000-8000-0000000000b2', 'Dee', 'Lapsed'),
-       ('f8100000-0000-4000-8000-000000000005', 'f8000000-0000-4000-8000-0000000000b2', 'Eve', 'Lapsed'),
-       ('f8100000-0000-4000-8000-000000000006', 'f8000000-0000-4000-8000-0000000000b2', 'Fay', 'Lapsed'),
-       ('f8100000-0000-4000-8000-000000000007', 'f8000000-0000-4000-8000-0000000000b2', 'Gus', 'Cancelled'),
-       ('f8100000-0000-4000-8000-000000000008', 'f8000000-0000-4000-8000-0000000000b2', 'Hal', 'Cancelled');
+-- Dates of birth because the Monaco departure is 18+ and migration 20260910000200 enforces it on
+-- insert into booking_travelers. This test is about capacity counting, so every traveler is adult.
+insert into public.traveler_profiles (id, owner_user_id, first_name, last_name, date_of_birth)
+values ('f8100000-0000-4000-8000-000000000001', 'f8000000-0000-4000-8000-0000000000b2', 'Ada', 'Confirmed', '1990-01-01'),
+       ('f8100000-0000-4000-8000-000000000002', 'f8000000-0000-4000-8000-0000000000b2', 'Ben', 'Confirmed', '1990-01-01'),
+       ('f8100000-0000-4000-8000-000000000003', 'f8000000-0000-4000-8000-0000000000b2', 'Cal', 'Holding', '1990-01-01'),
+       ('f8100000-0000-4000-8000-000000000004', 'f8000000-0000-4000-8000-0000000000b2', 'Dee', 'Lapsed', '1990-01-01'),
+       ('f8100000-0000-4000-8000-000000000005', 'f8000000-0000-4000-8000-0000000000b2', 'Eve', 'Lapsed', '1990-01-01'),
+       ('f8100000-0000-4000-8000-000000000006', 'f8000000-0000-4000-8000-0000000000b2', 'Fay', 'Lapsed', '1990-01-01'),
+       ('f8100000-0000-4000-8000-000000000007', 'f8000000-0000-4000-8000-0000000000b2', 'Gus', 'Cancelled', '1990-01-01'),
+       ('f8100000-0000-4000-8000-000000000008', 'f8000000-0000-4000-8000-0000000000b2', 'Hal', 'Cancelled', '1990-01-01');
 
 insert into public.bookings (id, confirmation_number, customer_id, departure_id, tour_version_id, stay_option_id, status,
                              currency, subtotal_amount, total_amount, deposit_amount, terms_version, hold_expires_at,
@@ -137,8 +139,9 @@ select tests.authenticate_as('f8000000-0000-4000-8000-0000000000a1');
 select lives_ok(
   $$ select * from public.stay_option_availability_for('30000000-0000-4000-8000-000000000004') $$,
   'ops staff may call the wrapper');
-select is((select count(*)::int from public.stay_option_availability_for('30000000-0000-4000-8000-000000000004')), 2,
-  'the wrapper returns both Monaco tiers');
+-- Four tiers since the 2026-09-10 repricing: cheap Nice, good Nice, the Monaco border, Monte Carlo.
+select is((select count(*)::int from public.stay_option_availability_for('30000000-0000-4000-8000-000000000004')), 4,
+  'the wrapper returns all four Monaco stay tiers');
 select is((select confirmed from public.stay_option_availability_for('30000000-0000-4000-8000-000000000004')
            where stay_option_id = '31000000-0000-4000-8000-000000000001'), 2,
   'the wrapper reports the same confirmed count as the view');

@@ -201,7 +201,7 @@ export default function GroupScreen() {
         <View
           style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}
         >
-          <Eyebrow>Live Moments</Eyebrow>
+          <Eyebrow style={{ flexShrink: 1 }}>Live Moments</Eyebrow>
           <Button
             title="Suggest one"
             variant="ghost"

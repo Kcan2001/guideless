@@ -1,11 +1,13 @@
 "use client";
 
-import { BedDouble, Coffee, Info, MapPin, TrainFront } from "lucide-react";
+import { BedDouble, Building2, Coffee, Info, MapPin, TrainFront } from "lucide-react";
 import { formatMoney } from "@guideless/utils";
 import { OptionCard } from "@/components/builder/option-card";
 import { StepNav } from "@/components/builder/step-nav";
 import type { CheckoutDeparture } from "@/components/checkout/types";
 import { TierLegend } from "@/components/tours/tier-legend";
+import { StayScarcity } from "@/components/tours/stay-scarcity";
+import { StayHotelPanel } from "@/components/tours/stay-hotel-panel";
 import { stayDetails } from "@/lib/data/extras-shared";
 
 /** "Where do you want to stay?" — one tier per booking; a radio group of cards. */
@@ -51,6 +53,7 @@ export function StayStep({
               d.trainTime && { icon: TrainFront, text: d.trainTime },
               d.breakfast && { icon: Coffee, text: `Breakfast: ${d.breakfast}` },
               d.roomType && { icon: BedDouble, text: d.roomType },
+              o.hotel && { icon: Building2, text: o.hotel.name },
             ].filter(Boolean) as Array<{ icon: typeof MapPin; text: string }>;
             const inputId = `stay-${o.id}`;
             return (
@@ -74,6 +77,14 @@ export function StayStep({
                 includes={o.includes}
                 excludes={o.excludes}
                 whyPriceNote={o.why_price_note}
+                status={
+                  <StayScarcity
+                    spotsLeft={o.spotsLeft}
+                    isLimited={o.isLimited}
+                    soldOut={o.soldOut}
+                    allocationHeld={d.hotelConfirmed}
+                  />
+                }
                 selected={selected}
                 footnote={
                   !d.hotelConfirmed ? (
@@ -96,7 +107,9 @@ export function StayStep({
                     <span className="font-medium">{selected ? "Selected" : "Choose this"}</span>
                   </label>
                 }
-              />
+              >
+                {o.hotel && <StayHotelPanel hotel={o.hotel} confirmed={d.hotelConfirmed} />}
+              </OptionCard>
             );
           })}
         </div>
