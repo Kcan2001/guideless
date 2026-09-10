@@ -18,12 +18,15 @@ export default defineConfig({
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
-  webServer: {
-    command: "pnpm exec next start -p 3100",
-    url: "http://localhost:3100",
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  // Only start a local server when the run has not been pointed at a deployed one.
+  webServer: process.env.E2E_BASE_URL
+    ? undefined
+    : {
+        command: "pnpm exec next start -p 3100",
+        url: "http://localhost:3100",
+        reuseExistingServer: !process.env.CI,
+        timeout: 120_000,
+      },
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"] } },
     { name: "mobile", use: { ...devices["Pixel 7"] }, testMatch: /marketing\.spec\.ts/ },

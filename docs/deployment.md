@@ -86,6 +86,30 @@ the marketing spec. Specs cover the marketing funnel (home, list filters, tour d
 JSON-LD, 404, departure page, sitemap/robots, security headers) and the customer funnel (sign
 up, wizard, payment step refused cleanly without Stripe, protected-route redirects).
 
+### The paid booking run (staging only)
+
+CI has no Stripe keys, so the default run stops at "the payment step refuses cleanly". Everything
+past that click — the Checkout session, the payment, the webhook that is the authoritative source
+of payment state, the confirmation email, the booking in the account, buying an extra afterwards,
+the refund preview — is covered by `e2e/paid-booking.spec.ts`, which skips unless it is pointed at
+a deployed environment. Run it against staging after anything that touches money:
+
+```bash
+cd apps/web
+E2E_BASE_URL=https://guideless-staging.vercel.app E2E_BYPASS=$VERCEL_PROTECTION_BYPASS NEXT_PUBLIC_SUPABASE_URL=https://<staging-ref>.supabase.co NEXT_PUBLIC_SUPABASE_ANON_KEY=… SUPABASE_SERVICE_ROLE_KEY=… pnpm test:e2e:paid
+```
+
+Notes that cost an afternoon each:
+
+- Setting `E2E_BASE_URL` turns off the local web server **and** the global teardown, which sweeps
+  every `@example.com` account and must never be pointed at a hosted project.
+- The traveler is created with the service role, not the sign-up form: hosted Supabase rate-limits
+  its own mailer, and sign-up is already covered locally.
+- The traveler's address is `delivered+…@resend.dev`, Resend's sink. Resend rejects `example.com`
+  outright, so any other choice records the confirmation email as failed.
+- Cleanup deletes `refunds`, `payments` and `hotel_bookings` before the booking: those reference it
+  `on delete restrict` on purpose, and until they go neither the booking nor the traveler can.
+
 Add when the corresponding code exists: Expo `eas build --profile preview` on release branches;
 `supabase db push` and `supabase functions deploy` on `main` (guarded by the `production`
 GitHub environment). Functions to deploy today: `social-publish`, `notify-dispatch`.
