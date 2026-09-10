@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { after } from "next/server";
 import { ArrowLeft } from "lucide-react";
 import { TrackView } from "@/components/analytics/track-view";
 import type { BuilderDepartureSummary } from "@/components/builder/departure-step";
@@ -9,6 +10,7 @@ import type { CheckoutDeparture } from "@/components/checkout/types";
 import { deriveBuilderSteps, resolveStep } from "@/lib/bookings/builder-steps";
 import { loadBuilderDraft } from "@/lib/bookings/drafts";
 import { listDepartureExtras } from "@/lib/data/extras";
+import { refreshStaleRatesForDeparture } from "@/lib/hotels/search";
 import { getTourBySlug } from "@/lib/data/tours";
 import { enabledAuthProviders } from "@/lib/auth/providers";
 import { createClient } from "@/lib/supabase/server";
@@ -53,6 +55,19 @@ export default async function BuildPage(props: PageProps<"/tours/[slug]/build">)
   ]);
   const user = userRes.data.user;
   const providers = await enabledAuthProviders();
+
+  // Somebody is about to choose between these tiers, so make sure the cost data behind them is
+  // current rather than up to six hours old from the last cron run. This runs after the response
+  // is sent, refetches only tiers whose stored rate has gone stale, and never changes what this
+  // page displays — see refreshStaleRatesForDeparture for why all three of those matter.
+  after(async () => {
+    try {
+      await refreshStaleRatesForDeparture(chosen.id);
+    } catch {
+      // A supplier being slow or down must never surface on a page a traveler is trying to book on.
+      // The nightly cron and the recheck inside startCheckout are both still there behind this.
+    }
+  });
 
   const departure: CheckoutDeparture = {
     id: chosen.id,
