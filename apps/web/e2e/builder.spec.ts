@@ -109,9 +109,15 @@ test.describe("trip builder", () => {
     await page.getByTestId("step-continue").first().click();
     await page.getByTestId("step-continue").first().click();
 
+    // Read the title off the card whose checkbox we actually tick. The first card on the plan is
+    // day one's airport transfer, which is priced per booking and so has a quantity select rather
+    // than a checkbox — taking the title from one card and the control from another is how this
+    // test lied to itself the first time.
     const plan = page.getByTestId("day-plan");
-    const firstTitle = await plan.getByRole("article").first().locator("h3").innerText();
-    await plan.getByRole("checkbox").first().check();
+    const firstBox = plan.getByRole("checkbox").first();
+    const card = plan.getByRole("article").filter({ has: firstBox });
+    const firstTitle = await card.first().locator("h3").innerText();
+    await firstBox.check();
 
     // What a traveler is buying has to be named in the summary, not only priced.
     await expect(page.getByTestId("order-summary").first()).toContainText(firstTitle.trim(), {

@@ -41,10 +41,12 @@ test("a new customer can build a trip up to the payment step, and is refused cle
   await expect(page.getByTestId("stay-tiers").getByRole("radio", { checked: true })).toBeVisible();
   await next();
 
-  // Experiences: choosing one raises today's total and puts a line in the summary. Assert the
-  // movement, not the amount — what the boat costs is a supplier price that changes with every
-  // reprice, and pinning it here turns a legitimate catalog edit into a failing build.
-  await expect(page.getByRole("heading", { name: /what do you want to add/i })).toBeVisible();
+  // Your days: everything optional, laid out as the trip's diary. Choosing one raises today's
+  // total and puts a line in the summary. Assert the movement, not the amount — what the boat
+  // costs is a supplier price that changes with every reprice, and pinning it here turns a
+  // legitimate catalog edit into a failing build.
+  await expect(page.getByRole("heading", { name: /how do you want to spend/i })).toBeVisible();
+  await expect(page.getByTestId("day-plan")).toBeVisible();
   const dueNow = async () => dollars(await summary.getByTestId("quote-due-now").innerText());
   const beforeBoat = await dueNow();
   const boat = page.getByRole("article", { name: /boat day along the riviera/i });
@@ -52,16 +54,6 @@ test("a new customer can build a trip up to the payment step, and is refused cle
   await expect(summary.getByText("Boat day along the Riviera")).toBeVisible();
   await expect.poll(dueNow).toBeGreaterThan(beforeBoat);
   await next();
-
-  // Transfers (if the departure offers any) — skip through
-  if (
-    await page
-      .getByRole("heading", { name: /get from the airport/i })
-      .isVisible()
-      .catch(() => false)
-  ) {
-    await next();
-  }
 
   // Travelers: names, emergency contact, preferences (defaults)
   await expect(page.getByRole("heading", { name: /who.s traveling/i })).toBeVisible();

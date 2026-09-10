@@ -85,3 +85,26 @@ operational and specific: "Your train to Avignon leaves in 45 minutes."
 
 Logo: `apps/web/public/brand/guideless-logo.webp`. Mobile icons/splash in
 `apps/mobile/assets/images/` (currently Expo placeholders — replace with brand marks on ink).
+
+## Links that take a moment
+
+Some routes are rendered per request — the Trip Builder loads a departure, its stay tiers, its
+add-ons, live availability and any saved draft before it can paint; `/tours`, a departure page and
+`/trips/[id]` do their own work. On a slow connection that is a real wait, and a plain link gives
+no sign it registered the click, so people press it again. Kyle, on the Monaco builder: _"should
+at least have a spinner if thats the case... shouldn't have people clicking the buttons over and
+over."_
+
+- **`<CtaLink>`** (`components/analytics/cta-link.tsx`) already wraps the primary calls to action
+  and now shows a spinner while the next page loads. Anything using it got this for free.
+- **`<PendingLink>`** (`components/ui/pending-link.tsx`) is the same behaviour without the
+  analytics event. Both take an optional `pendingLabel` ("Opening…").
+
+Both use `useLinkStatus` from `next/link`, so they stay real anchors — middle-click, open in a new
+tab, prefetch and the browser's own affordances keep working, which a button calling
+`router.push` would throw away. While pending, the anchor dims and stops taking clicks via
+`:has([role=status])`, which is the part that actually prevents the second and third press.
+
+**Use them for links into dynamic routes only.** A link to a statically rendered page is served
+from the cache and there is nothing to wait for; a spinner there is theatre. Form submissions
+already have `<SubmitButton>` with its own pending text — this is the navigation equivalent.

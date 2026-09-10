@@ -27,6 +27,7 @@ import { listOpenSurveys } from "@/lib/surveys/queries";
 import { signOut } from "@/lib/auth/actions";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { PendingLink } from "@/components/ui/pending-link";
 import { payBalance } from "@/lib/bookings/actions";
 import { daysBetweenDates, onboardingSteps, travelersComplete } from "@/lib/bookings/onboarding";
 import { listMyBookings } from "@/lib/data/bookings";
@@ -203,9 +204,12 @@ export default async function AccountPage(props: PageProps<"/account">) {
                 <p className="text-sm text-muted-foreground">
                   {formatDateRange(t.start_date, t.end_date)}
                 </p>
-                <Link href={`/trips/${t.id}`} className={buttonVariants({ size: "sm" }) + " mt-4"}>
+                <PendingLink
+                  href={`/trips/${t.id}`}
+                  className={buttonVariants({ size: "sm" }) + " mt-4"}
+                >
                   Open trip <ArrowRight className="h-4 w-4" aria-hidden />
-                </Link>
+                </PendingLink>
               </li>
             ))}
           </ul>
@@ -216,9 +220,9 @@ export default async function AccountPage(props: PageProps<"/account">) {
         <div className="mt-12 rounded-xl border border-dashed border-border p-10">
           <p className="font-heading text-xl font-semibold">{emptyStates.noTrips.title}</p>
           <p className="mt-1 text-muted-foreground">{emptyStates.noTrips.body}</p>
-          <Link href="/tours" className={buttonVariants() + " mt-6"}>
+          <PendingLink href="/tours" className={buttonVariants() + " mt-6"}>
             {emptyStates.noTrips.cta} <ArrowRight className="h-4 w-4" aria-hidden />
-          </Link>
+          </PendingLink>
         </div>
       ) : (
         <>

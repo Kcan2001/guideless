@@ -26,6 +26,7 @@ export function ConfiguratorExampleCard({ example }: { example: ConfiguratorExam
         </p>
         <CtaLink
           href={`/tours/${example.tourSlug}/build` as Route}
+          pendingLabel="Opening…"
           placement="home_configurator"
           className={cn(buttonVariants({ size: "lg" }), "mt-8")}
         >
