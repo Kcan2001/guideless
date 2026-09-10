@@ -1754,7 +1754,9 @@ export type Database = {
       departure_stay_options: {
         Row: {
           area: string | null;
+          auto_price: boolean;
           capacity: number | null;
+          cost_multiple: number | null;
           created_at: string;
           departure_id: string;
           deposit_amount: number | null;
@@ -1762,6 +1764,7 @@ export type Database = {
           destination_id: string | null;
           details: Json;
           excludes: string[];
+          fixed_cost_amount: number;
           hotel_id: string | null;
           hotel_name: string | null;
           hotel_room_id: string | null;
@@ -1774,6 +1777,8 @@ export type Database = {
           name: string;
           position: number;
           price_delta_amount: number;
+          priced_at: string | null;
+          priced_room_amount: number | null;
           shared_room_discount_amount: number | null;
           star_rating: number | null;
           tagline: string | null;
@@ -1783,7 +1788,9 @@ export type Database = {
         };
         Insert: {
           area?: string | null;
+          auto_price?: boolean;
           capacity?: number | null;
+          cost_multiple?: number | null;
           created_at?: string;
           departure_id: string;
           deposit_amount?: number | null;
@@ -1791,6 +1798,7 @@ export type Database = {
           destination_id?: string | null;
           details?: Json;
           excludes?: string[];
+          fixed_cost_amount?: number;
           hotel_id?: string | null;
           hotel_name?: string | null;
           hotel_room_id?: string | null;
@@ -1803,6 +1811,8 @@ export type Database = {
           name: string;
           position?: number;
           price_delta_amount?: number;
+          priced_at?: string | null;
+          priced_room_amount?: number | null;
           shared_room_discount_amount?: number | null;
           star_rating?: number | null;
           tagline?: string | null;
@@ -1812,7 +1822,9 @@ export type Database = {
         };
         Update: {
           area?: string | null;
+          auto_price?: boolean;
           capacity?: number | null;
+          cost_multiple?: number | null;
           created_at?: string;
           departure_id?: string;
           deposit_amount?: number | null;
@@ -1820,6 +1832,7 @@ export type Database = {
           destination_id?: string | null;
           details?: Json;
           excludes?: string[];
+          fixed_cost_amount?: number;
           hotel_id?: string | null;
           hotel_name?: string | null;
           hotel_room_id?: string | null;
@@ -1832,6 +1845,8 @@ export type Database = {
           name?: string;
           position?: number;
           price_delta_amount?: number;
+          priced_at?: string | null;
+          priced_room_amount?: number | null;
           shared_room_discount_amount?: number | null;
           star_rating?: number | null;
           tagline?: string | null;
@@ -6806,6 +6821,7 @@ export type Database = {
         Row: {
           address: string | null;
           amenities: string[] | null;
+          auto_price: boolean | null;
           bed_type: string | null;
           city: string | null;
           country_code: string | null;
@@ -6818,6 +6834,7 @@ export type Database = {
           latitude: number | null;
           longitude: number | null;
           max_occupancy: number | null;
+          priced_at: string | null;
           room_name: string | null;
           star_rating: number | null;
           stay_option_id: string | null;

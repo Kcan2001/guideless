@@ -6,6 +6,7 @@ import { formatMoney } from "@guideless/utils";
 import type { Currency } from "@guideless/types";
 import { OptionLabelBadge, TierBadge } from "@/components/tours/option-label";
 import { buttonVariants } from "@/components/ui/button";
+import { PricedAsOf } from "@/components/tours/priced-as-of";
 import { StayHotelPanel } from "@/components/tours/stay-hotel-panel";
 import { StayScarcity } from "@/components/tours/stay-scarcity";
 import { stayDetails, type StayOption } from "@/lib/data/extras";
@@ -120,12 +121,15 @@ export function StayTierCards({
                     </span>
                   )}
                 </p>
-                <StayScarcity
-                  spotsLeft={o.spotsLeft}
-                  isLimited={o.isLimited}
-                  soldOut={o.soldOut}
-                  allocationHeld={stayDetails(o).hotelConfirmed}
-                />
+                <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <PricedAsOf pricedAt={o.pricedAt} />
+                  <StayScarcity
+                    spotsLeft={o.spotsLeft}
+                    isLimited={o.isLimited}
+                    soldOut={o.soldOut}
+                    allocationHeld={stayDetails(o).hotelConfirmed}
+                  />
+                </span>
                 {saving > 0 && (
                   <p className="text-sm text-muted-foreground">
                     Two sharing each save {money(saving, currency)}
