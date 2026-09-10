@@ -4,21 +4,29 @@ import type { LegalDocument } from "@/content/legal/types";
 /**
  * Terms of Service for Guideless LLC, trading as Guideless Travel. Plain language on purpose.
  *
- * Section 4 deliberately does not say what happens to redeemed account credit when the customer
- * cancels. Today the code forfeits it: `previewRefund` works from `amount_paid`, which is card
- * money only, and nothing reverses the negative `account_credits` redemption row, so a traveler
- * loses 100% of applied credit even at the top refund tier. That is a decision Kyle has to make
- * (return it as credit, refund it at the tier percentage, or keep forfeiting it and say so), and
- * publishing a clause before the decision would bake the current behavior into the contract.
+ * NOT REVIEWED BY A LAWYER. This is a careful draft written against what the product actually
+ * does, for an attorney to review before it is relied on in a dispute. Every clause here is
+ * checked against code or a database setting, and the ones that are not obvious say where:
+ *
+ *   4  referral and host economics  → system_settings referral_discount_amount (5000),
+ *      referral_reward_amount (10000), referral_tiers ([]), host_free_spot_threshold (0),
+ *      and HOST_CREDIT_PER_TRAVELER / HOST_CREDIT_CAP in lib/data/community.ts
+ *   4  credit returned on cancellation → migration 20260910001100
+ *   6  the refund ladder differs per departure → departures.cancellation_policy; the Monaco
+ *      departure tops out at 20% because the rooms are bought and non-refundable
+ *   8  age → migration 20260910000200 enforces it on the DEPARTURE date, and tour_requirements
+ *      carries the consequence of lying
+ *  11  we are the organiser, not an agent → seed 090 and docs/business-readiness.md
+ *
  * Bump `brand.termsVersion` when anything here changes materially; every booking stores the
- * version the customer accepted.
+ * version the customer accepted, and changes never apply backwards to a booking already made.
  */
 export const terms: LegalDocument = {
   slug: "terms",
   title: "Terms of Service",
   lede: "These are the terms between you and Guideless LLC when you browse our site, book a trip or use the Guideless Travel app. We have kept them short and readable. If something is unclear, ask us before you book.",
   version: brand.termsVersion,
-  lastUpdated: "2026-09-08",
+  lastUpdated: "2026-09-10",
   sections: [
     {
       id: "who-we-are",
@@ -51,15 +59,17 @@ export const terms: LegalDocument = {
     },
     {
       id: "account-credit",
-      title: "4. Account credit",
+      title: "4. Referrals, hosting and account credit",
       paragraphs: [
-        "You earn account credit when a friend books with your referral code, when you reach a referral milestone, or when we grant it for a service issue. It is a discount on a future Guideless trip, not money.",
+        "Account credit is a discount on a future Guideless trip, not money. You earn it when a friend books with your referral code, when you host a departure, or when we grant it for a service issue.",
       ],
       list: [
-        "Credit has no cash value. We do not pay it out, transfer it between accounts or exchange it for anything other than a Guideless booking.",
+        "Referrals are a flat amount, the same on every trip: your friend gets $50 off their booking and you get $100 of credit, once their booking is confirmed. It does not increase with the number of friends you bring, and it is not a percentage of the trip price.",
+        "Hosting a departure earns $100 of credit for every confirmed traveler you bring, up to $1,000 on that departure. Hosts do not travel free. The host page states the current amounts, and the amount that applies is the one published when the traveler books.",
+        "Credit has no cash value. We do not pay it out, transfer it between accounts, or exchange it for anything other than a Guideless booking.",
         "Credit is applied automatically to the base trip price at checkout when you are signed in, up to the value of that trip. It is not applied to add-ons, and it does not expire.",
         "Credit is earned only once the friend's booking is confirmed. If that booking is later cancelled, the credit is reversed, because the trip it rewarded did not happen. If you had already spent it, the reversal leaves a negative balance that the next credit you earn clears first.",
-        "On the host program, a departure host travels free once the number of travelers stated on the host page have booked and confirmed on that departure. Cancelled bookings do not count toward it.",
+        "If you cancel a booking you had spent credit on, that credit goes back on your balance in full. The refund tiers in section 6 govern the money you paid by card; they do not reduce credit, because credit was never money.",
       ],
     },
     {
@@ -82,6 +92,8 @@ export const terms: LegalDocument = {
         "Request a cancellation from your account. Your account shows, before you confirm, the refund percentage that applies on that day and which add-ons are still refundable.",
         "We confirm the cancellation within two business days. Refunds go back to the original payment method and usually arrive within 10 business days of confirmation.",
         "Deposits and balances follow the same tiers, and we charge no cancellation fee on top. No tier is 100%: refunding a payment costs us the processing fee, so the top tier sits below it rather than us inventing a fee to cover it.",
+        "The tiers are not the same on every trip, and on some they are much lower. Where we have to buy rooms or tickets that the supplier will not refund at any notice — a Grand Prix weekend is the clearest case — the most we can return is what we can actually recover, and the published top tier can be as low as 20% even months ahead. That number is on the departure page and at checkout before you pay, and it is the number that governs. This is exactly why we recommend travel insurance on those departures.",
+        "Your deposit is set per stay tier and is shown before you pay. It is larger on the expensive tiers because the rooms behind them cost more and are bought earlier.",
         "Optional extras follow their own deadlines instead of the tiers. Some, event tickets in particular, are non-refundable from the moment you buy them, and say so before you add them.",
         "If one traveler on a multi-traveler booking cancels, the tiers apply to that traveler's share, and the remaining travelers' room arrangement may change.",
       ],
@@ -105,7 +117,8 @@ export const terms: LegalDocument = {
         "Travel insurance covering medical care, cancellation and personal belongings is strongly recommended on every departure. We do not make it a condition of booking and we do not check it, but if you travel without it, the losses it would have covered are yours.",
         "You are responsible for your own health, safety and behavior during the trip, for complying with local laws, and for the terms of the hotels, rail operators and activity providers you use.",
         "Timings in Your Guide are firm for trains and transfers. If you miss a departure, rebooking costs are yours.",
-        "Travelers must be 18 or older at the start of the trip unless a departure states otherwise.",
+        "Travelers must be 18 or older on the departure date unless a departure states otherwise. We check the date of birth you give us against that date, so you may book at 17 if you turn 18 before you travel.",
+        "If you give us a false date of birth to get past that check, the booking is cancelled without refund and you lose your deposit. Venues with their own age checks — bars, clubs, licensed viewing areas — will turn you away at the door, and we can neither refund that nor be held responsible for it.",
       ],
     },
     {
@@ -134,11 +147,15 @@ export const terms: LegalDocument = {
     },
     {
       id: "suppliers-and-liability",
-      title: "11. Suppliers and liability",
+      title: "11. Who is responsible for what",
+      paragraphs: [
+        "We are the organizer of your trip, not an agent booking it on your behalf. You buy one package from Guideless at one price, we choose and contract the hotels, trains, transfers and included experiences behind it, and you deal with us rather than with them. That is a deliberate choice and it is what the rest of this section follows from.",
+      ],
       list: [
-        "Hotels, rail operators, transfer companies and activity providers are independent businesses. We select and book them with care, but we do not run them, and we are not liable for their acts or omissions beyond what applicable law requires of a travel organizer.",
+        "We are responsible for delivering the trip as described: the nights, the journeys between cities and the experiences listed as Included. If a part of it is not delivered, tell us and we will put it right, provide something equivalent, or refund the part you did not get.",
+        "Hotels, rail operators, transfer companies and activity providers are independent businesses that we select and contract. We are responsible to you for the parts of your trip we sold you, whoever performs them. We are not responsible for things you buy directly from a supplier, for anything outside the trip we organized, or for a supplier's separate terms you agree to yourself.",
         "To the extent the law allows, our total liability to you for a booking is limited to the amount you paid us for that booking, and we are not liable for indirect or consequential losses such as missed flights you booked yourself, lost earnings or disappointment.",
-        "Nothing in these terms limits liability that cannot be limited by law, including for death or personal injury caused by our negligence.",
+        "Nothing in these terms limits liability that cannot be limited by law, including for death or personal injury caused by our negligence, or rights that consumer protection law where you live gives you and does not allow us to remove.",
       ],
     },
     {

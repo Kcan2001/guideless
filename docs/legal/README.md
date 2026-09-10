@@ -3,9 +3,14 @@
 > **Drafts for attorney review. Not legal advice. Do not send to a supplier.**
 >
 > These documents were prepared to give a qualified travel-business attorney something concrete to
-> mark up, not to be used as they stand. Guideless has not yet determined whether it operates as a
-> travel agent, a tour operator or a package organiser, and that single question changes several
-> clauses in every file here. Clauses that depend on it are marked **[POSITION-DEPENDENT]**.
+> mark up, not to be used as they stand.
+>
+> **The position question is settled: Guideless is the ORGANISER of a package**, decided 2026-09-10.
+> It contracts suppliers in its own name, takes the traveler's money itself, and sells hotel + rail
+>
+> - experiences for one price. Clauses marked **[POSITION-DEPENDENT]** should now be read on that
+>   basis rather than left open; the customer-facing documents already are
+>   (`apps/web/content/legal/terms.ts` clause 11 and `booking-agreement.ts` clauses 4 and 13).
 
 ## What is here
 
@@ -30,26 +35,30 @@ jurisdiction-by-jurisdiction table. This directory is only the supplier side.
 An attorney should settle these before the drafts are finalised, because each one changes wording
 that is already in the files.
 
-1. **Agent or organiser?** If Guideless contracts with suppliers in its own name and sells a
-   combined trip for one price, it is likely a tour operator or package organiser rather than an
-   agent, and is answerable to the traveler for the whole package including a supplier's failure.
-   If it is an agent, it contracts as agent for a disclosed principal and its liability is narrower.
-   Guideless currently takes the traveler's money itself, pays suppliers itself, and sells hotel +
-   rail + experiences for a single price, which points at organiser. Clause 3 of the master
-   agreement is written on that assumption and is marked accordingly.
-2. **California Seller of Travel.** Guideless operates from California and sells to consumers.
-   Registration, the CST number in advertising, and Travel Consumer Restitution Fund participation
-   are likely. Does it also need registration in Florida, Hawaii or Washington, and does any of them
-   force a trust account or bond that changes how supplier prepayments are held?
+1. ~~**Agent or organiser?**~~ **ANSWERED 2026-09-10: organiser.** Guideless contracts suppliers in
+   its own name, takes the traveler's money itself, and sells hotel + rail + experiences for a
+   single price. That is a tour operator selling a package, and it is answerable to the traveler for
+   the whole package including a supplier's failure. Clause 3 of the master agreement was already
+   written on that assumption. What remains for the attorney is confirming the wording, not the
+   position — and confirming that being the organiser is what we WANT, given it is settled by
+   conduct rather than by what a contract says.
+2. **Seller of Travel registration — the live blocker.** California, Florida, Hawaii and Washington
+   each require a seller of travel to register before selling to their residents, and Guideless holds
+   none of them. This is the one item standing between the Booking Agreement and publication: clause
+   4 has to state a registration number or state that residents of those states cannot book. Which
+   of the four bind us depends on where Guideless is operated from as well as where the customer
+   lives, and whether any of them forces a trust account changes how supplier prepayments are held.
 3. **Does the EU Package Travel Directive reach us?** Trips run in France and Monaco and every
-   supplier is European, but the sale is from a US company to mostly US consumers. If the Directive
-   applies, insolvency protection is mandatory and the refund and price-revision rules override
-   anything the customer terms say. This also determines whether clause 12 (force majeure) and
-   clause 8 (price changes) survive as drafted.
-4. **Whose contract is the traveler's contract?** If Guideless is the organiser, the traveler's
+   supplier is European, but the sale is from a US company to mostly US consumers. The working
+   position (seed 090) is that it reaches sales to EU residents, that the exposure is bounded and
+   tier-dependent rather than flat, and that insolvency protection is bought before the first
+   Premium or Elite sale to an EU resident rather than before any EU sale at all. The Booking
+   Agreement now states EU and UK travelers keep their mandatory rights. The attorney should confirm
+   the threshold, not whether the Directive exists.
+4. ~~**Whose contract is the traveler's contract?**~~ **Follows from 1: ours.** The traveler's
    remedy is against Guideless, and these agreements are how Guideless recovers from the supplier.
-   The indemnity and liability clauses assume that chain. If the traveler contracts directly with
-   the hotel, most of clause 11 needs rewriting.
+   The indemnity and liability clauses already assume that chain, and clause 13 of the Booking
+   Agreement now says it to the traveler in plain words.
 5. **Insolvency and prepayment protection.** Suppliers will want deposits months ahead. Whether that
    money can sit in the operating account or must be held in trust follows from questions 2 and 3.
 6. **Governing law.** The drafts leave this open. A California or Delaware choice is convenient for

@@ -4,46 +4,53 @@ Growth mechanics from `docs/strategy-v3-direction.md` §5. Everything here is dr
 confirmed bookings; nothing invents a count, and no reward is granted automatically except the
 referral credit described below.
 
-Migration: `supabase/migrations/20260906005000_referrals_waitlists.sql`.
+Migrations: `supabase/migrations/20260906005000_referrals_waitlists.sql`, and
+`20260910000800_referral_economics.sql`, which replaced the percentage discount and the escalating
+ladder with flat amounts.
 Tests: `supabase/tests/growth.test.sql` (33 assertions), `apps/web/lib/growth/drops.test.ts`.
 
 ## Referrals
 
 Two separate things pay out, both as `account_credits` in the booking's currency.
 
-### The flat reward (paid first, counted toward the ladder)
+### What a referral is worth
 
-Every referral that reaches a confirmed booking pays `system_settings.referral_reward_amount`
-(default 7500 = $75) once, as source `referral_reward`. The friend gets
-`referral_discount_percent` (default 5%) off the base trip at checkout. The flat amount lands as soon as a booking confirms and counts toward the ladder below. This is the existing
-behaviour and `quote_booking()` still owns the discount side.
+Flat, on every trip, whatever it costs:
 
-### The ladder
+|                    | Amount                    | Setting                           | When                       |
+| ------------------ | ------------------------- | --------------------------------- | -------------------------- |
+| The friend booking | **$50 off** the base trip | `referral_discount_amount` (5000) | at checkout                |
+| The referrer       | **$100 credit**           | `referral_reward_amount` (10000)  | when that booking confirms |
 
-`system_settings.referral_tiers` holds the thresholds, so staff change them without a deploy:
+It does not escalate with the number of friends, and it is not a percentage. A percentage was the
+old rule and it was the wrong shape for this catalogue: 5% is $69 on the cheapest trip and $1,580 on
+the dearest, which is twenty-three times the giveaway for the same act, at exactly the end where the
+margin is already committed to a non-refundable room. Costsaver, Contiki, Insight, Trafalgar and
+Intrepid all pay a flat $100. `quote_booking()` owns the discount side and reads
+`referral_discount_amount`; `referral_discount_percent` is a tombstone row nothing reads.
 
-```json
-[
-  { "referrals": 1, "credit": 10000, "note": "First friend" },
-  { "referrals": 2, "credit": 25000, "note": "Second friend" },
-  { "referrals": 3, "credit": 40000, "note": "Third friend" },
-  { "referrals": 4, "credit": 50000, "note": "Fourth friend, plus an experience on us" }
-]
+**The free host place is gone too.** `host_free_spot_threshold` is 0. Hosts earn
+`host_credit_per_traveler` ($100) per confirmed traveler up to `host_credit_cap` ($1,000) — see
+`HOST_CREDIT_PER_TRAVELER` in `apps/web/lib/data/community.ts`, which the public host page reads.
+
+### The ladder, retired
+
+`system_settings.referral_tiers` is now `[]`. It used to hold thresholds that topped a referrer up
+to a running total — $100, $250, $400, $500 "plus an experience on us" — and the fourth referral was
+worth five times the first for no reason anybody could defend.
+
+`sync_referral_tier(user, currency)` survives and is still the only writer of source
+`referral_tier`, but the entitlement is now simply:
+
 ```
-
-**The rule, exactly: `credit` is the referrer's running total, not a payment per friend, and not an
-extra on top of the flat reward.** Reaching a threshold tops the referrer up to that total counting
-everything already paid, the flat reward included. So one friend earns $100 altogether (the flat $75
-plus a $25 top-up), two earn $250, three $400, four $500 — never $1,250, and never $175 for one.
-
-`sync_referral_tier(user, currency)` implements it in one place and is the only writer of source
-`referral_tier`:
-
-```
-entitlement = credit of the highest tier whose `referrals` <= earned referrals (0 if none)
-paid        = sum of this user's `referral_tier` credit in that currency
+entitlement = earned referrals x referral_reward_amount
+paid        = sum of this user's referral_reward + referral_tier credit in that currency
 delta       = entitlement - paid   → written as one row when non-zero
 ```
+
+Emptying the tiers list without changing this function would have clawed the flat reward back to
+zero, because the ladder used to be the _total_ entitlement and `[]` means an entitlement of
+nothing. The tests caught it; it is worth remembering before anyone edits either half again.
 
 Because it recomputes from scratch it is idempotent: calling it twice pays nothing the second
 time. It is also self-reversing — if a referral is voided the earned count drops, entitlement
@@ -63,6 +70,18 @@ ladder, so a trip that did not happen does not leave a reward standing.
 
 `referral_progress(currency)` returns the ladder plus the signed-in traveler's own earned and
 pending counts, and drives the account card.
+
+### Spent credit comes back if the trip does not happen
+
+Confirming a booking writes a NEGATIVE `account_credits` row (source `redemption`) for whatever
+credit the quote applied. Until migration `20260910001100` nothing ever reversed it, so a traveler
+who spent $100 of credit and cancelled at the 90% tier got 90% of the card payment and none of the
+credit — and `previewRefund` could not even show it, because credit is not part of `amount_paid`.
+
+`restore_credit_on_cancellation()` now puts it back in full when a booking goes cancelled or
+refunded. In full, not at the tier percentage: the tiers govern money, and credit is a discount on a
+future trip that we lose nothing by returning. It settles the NET of the redemption rows for the
+booking, so cancelled-then-refunded does not hand it back twice.
 
 ## Waitlists
 

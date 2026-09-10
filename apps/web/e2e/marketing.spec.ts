@@ -122,11 +122,17 @@ test.describe("marketing site", () => {
     // The honesty line lives in the detail sheet now that the cards are condensed, so open one.
     // It is worth asserting because it is the promise we make about not naming an uncontracted
     // hotel, and it would be easy to lose in a redesign.
-    await stays
-      .getByRole("button", { name: /see the detail/i })
-      .first()
-      .click();
+    // `showModal()` needs the component hydrated, and this page hydrates four carousels and four
+    // modals. Clicking once and asserting immediately is a race the test loses on a cold server,
+    // so retry the click until the dialog is actually open.
     const sheet = page.getByRole("dialog");
+    await expect(async () => {
+      await stays
+        .getByRole("button", { name: /see the detail/i })
+        .first()
+        .click();
+      await expect(sheet).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 20_000 });
     await expect(sheet).toContainText(/priced this tier against|property confirmed at booking/i);
     await sheet.getByRole("button", { name: /close/i }).click();
     // Assert that race viewing renders as priced, tiered options, not which options the catalog

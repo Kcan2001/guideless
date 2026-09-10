@@ -4,6 +4,7 @@ import type { Currency } from "@guideless/types";
 import { Badge } from "@/components/ui/badge";
 import type { RoomRule } from "@/lib/data/community";
 import type { AddOnWithCounts, StayOption } from "@/lib/data/extras";
+import { REFERRAL_FRIEND_DISCOUNT, REFERRAL_REWARD } from "@/lib/data/community";
 import { cn } from "@/lib/utils";
 
 const KIND_LABEL: Record<string, string> = {
@@ -221,7 +222,8 @@ export function EventTierMenu({
 export function ReferralHint({ className }: { className?: string }) {
   return (
     <p className={cn("text-sm text-muted-foreground", className)}>
-      Booking with a friend&rsquo;s code? Enter it at checkout for 5% off the trip.
+      Booking with a friend&rsquo;s code? Enter it at checkout for ${REFERRAL_FRIEND_DISCOUNT / 100}{" "}
+      off the trip, and they get ${REFERRAL_REWARD / 100} toward theirs.
     </p>
   );
 }
