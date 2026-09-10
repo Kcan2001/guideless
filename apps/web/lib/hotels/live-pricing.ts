@@ -2,7 +2,7 @@ import "server-only";
 
 import type { TablesInsert } from "@guideless/types";
 import { createServiceRoleClient } from "@/lib/supabase/server";
-import { bestStoredRate, resolveStayContext } from "./catalog";
+import { bestStoredRate, resolveStayContexts } from "./catalog";
 import { refreshStaleRatesForDeparture } from "./search";
 import { getHotelSupplierId } from "./suppliers";
 
@@ -104,7 +104,6 @@ export async function repriceDepartureFromLiveRates(
     .eq("departure_id", departureId)
     .eq("is_active", true)
     .eq("auto_price", true)
-    .not("hotel_id", "is", null)
     .order("position");
 
   const result: RepriceResult = { departureId, repriced: [], unpriced: [] };
@@ -119,19 +118,35 @@ export async function repriceDepartureFromLiveRates(
 
   // One room cost per tier, at single occupancy: the base price is per traveler in their own room,
   // and the shared-room discount is applied separately from the same room cost.
+  //
+  // A tier is every city it stays in, so the cost is the SUM across its legs. A partial sum would
+  // be worse than no price at all — it would look like a bargain and be a loss — so a tier with any
+  // leg missing a rate stays unpriced and says which city was missing.
   const costs = new Map<string, number>();
+  const missingLegs = new Map<string, string[]>();
   await Promise.all(
     options.map(async (o) => {
-      const ctx = await resolveStayContext(o.id);
-      if (!ctx) return;
+      const legs = await resolveStayContexts(o.id);
+      if (legs.length === 0) return;
       // Price the room we actually sell. A tier that says "Breakfast: Included" must not be costed
       // from a room-only rate — that is a hole the size of the breakfast, and it was live.
       const requireBreakfast = /^included/i.test(
         String((o.details as { breakfast?: string } | null)?.breakfast ?? ""),
       );
-      const rate = await bestStoredRate(ctx, 1, { requireBreakfast });
-      if (rate?.total_amount == null) return;
-      costs.set(o.id, rate.total_amount);
+      const rates = await Promise.all(
+        legs.map((ctx) => bestStoredRate(ctx, 1, { requireBreakfast })),
+      );
+      const missing = legs
+        .filter((_, i) => rates[i]?.total_amount == null)
+        .map((ctx) => ctx.legName ?? ctx.hotel.city);
+      if (missing.length > 0) {
+        missingLegs.set(o.id, missing);
+        return;
+      }
+      costs.set(
+        o.id,
+        rates.reduce((sum, r) => sum + (r?.total_amount ?? 0), 0),
+      );
     }),
   );
 
@@ -153,7 +168,10 @@ export async function repriceDepartureFromLiveRates(
     const room = costs.get(o.id);
     const target = priceFor(o);
     if (room == null || target == null) {
-      result.unpriced.push(o.name);
+      const missing = missingLegs.get(o.id);
+      result.unpriced.push(
+        missing?.length ? `${o.name} (no rate in ${missing.join(", ")})` : o.name,
+      );
       continue;
     }
     // A rate far outside the band we last verified is treated as a data problem, not a price move.

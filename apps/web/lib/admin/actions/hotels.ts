@@ -156,12 +156,18 @@ export async function refreshHotelRatesAction(fd: FormData): Promise<void> {
   const hotelId = id(fd, "hotelId");
   const to = `/admin/hotels/${hotelId}#rates`;
   const sb = await createClient();
-  const { data: stays } = await sb
-    .from("departure_stay_options")
-    .select("id")
-    .eq("hotel_id", hotelId)
-    .eq("is_active", true);
-  const ids = ((stays ?? []) as Array<{ id: string }>).map((s) => s.id);
+  // A hotel reaches a tier two ways: as the tier anchor on a single-city trip, or as one leg of a
+  // multi-city one. Only checking the anchor meant pricing a Paris hotel did nothing at all.
+  const [{ data: stays }, { data: legs }] = await Promise.all([
+    sb.from("departure_stay_options").select("id").eq("hotel_id", hotelId).eq("is_active", true),
+    sb.from("departure_stay_legs").select("stay_option_id").eq("hotel_id", hotelId),
+  ]);
+  const ids = [
+    ...new Set([
+      ...((stays ?? []) as Array<{ id: string }>).map((s) => s.id),
+      ...((legs ?? []) as Array<{ stay_option_id: string }>).map((l) => l.stay_option_id),
+    ]),
+  ];
   if (ids.length === 0)
     flash(
       to,

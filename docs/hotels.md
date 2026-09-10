@@ -34,7 +34,7 @@ Guideless hotel catalog (hotels, hotel_rooms)      ← staff curate, /admin/hote
 | `apps/web/lib/hotels/suppliers/duffel.ts`                                        | Duffel Stays adapter                                                                                                                                                      |
 | `apps/web/lib/hotels/suppliers/mock.ts`                                          | Deterministic fixture supplier (`__fixtures__/mock-hotels.json`)                                                                                                          |
 | `apps/web/lib/hotels/suppliers/index.ts`                                         | `getHotelSupplier()` from env (server-only)                                                                                                                               |
-| `apps/web/lib/hotels/catalog.ts`                                                 | Admin read models, stay-context resolution, `bestStoredRate`, `suggestStayPrice`                                                                                          |
+| `apps/web/lib/hotels/catalog.ts`                                                 | Admin read models, `resolveStayContexts` (one per city), `bestStoredRate`, `suggestStayPrice`                                                                             |
 | `apps/web/lib/hotels/search.ts`                                                  | `refreshRatesForStayOption`, `refreshRatesForDeparture`, `listStayOptionsToRefresh`                                                                                       |
 | `apps/web/lib/hotels/recheck.ts`                                                 | `recheckStayRate` — stored vs live                                                                                                                                        |
 | `apps/web/lib/hotels/booking.ts`, `cancellation.ts`                              | `bookHotelForBooking`, `cancelHotelBooking` (staff-triggered)                                                                                                             |
@@ -72,14 +72,53 @@ call): exact `payment_type` values other than `pay_now`; whether `quantity_avail
 `available_rooms` is the populated field; whether `expires_at` exists on rates or only on quotes;
 child guests need an age (we send 8 when the catalog only knows a count).
 
+## A tier is a list of hotels, not a hotel
+
+`departure_stay_options.hotel_id` holds the property a **single-city** tier is priced against, and
+that property covers the whole departure — check in on the start date, check out on the end date.
+Monaco is five nights in one place, so that is exactly right there.
+
+Multi-city trips use `departure_stay_legs` (migration `20260910001000`): one row per city, each with
+its own hotel, its own room and its own dates.
+
+```
+departure_stay_options  ── legs ──▶  departure_stay_legs (hotel_id, check_in, check_out, position)
+        │  no legs → the anchor hotel_id covers the whole departure
+        ▼
+  stay_option_hotels_public          ← ONE ROW PER CITY; group by stay_option_id, order by position
+        ▼
+  resolveStayContexts(stayOptionId)  ← StayContext[] — one per leg, or one for the anchor
+```
+
+Everything downstream takes the list:
+
+- **Rate refresh** fetches each leg separately and deletes/replaces only that leg's dates, so
+  refreshing Paris cannot wipe the Nice rates.
+- **Live pricing** SUMS the legs. A tier with any leg missing a rate stays unpriced and names the
+  city that was missing — a partial sum would look like a bargain and be a loss.
+- **Recheck at checkout** compares the sum. Checking only the first leg would pass a tier whose
+  Paris hotel had doubled.
+- **Supplier booking** refuses a multi-leg tier outright (`multi_leg_unsupported`): three cities is
+  three supplier bookings and `hotel_bookings` records one, so booking the first leg would look
+  like success and leave the traveler with no bed in the other two.
+
+Southern France is the first trip on this shape: three nights in Nice, two in Avignon, three in
+Paris, four tiers, twelve properties (`supabase/seed/091_southern_france_real_hotels.sql`).
+
+**Inventory has a horizon.** Most hotels release rooms about twelve months ahead, so a departure
+further out than that cannot be tier-assigned at all — see `docs/tier-classification.md` Step 1b for
+the measurements and the rule. Such a departure keeps its ladder, links no properties and sets
+`auto_price = false` until the weekly job can see real rates.
+
 ## Adding a hotel
 
 1. `/admin/hotels` → Add hotel: name as contracted, destination, address, coordinates. Stars only
    for contracted properties (plan v2 §10). Active = selectable on stay options.
 2. On the hotel page add **rooms** (names matching the supplier's room names so rates filter) and a
    **supplier mapping** (`duffel` + the `acc_…` id; optionally per room).
-3. On the departure, edit the stay tier and pick the **linked hotel** (and room). The tier's copy,
-   photos and public price stay exactly as staff set them.
+3. On the departure, edit the stay tier and pick the **linked hotel** (and room). On a multi-city
+   trip add a `departure_stay_legs` row per city instead, with that city's dates. The tier's
+   copy, photos and public price stay exactly as staff set them.
 4. **Refresh rates** on the hotel page (or wait for the nightly job). The stay-tiers table shows the
    best stored rate for two adults, the matched pricing rule's markup and a suggested per-traveler
    delta; **Use suggested delta** writes it to the tier. Nothing changes a customer price

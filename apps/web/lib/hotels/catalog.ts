@@ -220,41 +220,117 @@ export interface StayContext {
   checkOut: string;
   currency: string;
   departureId: string;
+  /** 1-based position of this city in the itinerary. 1 for a single-city tier. */
+  legPosition: number;
+  /** The city as the itinerary names it, or null on a single-city tier. */
+  legName: string | null;
 }
 
-/** Hotel, room, supplier ids and dates behind a stay option; null when no hotel is linked. */
-export async function resolveStayContext(stayOptionId: string): Promise<StayContext | null> {
+/**
+ * Every hotel stay behind a tier, in itinerary order.
+ *
+ * A tier is a list of legs, not a hotel: Southern France is three nights in Nice, two in Avignon
+ * and three in Paris, and each has its own property and its own dates. A tier with no legs is a
+ * single-city tier, and its anchor `hotel_id` covers the whole departure — that is the Monaco
+ * shape and it returns exactly one context, so callers have one code path rather than two.
+ *
+ * Empty when no hotel is linked at all.
+ */
+export async function resolveStayContexts(stayOptionId: string): Promise<StayContext[]> {
   const sb = createServiceRoleClient();
-  const { data: stay } = await sb
-    .from("departure_stay_options")
-    .select("id, hotel_id, hotel_room_id, departure_id")
-    .eq("id", stayOptionId)
+  const [{ data: stay }, { data: legs }] = await Promise.all([
+    sb
+      .from("departure_stay_options")
+      .select("id, hotel_id, hotel_room_id, departure_id")
+      .eq("id", stayOptionId)
+      .maybeSingle(),
+    sb
+      .from("departure_stay_legs")
+      .select("hotel_id, hotel_room_id, position, check_in, check_out, destinations(name)")
+      .eq("stay_option_id", stayOptionId)
+      .order("position"),
+  ]);
+  if (!stay) return [];
+
+  const { data: departure } = await sb
+    .from("departures")
+    .select("start_date, end_date, currency")
+    .eq("id", stay.departure_id)
     .maybeSingle();
-  if (!stay?.hotel_id) return null;
-  const [{ data: hotel }, { data: room }, { data: mappings }, { data: departure }] =
-    await Promise.all([
-      sb.from("hotels").select("*").eq("id", stay.hotel_id).maybeSingle(),
-      stay.hotel_room_id
-        ? sb.from("hotel_rooms").select("*").eq("id", stay.hotel_room_id).maybeSingle()
-        : Promise.resolve({ data: null }),
-      sb.from("hotel_supplier_mappings").select("*").eq("hotel_id", stay.hotel_id),
-      sb
-        .from("departures")
-        .select("start_date, end_date, currency")
-        .eq("id", stay.departure_id)
-        .maybeSingle(),
-    ]);
-  if (!hotel || !departure) return null;
-  return {
-    stayOptionId,
-    hotel: hotel as HotelRow,
-    room: (room as HotelRoomRow | null) ?? null,
-    mappings: (mappings ?? []) as HotelSupplierMappingRow[],
-    checkIn: departure.start_date as string,
-    checkOut: departure.end_date as string,
-    currency: departure.currency as string,
-    departureId: stay.departure_id as string,
+  if (!departure) return [];
+
+  type LegSpec = {
+    hotelId: string;
+    roomId: string | null;
+    position: number;
+    legName: string | null;
+    checkIn: string;
+    checkOut: string;
   };
+  const specs: LegSpec[] = (legs ?? []).length
+    ? (legs ?? []).map((l) => ({
+        hotelId: l.hotel_id as string,
+        roomId: (l.hotel_room_id as string | null) ?? null,
+        position: l.position as number,
+        legName:
+          (l.destinations as { name: string } | { name: string }[] | null) == null
+            ? null
+            : Array.isArray(l.destinations)
+              ? ((l.destinations[0]?.name as string | undefined) ?? null)
+              : ((l.destinations as { name: string }).name ?? null),
+        checkIn: l.check_in as string,
+        checkOut: l.check_out as string,
+      }))
+    : stay.hotel_id
+      ? [
+          {
+            hotelId: stay.hotel_id as string,
+            roomId: (stay.hotel_room_id as string | null) ?? null,
+            position: 1,
+            legName: null,
+            checkIn: departure.start_date as string,
+            checkOut: departure.end_date as string,
+          },
+        ]
+      : [];
+  if (specs.length === 0) return [];
+
+  const hotelIds = [...new Set(specs.map((s) => s.hotelId))];
+  const roomIds = specs.map((s) => s.roomId).filter((id): id is string => Boolean(id));
+  const [{ data: hotels }, { data: rooms }, { data: mappings }] = await Promise.all([
+    sb.from("hotels").select("*").in("id", hotelIds),
+    roomIds.length
+      ? sb.from("hotel_rooms").select("*").in("id", roomIds)
+      : Promise.resolve({ data: [] as HotelRoomRow[] }),
+    sb.from("hotel_supplier_mappings").select("*").in("hotel_id", hotelIds),
+  ]);
+  const hotelById = new Map(((hotels ?? []) as HotelRow[]).map((h) => [h.id, h]));
+  const roomById = new Map(((rooms ?? []) as HotelRoomRow[]).map((r) => [r.id, r]));
+  const mappingsByHotel = new Map<string, HotelSupplierMappingRow[]>();
+  for (const m of (mappings ?? []) as HotelSupplierMappingRow[]) {
+    const list = mappingsByHotel.get(m.hotel_id) ?? [];
+    list.push(m);
+    mappingsByHotel.set(m.hotel_id, list);
+  }
+
+  return specs.flatMap((spec) => {
+    const hotel = hotelById.get(spec.hotelId);
+    if (!hotel) return [];
+    return [
+      {
+        stayOptionId,
+        hotel,
+        room: spec.roomId ? (roomById.get(spec.roomId) ?? null) : null,
+        mappings: mappingsByHotel.get(spec.hotelId) ?? [],
+        checkIn: spec.checkIn,
+        checkOut: spec.checkOut,
+        currency: departure.currency as string,
+        departureId: stay.departure_id as string,
+        legPosition: spec.position,
+        legName: spec.legName,
+      },
+    ];
+  });
 }
 
 /** Cheapest stored, available rate for a hotel stay and occupancy (room-scoped when the tier names one). */

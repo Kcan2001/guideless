@@ -5,14 +5,17 @@ import type { Json, TablesInsert } from "@guideless/types";
 import type { NormalizedRate } from "@/lib/hotels/types";
 import { asCurrency, asIsoDate } from "@/lib/hotels/normalize";
 import { createServiceRoleClient } from "@/lib/supabase/server";
-import { resolveStayContext, type StayContext } from "./catalog";
+import { resolveStayContexts, type StayContext } from "./catalog";
 import { getHotelSupplier, getHotelSupplierId, HotelSupplierError } from "./suppliers";
 
 /**
- * Rate refresh: for a stay option (hotel + departure dates) ask the configured supplier for rates
- * at 1 and 2 adults, in parallel with per-call timeouts, and store the normalised results in
- * `hotel_rates`. Stored rates are what staff price from and what `recheck.ts` compares against;
- * they are never trusted at payment time.
+ * Rate refresh: for every leg of a stay option (a hotel and its own nights) ask the configured
+ * supplier for rates at 1 and 2 adults, in parallel with per-call timeouts, and store the
+ * normalised results in `hotel_rates`. Stored rates are what staff price from and what
+ * `recheck.ts` compares against; they are never trusted at payment time.
+ *
+ * A single-city tier has one leg covering the whole departure, so nothing about Monaco changed
+ * when Southern France gained three.
  */
 
 export interface SupplierOutcome {
@@ -23,8 +26,12 @@ export interface SupplierOutcome {
 }
 export interface RefreshResult {
   stayOptionId: string;
-  hotelId: string | null;
-  /** `no_rates`: every supplier answered but had nothing for these dates — usually a wrong mapping. */
+  /** Every hotel this tier stays in, in itinerary order. */
+  hotelIds: string[];
+  /**
+   * The worst thing that happened across the legs. `no_rates`: a supplier answered but had nothing
+   * for those dates, which is usually a wrong mapping.
+   */
   skipped?: "no_hotel" | "no_mapping" | "no_rates";
   stored: number;
   suppliers: SupplierOutcome[];
@@ -66,18 +73,19 @@ function toRow(
   };
 }
 
-export async function refreshRatesForStayOption(stayOptionId: string): Promise<RefreshResult> {
-  const ctx = await resolveStayContext(stayOptionId);
-  if (!ctx) return { stayOptionId, hotelId: null, skipped: "no_hotel", stored: 0, suppliers: [] };
-
+/** One leg: one hotel, one set of nights. */
+async function refreshLeg(ctx: StayContext): Promise<{
+  skipped?: "no_mapping" | "no_rates";
+  stored: number;
+  suppliers: SupplierOutcome[];
+}> {
   const supplier = getHotelSupplier();
   const supplierId = getHotelSupplierId();
   const mapping = ctx.mappings.find((m) => m.supplier === supplierId && !m.hotel_room_id);
   const roomMapping = ctx.room
     ? ctx.mappings.find((m) => m.supplier === supplierId && m.hotel_room_id === ctx.room?.id)
     : null;
-  if (!mapping && !roomMapping)
-    return { stayOptionId, hotelId: ctx.hotel.id, skipped: "no_mapping", stored: 0, suppliers: [] };
+  if (!mapping && !roomMapping) return { skipped: "no_mapping", stored: 0, suppliers: [] };
   const supplierHotelId = (roomMapping ?? mapping)!.supplier_hotel_id;
   const base = {
     hotelIds: [ctx.hotel.id],
@@ -127,7 +135,8 @@ export async function refreshRatesForStayOption(stayOptionId: string): Promise<R
 
   if (rows.length) {
     const sb = createServiceRoleClient();
-    // Replace this supplier's snapshot for the stay dates rather than relying on a conflict target.
+    // Replace this suppliers snapshot for these stay dates rather than relying on a conflict
+    // target. Scoped to the leg dates, so refreshing Paris cannot wipe the Nice rates.
     const { error: delErr } = await sb
       .from("hotel_rates")
       .delete()
@@ -141,29 +150,50 @@ export async function refreshRatesForStayOption(stayOptionId: string): Promise<R
   }
   const noRates = rows.length === 0 && outcomes.every((o) => o.ok);
   return {
-    stayOptionId,
-    hotelId: ctx.hotel.id,
     stored: rows.length,
     suppliers: outcomes,
     ...(noRates ? { skipped: "no_rates" as const } : {}),
   };
 }
 
+export async function refreshRatesForStayOption(stayOptionId: string): Promise<RefreshResult> {
+  const legs = await resolveStayContexts(stayOptionId);
+  if (legs.length === 0)
+    return { stayOptionId, hotelIds: [], skipped: "no_hotel", stored: 0, suppliers: [] };
+
+  // Legs are separate hotels, so they can run together.
+  const perLeg = await Promise.all(legs.map((ctx) => refreshLeg(ctx)));
+  const stored = perLeg.reduce((n, r) => n + r.stored, 0);
+  const suppliers = perLeg.flatMap((r) => r.suppliers);
+  // Report the worst outcome across the legs: a tier is only priceable when every city has a rate.
+  const skipped =
+    perLeg.find((r) => r.skipped === "no_mapping")?.skipped ??
+    perLeg.find((r) => r.skipped === "no_rates")?.skipped;
+  return {
+    stayOptionId,
+    hotelIds: legs.map((l) => l.hotel.id),
+    stored,
+    suppliers,
+    ...(skipped ? { skipped } : {}),
+  };
+}
+
 export async function refreshRatesForDeparture(departureId: string): Promise<RefreshResult[]> {
   const sb = createServiceRoleClient();
+  // No `hotel_id is not null` filter any more: a multi-city tier links its hotels through legs,
+  // and `resolveStayContexts` returns nothing for a tier with neither, which reports as `no_hotel`.
   const { data } = await sb
     .from("departure_stay_options")
     .select("id")
     .eq("departure_id", departureId)
-    .eq("is_active", true)
-    .not("hotel_id", "is", null);
+    .eq("is_active", true);
   const results: RefreshResult[] = [];
   for (const s of (data ?? []) as Array<{ id: string }>)
     results.push(await refreshRatesForStayOption(s.id));
   return results;
 }
 
-/** Every active, hotel-linked stay option on a departure starting within `days` days. */
+/** Every active stay option on a departure starting within `days` days. */
 export async function listStayOptionsToRefresh(days = 400): Promise<string[]> {
   const sb = createServiceRoleClient();
   const horizon = new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);
@@ -172,7 +202,6 @@ export async function listStayOptionsToRefresh(days = 400): Promise<string[]> {
     .from("departure_stay_options")
     .select("id, departures!inner(start_date, status)")
     .eq("is_active", true)
-    .not("hotel_id", "is", null)
     .gte("departures.start_date", today)
     .lte("departures.start_date", horizon)
     .in("departures.status", ["draft", "open", "guaranteed", "full"]);
@@ -210,27 +239,37 @@ export async function refreshStaleRatesForDeparture(
   const sb = createServiceRoleClient();
   const { data: options, error } = await sb
     .from("departure_stay_options")
-    .select("id, hotel_id")
+    .select("id")
     .eq("departure_id", departureId)
-    .eq("is_active", true)
-    .not("hotel_id", "is", null);
+    .eq("is_active", true);
   if (error || !options?.length) return { checked: 0, refreshed: 0, skipped: 0, results: [] };
 
   const cutoff = new Date(Date.now() - maxAgeMinutes * 60_000).toISOString();
 
-  // One freshness probe per hotel. A tier with no stored rate at all is always stale.
+  // One freshness probe per leg, scoped to that leg dates. A tier is stale if ANY of its cities is
+  // stale; a tier with no hotels at all is never stale, because there is nothing to fetch.
   const staleness = await Promise.all(
     options.map(async (o) => {
-      const { data } = await sb
-        .from("hotel_rates")
-        .select("fetched_at")
-        .eq("hotel_id", o.hotel_id!)
-        .order("fetched_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      return { id: o.id, stale: !data?.fetched_at || data.fetched_at < cutoff };
+      const legs = await resolveStayContexts(o.id);
+      if (legs.length === 0) return { id: o.id, linked: false, stale: false };
+      const fetched = await Promise.all(
+        legs.map(async (ctx) => {
+          const { data } = await sb
+            .from("hotel_rates")
+            .select("fetched_at")
+            .eq("hotel_id", ctx.hotel.id)
+            .eq("check_in", ctx.checkIn)
+            .eq("check_out", ctx.checkOut)
+            .order("fetched_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          return data?.fetched_at ?? null;
+        }),
+      );
+      return { id: o.id, linked: true, stale: fetched.some((f) => !f || f < cutoff) };
     }),
   );
+  const linked = staleness.filter((s) => s.linked);
 
   const stale = staleness.filter((s) => s.stale);
   const results = await Promise.all(
@@ -240,7 +279,7 @@ export async function refreshStaleRatesForDeparture(
       } catch (err) {
         return {
           stayOptionId: s.id,
-          hotelId: null,
+          hotelIds: [],
           stored: 0,
           suppliers: [
             {
@@ -256,9 +295,9 @@ export async function refreshStaleRatesForDeparture(
   );
 
   return {
-    checked: options.length,
+    checked: linked.length,
     refreshed: results.filter((r) => r.stored > 0).length,
-    skipped: options.length - stale.length,
+    skipped: linked.length - stale.length,
     results,
   };
 }

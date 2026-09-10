@@ -10,7 +10,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { PricedAsOf } from "@/components/tours/priced-as-of";
 import { StayHotelPanel } from "@/components/tours/stay-hotel-panel";
 import { StayScarcity } from "@/components/tours/stay-scarcity";
-import { stayDetails, type StayOption } from "@/lib/data/extras";
+import { stayDetails, stayGallery, stayHotelNames, type StayOption } from "@/lib/data/extras";
 import { photoAlt } from "@/lib/photos";
 import { cn } from "@/lib/utils";
 
@@ -56,9 +56,11 @@ export function StayTierCards({
         const d = stayDetails(o);
         const saving = o.shared_room_discount_amount ?? sharedRoomDiscountAmount;
 
-        // The property's own photography wins; the seeded destination shot is the fallback.
-        const gallery = o.hotel?.imageUrls?.length ? o.hotel.imageUrls : o.image_urls;
-        const galleryAlt = o.hotel?.name ?? photoAlt(o.image_urls[0] ?? "", o.name);
+        // The properties' own photography wins, one city at a time; the seeded destination shot
+        // is the fallback.
+        const gallery = stayGallery(o.hotels, o.image_urls);
+        const hotelNames = stayHotelNames(o.hotels);
+        const galleryAlt = hotelNames ?? photoAlt(o.image_urls[0] ?? "", o.name);
 
         const allFacts: Array<{ icon: typeof MapPin; label: string; value: string }> = [];
         if (d.neighborhood) allFacts.push({ icon: MapPin, label: "Where", value: d.neighborhood });
@@ -113,7 +115,9 @@ export function StayTierCards({
                     </span>
                   ) : null}
                 </h3>
-                {o.hotel && <p className="mt-1 text-sm text-muted-foreground">{o.hotel.name}</p>}
+                {hotelNames && (
+                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{hotelNames}</p>
+                )}
               </div>
 
               <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-y border-border py-3">
@@ -169,7 +173,7 @@ export function StayTierCards({
                 <DetailModal
                   trigger="See the detail"
                   title={o.name}
-                  subtitle={o.hotel?.name ?? o.area}
+                  subtitle={hotelNames ?? o.area}
                 >
                   {o.tagline && <p className="font-heading text-lg">{o.tagline}</p>}
                   {o.description && <p className="text-sm">{o.description}</p>}
@@ -238,8 +242,8 @@ export function StayTierCards({
                     </p>
                   )}
 
-                  {o.hotel ? (
-                    <StayHotelPanel hotel={o.hotel} confirmed={d.hotelConfirmed} />
+                  {o.hotels.length > 0 ? (
+                    <StayHotelPanel hotels={o.hotels} confirmed={d.hotelConfirmed} />
                   ) : (
                     !d.hotelConfirmed && (
                       <p className="flex items-start gap-2 text-sm text-muted-foreground">

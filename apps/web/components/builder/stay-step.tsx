@@ -8,7 +8,7 @@ import type { CheckoutDeparture } from "@/components/checkout/types";
 import { TierLegend } from "@/components/tours/tier-legend";
 import { StayScarcity } from "@/components/tours/stay-scarcity";
 import { StayHotelPanel } from "@/components/tours/stay-hotel-panel";
-import { stayDetails } from "@/lib/data/extras-shared";
+import { stayDetails, stayGallery, stayHotelNames } from "@/lib/data/extras-shared";
 
 /** "Where do you want to stay?" — one tier per booking; a radio group of cards. */
 export function StayStep({
@@ -47,13 +47,14 @@ export function StayStep({
           {departure.stayOptions.map((o) => {
             const d = stayDetails(o);
             const selected = stayOptionId === o.id;
+            const hotelNames = stayHotelNames(o.hotels);
             const facts = [
               d.neighborhood && { icon: MapPin, text: d.neighborhood },
               d.stationDistance && { icon: TrainFront, text: d.stationDistance },
               d.trainTime && { icon: TrainFront, text: d.trainTime },
               d.breakfast && { icon: Coffee, text: `Breakfast: ${d.breakfast}` },
               d.roomType && { icon: BedDouble, text: d.roomType },
-              o.hotel && { icon: Building2, text: o.hotel.name },
+              hotelNames && { icon: Building2, text: hotelNames },
             ].filter(Boolean) as Array<{ icon: typeof MapPin; text: string }>;
             const inputId = `stay-${o.id}`;
             return (
@@ -65,8 +66,8 @@ export function StayStep({
                 tier={o.tier}
                 label={o.label}
                 image={o.image_urls[0]}
-                gallery={o.hotel?.imageUrls?.length ? o.hotel.imageUrls : undefined}
-                imageAlt={o.hotel?.name ?? `${o.name}${o.area ? `, ${o.area}` : ""}`}
+                gallery={o.hotels.length ? stayGallery(o.hotels, []) : undefined}
+                imageAlt={hotelNames ?? `${o.name}${o.area ? `, ${o.area}` : ""}`}
                 collapse
                 price={
                   o.price_delta_amount === 0
@@ -110,7 +111,9 @@ export function StayStep({
                   </label>
                 }
               >
-                {o.hotel && <StayHotelPanel hotel={o.hotel} confirmed={d.hotelConfirmed} />}
+                {o.hotels.length > 0 && (
+                  <StayHotelPanel hotels={o.hotels} confirmed={d.hotelConfirmed} />
+                )}
               </OptionCard>
             );
           })}
