@@ -261,6 +261,16 @@ export async function resolveStayContext(stayOptionId: string): Promise<StayCont
 export async function bestStoredRate(
   ctx: StayContext,
   adults: number,
+  /**
+   * Constrain the rate to what the tier actually promises.
+   *
+   * Without this it returns the cheapest rate at the hotel, full stop — which quietly prices a
+   * breakfast-included tier off a room-only rate. It was doing exactly that in production: the
+   * Classic tier promises breakfast and was costed at $2,028 when the cheapest rate that actually
+   * includes breakfast is $2,471. A $442 hole per traveler, on a tier where eighteen qualifying
+   * rates were sitting in the same table.
+   */
+  { requireBreakfast = false }: { requireBreakfast?: boolean } = {},
 ): Promise<HotelRateRow | null> {
   const sb = createServiceRoleClient();
   let q = sb
@@ -274,6 +284,7 @@ export async function bestStoredRate(
     .order("total_amount", { ascending: true })
     .limit(1);
   if (ctx.room) q = q.eq("hotel_room_id", ctx.room.id);
+  if (requireBreakfast) q = q.eq("breakfast_included", true);
   const { data } = await q.maybeSingle();
   return (data as HotelRateRow | null) ?? null;
 }

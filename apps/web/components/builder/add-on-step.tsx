@@ -100,7 +100,7 @@ export function AddOnStep({
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-3xl font-bold">{title}</h1>
+        <h2 className="text-3xl font-bold">{title}</h2>
         <p className="mt-2 text-muted-foreground">{INTRO[mode]}</p>
       </header>
 

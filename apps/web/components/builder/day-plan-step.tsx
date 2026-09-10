@@ -312,7 +312,7 @@ export function DayPlanStep({
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-3xl font-bold">{title}</h1>
+        <h2 className="text-3xl font-bold">{title}</h2>
         <p className="mt-2 max-w-2xl text-muted-foreground">
           Day by day. Add as much or as little as you like — the only things you cannot combine are
           two views of the same session. Everything here can also be added later in the app.

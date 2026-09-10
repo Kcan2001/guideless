@@ -32,7 +32,7 @@ export function StayStep({
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-3xl font-bold">{title}</h1>
+        <h2 className="text-3xl font-bold">{title}</h2>
         <p className="mt-2 text-muted-foreground">
           The first option is in the price. Upgrade if you want to.
           {saving > 0 ? ` Two sharing a room each save ${money(saving)}.` : ""}

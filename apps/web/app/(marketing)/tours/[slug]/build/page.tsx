@@ -115,6 +115,11 @@ export default async function BuildPage(props: PageProps<"/tours/[slug]/build">)
           <ArrowLeft className="h-4 w-4" aria-hidden /> Back to {tour.name}
         </Link>
       </div>
+      {/* The wizard renders its own heading per step, on the client, so the initial HTML had no h1
+          at all — nothing for a screen reader to land on and no document outline until hydration.
+          This names the whole task once, server-side; the step titles are h2 beneath it, which is
+          what they always were semantically. */}
+      <h1 className="sr-only">Build your {tour.name}</h1>
       <TripBuilder
         tourSlug={tour.slug}
         departure={departure}
