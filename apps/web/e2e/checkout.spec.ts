@@ -26,7 +26,11 @@ test("a new customer can build a trip up to the payment step, and is refused cle
   await page.locator("#su-password").fill("guideless2027test");
   await page.getByRole("button", { name: "Create account" }).click();
 
-  await expect(page).toHaveURL(new RegExp(`/tours/${TOUR_SLUG}/build`));
+  // Sign-in redirects into the builder, which is server-rendered per request and loads the
+  // departure, its tiers, its add-ons and live availability before it paints. About two seconds
+  // on Vercel; longer here, where parallel workers share one local Supabase. Assert that the
+  // navigation happens, not how fast a contended local stack renders it.
+  await expect(page).toHaveURL(new RegExp(`/tours/${TOUR_SLUG}/build`), { timeout: 30_000 });
   const summary = page.getByTestId("order-summary").first();
   const next = () => page.getByTestId("step-continue").first().click();
 
