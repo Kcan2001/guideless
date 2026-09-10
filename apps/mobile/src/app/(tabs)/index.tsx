@@ -260,7 +260,7 @@ export default function TripHomeScreen() {
                 alignItems: "center",
               }}
             >
-              <Eyebrow>Next</Eyebrow>
+              <Eyebrow style={{ flexShrink: 1 }}>Next</Eyebrow>
               {next.start_time && phase === "during" && (
                 <Pill tone={minutesUntil(next.start_time, clock) <= 60 ? "warning" : "neutral"}>
                   in{" "}
@@ -384,7 +384,7 @@ export default function TripHomeScreen() {
           <View
             style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}
           >
-            <View>
+            <View style={{ flex: 1, minWidth: 0 }}>
               <Eyebrow>Your group</Eyebrow>
               <H2>
                 {members.length} {members.length === 1 ? "traveler" : "travelers"}

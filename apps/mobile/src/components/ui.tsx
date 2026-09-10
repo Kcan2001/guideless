@@ -126,7 +126,9 @@ export function Pill({
           : c.textSecondary;
   return (
     <View style={[styles.pill, { backgroundColor: bg }]}>
-      <Text style={[styles.pillText, { color: fg }]}>{children}</Text>
+      <Text style={[styles.pillText, { color: fg }]} numberOfLines={1}>
+        {children}
+      </Text>
     </View>
   );
 }
@@ -173,7 +175,9 @@ export function Button({
       ) : (
         <>
           {icon && <Ionicons name={icon} size={18} color={fg} />}
-          <Text style={[styles.buttonText, { color: fg }]}>{title}</Text>
+          <Text style={[styles.buttonText, { color: fg }]} numberOfLines={1}>
+            {title}
+          </Text>
         </>
       )}
     </Pressable>
@@ -221,14 +225,16 @@ export function Row({
           <Ionicons name={icon} size={18} color={c.text} />
         </View>
       )}
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, minWidth: 0 }}>
         <Text style={[styles.rowTitle, { color: c.text }]}>{title}</Text>
         {subtitle ? (
           <Text style={[styles.rowSub, { color: c.textSecondary }]}>{subtitle}</Text>
         ) : null}
       </View>
-      {right ??
-        (onPress ? <Ionicons name="chevron-forward" size={18} color={c.textSecondary} /> : null)}
+      <View style={styles.rowRight}>
+        {right ??
+          (onPress ? <Ionicons name="chevron-forward" size={18} color={c.textSecondary} /> : null)}
+      </View>
     </View>
   );
   return onPress ? (
@@ -321,8 +327,10 @@ const styles = StyleSheet.create({
     borderRadius: Radius.xl,
     paddingHorizontal: 10,
     paddingVertical: 3,
+    flexShrink: 1,
+    maxWidth: "100%",
   },
-  pillText: { fontFamily: "Inter_500Medium", fontSize: 12 },
+  pillText: { fontFamily: "Inter_500Medium", fontSize: 12, flexShrink: 1 },
   button: {
     minHeight: MinTouchTarget + 4,
     borderRadius: Radius.md,
@@ -332,8 +340,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: Spacing.two,
+    flexShrink: 1,
+    minWidth: 0,
   },
-  buttonText: { fontFamily: "Inter_600SemiBold", fontSize: 16 },
+  buttonText: { fontFamily: "Inter_600SemiBold", fontSize: 16, flexShrink: 1 },
   input: {
     minHeight: MinTouchTarget + 4,
     borderWidth: 1,
@@ -357,6 +367,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  rowRight: { flexShrink: 0, alignItems: "flex-end" },
   rowTitle: { fontFamily: "Inter_600SemiBold", fontSize: 16 },
   rowSub: { fontFamily: "Inter_400Regular", fontSize: 14, marginTop: 2 },
   note: { borderRadius: Radius.md, padding: Spacing.three },

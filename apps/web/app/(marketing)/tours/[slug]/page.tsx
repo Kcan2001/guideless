@@ -92,7 +92,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
   const detail = await getTourBySlug(slug);
   if (!detail) notFound();
 
-  const { tour, version, route, days, included, excluded, faqs, departures } = detail;
+  const { tour, version, route, days, included, excluded, requirements, faqs, departures } = detail;
   const price = tourFromPrice({
     tour,
     version,
@@ -523,6 +523,27 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
           <ResponsibilityList included={included} excluded={excluded} />
         </div>
       </section>
+
+      {/* Before you book. Conditions of joining, not marketing: a traveler who cannot meet these
+          cannot come, so they belong above the reviews rather than in the small print. */}
+      {requirements.length > 0 && (
+        <section className="mx-auto w-full max-w-6xl px-6 pb-20">
+          <h2 className="text-3xl font-bold md:text-4xl">Before you book.</h2>
+          <p className="mt-2 max-w-xl text-muted-foreground">
+            What everyone on this trip has to be able to do. Check these now, not in May.
+          </p>
+          <ul className="mt-8 grid max-w-4xl gap-4 md:grid-cols-3">
+            {requirements.map((requirement) => (
+              <li key={requirement.id} className="rounded-xl border bg-card p-5">
+                <h3 className="font-semibold">{requirement.title}</h3>
+                {requirement.description && (
+                  <p className="mt-2 text-sm text-muted-foreground">{requirement.description}</p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <TourReviews stats={reviewStats} reviews={reviews} tourName={tour.name} />
       <TestimonialStrip

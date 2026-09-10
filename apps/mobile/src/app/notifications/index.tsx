@@ -32,7 +32,7 @@ export default function InboxScreen() {
       <View
         style={{ flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between" }}
       >
-        <View>
+        <View style={{ flex: 1, minWidth: 0 }}>
           <Eyebrow>Updates</Eyebrow>
           <H1>Inbox</H1>
         </View>

@@ -1545,6 +1545,7 @@ export type Database = {
           pricing_basis: string;
           start_time: string | null;
           supplier_booking_url: string | null;
+          supplier_confirmed: boolean;
           supplier_service_id: string | null;
           supplier_terms_url: string | null;
           tier: Database["public"]["Enums"]["option_tier"] | null;
@@ -1586,6 +1587,7 @@ export type Database = {
           pricing_basis?: string;
           start_time?: string | null;
           supplier_booking_url?: string | null;
+          supplier_confirmed?: boolean;
           supplier_service_id?: string | null;
           supplier_terms_url?: string | null;
           tier?: Database["public"]["Enums"]["option_tier"] | null;
@@ -1627,6 +1629,7 @@ export type Database = {
           pricing_basis?: string;
           start_time?: string | null;
           supplier_booking_url?: string | null;
+          supplier_confirmed?: boolean;
           supplier_service_id?: string | null;
           supplier_terms_url?: string | null;
           tier?: Database["public"]["Enums"]["option_tier"] | null;
@@ -1754,6 +1757,7 @@ export type Database = {
           capacity: number | null;
           created_at: string;
           departure_id: string;
+          deposit_amount: number | null;
           description: string | null;
           destination_id: string | null;
           details: Json;
@@ -1782,6 +1786,7 @@ export type Database = {
           capacity?: number | null;
           created_at?: string;
           departure_id: string;
+          deposit_amount?: number | null;
           description?: string | null;
           destination_id?: string | null;
           details?: Json;
@@ -1810,6 +1815,7 @@ export type Database = {
           capacity?: number | null;
           created_at?: string;
           departure_id?: string;
+          deposit_amount?: number | null;
           description?: string | null;
           destination_id?: string | null;
           details?: Json;
@@ -5142,6 +5148,38 @@ export type Database = {
           },
         ];
       };
+      tour_requirements: {
+        Row: {
+          description: string | null;
+          id: string;
+          position: number;
+          title: string;
+          tour_version_id: string;
+        };
+        Insert: {
+          description?: string | null;
+          id?: string;
+          position?: number;
+          title: string;
+          tour_version_id: string;
+        };
+        Update: {
+          description?: string | null;
+          id?: string;
+          position?: number;
+          title?: string;
+          tour_version_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tour_requirements_tour_version_id_fkey";
+            columns: ["tour_version_id"];
+            isOneToOne: false;
+            referencedRelation: "tour_versions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       tour_version_destinations: {
         Row: {
           destination_id: string;
@@ -5187,6 +5225,7 @@ export type Database = {
           gallery_image_urls: string[];
           hero_image_url: string | null;
           id: string;
+          minimum_age: number | null;
           published_at: string | null;
           seo_description: string | null;
           seo_title: string | null;
@@ -5208,6 +5247,7 @@ export type Database = {
           gallery_image_urls?: string[];
           hero_image_url?: string | null;
           id?: string;
+          minimum_age?: number | null;
           published_at?: string | null;
           seo_description?: string | null;
           seo_title?: string | null;
@@ -5229,6 +5269,7 @@ export type Database = {
           gallery_image_urls?: string[];
           hero_image_url?: string | null;
           id?: string;
+          minimum_age?: number | null;
           published_at?: string | null;
           seo_description?: string | null;
           seo_title?: string | null;
@@ -6763,15 +6804,19 @@ export type Database = {
       };
       stay_option_hotels_public: {
         Row: {
+          address: string | null;
           amenities: string[] | null;
           bed_type: string | null;
           city: string | null;
           country_code: string | null;
           departure_id: string | null;
+          description: string | null;
           hotel_id: string | null;
           hotel_name: string | null;
           hotel_slug: string | null;
           image_urls: string[] | null;
+          latitude: number | null;
+          longitude: number | null;
           max_occupancy: number | null;
           room_name: string | null;
           star_rating: number | null;
@@ -7470,6 +7515,16 @@ export type Database = {
           capacity: number;
           confirmed: number;
           held: number;
+          stay_option_id: string;
+        }[];
+      };
+      stay_option_availability_public: {
+        Args: { p_departure_id: string };
+        Returns: {
+          capacity: number;
+          is_limited: boolean;
+          sold_out: boolean;
+          spots_left: number;
           stay_option_id: string;
         }[];
       };
