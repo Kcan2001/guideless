@@ -113,11 +113,15 @@ test.describe("trip builder", () => {
     // day one's airport transfer, which is priced per booking and so has a quantity select rather
     // than a checkbox — taking the title from one card and the control from another is how this
     // test lied to itself the first time.
+    // `has:` resolves relative to each article, so it takes a plain role locator — passing a
+    // `.first()` chain matches nothing and the test hangs on innerText.
     const plan = page.getByTestId("day-plan");
-    const firstBox = plan.getByRole("checkbox").first();
-    const card = plan.getByRole("article").filter({ has: firstBox });
-    const firstTitle = await card.first().locator("h3").innerText();
-    await firstBox.check();
+    const card = plan
+      .getByRole("article")
+      .filter({ has: page.getByRole("checkbox") })
+      .first();
+    const firstTitle = await card.locator("h3").innerText();
+    await card.getByRole("checkbox").first().check();
 
     // What a traveler is buying has to be named in the summary, not only priced.
     await expect(page.getByTestId("order-summary").first()).toContainText(firstTitle.trim(), {
