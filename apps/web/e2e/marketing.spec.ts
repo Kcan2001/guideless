@@ -67,7 +67,11 @@ test.describe("marketing site", () => {
   }) => {
     await page.goto("/tours/southern-france");
     await page.getByRole("link", { name: "Details" }).first().click();
-    await expect(page).toHaveURL(/\/departures\//);
+    // The departure route is server-rendered per request and answers in under three seconds on
+    // Vercel. Here, several parallel workers share one local Supabase, so it can exceed the ten
+    // second default under contention. Assert that the navigation happens, not how fast a
+    // contended local stack renders it.
+    await expect(page).toHaveURL(/\/departures\//, { timeout: 30_000 });
     await expect(page.getByRole("heading", { name: /payment schedule/i })).toBeVisible();
     await expect(page.getByRole("heading", { name: /cancellation policy/i })).toBeVisible();
     // Assert that tiers render, not which percentages they hold: those are a commercial decision
@@ -105,21 +109,33 @@ test.describe("marketing site", () => {
     await expect(build).toHaveAttribute("href", /\/tours\/monaco-grand-prix\/build\?departure=/);
     await expect(page.getByTestId("compare-block")).toContainText(/traditional .* package/i);
     await expect(page.getByRole("heading", { name: /how you watch/i })).toBeVisible();
+    // Assert the ladder's SHAPE, not which hotels are in it: tier names and properties are
+    // supplier data that changes with every reprice, and pinning them here is what made this spec
+    // fail the moment Monaco was repriced from two tiers to four.
     const stays = page.getByTestId("stay-tiers");
-    await expect(stays).toContainText("Nice, near the port");
-    await expect(stays).toContainText("Monaco, Monte Carlo");
-    await expect(stays).toContainText(/property confirmed at booking/i);
-    await expect(stays).not.toContainText("★");
     await expect(page.getByTestId("tier-legend")).toContainText("Explorer");
     await expect(stays.locator("[data-tier='explorer']")).toHaveText("Explorer");
     await expect(stays.locator("[data-tier='elite']")).toHaveText("Elite");
+    // Every rung shows a price and how many places are left.
+    await expect(stays).toContainText(/places? left|sold out/i);
+
+    // The honesty line lives in the detail sheet now that the cards are condensed, so open one.
+    // It is worth asserting because it is the promise we make about not naming an uncontracted
+    // hotel, and it would be easy to lose in a redesign.
+    await stays
+      .getByRole("button", { name: /see the detail/i })
+      .first()
+      .click();
+    const sheet = page.getByRole("dialog");
+    await expect(sheet).toContainText(/priced this tier against|property confirmed at booking/i);
+    await sheet.getByRole("button", { name: /close/i }).click();
     // Assert that race viewing renders as priced, tiered options, not which options the catalog
     // holds: the titles and prices are supplier data that changes with every reprice.
     const raceOptions = page.getByTestId("race-options");
     await expect(raceOptions.locator("[data-tier]").first()).toBeVisible();
     await expect(raceOptions).toContainText("per person");
     await expect(raceOptions).toContainText("Most popular");
-    await expect(raceOptions.locator("[data-tier='classic']")).toHaveText("Classic");
+    await expect(raceOptions.locator("[data-tier='classic']").first()).toHaveText("Classic");
     const ld = await page.locator('script[type="application/ld+json"]').allTextContents();
     const types = ld.flatMap((t) => JSON.parse(t)).map((d: { "@type": string }) => d["@type"]);
     expect(types).toEqual(expect.arrayContaining(["TouristTrip", "Event"]));
@@ -128,7 +144,11 @@ test.describe("marketing site", () => {
   test("departure page shows the anonymized roster and when the group opens", async ({ page }) => {
     await page.goto("/tours/monaco-grand-prix");
     await page.getByRole("link", { name: "Details" }).first().click();
-    await expect(page).toHaveURL(/\/departures\//);
+    // The departure route is server-rendered per request and answers in under three seconds on
+    // Vercel. Here, several parallel workers share one local Supabase, so it can exceed the ten
+    // second default under contention. Assert that the navigation happens, not how fast a
+    // contended local stack renders it.
+    await expect(page).toHaveURL(/\/departures\//, { timeout: 30_000 });
     const roster = page.getByTestId("roster-strip");
     await expect(roster).toContainText("Your Group");
     await expect(roster).toContainText(/group opens on|group is open/i);
@@ -151,7 +171,7 @@ test.describe("marketing site", () => {
     // fail on the seventh local run, so clear the window rather than weaken the assertion.
     await resetRateLimit("host_application");
     await page.goto("/host");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("travel free");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(/pay less/i);
     await page.locator("#host-name").fill("E2E Host");
     await page.locator("#host-email").fill(`host+${Date.now()}@example.com`);
     await page

@@ -42,9 +42,13 @@ test.describe("trip builder", () => {
 
     const read = total(page);
     const before = await read();
+    // How many tiers a departure carries is catalogue data and changes with every reprice —
+    // Monaco went from two to four on 10 September. Assert that there is something to upgrade TO
+    // and that choosing it costs more, which is the behaviour this test is actually about.
     const tiers = page.getByTestId("stay-tiers").getByRole("radio");
-    await expect(tiers).toHaveCount(2);
-    await tiers.nth(1).check();
+    const count = await tiers.count();
+    expect(count).toBeGreaterThan(1);
+    await tiers.nth(count - 1).check();
 
     // The upgrade is a price delta on the departure, so the total moves and the deposit does not.
     await expect.poll(read, { timeout: 15_000 }).toBeGreaterThan(before);

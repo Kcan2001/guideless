@@ -207,10 +207,16 @@ export async function removeBooking(bookingId: string): Promise<void> {
  * happy-path assertion honest instead of softening it to "thanks OR rate limited".
  */
 export async function resetRateLimit(prefix: string): Promise<void> {
-  try {
-    await serviceClient().from("rate_limits").delete().like("key", `${prefix}:%`);
-  } catch {
-    // Best effort: without the service key there is nothing to reset.
+  // Not best-effort. This used to swallow every failure, so when the delete silently did nothing
+  // the counter climbed run after run and the test failed twenty lines later with "element not
+  // found" — a rate-limit problem wearing a UI bug's clothes. If the window cannot be cleared the
+  // test is going to fail anyway; fail here, where the message is useful.
+  const { error } = await serviceClient().from("rate_limits").delete().like("key", `${prefix}:%`);
+  if (error) {
+    throw new Error(
+      `Could not clear the "${prefix}" rate-limit window: ${error.message}. ` +
+        "Public forms are limited per IP per hour, so the next submission in this spec will be refused.",
+    );
   }
 }
 

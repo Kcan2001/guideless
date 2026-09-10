@@ -65,7 +65,9 @@ export function StayStep({
                 tier={o.tier}
                 label={o.label}
                 image={o.image_urls[0]}
-                imageAlt={`${o.name}${o.area ? `, ${o.area}` : ""}`}
+                gallery={o.hotel?.imageUrls?.length ? o.hotel.imageUrls : undefined}
+                imageAlt={o.hotel?.name ?? `${o.name}${o.area ? `, ${o.area}` : ""}`}
+                collapse
                 price={
                   o.price_delta_amount === 0
                     ? "Included"
