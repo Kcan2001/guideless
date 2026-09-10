@@ -15,7 +15,7 @@ import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const SEED_DIR = join(root, "supabase", "seed");
-const CATALOG_PREFIXES = ["010", "020", "030", "040", "050", "060", "070", "080", "081", "082", "083", "084", "085", "086", "087", "088", "089", "090"];
+const CATALOG_PREFIXES = ["010", "020", "030", "040", "050", "060", "070", "080", "081", "082", "083", "084", "085", "086", "087", "088", "089", "090", "091"];
 
 const args = process.argv.slice(2);
 const opt = (name) => {

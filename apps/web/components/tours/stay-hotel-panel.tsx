@@ -2,15 +2,52 @@ import { ExternalLink, Info, MapPin, Star } from "lucide-react";
 import type { StayHotel } from "@/lib/data/extras";
 
 /**
- * The property a stay tier is priced against: name, address, a map link and what the building
+ * The properties a stay tier is priced against: name, address, a map link and what each building
  * actually has. Every field here came from the supplier's own record, not from us.
+ *
+ * A tier is a list, not a hotel. Monaco is five nights in one place; Southern France is three
+ * nights in Nice, two in Avignon and three in Paris, and a traveler choosing between tiers wants
+ * to see all three. Each leg carries its own city and night count, so nobody has to work out from
+ * a single address which city it was.
  *
  * `confirmed` is the honesty switch. Seed 050 set the rule that we do not present a property as
  * booked until it is contracted, and none of these are. So an unconfirmed hotel is shown as the
  * room the price was built from — a weaker and true claim — rather than as "your hotel". Do not
  * remove that line without a signed contract behind the tier.
  */
-export function StayHotelPanel({ hotel, confirmed }: { hotel: StayHotel; confirmed: boolean }) {
+export function StayHotelPanel({
+  hotels,
+  confirmed,
+}: {
+  hotels: readonly StayHotel[];
+  confirmed: boolean;
+}) {
+  if (hotels.length === 0) return null;
+  const multi = hotels.length > 1;
+
+  return (
+    <section className="mt-4 space-y-3">
+      {hotels.map((hotel) => (
+        <HotelBlock key={`${hotel.name}-${hotel.checkIn}`} hotel={hotel} showLeg={multi} />
+      ))}
+
+      {!confirmed && (
+        <p className="flex items-start gap-1.5 px-4 text-xs text-muted-foreground">
+          <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+          <span>
+            {multi ? "These are the properties" : "This is the property"} we priced this tier
+            against, and the rooms whose real rates produced the figure above. We have not
+            contracted {multi ? "them" : "it"} yet, so your hotel is confirmed and named when you
+            book &mdash; it will be {multi ? "these" : "this"} or something we would stay in
+            ourselves.
+          </span>
+        </p>
+      )}
+    </section>
+  );
+}
+
+function HotelBlock({ hotel, showLeg }: { hotel: StayHotel; showLeg: boolean }) {
   const mapsQuery = encodeURIComponent(
     [hotel.name, hotel.address, hotel.city].filter(Boolean).join(", "),
   );
@@ -21,8 +58,20 @@ export function StayHotelPanel({ hotel, confirmed }: { hotel: StayHotel; confirm
       : `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
 
   return (
-    <section className="mt-4 rounded-lg border border-border bg-muted/40 p-4 text-sm">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+    <div className="rounded-lg border border-border bg-muted/40 p-4 text-sm">
+      {showLeg && (hotel.legName || hotel.nights > 0) && (
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          {hotel.legName}
+          {hotel.nights > 0 && (
+            <span className="font-normal normal-case tracking-normal">
+              {" · "}
+              {hotel.nights} night{hotel.nights === 1 ? "" : "s"}
+            </span>
+          )}
+        </p>
+      )}
+
+      <div className="mt-1 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <h4 className="font-semibold">{hotel.name}</h4>
         {hotel.starRating != null && (
           <span className="inline-flex items-center gap-0.5 text-xs text-muted-foreground">
@@ -60,17 +109,6 @@ export function StayHotelPanel({ hotel, confirmed }: { hotel: StayHotel; confirm
           ))}
         </ul>
       )}
-
-      {!confirmed && (
-        <p className="mt-3 flex items-start gap-1.5 text-xs text-muted-foreground">
-          <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
-          <span>
-            This is the property we priced this tier against, and the room whose real rate produced
-            the figure above. We have not contracted it yet, so your hotel is confirmed and named
-            when you book &mdash; it will be this or something we would stay in ourselves.
-          </span>
-        </p>
-      )}
-    </section>
+    </div>
   );
 }

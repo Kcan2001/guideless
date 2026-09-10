@@ -1,24 +1,12 @@
 import "server-only";
 
 import type { Tables, Views } from "@guideless/types";
+import type { StayHotel } from "@/lib/data/extras-shared";
 import { createPublicClient } from "@/lib/supabase/public";
 
 export type StayOptionRow = Tables<"departure_stay_options">;
+type StayHotelRow = Views<"stay_option_hotels_public">;
 export type AddOn = Tables<"departure_add_ons">;
-
-/** The public profile of the property a tier is priced against (migration 20260910000300). */
-export interface StayHotel {
-  name: string;
-  address: string | null;
-  city: string | null;
-  countryCode: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  starRating: number | null;
-  description: string | null;
-  amenities: string[];
-  imageUrls: string[];
-}
 
 export interface StayOption extends StayOptionRow {
   /**
@@ -29,8 +17,8 @@ export interface StayOption extends StayOptionRow {
   /** 1-9 left. Drives the "Only a few left" badge. */
   isLimited: boolean;
   soldOut: boolean;
-  /** Null until a tier is linked to a hotel. */
-  hotel: StayHotel | null;
+  /** One entry per city, in itinerary order. Empty until a tier is linked to hotels. */
+  hotels: StayHotel[];
   /**
    * When this price was last derived from a live supplier rate, or null for a hand-set tier.
    * The tour page shows it as an "as of" date; the builder re-derives on entry, so by the time
@@ -50,7 +38,13 @@ export interface AddOnWithCounts extends AddOn {
   date: string | null;
 }
 
-export { stayDetails, type StayDetails } from "@/lib/data/extras-shared";
+export {
+  stayDetails,
+  stayGallery,
+  stayHotelNames,
+  type StayDetails,
+  type StayHotel,
+} from "@/lib/data/extras-shared";
 
 export interface DepartureExtras {
   stayOptions: StayOption[];
@@ -146,7 +140,17 @@ export async function listDepartureExtras(
       ];
   const availById = new Map((availability ?? []).map((a) => [a.add_on_id, a]));
   const seatsById = new Map((stayAvailability ?? []).map((a) => [a.stay_option_id, a]));
-  const hotelById = new Map((stayHotels ?? []).map((h) => [h.stay_option_id, h]));
+  // One row per city now, so this groups rather than indexes.
+  const hotelsByStay = new Map<string, StayHotelRow[]>();
+  for (const h of stayHotels ?? []) {
+    if (!h.stay_option_id) continue;
+    const list = hotelsByStay.get(h.stay_option_id) ?? [];
+    list.push(h);
+    hotelsByStay.set(h.stay_option_id, list);
+  }
+  for (const list of hotelsByStay.values()) {
+    list.sort((a, b) => (a.position ?? 1) - (b.position ?? 1));
+  }
   const goingById = new Map((headcounts ?? []).map((h) => [h.add_on_id, h.going ?? 0]));
   const start = departure?.start_date ?? null;
   const end = departure?.end_date ?? null;
@@ -156,27 +160,35 @@ export async function listDepartureExtras(
     groupOpensDaysBefore: departure?.group_opens_days_before ?? 30,
     stayOptions: (stays ?? []).map((s) => {
       const seats = seatsById.get(s.id);
-      const h = hotelById.get(s.id);
+      const legs = hotelsByStay.get(s.id) ?? [];
       return {
         ...s,
-        pricedAt: h?.auto_price ? (h.priced_at ?? null) : null,
+        pricedAt: legs[0]?.auto_price ? (legs[0]?.priced_at ?? null) : null,
         spotsLeft: seats?.spots_left ?? null,
         isLimited: seats?.is_limited ?? false,
         soldOut: seats?.sold_out ?? false,
-        hotel: h?.hotel_name
-          ? {
-              name: h.hotel_name,
-              address: h.address,
-              city: h.city,
-              countryCode: h.country_code,
-              latitude: h.latitude,
-              longitude: h.longitude,
-              starRating: h.star_rating,
-              description: h.description,
-              amenities: h.amenities ?? [],
-              imageUrls: h.image_urls ?? [],
-            }
-          : null,
+        hotels: legs.flatMap<StayHotel>((h) =>
+          h.hotel_name
+            ? [
+                {
+                  name: h.hotel_name,
+                  address: h.address,
+                  city: h.city,
+                  countryCode: h.country_code,
+                  latitude: h.latitude,
+                  longitude: h.longitude,
+                  starRating: h.star_rating,
+                  description: h.description,
+                  amenities: h.amenities ?? [],
+                  imageUrls: h.image_urls ?? [],
+                  legName: h.leg_name ?? h.city,
+                  nights: h.nights ?? 0,
+                  checkIn: h.check_in ?? "",
+                  checkOut: h.check_out ?? "",
+                },
+              ]
+            : [],
+        ),
       };
     }),
     addOns: (addOns ?? []).map((a) => {

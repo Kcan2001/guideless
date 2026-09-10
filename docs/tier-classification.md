@@ -50,6 +50,32 @@ Evidence, not intuition: run the availability sweep first. If most candidates ar
 is scarce and the ladder is about quality. If a handful are, that handful is the top of the ladder
 whatever their star ratings say.
 
+### Step 1b — Check the departure is close enough to have inventory
+
+Before anything else, run the sweep and count what came back. **A departure more than about twelve
+months out cannot be tier-assigned from live inventory**, because most hotels have not loaded it
+yet. This is not the trip being full and it is not a supplier fault; it is the booking window.
+
+Measured on 10 September 2026, one Nice sweep of the same 100 properties for three nights:
+
+| Departure is out | Properties with any availability |
+| ---------------- | -------------------------------- |
+| 2 months         | 93 of 100                        |
+| 6 months         | 86                               |
+| 8 months         | 80                               |
+| 11 months        | 65                               |
+| 12 months        | 24                               |
+| 14 months        | 10                               |
+
+The cliff is between eleven and twelve months, and it is worse in small towns: the same day, Avignon
+had 39 properties available for a May 2027 stay and **four** for September 2027. Four properties
+cannot make a four-rung ladder, and two of those four were out of town.
+
+So the rule is: **sweep first, count, and if the count is thin, stop.** Leave the departure priced
+from the nearest researched window, do not link properties, set `auto_price = false`, and write into
+the tier brief when to come back. Linking a property that happens to have released inventory early
+is worse than linking none — it is a sample of one, usually a chain, and it will misprice the rung.
+
 ### Step 2 — Set the bands from real rates
 
 Each rung gets a **researched cost band per stay**, taken from live supplier rates for the actual
@@ -147,6 +173,28 @@ What a traveler would choose if price were irrelevant — and it must be _availa
 
 ---
 
+## The scripts that do this
+
+Three of the steps above are now executable rather than descriptive:
+
+```bash
+# Step 1-2: everything available in one city for exact nights, priced at 1 adult and 2 sharing,
+# with the cheapest rate and the cheapest that includes breakfast side by side.
+LITEAPI_KEY=… node scripts/tier-candidates.mjs \
+  --city Nice --country FR --lat 43.7102 --lng 7.262 \
+  --in 2027-05-14 --out 2027-05-17 --json nice-may.json
+
+# Step 3: a chosen shortlist priced across EVERY departure window, so a tier that exists in May and
+# not in September is caught before it is seeded.
+LITEAPI_KEY=… node scripts/tier-verify.mjs --plan plan.json
+
+# The public profile of the chosen properties: address, coordinates, stars, photographs, amenities.
+LITEAPI_KEY=… node scripts/hotel-details.mjs --plan plan.json --json hotels.json
+```
+
+They read only and write nothing. The descriptions they return are supplier marketing copy; write
+your own before they go on a page.
+
 ## For an automated first pass
 
 A model can do Steps 1–3 and produce a **proposal**, not a decision. Give it:
@@ -168,6 +216,7 @@ a model is very good at producing plausible numbers.
 **Guardrails for the automated pass**, all of which have already been violated at least once here:
 
 - Refuse to propose a property with no availability for the exact dates.
+- Refuse to propose anything at all for a departure whose sweep came back thin (Step 1b).
 - Refuse to propose a rung whose band has not been researched.
 - Flag when a proposal's cost sits outside the tier's band rather than silently widening the band.
 - Flag when the cheapest rate at a property does not match what the tier promises.

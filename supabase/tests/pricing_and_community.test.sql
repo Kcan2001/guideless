@@ -1,6 +1,8 @@
 -- pgTAP tests for migrations 029–031: quote math, rooms, stay tiers, add-ons, referral rewards,
 -- roster stats, group opening, and the RLS around all of it. Uses seeded departure
--- 30000000-…-0001 (Southern France, $3,495 own room, $750 deposit) inside a rolled-back transaction.
+-- 30000000-…-0001 (Southern France, $750 deposit) inside a rolled-back transaction. The list
+-- price is read from the row rather than restated: that departure is re-priced from live
+-- supplier rates, so a literal would fail every time the trip gets cheaper.
 
 begin;
 create extension if not exists pgtap with schema extensions;
@@ -58,19 +60,19 @@ values
 -- ── Quote math ───────────────────────────────────────────────────────────────
 select is(
   (public.quote_booking('30000000-0000-4000-8000-000000000001', array[1], null, '[]', null, 'deposit', false) ->> 'total_amount')::int,
-  349500, 'one traveler in their own room pays the list price');
+  (select price_amount::int from public.departures where id = '30000000-0000-4000-8000-000000000001'), 'one traveler in their own room pays the list price');
 select is(
   (public.quote_booking('30000000-0000-4000-8000-000000000001', array[1,1], null, '[]', null, 'deposit', false) ->> 'total_amount')::int,
-  (349500 - 35000) * 2, 'two travelers sharing a room each get the shared-room discount');
+  ((select price_amount::int from public.departures where id = '30000000-0000-4000-8000-000000000001') - 35000) * 2, 'two travelers sharing a room each get the shared-room discount');
 select is(
   (public.quote_booking('30000000-0000-4000-8000-000000000001', array[1,1,2], null, '[]', null, 'deposit', false) ->> 'base_amount')::int,
-  (349500 - 35000) * 2 + 349500, 'mixed rooms price each traveler by their own room');
+  ((select price_amount::int from public.departures where id = '30000000-0000-4000-8000-000000000001') - 35000) * 2 + (select price_amount::int from public.departures where id = '30000000-0000-4000-8000-000000000001'), 'mixed rooms price each traveler by their own room');
 select is(
   (public.quote_booking('30000000-0000-4000-8000-000000000001', array[1,1,1], null, '[]', null, 'deposit', false) -> 'problems' -> 0 ->> 'code'),
   'room_capacity', 'three in a room is refused');
 select is(
   (public.quote_booking('30000000-0000-4000-8000-000000000001', array[1], 'a2000000-0000-4000-8000-0000000000a1', '[]', null, 'deposit', false) ->> 'total_amount')::int,
-  349500 + 85000, 'a stay tier adds its delta per traveler');
+  (select price_amount::int from public.departures where id = '30000000-0000-4000-8000-000000000001') + 85000, 'a stay tier adds its delta per traveler');
 select is(
   (public.quote_booking('30000000-0000-4000-8000-000000000001', array[1,2], null,
      '[{"addOnId":"a3000000-0000-4000-8000-0000000000a1","travelerIndexes":[1,2]},{"addOnId":"a3000000-0000-4000-8000-0000000000a2","quantity":1}]'::jsonb,
@@ -124,7 +126,7 @@ select tests.clear_auth();
 
 select is(
   (select total_amount::int from public.bookings where customer_id = 'e2000000-0000-4000-8000-0000000000e2'),
-  ((349500 + 85000 - 35000) * 2)
+  (((select price_amount::int from public.departures where id = '30000000-0000-4000-8000-000000000001') + 85000 - 35000) * 2)
     - (select (value #>> '{}')::int from public.system_settings where key = 'referral_discount_amount')
     + 14500 * 2 + 9000,
   'the booking total equals the quote: base with tier and shared discount, minus referral, plus add-ons');

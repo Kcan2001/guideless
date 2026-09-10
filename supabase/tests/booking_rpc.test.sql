@@ -47,7 +47,10 @@ select * from public.create_booking(
   'deposit', 'v1');
 
 select is((select count(*)::int from tmp_result), 1, 'create_booking returns one row');
-select is((select total_amount from tmp_result), 699000::bigint, 'total = price × travelers (2 × $3,495)');
+-- Read the list price rather than restating it: this departure is re-priced from live supplier
+-- rates now, so a literal here is a test that fails every time the trip gets cheaper.
+select is((select total_amount from tmp_result),
+  ((select price_amount::int from public.departures where id = '30000000-0000-4000-8000-000000000001') * 2)::bigint, 'total = list price × travelers');
 select is((select deposit_amount from tmp_result), 150000::bigint, 'deposit = deposit × travelers (2 × $750)');
 select is((select amount_due_now from tmp_result), 150000::bigint, 'deposit option: due now = deposit');
 select alike((select confirmation_number from tmp_result), 'GL-________', 'confirmation number generated');

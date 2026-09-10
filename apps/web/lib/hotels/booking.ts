@@ -3,7 +3,7 @@ import "server-only";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import { freeUntil } from "./cancellation-policy";
 import type { CancellationPolicy } from "./types";
-import { bestStoredRate, resolveStayContext, type HotelBookingRow } from "./catalog";
+import { bestStoredRate, resolveStayContexts, type HotelBookingRow } from "./catalog";
 import { getHotelSupplier, getHotelSupplierId, HotelSupplierError } from "./suppliers";
 
 /**
@@ -16,7 +16,14 @@ import { getHotelSupplier, getHotelSupplierId, HotelSupplierError } from "./supp
 export interface HotelBookingOutcome {
   ok: boolean;
   hotelBooking: HotelBookingRow | null;
-  reason?: "no_hotel" | "no_rate" | "already_booked" | "supplier_error" | "not_found";
+  reason?:
+    | "no_hotel"
+    | "no_rate"
+    | "already_booked"
+    | "supplier_error"
+    | "not_found"
+    /** A multi-city tier needs one supplier booking per city; hotel_bookings holds one. */
+    | "multi_leg_unsupported";
   message?: string;
 }
 
@@ -44,8 +51,13 @@ export async function bookHotelForBooking(
   if (existing)
     return { ok: false, hotelBooking: existing as HotelBookingRow, reason: "already_booked" };
 
-  const ctx = await resolveStayContext(booking.stay_option_id as string);
-  if (!ctx) return { ok: false, hotelBooking: null, reason: "no_hotel" };
+  const legs = await resolveStayContexts(booking.stay_option_id as string);
+  if (legs.length === 0) return { ok: false, hotelBooking: null, reason: "no_hotel" };
+  // A three-city tier is three supplier bookings, and `hotel_bookings` records one per booking.
+  // Booking only the first leg would look like success and leave the traveler with no bed in the
+  // other two cities, so refuse loudly until the table and this function handle a list.
+  if (legs.length > 1) return { ok: false, hotelBooking: null, reason: "multi_leg_unsupported" };
+  const ctx = legs[0]!;
   const travelers = (booking.booking_travelers ?? []) as Array<{ traveler_id: string }>;
   const adults = Math.min(2, Math.max(1, travelers.length));
   const rate = await bestStoredRate(ctx, adults);
