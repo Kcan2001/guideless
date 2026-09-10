@@ -536,3 +536,16 @@ insert into public.tour_included_items (tour_version_id, position, title, descri
   ('21000000-0000-4000-8000-000000000002', 5, 'Free things we do together',
    'A morning swim off the old town, the walk up Castle Hill, breakfast before qualifying. No charge and no sign-up. Whether you are in Nice or Monte Carlo, on the yacht or in the grandstand, these are the bits everyone is at.')
 on conflict do nothing;
+
+-- Every optional day has its own photograph, and no two lead with the same frame (0074).
+update public.departure_add_ons a set image_urls = v.urls
+from (values
+  ('Private airport transfer', array['/photos/nice-promenade-dusk.jpg']),
+  ('Terrace with lunch (Sat + Sun)', array['/photos/monaco-harbour-rock.jpg','/photos/monaco-circuit-signage.jpg']),
+  ('Amber Lounge yacht, qualifying day', array['/photos/monaco-yacht-deck-view.jpg','/photos/monaco-harbour-yachts.jpg']),
+  ('Amber Lounge yacht, race day', array['/photos/monaco-hairpin-race.jpg','/photos/monaco-yacht-deck-view.jpg']),
+  ('Friday night on the water', array['/photos/monaco-casino-night.jpg']),
+  ('Sunday night after the flag', array['/photos/monaco-night-sea.jpg'])
+) as v(title, urls)
+where a.title = v.title
+  and a.departure_id in (select id from public.departures where tour_id = '20000000-0000-4000-8000-000000000002');

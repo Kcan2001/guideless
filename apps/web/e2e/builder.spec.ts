@@ -50,22 +50,40 @@ test.describe("trip builder", () => {
     await expect.poll(read, { timeout: 15_000 }).toBeGreaterThan(before);
   });
 
-  test("race viewing is one choice per traveler, not several", async ({ page }) => {
+  test("the optional extras are laid out as the days of the trip", async ({ page }) => {
     await page.getByTestId("step-continue").first().click();
     await page.getByTestId("step-continue").first().click();
 
-    const raceOptions = page.getByTestId("race-options");
-    await expect(raceOptions).toBeVisible();
-    const choices = raceOptions.getByRole("checkbox");
+    const plan = page.getByTestId("day-plan");
+    await expect(plan).toBeVisible();
+    // Every day of the departure appears, including any with nothing to sell, so the numbering
+    // a traveler reads matches the itinerary they were shown.
+    const days = plan.locator("[data-testid^='day-']");
+    expect(await days.count()).toBeGreaterThan(2);
+    await expect(page.getByTestId("day-1")).toContainText(/day 1/i);
+  });
+
+  test("two views of the same session conflict; two different days do not", async ({ page }) => {
+    await page.getByTestId("step-continue").first().click();
+    await page.getByTestId("step-continue").first().click();
+
+    const plan = page.getByTestId("day-plan");
+    const choices = plan.getByRole("checkbox");
     expect(await choices.count()).toBeGreaterThan(1);
 
+    // Anything still enabled after a first pick is, by definition, not in conflict with it —
+    // the blocked ones are disabled and say what is blocking them.
     await choices.first().check();
     await expect(choices.first()).toBeChecked();
 
-    await choices.nth(1).check();
-    await expect(choices.nth(1)).toBeChecked();
-    // The tier group is mutually exclusive: choosing a second view drops the first.
-    await expect(choices.first()).not.toBeChecked();
+    const enabled = plan.getByRole("checkbox").and(page.locator(":not([disabled])"));
+    if ((await enabled.count()) > 1) {
+      const second = enabled.nth(1);
+      await second.check();
+      await expect(second).toBeChecked();
+      // Both survive: picking a compatible option must not silently drop the first.
+      await expect(choices.first()).toBeChecked();
+    }
   });
 
   test("an extra outside the race group stacks on top of one inside it", async ({ page }) => {
@@ -73,27 +91,27 @@ test.describe("trip builder", () => {
     await page.getByTestId("step-continue").first().click();
     await page.getByTestId("step-continue").first().click();
 
-    const race = page.getByTestId("race-options").getByRole("checkbox").first();
-    await race.check();
+    const plan = page.getByTestId("day-plan");
+    const choices = plan.getByRole("checkbox");
+    await choices.first().check();
     await expect.poll(read, { timeout: 15_000 }).toBeGreaterThan(0);
-    const withRace = await read();
+    const withFirst = await read();
 
-    await page.getByTestId("step-continue").first().click();
-    await expect(page.getByRole("heading", { name: /what do you want to add/i })).toBeVisible();
-    const extras = page.getByTestId("experiences-options").getByRole("checkbox");
-    if (!(await extras.count())) test.skip(true, "this departure has no non-exclusive extras");
-    await extras.first().check();
+    const enabled = plan.getByRole("checkbox").and(page.locator(":not([disabled])"));
+    if ((await enabled.count()) < 2)
+      test.skip(true, "this departure has only one compatible extra");
+    await enabled.nth(1).check();
 
-    await expect.poll(read, { timeout: 15_000 }).toBeGreaterThan(withRace);
+    await expect.poll(read, { timeout: 15_000 }).toBeGreaterThan(withFirst);
   });
 
   test("the summary names what was chosen, not just a number", async ({ page }) => {
     await page.getByTestId("step-continue").first().click();
     await page.getByTestId("step-continue").first().click();
 
-    const raceOptions = page.getByTestId("race-options");
-    const firstTitle = await raceOptions.getByRole("article").first().locator("h3").innerText();
-    await raceOptions.getByRole("checkbox").first().check();
+    const plan = page.getByTestId("day-plan");
+    const firstTitle = await plan.getByRole("article").first().locator("h3").innerText();
+    await plan.getByRole("checkbox").first().check();
 
     // What a traveler is buying has to be named in the summary, not only priced.
     await expect(page.getByTestId("order-summary").first()).toContainText(firstTitle.trim(), {

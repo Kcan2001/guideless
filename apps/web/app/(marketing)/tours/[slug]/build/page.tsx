@@ -35,7 +35,7 @@ export default async function BuildPage(props: PageProps<"/tours/[slug]/build">)
   const [{ slug }, sp] = await Promise.all([props.params, props.searchParams]);
   const detail = await getTourBySlug(slug);
   if (!detail) notFound();
-  const { tour, route, departures } = detail;
+  const { tour, route, departures, days } = detail;
 
   const requested =
     typeof sp.departure === "string" && UUID.test(sp.departure) ? sp.departure : null;
@@ -105,6 +105,11 @@ export default async function BuildPage(props: PageProps<"/tours/[slug]/build">)
       <TripBuilder
         tourSlug={tour.slug}
         departure={departure}
+        tripDays={days.map((d) => ({
+          day_number: d.day_number,
+          title: d.title,
+          destination: d.destination?.name ?? null,
+        }))}
         departures={summaries}
         steps={steps}
         user={user ? { id: user.id, email: user.email ?? null } : null}

@@ -1523,6 +1523,7 @@ export type Database = {
           day_number: number | null;
           departure_id: string;
           description: string | null;
+          end_day_number: number | null;
           end_time: string | null;
           excludes: string[];
           id: string;
@@ -1563,6 +1564,7 @@ export type Database = {
           day_number?: number | null;
           departure_id: string;
           description?: string | null;
+          end_day_number?: number | null;
           end_time?: string | null;
           excludes?: string[];
           id?: string;
@@ -1603,6 +1605,7 @@ export type Database = {
           day_number?: number | null;
           departure_id?: string;
           description?: string | null;
+          end_day_number?: number | null;
           end_time?: string | null;
           excludes?: string[];
           id?: string;
@@ -6963,6 +6966,10 @@ export type Database = {
           p_add_on: Database["public"]["Tables"]["departure_add_ons"]["Row"];
         };
         Returns: string;
+      };
+      add_on_days: {
+        Args: { p_day: number; p_end_day: number };
+        Returns: number[];
       };
       add_on_room_participants: {
         Args: { p_add_on_id: string; p_trip_id: string };

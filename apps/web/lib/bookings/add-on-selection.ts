@@ -1,5 +1,6 @@
 import type { AddOnSelection } from "@guideless/validation";
 import type { QuoteProblem, QuoteProblemCode } from "@guideless/types";
+import { conflictsWith } from "./add-on-days";
 
 /** Minimal add-on shape the selection helpers need (works for catalog rows and mobile payloads). */
 export interface SelectableAddOn {
@@ -7,6 +8,19 @@ export interface SelectableAddOn {
   /** "per_traveler" | "per_booking" (database rows type this as string). */
   pricing_basis: string;
   tier_group: string | null;
+  /** First and last day the option covers. A conflict needs an overlapping day, not just a group. */
+  day_number?: number | null;
+  end_day_number?: number | null;
+}
+
+/** Normalise the optional day fields so the conflict rule can read them off any caller's row. */
+function scoped(a: SelectableAddOn) {
+  return {
+    id: a.id,
+    tier_group: a.tier_group,
+    day_number: a.day_number ?? null,
+    end_day_number: a.end_day_number ?? null,
+  };
 }
 
 /** Room layout helpers: one 1-based room number per traveler, at most two per room. */
@@ -79,8 +93,11 @@ export function quantityOf(selection: AddOnSelection[], addOnId: string): number
 }
 
 /**
- * Toggle a per-traveler add-on for one traveler (1-based). Add-ons in the same tier group are
- * mutually exclusive per traveler, so selecting one removes that traveler from its siblings.
+ * Toggle a per-traveler add-on for one traveler (1-based).
+ *
+ * Selecting one option drops that traveler from anything it conflicts with — same exclusive group
+ * *and* an overlapping day. Saturday's yacht and Sunday's yacht therefore coexist, while a
+ * three-day pass clears every race view across the days it covers.
  */
 export function toggleTraveler(
   selection: AddOnSelection[],
@@ -98,13 +115,11 @@ export function toggleTraveler(
   );
   if (!selected) {
     if (addOn.tier_group) {
-      const siblings = new Set(
-        catalog
-          .filter((a) => a.tier_group === addOn.tier_group && a.id !== addOnId)
-          .map((a) => a.id),
+      const clashing = new Set(
+        catalog.filter((a) => conflictsWith(scoped(a), scoped(addOn))).map((a) => a.id),
       );
       next = next.map((s) =>
-        siblings.has(s.addOnId)
+        clashing.has(s.addOnId)
           ? { ...s, travelerIndexes: (s.travelerIndexes ?? []).filter((i) => i !== travelerIndex) }
           : s,
       );
@@ -134,12 +149,10 @@ export function setQuantity(
   let next = selection.filter((s) => s.addOnId !== addOnId);
   if (q > 0) {
     if (addOn.tier_group) {
-      const siblings = new Set(
-        catalog
-          .filter((a) => a.tier_group === addOn.tier_group && a.id !== addOnId)
-          .map((a) => a.id),
+      const clashing = new Set(
+        catalog.filter((a) => conflictsWith(scoped(a), scoped(addOn))).map((a) => a.id),
       );
-      next = next.filter((s) => !siblings.has(s.addOnId));
+      next = next.filter((s) => !clashing.has(s.addOnId));
     }
     next.push({ addOnId, quantity: q });
   }
@@ -176,7 +189,7 @@ const PROBLEM_COPY: Record<QuoteProblemCode, string> = {
   add_on_unknown: "One of your add-ons is no longer offered.",
   add_on_closed: "One add-on can no longer be booked for its date.",
   add_on_sold_out: "An add-on has fewer spots left than you selected.",
-  tier_conflict: "Pick one option per traveler in that group.",
+  tier_conflict: "Only one of those per traveler per day. Drop one to add the other.",
   code_invalid: "We don't recognise that code.",
   code_own_referral: "Your own referral code can't be used on your booking.",
   code_currency: "That code is for a different currency.",
