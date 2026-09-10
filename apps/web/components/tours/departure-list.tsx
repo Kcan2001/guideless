@@ -1,10 +1,10 @@
-import Link from "next/link";
 import { CalendarDays, Users } from "lucide-react";
 import { dropCountdown, dropState } from "@/lib/growth/drops";
 import { WaitlistForm } from "@/components/growth/waitlist-form";
 import { formatDateRange, formatMoney } from "@guideless/utils";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { PendingLink } from "@/components/ui/pending-link";
 import type { DepartureWithAvailability } from "@/lib/data/tours";
 import { cn } from "@/lib/utils";
 
@@ -37,12 +37,12 @@ export function DepartureList({
       <div className="rounded-xl border border-dashed border-border p-8 text-center">
         <p className="font-heading text-lg font-semibold">New dates are being finalized.</p>
         <p className="mt-1 text-muted-foreground">Check back soon, or explore other trips.</p>
-        <Link
+        <PendingLink
           href="/tours"
           className={cn(buttonVariants({ variant: "secondary", size: "sm" }), "mt-4")}
         >
           All trips
-        </Link>
+        </PendingLink>
       </div>
     );
   }
@@ -83,12 +83,12 @@ export function DepartureList({
               <p className="text-xs text-muted-foreground">per traveler</p>
             </div>
             <div className="flex gap-2">
-              <Link
+              <PendingLink
                 href={`/tours/${tourSlug}/departures/${d.id}`}
                 className={buttonVariants({ variant: "secondary", size: "sm" })}
               >
                 Details
-              </Link>
+              </PendingLink>
               {!drop.open || soldOut ? (
                 <span
                   className={cn(buttonVariants({ size: "sm" }), "pointer-events-none opacity-50")}
@@ -96,12 +96,13 @@ export function DepartureList({
                   {drop.open ? "Sold out" : "Not open yet"}
                 </span>
               ) : (
-                <Link
+                <PendingLink
                   href={{ pathname: `/tours/${tourSlug}/build`, query: { departure: d.id } }}
                   className={buttonVariants({ size: "sm" })}
+                  pendingLabel="Opening…"
                 >
                   Build my trip
-                </Link>
+                </PendingLink>
               )}
             </div>
             {tourId && (!drop.open || soldOut) && (

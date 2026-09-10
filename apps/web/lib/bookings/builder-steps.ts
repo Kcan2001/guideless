@@ -1,10 +1,14 @@
 /**
- * Trip Builder steps (plan v2 §13–14). The list is derived from what a departure actually offers,
- * so a tour without race tiers never shows a race step and a departure without transfers skips
- * that step. Order is fixed; presence is data-driven. Titles are questions in plain language.
+ * Trip Builder steps (plan v2 §13–14). The list is derived from what a departure actually offers;
+ * order is fixed, presence is data-driven, titles are questions in plain language.
+ *
+ * Race views, experiences and transfers used to be three consecutive steps. They are now one
+ * "Your days" step laid out as the days of the trip, because splitting a five-day race weekend
+ * across three menus asks the traveler to rebuild the diary in their head — and it hid the fact
+ * that a Friday choice and a Sunday choice were never in competition. `partitionAddOns` is kept
+ * because the tour page still groups the same way when it is selling rather than booking.
  */
-export type BuilderStepKey =
-  "dates" | "stay" | "race" | "experiences" | "transfers" | "travelers" | "review" | "payment";
+export type BuilderStepKey = "dates" | "stay" | "days" | "travelers" | "review" | "payment";
 
 export interface BuilderStep {
   key: BuilderStepKey;
@@ -17,7 +21,7 @@ export interface BuilderStep {
 export interface BuilderStepInput {
   stayOptionCount: number;
   addOns: ReadonlyArray<{ tier_group: string | null; kind: string }>;
-  /** Used to phrase the race step ("How do you want to watch Monaco?"). */
+  /** Used to phrase the day step for an event departure. */
   eventName?: string | null;
 }
 
@@ -44,26 +48,16 @@ export function partitionAddOns<T extends { tier_group: string | null; kind: str
   return { race, experiences, transfers };
 }
 
-const ALL: BuilderStepKey[] = [
-  "dates",
-  "stay",
-  "race",
-  "experiences",
-  "transfers",
-  "travelers",
-  "review",
-  "payment",
-];
+const ALL: BuilderStepKey[] = ["dates", "stay", "days", "travelers", "review", "payment"];
 
 export function deriveBuilderSteps(input: BuilderStepInput): BuilderStep[] {
   const parts = partitionAddOns(input.addOns);
   const event = input.eventName?.replace(/^Formula 1 /, "").trim();
+  const anyAddOns = parts.race.length + parts.experiences.length + parts.transfers.length > 0;
   const present: Record<BuilderStepKey, boolean> = {
     dates: true,
     stay: input.stayOptionCount > 0,
-    race: parts.race.length > 0,
-    experiences: parts.experiences.length > 0,
-    transfers: parts.transfers.length > 0,
+    days: anyAddOns,
     travelers: true,
     review: true,
     payment: true,
@@ -71,9 +65,10 @@ export function deriveBuilderSteps(input: BuilderStepInput): BuilderStep[] {
   const copy: Record<BuilderStepKey, [title: string, short: string]> = {
     dates: ["When do you want to go?", "Dates"],
     stay: ["Where do you want to stay?", "Stay"],
-    race: [event ? `How do you want to watch ${event}?` : "How do you want to watch?", "Race"],
-    experiences: ["What do you want to add?", "Experiences"],
-    transfers: ["How do you want to get from the airport?", "Transfers"],
+    days: [
+      event ? `How do you want to spend ${event}?` : "How do you want to spend your days?",
+      "Your days",
+    ],
     travelers: ["Who’s traveling?", "Travelers"],
     review: ["Almost there.", "Review"],
     payment: ["Review and pay.", "Payment"],

@@ -80,3 +80,40 @@ thing that marks a booking paid.
 - `e2e/checkout.spec.ts` — sign up → builder → payment step, refused cleanly without Stripe; the
   old checkout URL forwards.
 - `e2e/marketing.spec.ts` — "Build my trip" CTAs point at the builder.
+
+## The day plan (migrations 0073–0074)
+
+The builder's optional extras used to be three consecutive steps — race views, then experiences,
+then transfers. Kyle, looking at the Monaco builder: _"The addons need to be presented as each day
+... they can pick multiple per day, or if an option is two days (sat + sun) they elect it once and
+it's highlighted for both days."_ Three menus asked a traveler to rebuild a five-day race weekend
+in their head, and it hid the fact that a Friday choice and a Sunday choice were never in
+competition.
+
+They are now one **Your days** step laid out as the trip's diary. Every day of the departure
+appears in order with its itinerary title and destination, and a day with nothing to sell says so
+rather than being dropped — the numbering has to match the itinerary the traveler was shown.
+
+Two schema facts make it work.
+
+- **`end_day_number`** gives an option a span. "Grandstand K (three-day pass)" is days 3–5;
+  "Terrace with lunch (Sat + Sun)" and "Amber Lounge yacht, both days" are 4–5. Before this they
+  all sat on a single day, so a traveler reading Sunday saw no grandstand and concluded they had
+  none. The option is selectable on the first day of its span and appears on the rest as a strip
+  saying it already covers that day. Every real case is contiguous, so a second integer is enough
+  and an array would answer a question nobody is asking.
+- **A conflict is a `tier_group` _and_ an overlapping day.** It used to be the group alone, so
+  choosing Friday's grandstand made Sunday's yacht unselectable — the builder would not let you
+  watch two days of a three-day race weekend. Now Saturday's yacht and Sunday's yacht are two
+  separate choices, and the three-day pass correctly blocks all three days. Anything with no
+  `tier_group` never conflicts, which is what lets somebody take the coast boat at ten, the
+  grandstand at three and the harbour party at nine.
+
+`quote_booking()` is still the authority and re-checks every conflict on the server; the client
+rules in `lib/bookings/add-on-days.ts` exist so a traveler is stopped before the request, not
+after. A blocked card names what is blocking it rather than just going grey.
+
+Within a day, options run in the order they happen; anything untimed sinks to the end. Every
+option renders through the same `OptionCard`, and migration 0074 gave the two Monaco add-ons that
+had no photograph one and split the three yacht options off their shared lead image, so the day
+plan reads as distinct products rather than one repeated.

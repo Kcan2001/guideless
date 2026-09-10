@@ -3,8 +3,9 @@
 import type { Route } from "next";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { AddOnStep } from "@/components/builder/add-on-step";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { DayPlanStep } from "@/components/builder/day-plan-step";
+import type { TripDay } from "@/lib/bookings/add-on-days";
 import { BuilderProgress } from "@/components/builder/builder-progress";
 import { DepartureStep, type BuilderDepartureSummary } from "@/components/builder/departure-step";
 import {
@@ -26,7 +27,6 @@ import type { CheckoutDeparture, CheckoutUser } from "@/components/checkout/type
 import { defaultRooms, fitRooms, fitSelection } from "@/lib/bookings/add-on-selection";
 import {
   nextStep,
-  partitionAddOns,
   previousStep,
   type BuilderStep,
   type BuilderStepKey,
@@ -46,6 +46,7 @@ export function TripBuilder({
   tourSlug,
   departure,
   departures,
+  tripDays,
   steps,
   user,
   googleEnabled = false,
@@ -56,6 +57,8 @@ export function TripBuilder({
   tourSlug: string;
   departure: CheckoutDeparture;
   departures: BuilderDepartureSummary[];
+  /** The itinerary's days, so the add-on step can lay itself out as the trip's diary. */
+  tripDays: TripDay[];
   steps: BuilderStep[];
   user: CheckoutUser | null;
   /** Whether the project has Google sign-in switched on; the button is hidden when it does not. */
@@ -156,7 +159,6 @@ export function TripBuilder({
     });
   }, [quoteState.quote, departure.id]);
 
-  const parts = useMemo(() => partitionAddOns(departure.addOns), [departure.addOns]);
   const current = steps.find((s) => s.key === step) ?? steps[0]!;
   const go = (key: BuilderStepKey | null) => {
     if (!key) return;
@@ -210,13 +212,12 @@ export function TripBuilder({
       onBack={back}
       onNext={forward}
     />
-  ) : step === "race" || step === "experiences" || step === "transfers" ? (
-    <AddOnStep
-      key={step}
+  ) : step === "days" ? (
+    <DayPlanStep
       title={current.title}
-      mode={step}
       departure={departure}
-      addOns={parts[step]}
+      addOns={departure.addOns}
+      tripDays={tripDays}
       travelerNames={names}
       selection={draft.addOns}
       onChange={(addOns) => update({ addOns })}

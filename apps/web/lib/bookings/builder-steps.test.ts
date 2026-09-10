@@ -19,31 +19,27 @@ const monaco = {
 };
 
 describe("deriveBuilderSteps", () => {
-  it("shows every step for an event departure with tiers, experiences and transfers", () => {
+  it("puts everything optional into one day-by-day step", () => {
     const steps = deriveBuilderSteps(monaco).map((s) => s.key);
-    expect(steps).toEqual([
-      "dates",
-      "stay",
-      "race",
-      "experiences",
-      "transfers",
-      "travelers",
-      "review",
-      "payment",
-    ]);
+    expect(steps).toEqual(["dates", "stay", "days", "travelers", "review", "payment"]);
   });
 
-  it("phrases the race step with the event name, minus the series prefix", () => {
-    const race = deriveBuilderSteps(monaco).find((s) => s.key === "race");
-    expect(race?.title).toBe("How do you want to watch Monaco Grand Prix 2027?");
+  it("phrases the day step with the event name, minus the series prefix", () => {
+    const days = deriveBuilderSteps(monaco).find((s) => s.key === "days");
+    expect(days?.title).toBe("How do you want to spend Monaco Grand Prix 2027?");
   });
 
-  it("drops the race, transfer and stay steps when the departure has none", () => {
+  it("keeps the day step for a departure whose only extras are experiences", () => {
     const steps = deriveBuilderSteps({
       stayOptionCount: 0,
       addOns: [{ tier_group: null, kind: "activity" }],
     }).map((s) => s.key);
-    expect(steps).toEqual(["dates", "experiences", "travelers", "review", "payment"]);
+    expect(steps).toEqual(["dates", "days", "travelers", "review", "payment"]);
+  });
+
+  it("drops the day step entirely when there is nothing optional to sell", () => {
+    const steps = deriveBuilderSteps({ stayOptionCount: 1, addOns: [] }).map((s) => s.key);
+    expect(steps).toEqual(["dates", "stay", "travelers", "review", "payment"]);
   });
 
   it("always keeps dates, travelers, review and payment", () => {
@@ -52,6 +48,7 @@ describe("deriveBuilderSteps", () => {
   });
 });
 
+// Still used by the tour page, which groups the same way when it is selling rather than booking.
 describe("partitionAddOns", () => {
   it("splits tiers, transfers and the rest", () => {
     const parts = partitionAddOns(monaco.addOns);
