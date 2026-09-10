@@ -351,7 +351,9 @@ export function DayPlanStep({
               )}
 
               {selectable.length > 0 ? (
-                <ul className="mt-4 grid gap-5 md:grid-cols-2">
+                // A lone option on a quiet day gets the full width rather than sitting stranded
+                // in half a grid; its own container query then lays the card out to suit.
+                <ul className={cn("mt-4 grid gap-5", selectable.length > 1 && "md:grid-cols-2")}>
                   {selectable.map((e) => (
                     <li key={e.addOn.id}>{renderCard(e)}</li>
                   ))}
@@ -371,7 +373,7 @@ export function DayPlanStep({
           <div className="border-b border-border pb-2">
             <h2 className="font-heading text-xl font-semibold">Any time on the trip</h2>
           </div>
-          <ul className="mt-4 grid gap-5 md:grid-cols-2">
+          <ul className={cn("mt-4 grid gap-5", plan.anytime.length > 1 && "md:grid-cols-2")}>
             {plan.anytime.map((a) => (
               <li key={a.id}>
                 {renderCard({ addOn: a, isFirstDay: true, carriedOver: false, days: [] })}

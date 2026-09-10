@@ -2,8 +2,9 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import type { BookingQuoteResult } from "@guideless/types";
 import type { PaymentOption } from "@guideless/utils";
-import { formatMoney } from "@guideless/utils";
+import { formatDate, formatMoney } from "@guideless/utils";
 import type { BuilderDraft } from "@/components/builder/draft";
 import type { CheckoutDeparture } from "@/components/checkout/types";
 import { Button } from "@/components/ui/button";
@@ -12,11 +13,21 @@ import { startCheckout } from "@/lib/bookings/actions";
 import { track } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
-/** "Review and pay." — deposit or full, a last look, then Stripe's page. */
+/**
+ * "Review and pay." — deposit or full, a last look, then Stripe's page.
+ *
+ * The amount charged today comes from the quote and nowhere else. The deposit option used to be
+ * labelled with `departure.depositAmount` — "$600 per traveler" — while the card was actually
+ * charged the deposit *plus every extra*, so the page said $600 in the choice you were making and
+ * $2,790 in the summary beside it. On the last screen before payment that is the worst possible
+ * place for two different numbers, so the option now states what will be taken, from the same
+ * source the summary reads.
+ */
 export function PaymentStep({
   title,
   departure,
   draft,
+  quote,
   userSignedIn,
   onBack,
   onPaymentOption,
@@ -24,6 +35,8 @@ export function PaymentStep({
   title: string;
   departure: CheckoutDeparture;
   draft: BuilderDraft;
+  /** Authoritative money. Null only while the first quote is in flight. */
+  quote: BookingQuoteResult | null;
   userSignedIn: boolean;
   onBack: () => void;
   onPaymentOption: (o: PaymentOption) => void;
@@ -48,13 +61,17 @@ export function PaymentStep({
       [
         canDeposit && {
           value: "deposit" as const,
-          title: `Deposit today (${money(departure.depositAmount)} per traveler)`,
+          title: "Deposit today",
           body:
             chosenAddOns.length > 0
-              ? "Extras are paid today too. Balance before departure."
-              : "Balance before departure.",
+              ? `${money(departure.depositAmount)} per traveler now, plus your extras in full. The rest before departure.`
+              : `${money(departure.depositAmount)} per traveler now. The rest before departure.`,
         },
-        { value: "full" as const, title: "Pay in full today", body: "Nothing more to pay." },
+        {
+          value: "full" as const,
+          title: "Pay in full today",
+          body: "The whole trip now. Nothing more to pay.",
+        },
       ].filter(Boolean) as Array<{ value: PaymentOption; title: string; body: string }>,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [canDeposit, departure.depositAmount, chosenAddOns.length],
@@ -126,6 +143,22 @@ export function PaymentStep({
             <span>
               <span className="block font-semibold">{o.title}</span>
               <span className="block text-sm text-muted-foreground">{o.body}</span>
+              {draft.paymentOption === o.value && quote && (
+                <span className="mt-2 block text-sm">
+                  <span className="font-semibold">
+                    You&rsquo;ll pay {money(quote.due_now_amount)} today
+                  </span>
+                  {quote.total_amount > quote.due_now_amount && (
+                    <span className="text-muted-foreground">
+                      , then {money(quote.total_amount - quote.due_now_amount)}
+                      {departure.balanceDueDate
+                        ? ` by ${formatDate(departure.balanceDueDate)}`
+                        : ""}
+                    </span>
+                  )}
+                  .
+                </span>
+              )}
             </span>
           </label>
         ))}

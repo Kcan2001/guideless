@@ -390,8 +390,9 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
                     : "One of these, your call."}
                 </h2>
                 <p className="mt-2 max-w-xl text-muted-foreground">
-                  Priced per person, chosen per traveler. Pick one now or add it later while seats
-                  last. Tiers work the same way as for where you stay.
+                  Priced per person and chosen per traveler. One view per session — take Saturday
+                  and Sunday both if you want, just not two views of the same day. Pick now or add
+                  later while seats last. Tiers work the same way as for where you stay.
                 </p>
                 <div className="mt-10">
                   <ExperienceCards
