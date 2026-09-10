@@ -35,6 +35,13 @@ import { HotelSupplierError, SUPPLIER_TIMEOUTS, withTimeout } from "./shared";
 
 const BASE = "https://api.liteapi.travel/v3.0";
 
+/**
+ * Age used when we know a child is travelling but not how old they are. LiteAPI prices by age and
+ * rejects an occupancy that gives a count instead. Ten is mid-range and errs towards the adult
+ * fare, so a quote is never lower than what the traveler is actually charged.
+ */
+const CHILD_AGE_UNKNOWN = 10;
+
 // ── Wire shapes (subset; optional-heavy because sandbox and production differ) ─
 interface LiteMoney {
   amount?: number | null;
@@ -428,7 +435,19 @@ export class LiteApiSupplier implements HotelSupplier {
         method: "POST",
         body: {
           hotelIds: [input.supplierHotelId],
-          occupancies: [{ adults: input.adults, children: input.children ?? 0 }],
+          // LiteAPI's `children` is an array of AGES, not a count. Sending the count made every
+          // rate request 400 with "models.Occupancy.Children: []int: decode slice: expect [",
+          // which is why this adapter had never successfully fetched a rate in production. Our
+          // contract only carries a number, so an unknown age becomes a placeholder; zero children
+          // omits the field entirely, which is what LiteAPI expects.
+          occupancies: [
+            {
+              adults: input.adults,
+              ...(input.children && input.children > 0
+                ? { children: Array.from({ length: input.children }, () => CHILD_AGE_UNKNOWN) }
+                : {}),
+            },
+          ],
           currency: input.currency,
           guestNationality: "US",
           checkin: input.checkIn,
