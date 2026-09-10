@@ -156,6 +156,27 @@ describe("LiteApiSupplier", () => {
     expect(laddered.length).toBeGreaterThan(0);
   });
 
+  // Regression, 2026-09-10. `children` was sent as a COUNT, and LiteAPI wants an array of AGES:
+  // every rate request 400'd with "models.Occupancy.Children: []int: decode slice: expect [".
+  // The adapter had therefore never fetched a rate in production, and nothing caught it because
+  // the fixtures only ever exercised the response side. Assert the request body, not just the reply.
+  it("sends occupancy the way LiteAPI parses it: no children key when there are none", async () => {
+    const { s, calls } = supplier();
+    await s.getRates({ ...searchInput, supplierHotelId: "lp2febb", children: 0 });
+    const body = calls.at(-1)!.body as { occupancies: Array<Record<string, unknown>> };
+    expect(body.occupancies).toEqual([{ adults: searchInput.adults }]);
+    expect(body.occupancies[0]).not.toHaveProperty("children");
+  });
+
+  it("sends children as an array of ages, never a count", async () => {
+    const { s, calls } = supplier();
+    await s.getRates({ ...searchInput, supplierHotelId: "lp2febb", children: 2 });
+    const body = calls.at(-1)!.body as { occupancies: Array<{ children?: number[] }> };
+    expect(Array.isArray(body.occupancies[0]!.children)).toBe(true);
+    expect(body.occupancies[0]!.children).toHaveLength(2);
+    for (const age of body.occupancies[0]!.children!) expect(Number.isInteger(age)).toBe(true);
+  });
+
   it("carries the offer expiry through from the response", async () => {
     const { s } = supplier();
     const [rate] = await s.getRates({ ...searchInput, supplierHotelId: "lp2febb" });
