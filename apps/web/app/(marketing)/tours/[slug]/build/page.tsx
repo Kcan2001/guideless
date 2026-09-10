@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { after } from "next/server";
 import { ArrowLeft } from "lucide-react";
 import { TrackView } from "@/components/analytics/track-view";
 import type { BuilderDepartureSummary } from "@/components/builder/departure-step";
@@ -10,7 +9,7 @@ import type { CheckoutDeparture } from "@/components/checkout/types";
 import { deriveBuilderSteps, resolveStep } from "@/lib/bookings/builder-steps";
 import { loadBuilderDraft } from "@/lib/bookings/drafts";
 import { listDepartureExtras } from "@/lib/data/extras";
-import { refreshStaleRatesForDeparture } from "@/lib/hotels/search";
+import { repriceDepartureFromLiveRates } from "@/lib/hotels/live-pricing";
 import { getTourBySlug } from "@/lib/data/tours";
 import { enabledAuthProviders } from "@/lib/auth/providers";
 import { createClient } from "@/lib/supabase/server";
@@ -27,6 +26,9 @@ export async function generateMetadata(props: PageProps<"/tours/[slug]/build">):
 }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** How long we will make somebody wait for a verified price before showing the last verified one. */
+const LIVE_PRICE_TIMEOUT_MS = 6000;
 
 /**
  * The Trip Builder (plan v2 §13). `?departure=` picks the dates (default: the next open one),
@@ -47,6 +49,15 @@ export default async function BuildPage(props: PageProps<"/tours/[slug]/build">)
     departures[0];
   if (!chosen) notFound();
 
+  // Verify the price before showing it. The tour page shows the price as of the last refresh and
+  // says so; the builder is where somebody actually decides, so it gets the real current number.
+  // Bounded, because a slow supplier must never stop a booking: past the deadline we fall back to
+  // the stored prices, which are the last verified ones rather than guesses.
+  await Promise.race([
+    repriceDepartureFromLiveRates(chosen.id).catch(() => null),
+    new Promise((resolve) => setTimeout(resolve, LIVE_PRICE_TIMEOUT_MS)),
+  ]);
+
   const supabase = await createClient();
   const [extras, userRes, serverDraft] = await Promise.all([
     listDepartureExtras(chosen.id),
@@ -55,19 +66,6 @@ export default async function BuildPage(props: PageProps<"/tours/[slug]/build">)
   ]);
   const user = userRes.data.user;
   const providers = await enabledAuthProviders();
-
-  // Somebody is about to choose between these tiers, so make sure the cost data behind them is
-  // current rather than up to six hours old from the last cron run. This runs after the response
-  // is sent, refetches only tiers whose stored rate has gone stale, and never changes what this
-  // page displays — see refreshStaleRatesForDeparture for why all three of those matter.
-  after(async () => {
-    try {
-      await refreshStaleRatesForDeparture(chosen.id);
-    } catch {
-      // A supplier being slow or down must never surface on a page a traveler is trying to book on.
-      // The nightly cron and the recheck inside startCheckout are both still there behind this.
-    }
-  });
 
   const departure: CheckoutDeparture = {
     id: chosen.id,

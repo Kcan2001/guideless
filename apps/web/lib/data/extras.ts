@@ -31,6 +31,12 @@ export interface StayOption extends StayOptionRow {
   soldOut: boolean;
   /** Null until a tier is linked to a hotel. */
   hotel: StayHotel | null;
+  /**
+   * When this price was last derived from a live supplier rate, or null for a hand-set tier.
+   * The tour page shows it as an "as of" date; the builder re-derives on entry, so by the time
+   * somebody is choosing, this is minutes old.
+   */
+  pricedAt: string | null;
 }
 
 export interface AddOnWithCounts extends AddOn {
@@ -153,6 +159,7 @@ export async function listDepartureExtras(
       const h = hotelById.get(s.id);
       return {
         ...s,
+        pricedAt: h?.auto_price ? (h.priced_at ?? null) : null,
         spotsLeft: seats?.spots_left ?? null,
         isLimited: seats?.is_limited ?? false,
         soldOut: seats?.sold_out ?? false,
