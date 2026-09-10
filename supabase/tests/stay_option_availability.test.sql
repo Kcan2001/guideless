@@ -145,7 +145,9 @@ select is((select count(*)::int from public.stay_option_availability_for('300000
 select is((select confirmed from public.stay_option_availability_for('30000000-0000-4000-8000-000000000004')
            where stay_option_id = '31000000-0000-4000-8000-000000000001'), 2,
   'the wrapper reports the same confirmed count as the view');
--- Southern France carries three purchasable tiers since seed 087 added the Luberon villa as Elite.
+-- Three rows, two of them purchasable: seed 089 deactivated the Luberon villa Elite tier. The
+-- staff wrapper deliberately still counts it — ops need to see a tier they have taken off sale —
+-- while stay_option_availability_public filters on is_active, because a traveler must not.
 select is((select count(*)::int from public.stay_option_availability_for('30000000-0000-4000-8000-000000000001')), 3,
   'the wrapper scopes to the departure asked for');
 
