@@ -23,7 +23,11 @@ test.describe("marketing site", () => {
       await expect(page.getByRole("navigation", { name: "Mobile" })).toBeVisible();
       await expect(page.getByRole("link", { name: "How it works" }).first()).toBeVisible();
     } else {
-      await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible();
+      // No desktop nav any more: wordmark, account, and the button. The full list is in the footer.
+      await expect(page.getByRole("navigation", { name: "Primary" })).toHaveCount(0);
+      await expect(
+        page.getByRole("contentinfo").getByRole("link", { name: "How it works" }),
+      ).toBeVisible();
     }
   });
 
@@ -218,12 +222,11 @@ test.describe("marketing site", () => {
       expect(res?.status(), old).toBe(200);
       await expect(page).toHaveURL(/\/how-it-works$/);
     }
-    // One link in the header, not three doors into one room. Desktop only: small screens collapse
-    // the nav into the drawer, where a longer list costs nothing and this assertion means nothing.
+    // The header is down to the wordmark and the way in. No desktop nav landmark at all — an empty
+    // one would announce "Primary navigation" and then offer nothing.
     if (!isMobile) {
-      await expect(page.getByRole("navigation", { name: "Primary" }).getByRole("link")).toHaveCount(
-        1,
-      );
+      await expect(page.getByRole("navigation", { name: "Primary" })).toHaveCount(0);
+      await expect(page.locator("header").getByRole("link")).toHaveCount(3);
     }
   });
 
