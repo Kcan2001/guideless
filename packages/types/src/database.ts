@@ -1519,6 +1519,8 @@ export type Database = {
           end_day_number: number | null;
           end_time: string | null;
           excludes: string[];
+          family: string | null;
+          family_summary: string | null;
           id: string;
           image_urls: string[];
           in_trip_only: boolean;
@@ -1561,6 +1563,8 @@ export type Database = {
           end_day_number?: number | null;
           end_time?: string | null;
           excludes?: string[];
+          family?: string | null;
+          family_summary?: string | null;
           id?: string;
           image_urls?: string[];
           in_trip_only?: boolean;
@@ -1603,6 +1607,8 @@ export type Database = {
           end_day_number?: number | null;
           end_time?: string | null;
           excludes?: string[];
+          family?: string | null;
+          family_summary?: string | null;
           id?: string;
           image_urls?: string[];
           in_trip_only?: boolean;

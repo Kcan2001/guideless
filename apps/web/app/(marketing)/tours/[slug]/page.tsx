@@ -24,6 +24,7 @@ import { ItineraryTimeline } from "@/components/tours/itinerary-timeline";
 import { PhotoGallery } from "@/components/tours/photo-gallery";
 import { ResponsibilityList } from "@/components/tours/responsibility-list";
 import { StayTierCards } from "@/components/tours/stay-tier-cards";
+import { addOnFamilies } from "@/lib/data/extras-shared";
 import { TierLegend } from "@/components/tours/tier-legend";
 import { CtaLink } from "@/components/analytics/cta-link";
 import { buttonVariants } from "@/components/ui/button";
@@ -50,6 +51,39 @@ const LEVEL_LABEL = {
 } as const;
 
 /** Hero promise when the version has no tagline of its own. */
+/**
+ * The tier grid's call to action, and the only one in the section.
+ *
+ * The cards used to carry a button each, all four pointing at the same builder. That asked "which
+ * one?" of somebody who had not yet seen a room, and it is the wrong question on this page: the
+ * tiers explain the price bands, and choosing is what the builder is for. One button, naming what
+ * happens next.
+ */
+function SeeTheRooms({ href }: { href: Route }) {
+  return (
+    <div className="mt-10 flex flex-wrap items-center gap-x-4 gap-y-2">
+      <CtaLink
+        placement="tour_tiers"
+        href={href}
+        className={buttonVariants({ size: "lg" })}
+        data-testid="see-the-rooms"
+      >
+        See the rooms and prices <ArrowRight className="h-4 w-4" aria-hidden />
+      </CtaLink>
+      <p className="text-sm text-muted-foreground">
+        Free to look — nothing is held until you pay a deposit.
+      </p>
+    </div>
+  );
+}
+
+/**
+ * Exclusive sets the tour page gives a section of their own. Everything else with a `tier_group`
+ * falls through to the general "also optional" grid rather than being mislabelled.
+ */
+const RACE_VIEW_GROUP = "race_view";
+const NIGHT_GROUP_PREFIX = "night_";
+
 function heroPromise(slug: string, isEvent: boolean): string {
   if (slug === "monaco-grand-prix") {
     return "Stay in Nice or Monaco. Choose your race view. Meet the group. Explore the Riviera on your own terms.";
@@ -122,9 +156,24 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
     .flatMap((d) => d.items.map((i) => ({ item: i, day: d })))
     .find((x) => x.item.is_anchor);
   const stayOptions = extras?.stayOptions ?? [];
-  const viewing = (extras?.addOns ?? []).filter((a) => a.tier_group);
-  const experiences = (extras?.addOns ?? []).filter((a) => !a.tier_group);
-  const hasExtras = stayOptions.length > 0 || viewing.length > 0 || experiences.length > 0;
+  // One card per thing you can add, not per row you can buy: the yacht's three days are one
+  // answer to "can I watch from a boat?". The builder still offers every variant.
+  //
+  // `tier_group` marks any mutually exclusive set, and Monaco has six of them — race viewing plus
+  // one per night. Treating "has a tier_group" as "is race viewing" put nine nightclub cards under
+  // the heading "How you watch the Monaco Grand Prix", which is the wrong answer to the only
+  // question that section exists to answer.
+  const allAddOns = extras?.addOns ?? [];
+  const viewing = addOnFamilies(allAddOns.filter((a) => a.tier_group === RACE_VIEW_GROUP));
+  const nightOptions = addOnFamilies(
+    allAddOns.filter((a) => a.tier_group?.startsWith(NIGHT_GROUP_PREFIX)),
+  );
+  const experiences = addOnFamilies(allAddOns.filter((a) => !a.tier_group));
+  const hasExtras =
+    stayOptions.length > 0 ||
+    viewing.length > 0 ||
+    nightOptions.length > 0 ||
+    experiences.length > 0;
   const bookable = !!next && next.availability.available > 0;
   const buildHref = bookable ? (`/tours/${tour.slug}/build?departure=${next.id}` as Route) : null;
   const eventShortName = tour.event_name?.replace(/^Formula 1 /, "") ?? null;
@@ -357,8 +406,8 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
             {isEvent ? "Pick your base." : "Pick your tier."}
           </h2>
           <p className="mt-2 max-w-xl text-muted-foreground">
-            Every trip starts at the minimum. Upgrade if you want to, and see exactly why it costs
-            more before you do. The same four tiers apply to add-ons.
+            What each price band buys you: the area, how far it is, and what is in the price. You
+            see the actual properties when you build the trip. The same four tiers apply to add-ons.
           </p>
           <TierLegend className="mt-8" />
           <div className="mt-10">
@@ -366,17 +415,17 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
               options={stayOptions}
               currency={currency}
               sharedRoomDiscountAmount={extras.sharedRoomDiscountAmount}
-              ctaHref={buildHref}
             />
           </div>
           <div className="mt-8 space-y-2">
             <RoomRule rule={roomRule} />
           </div>
+          {buildHref && <SeeTheRooms href={buildHref} />}
         </section>
       )}
 
       {/* How you watch / experiences */}
-      {(viewing.length > 0 || experiences.length > 0) && (
+      {(viewing.length > 0 || nightOptions.length > 0 || experiences.length > 0) && (
         <section className="bg-surface py-20">
           <div className="mx-auto w-full max-w-6xl space-y-16 px-6">
             {viewing.length > 0 && (
@@ -391,17 +440,37 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
                 </h2>
                 <p className="mt-2 max-w-xl text-muted-foreground">
                   Priced per person and chosen per traveler. One view per session — take Saturday
-                  and Sunday both if you want, just not two views of the same day. Pick now or add
-                  later while seats last. Tiers work the same way as for where you stay.
+                  and Sunday both if you want, just not two views of the same day. Where there is
+                  more than one way to do it, you pick the day when you build. Tiers work the same
+                  way as for where you stay.
                 </p>
                 <div className="mt-10">
                   <ExperienceCards
-                    addOns={viewing}
+                    families={viewing}
                     currency={currency}
                     size="large"
                     pickOne
-                    ctaHref={buildHref}
                     testId="race-options"
+                  />
+                </div>
+              </div>
+            )}
+            {nightOptions.length > 0 && (
+              <div>
+                <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                  Your nights
+                </p>
+                <h2 className="mt-3 text-3xl font-bold md:text-4xl">Where the group ends up.</h2>
+                <p className="mt-2 max-w-xl text-muted-foreground">
+                  One per night, and none of them compulsory. Prices are per person and every night
+                  stands on its own — take one, take all of them, or keep your evenings free.
+                </p>
+                <div className="mt-10">
+                  <ExperienceCards
+                    families={nightOptions}
+                    currency={currency}
+                    pickOne
+                    testId="night-options"
                   />
                 </div>
               </div>
@@ -420,9 +489,8 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
                 </p>
                 <div className="mt-10">
                   <ExperienceCards
-                    addOns={experiences}
+                    families={experiences}
                     currency={currency}
-                    ctaHref={buildHref}
                     testId="experience-options"
                   />
                 </div>

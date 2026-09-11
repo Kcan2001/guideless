@@ -85,3 +85,81 @@ export function stayDetails(option: Pick<StayOptionRow, "details">): StayDetails
     hotelConfirmed: obj.hotel_confirmed === true,
   };
 }
+
+/**
+ * One entry on the tour page, standing for one *thing* you can add rather than one row you can buy.
+ *
+ * The tour page and the builder answer different questions. "Can I watch this from a yacht?" is a
+ * tour-page question; "qualifying day, race day, or both?" is a builder question, and answering it
+ * on the tour page turned a four-card ladder into a twelve-card wall. So rows that share a `family`
+ * collapse into one entry here, and the builder keeps every row untouched.
+ *
+ * The price is the cheapest variant's, because a Friday yacht and a Sunday yacht are not the same
+ * price. Quoting the dearest would mislead in the other direction, so a collapsed family always
+ * renders as "From".
+ */
+export interface AddOnFamily<T extends AddOnLike> {
+  /** Stable per departure: the family name, or the add-on's id when it stands alone. */
+  key: string;
+  title: string;
+  /** Family-level copy, falling back to the cheapest variant's own description. */
+  summary: string | null;
+  /** Cheapest variant's price. Render with `isFrom` — never bare when the family has variants. */
+  fromAmount: number;
+  /** True when this stands for more than one row, which is exactly when "From" is required. */
+  isFrom: boolean;
+  variantCount: number;
+  /** The cheapest variant, whose tier, photos and kind the card borrows. */
+  cheapest: T;
+  /** Every row behind this entry, cheapest first, for the detail sheet. */
+  variants: T[];
+}
+
+/** The subset of an add-on this module needs. Keeps the helper usable from client components. */
+export interface AddOnLike {
+  id: string;
+  title: string;
+  description: string | null;
+  family: string | null;
+  family_summary: string | null;
+  price_amount: number;
+}
+
+/**
+ * Collapse add-ons into families, preserving the order they arrived in.
+ *
+ * A null `family` is not a missing value — it means the add-on is its own family, which is the
+ * common case (a transfer, a dinner). Those pass through as single-variant entries priced exactly,
+ * because there is nothing for a "From" to range over.
+ */
+export function addOnFamilies<T extends AddOnLike>(addOns: readonly T[]): AddOnFamily<T>[] {
+  const order: string[] = [];
+  const groups = new Map<string, T[]>();
+
+  for (const a of addOns) {
+    const key = a.family ?? a.id;
+    const existing = groups.get(key);
+    if (existing) {
+      existing.push(a);
+    } else {
+      groups.set(key, [a]);
+      order.push(key);
+    }
+  }
+
+  return order.map((key) => {
+    // Non-null: every key in `order` was inserted alongside its group.
+    const variants = [...groups.get(key)!].sort((a, b) => a.price_amount - b.price_amount);
+    const cheapest = variants[0]!;
+    return {
+      key,
+      title: cheapest.family ?? cheapest.title,
+      summary: cheapest.family_summary ?? cheapest.description,
+      fromAmount: cheapest.price_amount,
+      isFrom: variants.length > 1,
+      variantCount: variants.length,
+      cheapest,
+      variants,
+    };
+  });
+}

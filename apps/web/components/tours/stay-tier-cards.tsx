@@ -1,66 +1,56 @@
-import Link from "next/link";
-import type { Route } from "next";
-import { BedDouble, Check, Coffee, Info, MapPin, Minus, Star, TrainFront } from "lucide-react";
+import Image from "next/image";
+import { BedDouble, Check, Coffee, MapPin, Minus, TrainFront } from "lucide-react";
 import { formatMoney } from "@guideless/utils";
 import type { Currency } from "@guideless/types";
 import { DetailModal } from "@/components/tours/detail-modal";
-import { HotelCarousel } from "@/components/tours/hotel-carousel";
 import { OptionLabelBadge, TierBadge } from "@/components/tours/option-label";
-import { buttonVariants } from "@/components/ui/button";
 import { PricedAsOf } from "@/components/tours/priced-as-of";
-import { StayHotelPanel } from "@/components/tours/stay-hotel-panel";
 import { StayScarcity } from "@/components/tours/stay-scarcity";
-import { stayDetails, stayGallery, stayHotelNames, type StayOption } from "@/lib/data/extras";
-import { photoAlt } from "@/lib/photos";
-import { cn } from "@/lib/utils";
+import { stayDetails, type StayOption } from "@/lib/data/extras";
+import { photoAlt, photoPosition } from "@/lib/photos";
+import { cn, gridColumns } from "@/lib/utils";
 
 function money(amount: number, currency: Currency) {
   return formatMoney({ amount, currency }, { compact: true });
 }
 
 /**
- * Accommodation tiers, as cards you can compare at a glance.
+ * Accommodation tiers on the tour page: what each price band *means*, not which hotel you get.
  *
- * The card carries only what a traveler chooses BETWEEN: the property's own photographs, the price,
- * how many places are left, and three facts. Everything else — the full description, what is and is
- * not in the price, why it costs what it does, the address and the amenities — is one click away in
- * a modal. The previous version put all of that inline, three cards across, which made a wall of
- * text nobody reads and buried the price below the fold.
+ * The tour page and the builder answer different questions. Somebody reading the tour page is
+ * deciding whether this trip is for them and which budget they are in; somebody in the builder has
+ * decided and is choosing a room. Naming the property here answered the second question to a person
+ * still asking the first, and it cost us twice: four carousels of hotel photography above the fold
+ * pushed the price below it, and a named hotel on a marketing page is a promise about inventory we
+ * only actually hold once a tier is linked and in date.
  *
- * Photographs come from the property itself where we have a hotel linked, and fall back to a
- * destination photo otherwise. Star ratings render only when set, and an unconfirmed property says
- * so rather than implying a booking we have not made.
+ * So the card shows the band — the area, the character of the tier, what it includes, the price and
+ * how many places are left — over the tier's own photograph of the *place*. The properties, their
+ * photographs, their addresses and their amenities are one step further in, in the builder, where
+ * they are a choice rather than a claim.
+ *
+ * There is no per-card call to action. Choosing happens in the builder, and four buttons that all
+ * go to the same page is four chances to answer "which one?" before anyone has seen the rooms.
  */
 export function StayTierCards({
   options,
   currency,
   sharedRoomDiscountAmount,
-  ctaHref,
-  ctaLabel = "Build my trip",
 }: {
   options: StayOption[];
   currency: Currency;
   /** Departure-level saving per traveler when two share; a tier may override it. */
   sharedRoomDiscountAmount: number;
-  ctaHref: Route | null;
-  ctaLabel?: string;
 }) {
   if (options.length === 0) return null;
-  const twoUp = options.length === 2;
   return (
-    <ul
-      className={cn("grid gap-6", twoUp ? "lg:grid-cols-2" : "md:grid-cols-2 xl:grid-cols-3")}
-      data-testid="stay-tiers"
-    >
+    <ul className={cn("grid gap-6", gridColumns(options.length))} data-testid="stay-tiers">
       {options.map((o) => {
         const d = stayDetails(o);
         const saving = o.shared_room_discount_amount ?? sharedRoomDiscountAmount;
 
-        // The properties' own photography wins, one city at a time; the seeded destination shot
-        // is the fallback.
-        const gallery = stayGallery(o.hotels, o.image_urls);
-        const hotelNames = stayHotelNames(o.hotels);
-        const galleryAlt = hotelNames ?? photoAlt(o.image_urls[0] ?? "", o.name);
+        // The tier's own photograph of the area. Deliberately NOT the hotel gallery — see above.
+        const image = o.image_urls[0] ?? null;
 
         const allFacts: Array<{ icon: typeof MapPin; label: string; value: string }> = [];
         if (d.neighborhood) allFacts.push({ icon: MapPin, label: "Where", value: d.neighborhood });
@@ -82,13 +72,15 @@ export function StayTierCards({
               o.is_default ? "border-ink" : "border-border",
             )}
           >
-            {gallery.length > 0 && (
+            {image && (
               <div className="relative aspect-[16/10]">
-                <HotelCarousel
-                  images={gallery}
-                  alt={galleryAlt}
+                <Image
+                  src={image}
+                  alt={photoAlt(image, o.area ?? o.name)}
+                  fill
                   sizes="(min-width: 1280px) 420px, (min-width: 768px) 50vw, 100vw"
-                  className="h-full w-full"
+                  className="object-cover"
+                  style={{ objectPosition: photoPosition(image) }}
                 />
                 <div className="pointer-events-none absolute left-3 top-3 flex flex-wrap gap-1.5">
                   <TierBadge tier={o.tier} />
@@ -102,22 +94,8 @@ export function StayTierCards({
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {o.area ?? "Where you stay"}
                 </p>
-                <h3 className="mt-1.5 font-heading text-xl font-bold">
-                  {o.name}
-                  {o.star_rating ? (
-                    <span
-                      className="ml-2 inline-flex items-center gap-0.5 align-middle text-teal"
-                      aria-label={`${o.star_rating} star`}
-                    >
-                      {Array.from({ length: o.star_rating }).map((_, i) => (
-                        <Star key={i} className="h-3.5 w-3.5 fill-current" aria-hidden />
-                      ))}
-                    </span>
-                  ) : null}
-                </h3>
-                {hotelNames && (
-                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{hotelNames}</p>
-                )}
+                <h3 className="mt-1.5 font-heading text-xl font-bold">{o.name}</h3>
+                {o.tagline && <p className="mt-1 text-sm text-muted-foreground">{o.tagline}</p>}
               </div>
 
               <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-y border-border py-3">
@@ -142,15 +120,15 @@ export function StayTierCards({
                 </span>
               </div>
 
+              {/* One column. Four cards across leaves each about 250px wide, and a two-column fact
+                  list there wraps "10-15 min to Nice-Ville" onto three lines. */}
               {summaryFacts.length > 0 && (
-                <dl className="grid gap-x-4 gap-y-2 text-sm sm:grid-cols-2">
+                <dl className="grid gap-y-2 text-sm">
                   {summaryFacts.map(({ icon: Icon, label, value }) => (
                     <div key={label} className="flex gap-2">
                       <Icon className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden />
                       <div className="min-w-0">
-                        <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-                          {label}
-                        </dt>
+                        <dt className="sr-only">{label}</dt>
                         <dd>{value}</dd>
                       </div>
                     </div>
@@ -159,23 +137,7 @@ export function StayTierCards({
               )}
 
               <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-2 pt-2">
-                {ctaHref && (
-                  <Link
-                    href={ctaHref}
-                    className={buttonVariants({
-                      variant: o.is_default ? "primary" : "secondary",
-                      size: "sm",
-                    })}
-                  >
-                    {ctaLabel}
-                  </Link>
-                )}
-                <DetailModal
-                  trigger="See the detail"
-                  title={o.name}
-                  subtitle={hotelNames ?? o.area}
-                >
-                  {o.tagline && <p className="font-heading text-lg">{o.tagline}</p>}
+                <DetailModal trigger="See the detail" title={o.name} subtitle={o.area}>
                   {o.description && <p className="text-sm">{o.description}</p>}
 
                   {allFacts.length > 0 && (
@@ -242,17 +204,11 @@ export function StayTierCards({
                     </p>
                   )}
 
-                  {o.hotels.length > 0 ? (
-                    <StayHotelPanel hotels={o.hotels} confirmed={d.hotelConfirmed} />
-                  ) : (
-                    !d.hotelConfirmed && (
-                      <p className="flex items-start gap-2 text-sm text-muted-foreground">
-                        <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-                        Property confirmed at booking. We name the hotel in your confirmation, never
-                        a star rating we cannot stand behind.
-                      </p>
-                    )
-                  )}
+                  <p className="flex items-start gap-2 text-sm text-muted-foreground">
+                    <BedDouble className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+                    You see the actual properties, their photographs and their addresses when you
+                    build the trip. We name a hotel once we hold the rooms, never before.
+                  </p>
                 </DetailModal>
               </div>
             </div>

@@ -133,7 +133,9 @@ test.describe("marketing site", () => {
         .click();
       await expect(sheet).toBeVisible({ timeout: 2000 });
     }).toPass({ timeout: 20_000 });
-    await expect(sheet).toContainText(/priced this tier against|property confirmed at booking/i);
+    // The tour page explains the price band; the properties are the builder's job. The sheet must
+    // say so, because "which hotel?" is the first question this page now declines to answer.
+    await expect(sheet).toContainText(/we name a hotel once we hold the rooms/i);
     await sheet.getByRole("button", { name: /close/i }).click();
     // Assert that race viewing renders as priced, tiered options, not which options the catalog
     // holds: the titles and prices are supplier data that changes with every reprice.
@@ -142,6 +144,21 @@ test.describe("marketing site", () => {
     await expect(raceOptions).toContainText("per person");
     await expect(raceOptions).toContainText("Most popular");
     await expect(raceOptions.locator("[data-tier='classic']").first()).toHaveText("Classic");
+    // Variants of one thing collapse to one card priced From the cheapest. The catalogue holds
+    // three Amber Lounge yacht rows; the tour page must show one, and must not quote the dearest.
+    await expect(raceOptions).toContainText(/From \$/);
+    await expect(raceOptions).toContainText(/ways to do it/i);
+    // Exactly one yacht card, not three. Matched on the heading: several nightlife cards mention
+    // a superyacht in their copy, and a body-text match would pass for the wrong reason.
+    await expect(raceOptions.getByRole("heading", { name: "Yacht", exact: true })).toHaveCount(1);
+    // Race viewing is race viewing. The nightlife has six exclusive groups of its own and used to
+    // render under "How you watch", which is nine nightclubs answering a question nobody asked.
+    await expect(raceOptions).not.toContainText(/Jimmy'z|Sass Caf/i);
+    await expect(page.getByTestId("night-options")).toContainText(/Jimmy'z/i);
+    // Choosing happens in the builder. No card carries its own call to action.
+    await expect(raceOptions.getByRole("link")).toHaveCount(0);
+    await expect(stays.getByRole("link")).toHaveCount(0);
+    await expect(page.getByTestId("see-the-rooms")).toBeVisible();
     const ld = await page.locator('script[type="application/ld+json"]').allTextContents();
     const types = ld.flatMap((t) => JSON.parse(t)).map((d: { "@type": string }) => d["@type"]);
     expect(types).toEqual(expect.arrayContaining(["TouristTrip", "Event"]));
