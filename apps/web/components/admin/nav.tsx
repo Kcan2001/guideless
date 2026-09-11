@@ -71,7 +71,7 @@ export function AdminNav({ email, roles }: { email: string | null; roles: Role[]
         <Image src="/brand/guideless-logo.webp" alt="" width={32} height={32} className="rounded" />
         <div>
           <p className="font-heading text-sm font-bold leading-tight">{brand.shortName}</p>
-          <p className="text-[11px] uppercase tracking-[0.18em] text-aqua">Operations</p>
+          <p className="eyebrow text-aqua">Operations</p>
         </div>
       </div>
       <nav aria-label="Admin" className="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-col lg:pb-0">

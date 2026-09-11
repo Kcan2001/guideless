@@ -67,13 +67,13 @@ export default async function BookingAddOnsPage(
       >
         <ArrowLeft className="h-4 w-4" aria-hidden /> Back to your account
       </Link>
-      <p className="mt-6 text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
+      <p className="eyebrow mt-6 text-muted-foreground">
         {tour.name}
         {departure.start_date && departure.end_date
           ? ` · ${formatDateRange(departure.start_date, departure.end_date)}`
           : ""}
       </p>
-      <h1 className="mt-3 text-4xl font-bold md:text-5xl">Add to your trip.</h1>
+      <h1 className="mt-3 text-4xl md:text-5xl">Add to your trip.</h1>
       <p className="mt-2 max-w-2xl text-muted-foreground">
         Everything optional, paid today, and visible to your group so you can find each other there.
         You can come back to this page any time, even during the trip.

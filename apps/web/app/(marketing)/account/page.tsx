@@ -145,10 +145,8 @@ export default async function AccountPage(props: PageProps<"/account">) {
     <div className="mx-auto w-full max-w-5xl px-6 py-16">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            Your account
-          </p>
-          <h1 className="mt-3 text-4xl font-bold md:text-5xl">Your trips.</h1>
+          <p className="eyebrow text-muted-foreground">Your account</p>
+          <h1 className="mt-3 text-4xl md:text-5xl">Your trips.</h1>
           <p className="mt-2 text-muted-foreground">{user.email}</p>
         </div>
         <form action={signOut}>
@@ -193,13 +191,11 @@ export default async function AccountPage(props: PageProps<"/account">) {
 
       {liveTrips.length > 0 && (
         <section className="mt-12">
-          <h2 className="text-xl font-semibold">Open trip</h2>
+          <h2 className="text-xl ">Open trip</h2>
           <ul className="mt-4 grid gap-4 md:grid-cols-2">
             {liveTrips.map((t) => (
               <li key={t.id} className="rounded border border-aqua bg-aqua/10 p-5">
-                <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                  {t.status}
-                </p>
+                <p className="eyebrow text-muted-foreground">{t.status}</p>
                 <p className="mt-1 font-heading text-xl font-semibold">{t.name}</p>
                 <p className="text-sm text-muted-foreground">
                   {formatDateRange(t.start_date, t.end_date)}
@@ -248,7 +244,7 @@ export default async function AccountPage(props: PageProps<"/account">) {
               });
               return (
                 <section key={b.booking.id} className="mt-12">
-                  <h2 className="text-xl font-semibold">Getting ready</h2>
+                  <h2 className="text-xl ">Getting ready</h2>
                   <div className="mt-4">
                     <OnboardingChecklist steps={steps} tourName={b.tour.name} />
                   </div>
@@ -263,7 +259,7 @@ export default async function AccountPage(props: PageProps<"/account">) {
           />
           {upcoming.length > 0 && (
             <section className="mt-12" id="travelers">
-              <h2 className="text-xl font-semibold">Traveler details</h2>
+              <h2 className="text-xl ">Traveler details</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Hotels and rail operators need these. Names as on the passport are changed through
                 support.
@@ -319,7 +315,7 @@ export default async function AccountPage(props: PageProps<"/account">) {
           )}
           {upcoming.length > 0 && (
             <section className="mt-12" id="assistant">
-              <h2 className="text-xl font-semibold">Ask about your trip</h2>
+              <h2 className="text-xl ">Ask about your trip</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Where to eat, what&rsquo;s near the hotel, what to do with a free morning. It knows
                 your route and what we recommend, and anything you save is private to you.
@@ -354,7 +350,7 @@ export default async function AccountPage(props: PageProps<"/account">) {
 
           {surveys.length > 0 && (
             <section className="mt-12" id="surveys">
-              <h2 className="text-xl font-semibold">Tell us</h2>
+              <h2 className="text-xl ">Tell us</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Private, and never published. Before a trip it tells us what you are expecting;
                 after one it tells us what to change.
@@ -394,9 +390,7 @@ export default async function AccountPage(props: PageProps<"/account">) {
 
           {(reviewable.length > 0 || myReviews.length > 0) && (
             <section className="mt-12" id="reviews">
-              <h2 className="text-xl font-semibold">
-                {reviewable.length > 0 ? "How was it?" : "Your reviews"}
-              </h2>
+              <h2 className="text-xl ">{reviewable.length > 0 ? "How was it?" : "Your reviews"}</h2>
               {reviewable.length > 0 && (
                 <p className="mt-1 text-sm text-muted-foreground">
                   {reviewable.length === 1
@@ -429,7 +423,7 @@ export default async function AccountPage(props: PageProps<"/account">) {
           )}
 
           <section className="mt-12">
-            <h2 className="text-xl font-semibold">Bring a friend</h2>
+            <h2 className="text-xl ">Bring a friend</h2>
             <div className="mt-4">
               <ReferralCard
                 code={referral.code}
@@ -470,7 +464,7 @@ function BookingList({
   );
   return (
     <section className="mt-12">
-      <h2 className="text-xl font-semibold">{title}</h2>
+      <h2 className="text-xl ">{title}</h2>
       <ul className="mt-4 divide-y divide-border rounded border border-border bg-surface">
         {items.map(({ booking: b, departure, tour, travelers }) => {
           const currency = b.currency as Parameters<typeof formatMoney>[0]["currency"];

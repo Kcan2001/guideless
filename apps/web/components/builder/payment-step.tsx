@@ -115,7 +115,7 @@ export function PaymentStep({
   return (
     <div className="space-y-8">
       <header>
-        <h2 className="text-3xl font-bold">{title}</h2>
+        <h2 className="text-3xl ">{title}</h2>
         <p className="mt-2 text-muted-foreground">
           Card details go to Stripe&rsquo;s secure page. We never see your card.
         </p>
@@ -165,7 +165,7 @@ export function PaymentStep({
       </fieldset>
 
       <div className="rounded border border-border bg-surface p-6 text-sm">
-        <h2 className="font-heading text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+        <h2 className="font-heading text-xs uppercase tracking-[0.18em] text-muted-foreground">
           Travelers
         </h2>
         <ul className="mt-3 space-y-1">
@@ -179,13 +179,13 @@ export function PaymentStep({
         </ul>
         {stay && (
           <>
-            <h2 className="mt-5 font-heading text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            <h2 className="mt-5 font-heading text-xs uppercase tracking-[0.18em] text-muted-foreground">
               Stay
             </h2>
             <p className="mt-2">{stay.name}</p>
           </>
         )}
-        <h2 className="mt-5 font-heading text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+        <h2 className="mt-5 font-heading text-xs uppercase tracking-[0.18em] text-muted-foreground">
           Extras
         </h2>
         {chosenAddOns.length === 0 ? (
@@ -205,7 +205,7 @@ export function PaymentStep({
         )}
         {draft.groupCode && (
           <>
-            <h2 className="mt-5 font-heading text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            <h2 className="mt-5 font-heading text-xs uppercase tracking-[0.18em] text-muted-foreground">
               Group
             </h2>
             <p className="mt-2">Joining a friend&rsquo;s group with code {draft.groupCode}.</p>

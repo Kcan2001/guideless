@@ -20,7 +20,7 @@ export function PageHeader({
     <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div>
         {crumbs && <div className="mb-2 text-xs text-muted-foreground">{crumbs}</div>}
-        <h1 className="text-3xl font-bold">{title}</h1>
+        <h1 className="text-3xl ">{title}</h1>
         {description && <p className="mt-1 text-muted-foreground">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
@@ -50,7 +50,7 @@ export function Section({
     >
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border px-5 py-4">
         <div>
-          <h2 className="font-heading text-base font-semibold">{title}</h2>
+          <h2 className="font-heading text-base ">{title}</h2>
           {description && <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>}
         </div>
         {actions}
@@ -73,10 +73,10 @@ export function Stat({
 }) {
   return (
     <div className="rounded border border-border bg-surface p-4">
-      <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="eyebrow text-muted-foreground">{label}</p>
       <p
         className={cn(
-          "mt-1 font-heading text-2xl font-bold",
+          "mt-1 num text-2xl",
           tone === "warning" && "text-warning",
           tone === "good" && "text-[#2FA88A]",
         )}
@@ -101,7 +101,7 @@ export function Table({
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
-        <thead className="text-xs uppercase tracking-wide text-muted-foreground">
+        <thead className="eyebrow text-muted-foreground">
           <tr>
             {head.map((h, i) => (
               <th key={i} scope="col" className="px-3 py-2 font-medium first:pl-0 last:pr-0">

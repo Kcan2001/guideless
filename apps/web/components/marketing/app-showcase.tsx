@@ -26,7 +26,7 @@ export function AppShowcase({ screens }: { screens: AppScreen[] }) {
             </div>
           )}
           <div className="p-5">
-            <h3 className="font-heading text-lg font-semibold text-cloud">{s.title}</h3>
+            <h3 className="font-heading text-lg text-cloud">{s.title}</h3>
             <p className="mt-1.5 text-sm leading-relaxed text-cloud/75">{s.body}</p>
           </div>
         </li>

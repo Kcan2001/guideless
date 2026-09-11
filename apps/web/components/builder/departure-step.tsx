@@ -45,7 +45,7 @@ export function DepartureStep({
   return (
     <div className="space-y-8">
       <header>
-        <h2 className="text-3xl font-bold">{title}</h2>
+        <h2 className="text-3xl ">{title}</h2>
         <p className="mt-2 text-muted-foreground">Prices are per traveler in their own room.</p>
       </header>
 
@@ -95,7 +95,7 @@ export function DepartureStep({
                     <Badge variant="warning">{d.available} left</Badge>
                   ) : null}
                   <span className="text-right">
-                    <span className="block font-heading text-xl font-bold">
+                    <span className="block num text-xl">
                       {formatMoney(
                         { amount: d.priceAmount, currency: d.currency },
                         { compact: true },

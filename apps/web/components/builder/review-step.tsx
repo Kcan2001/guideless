@@ -58,7 +58,7 @@ export function ReviewStep({
       className="space-y-8"
     >
       <header>
-        <h2 className="text-3xl font-bold">{title}</h2>
+        <h2 className="text-3xl ">{title}</h2>
         <p className="mt-2 text-muted-foreground">
           Your itinerary, group and documents live in your account and the app.
         </p>

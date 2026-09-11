@@ -40,11 +40,11 @@ function BlockView({ block }: { block: Block }) {
   switch (block.type) {
     case "heading":
       return block.level === 2 ? (
-        <h2 className="mt-10 font-heading text-2xl font-bold first:mt-0">
+        <h2 className="mt-10 font-heading text-2xl first:mt-0">
           <InlineRun content={block.content} />
         </h2>
       ) : (
-        <h3 className="mt-8 font-heading text-lg font-semibold first:mt-0">
+        <h3 className="mt-8 font-heading text-lg first:mt-0">
           <InlineRun content={block.content} />
         </h3>
       );

@@ -50,7 +50,7 @@ export default function ContactPage() {
         <div className="grid gap-6 md:grid-cols-3">
           <div className="rounded border border-border bg-surface p-6">
             <Mail className="h-6 w-6 text-teal" aria-hidden />
-            <h2 className="mt-4 text-xl font-semibold">Before you book</h2>
+            <h2 className="mt-4 text-xl ">Before you book</h2>
             <p className="mt-2 text-muted-foreground">
               Questions about a trip, a date, a hotel tier or traveling with friends: email us and a
               person replies.
@@ -64,7 +64,7 @@ export default function ContactPage() {
           </div>
           <div className="rounded border border-border bg-surface p-6">
             <MessageSquare className="h-6 w-6 text-teal" aria-hidden />
-            <h2 className="mt-4 text-xl font-semibold">Once you have booked</h2>
+            <h2 className="mt-4 text-xl ">Once you have booked</h2>
             <p className="mt-2 text-muted-foreground">
               Message support from your account or the Guideless app. We already see your booking,
               your itinerary and today&rsquo;s route, so you never explain from scratch.
@@ -82,7 +82,7 @@ export default function ContactPage() {
           </div>
           <div className="rounded border border-border bg-surface p-6">
             <Phone className="h-6 w-6 text-teal" aria-hidden />
-            <h2 className="mt-4 text-xl font-semibold">In an emergency</h2>
+            <h2 className="mt-4 text-xl ">In an emergency</h2>
             <p className="mt-2 text-muted-foreground">
               Call local emergency services first. The app shows the right numbers for every
               destination on your route, with a one-tap dial. In the EU, 112 works everywhere.
@@ -91,7 +91,7 @@ export default function ContactPage() {
         </div>
 
         <div className="mt-16 border-t border-border pt-10">
-          <h2 className="text-2xl font-bold">Where to write</h2>
+          <h2 className="text-2xl ">Where to write</h2>
           <p className="mt-3 max-w-2xl text-muted-foreground">
             Every address reaches a person, not a ticket queue. Choosing the right one gets you a
             faster answer, and keeps a traveler mid-trip from waiting behind a hotel contract.
@@ -112,7 +112,7 @@ export default function ContactPage() {
 
         <div className="mt-16 grid gap-10 lg:grid-cols-2">
           <div>
-            <h2 className="text-2xl font-bold">Press, partners and suppliers</h2>
+            <h2 className="text-2xl ">Press, partners and suppliers</h2>
             <p className="mt-3 text-muted-foreground">
               Hotels, boat operators, wine estates and anyone who would like to work with Guideless:
               write to{" "}
@@ -123,7 +123,7 @@ export default function ContactPage() {
             </p>
           </div>
           <div>
-            <h2 className="text-2xl font-bold">Follow along</h2>
+            <h2 className="text-2xl ">Follow along</h2>
             <p className="mt-3 text-muted-foreground">
               New departures are announced on Instagram and by email, one message per new trip.
             </p>

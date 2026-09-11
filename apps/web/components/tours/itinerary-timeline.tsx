@@ -70,7 +70,7 @@ export function ItineraryTimeline({ days }: { days: TourDetail["days"] }) {
             {day.destination && (
               <span className="text-sm text-muted-foreground">{day.destination.name}</span>
             )}
-            <h3 className="basis-full text-2xl font-semibold">{day.title}</h3>
+            <h3 className="basis-full text-2xl ">{day.title}</h3>
             {day.summary && <p className="basis-full text-muted-foreground">{day.summary}</p>}
           </header>
 

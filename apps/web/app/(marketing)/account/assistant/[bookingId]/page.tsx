@@ -56,10 +56,8 @@ export default async function AssistantPage(props: PageProps<"/account/assistant
         <ArrowLeft className="h-4 w-4" aria-hidden /> Back to your account
       </Link>
 
-      <p className="mt-6 text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-        {ctx.tourName}
-      </p>
-      <h1 className="mt-2 font-heading text-3xl font-bold">Your trip assistant</h1>
+      <p className="eyebrow mt-6 text-muted-foreground">{ctx.tourName}</p>
+      <h1 className="mt-2 font-heading text-3xl ">Your trip assistant</h1>
       <p className="mt-2 text-muted-foreground">
         {ctx.phase === "during"
           ? `Day ${ctx.today?.dayNumber ?? ""} — it is ${ctx.localTime} where you are.`
@@ -100,7 +98,7 @@ export default async function AssistantPage(props: PageProps<"/account/assistant
       </div>
 
       <section className="mt-12" id="plans">
-        <h2 className="font-heading text-xl font-semibold">Your plans</h2>
+        <h2 className="font-heading text-xl ">Your plans</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Yours alone — nobody else on the trip sees these, and they appear in your calendar
           download alongside the itinerary.

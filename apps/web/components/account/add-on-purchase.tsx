@@ -88,7 +88,7 @@ export function AddOnPurchase({
         className="rounded border border-border bg-surface p-6 lg:sticky lg:top-6 lg:self-start"
         aria-live="polite"
       >
-        <h2 className="font-heading text-lg font-semibold">Your additions</h2>
+        <h2 className="font-heading text-lg ">Your additions</h2>
         {selection.length === 0 ? (
           <p className="mt-2 text-sm text-muted-foreground">Nothing selected yet.</p>
         ) : (

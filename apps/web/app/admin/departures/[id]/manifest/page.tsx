@@ -51,7 +51,7 @@ export default async function ManifestPage(props: PageProps<"/admin/departures/[
 
       {/* Print header: the page loses its chrome, so the sheet has to name itself. */}
       <header className="hidden print:mb-6 print:block">
-        <h1 className="text-2xl font-bold">{tour.name}</h1>
+        <h1 className="text-2xl ">{tour.name}</h1>
         <p className="text-sm">
           {formatDateRange(departure.start_date, departure.end_date)} · {travelers.length} travelers
           · Guideless Travel

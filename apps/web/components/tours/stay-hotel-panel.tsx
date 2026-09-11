@@ -60,7 +60,7 @@ function HotelBlock({ hotel, showLeg }: { hotel: StayHotel; showLeg: boolean }) 
   return (
     <div className="rounded border border-border bg-surface-muted/40 p-4 text-sm">
       {showLeg && (hotel.legName || hotel.nights > 0) && (
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <p className="eyebrow text-muted-foreground">
           {hotel.legName}
           {hotel.nights > 0 && (
             <span className="font-normal normal-case tracking-normal">
@@ -72,7 +72,7 @@ function HotelBlock({ hotel, showLeg }: { hotel: StayHotel; showLeg: boolean }) 
       )}
 
       <div className="mt-1 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-        <h4 className="font-semibold">{hotel.name}</h4>
+        <h4 className="">{hotel.name}</h4>
         {hotel.starRating != null && (
           <span className="inline-flex items-center gap-0.5 text-xs text-muted-foreground">
             {hotel.starRating}

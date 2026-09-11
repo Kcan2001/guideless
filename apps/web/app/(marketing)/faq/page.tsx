@@ -35,7 +35,7 @@ export default function FaqPage() {
         </div>
         <div className="mt-16 grid gap-6 rounded border border-border bg-surface p-8 md:grid-cols-[1fr_auto] md:items-center">
           <div>
-            <h2 className="text-2xl font-bold">Still wondering about something?</h2>
+            <h2 className="text-2xl ">Still wondering about something?</h2>
             <p className="mt-2 text-muted-foreground">
               Email {emails.hello}. If you have booked, message support from your account or the app
               and we already see your trip.

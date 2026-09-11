@@ -21,9 +21,7 @@ export function FounderBlock({ showPrinciples = true }: { showPrinciples?: boole
         </figcaption>
       </figure>
       <div>
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-          From the founder
-        </p>
+        <p className="eyebrow text-muted-foreground">From the founder</p>
         <div className="mt-4 space-y-4 text-lg leading-relaxed text-foreground/90">
           {founder.paragraphs.map((p) => (
             <p key={p.slice(0, 24)}>{p}</p>

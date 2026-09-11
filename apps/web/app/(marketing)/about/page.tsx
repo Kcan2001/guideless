@@ -78,7 +78,7 @@ export default function AboutPage() {
         <ul className="mt-12 grid gap-6 md:grid-cols-2">
           {operatingPrinciples.map((p) => (
             <li key={p.title} className="rounded border border-border bg-surface p-6">
-              <h3 className="text-xl font-semibold">{p.title}</h3>
+              <h3 className="text-xl ">{p.title}</h3>
               <p className="mt-2 text-muted-foreground">{p.body}</p>
             </li>
           ))}
@@ -90,7 +90,7 @@ export default function AboutPage() {
         </p>
         <div className="mt-16 grid gap-6 rounded bg-ink p-10 text-cloud md:grid-cols-[1fr_auto] md:items-center">
           <div>
-            <h2 className="text-3xl font-bold">{brand.taglineSecondary}</h2>
+            <h2 className="text-3xl ">{brand.taglineSecondary}</h2>
             <p className="mt-3 max-w-xl text-cloud/80">
               See the two trips, what each includes and what you can add.
             </p>

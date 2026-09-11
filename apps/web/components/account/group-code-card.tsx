@@ -61,9 +61,7 @@ export function GroupCodeCard({
 
   return (
     <div className="rounded border border-border bg-surface p-6" data-testid="group-code-card">
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-        Bring friends along
-      </p>
+      <p className="eyebrow text-muted-foreground">Bring friends along</p>
       <p className="mt-2 text-sm text-muted-foreground">
         Friends book their own spot and enter your code. Same dates, same group, separate payments.
       </p>

@@ -282,7 +282,7 @@ export function TripBuilder({
         )}
         {soldOut ? (
           <div className="mt-10 rounded border border-dashed border-border p-8">
-            <h2 className="text-2xl font-bold">This departure just sold out.</h2>
+            <h2 className="text-2xl ">This departure just sold out.</h2>
             <p className="mt-2 text-muted-foreground">Other dates may still be open.</p>
           </div>
         ) : (

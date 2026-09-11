@@ -26,7 +26,7 @@ export function UnlockProgress({
 
   return (
     <section className={className} aria-labelledby="unlocks-heading">
-      <h3 id="unlocks-heading" className="font-heading text-lg font-semibold">
+      <h3 id="unlocks-heading" className="font-heading text-lg ">
         The more of you there are, the better it gets
       </h3>
       {next ? (

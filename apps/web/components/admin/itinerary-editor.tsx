@@ -87,12 +87,12 @@ export function ItineraryEditor({
         >
           <header className="flex flex-wrap items-start justify-between gap-3 border-b border-border bg-cloud/60 px-4 py-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-link">
+              <p className="eyebrow text-link">
                 Day {day.day_number}
                 {day.date ? ` · ${day.date}` : ""}
                 {day.destination ? ` · ${day.destination.name}` : ""}
               </p>
-              <h3 className="text-lg font-semibold">{day.title}</h3>
+              <h3 className="text-lg ">{day.title}</h3>
               {day.summary && <p className="text-sm text-muted-foreground">{day.summary}</p>}
             </div>
             {!locked && actions.updateDay && actions.deleteDay && (
@@ -205,9 +205,7 @@ export function ItineraryEditor({
                       >
                         {hiddenInputs}
                         <input type="hidden" name="itemId" value={item.id} />
-                        <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-                          Tell travelers what changed
-                        </p>
+                        <p className="eyebrow text-muted-foreground">Tell travelers what changed</p>
                         <input
                           name="changeNote"
                           defaultValue={item.change_note ?? ""}

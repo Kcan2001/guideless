@@ -58,10 +58,8 @@ export function QuotePanel({
     >
       {!compact && (
         <>
-          <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-            {departure.routeNames.join(" → ")}
-          </p>
-          <h2 className="mt-1 font-heading text-2xl font-bold">{departure.tourName}</h2>
+          <p className="eyebrow text-muted-foreground">{departure.routeNames.join(" → ")}</p>
+          <h2 className="mt-1 font-heading text-2xl ">{departure.tourName}</h2>
         </>
       )}
       <p className={cn("flex items-center gap-2 text-sm", !compact && "mt-2")}>
@@ -188,9 +186,7 @@ export function QuotePanel({
 function Group({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-        {label}
-      </p>
+      <p className="eyebrow text-muted-foreground">{label}</p>
       {children}
     </div>
   );

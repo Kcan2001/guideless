@@ -212,9 +212,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
               ? tour.event_name
               : route.map((r) => r.destination.name).join(" → ")}
           </p>
-          <h1 className="mt-3 max-w-3xl text-5xl font-bold leading-[1.02] md:text-7xl">
-            {tour.name}
-          </h1>
+          <h1 className="mt-3 max-w-3xl text-5xl leading-[1.02] md:text-7xl">{tour.name}</h1>
           <p className="mt-6 max-w-2xl text-lg text-cloud/85 md:text-xl">
             {version.tagline ?? heroPromise(tour.slug, isEvent)}
           </p>
@@ -348,7 +346,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
           )}
         </div>
         <aside className="rounded border border-border bg-surface p-6">
-          <h2 className="font-heading text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <h2 className="font-heading text-sm uppercase tracking-[0.18em] text-muted-foreground">
             Your route
           </h2>
           <ol className="mt-4 space-y-4">
@@ -378,10 +376,8 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
       {/* Two ways to buy the same trip */}
       <section className="bg-surface py-20">
         <div className="mx-auto w-full max-w-6xl px-6">
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            Two ways to do this
-          </p>
-          <h2 className="mt-3 text-3xl font-bold md:text-4xl">
+          <p className="eyebrow text-muted-foreground">Two ways to do this</p>
+          <h2 className="mt-3 text-3xl md:text-4xl">
             {isEvent ? "One package, or your weekend." : "One itinerary, or your trip."}
           </h2>
           <div className="mt-10">
@@ -393,10 +389,8 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
       {/* Where you stay */}
       {stayOptions.length > 0 && extras && (
         <section id="make-it-yours" className="mx-auto w-full max-w-6xl scroll-mt-24 px-6 py-20">
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            Where you stay
-          </p>
-          <h2 className="mt-3 text-3xl font-bold md:text-4xl">
+          <p className="eyebrow text-muted-foreground">Where you stay</p>
+          <h2 className="mt-3 text-3xl md:text-4xl">
             {isEvent ? "Pick your base." : "Pick your tier."}
           </h2>
           <p className="mt-2 max-w-xl text-muted-foreground">
@@ -424,10 +418,10 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
           <div className="mx-auto w-full max-w-6xl space-y-16 px-6">
             {viewing.length > 0 && (
               <div>
-                <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                <p className="eyebrow text-muted-foreground">
                   {isEvent ? "How you watch" : "Choose one"}
                 </p>
-                <h2 className="mt-3 text-3xl font-bold md:text-4xl">
+                <h2 className="mt-3 text-3xl md:text-4xl">
                   {isEvent && eventShortName
                     ? `How you watch ${eventShortName}.`
                     : "One of these, your call."}
@@ -451,10 +445,8 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
             )}
             {nightOptions.length > 0 && (
               <div>
-                <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                  Your nights
-                </p>
-                <h2 className="mt-3 text-3xl font-bold md:text-4xl">Where the group ends up.</h2>
+                <p className="eyebrow text-muted-foreground">Your nights</p>
+                <h2 className="mt-3 text-3xl md:text-4xl">Where the group ends up.</h2>
                 <p className="mt-2 max-w-xl text-muted-foreground">
                   One per night, and none of them compulsory. Prices are per person and every night
                   stands on its own — take one, take all of them, or keep your evenings free.
@@ -471,10 +463,8 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
             )}
             {experiences.length > 0 && (
               <div>
-                <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                  Also optional
-                </p>
-                <h2 className="mt-3 text-3xl font-bold md:text-4xl">
+                <p className="eyebrow text-muted-foreground">Also optional</p>
+                <h2 className="mt-3 text-3xl md:text-4xl">
                   {viewing.length > 0 ? "Round out the weekend." : "Add on what you like."}
                 </h2>
                 <p className="mt-2 max-w-xl text-muted-foreground">
@@ -502,7 +492,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
 
       {/* Itinerary */}
       <section id="itinerary" className="mx-auto w-full max-w-6xl scroll-mt-24 px-6 py-20">
-        <h2 className="text-3xl font-bold md:text-4xl">Day by day.</h2>
+        <h2 className="text-3xl md:text-4xl">Day by day.</h2>
         <p className="mt-2 max-w-xl text-muted-foreground">
           Times are local. Anything marked{" "}
           <span className="font-medium text-foreground">Optional</span> is exactly that. The dashed
@@ -514,13 +504,8 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
             aria-labelledby="night-one"
             data-testid="anchor-callout"
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              Night one · Day {anchor.day.day_number}
-            </p>
-            <h3
-              id="night-one"
-              className="mt-1 flex items-center gap-2 font-heading text-2xl font-semibold"
-            >
+            <p className="eyebrow text-muted-foreground">Night one · Day {anchor.day.day_number}</p>
+            <h3 id="night-one" className="mt-1 flex items-center gap-2 font-heading text-2xl ">
               <Sparkles className="h-5 w-5 text-teal" aria-hidden /> {anchor.item.title}
               {anchor.item.start_time ? ` · ${formatWallTime(anchor.item.start_time)}` : ""}
             </h3>
@@ -541,7 +526,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
       {/* Departures */}
       <section id="departures" className="scroll-mt-24 bg-surface py-20">
         <div className="mx-auto w-full max-w-6xl px-6">
-          <h2 className="text-3xl font-bold md:text-4xl">Dates &amp; prices.</h2>
+          <h2 className="text-3xl md:text-4xl">Dates &amp; prices.</h2>
           <p className="mt-2 max-w-xl text-muted-foreground">
             Prices are per traveler in your own room and include everything under &ldquo;Guideless
             handles&rdquo;. Reserve with a deposit; the balance is due before departure.
@@ -577,7 +562,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
 
       {/* Included / excluded */}
       <section className="mx-auto w-full max-w-6xl px-6 py-20">
-        <h2 className="text-3xl font-bold md:text-4xl">Who handles what.</h2>
+        <h2 className="text-3xl md:text-4xl">Who handles what.</h2>
         <p className="mt-2 max-w-xl text-muted-foreground">
           The one thing every traveler should know before booking.
         </p>
@@ -590,14 +575,14 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
           cannot come, so they belong above the reviews rather than in the small print. */}
       {requirements.length > 0 && (
         <section className="mx-auto w-full max-w-6xl px-6 pb-20">
-          <h2 className="text-3xl font-bold md:text-4xl">Before you book.</h2>
+          <h2 className="text-3xl md:text-4xl">Before you book.</h2>
           <p className="mt-2 max-w-xl text-muted-foreground">
             What everyone on this trip has to be able to do. Check these now, not in May.
           </p>
           <ul className="mt-8 grid max-w-4xl gap-4 md:grid-cols-3">
             {requirements.map((requirement) => (
               <li key={requirement.id} className="rounded border bg-card p-5">
-                <h3 className="font-semibold">{requirement.title}</h3>
+                <h3 className="">{requirement.title}</h3>
                 {requirement.description && (
                   <p className="mt-2 text-sm text-muted-foreground">{requirement.description}</p>
                 )}
@@ -621,7 +606,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
       {/* FAQ */}
       {faqs.length > 0 && (
         <section className="mx-auto w-full max-w-6xl px-6 pb-24">
-          <h2 className="text-3xl font-bold md:text-4xl">Questions about this trip.</h2>
+          <h2 className="text-3xl md:text-4xl">Questions about this trip.</h2>
           <div className="mt-8 max-w-3xl">
             <Faq items={faqs} />
           </div>

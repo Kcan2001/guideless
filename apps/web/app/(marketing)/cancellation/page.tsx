@@ -68,7 +68,7 @@ export default async function CancellationPage() {
         <ul className="grid gap-6 md:grid-cols-2">
           {RULES.map((r) => (
             <li key={r.title} className="rounded border border-border bg-surface p-6">
-              <h2 className="text-lg font-semibold">{r.title}</h2>
+              <h2 className="text-lg ">{r.title}</h2>
               <p className="mt-2 text-muted-foreground">{r.body}</p>
             </li>
           ))}
@@ -90,16 +90,14 @@ export default async function CancellationPage() {
                 );
                 return (
                   <div key={tour.id} className="rounded border border-border bg-cloud p-6">
-                    <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                      {tour.name}
-                    </p>
+                    <p className="eyebrow text-muted-foreground">{tour.name}</p>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {formatDateRange(departure!.startDate, departure!.endDate)}
                     </p>
                     <div className="mt-4 overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead>
-                          <tr className="text-left text-xs uppercase tracking-wide text-muted-foreground">
+                          <tr className="eyebrow text-left text-muted-foreground">
                             <th className="pb-2 font-medium">Cancel</th>
                             <th className="pb-2 text-right font-medium">Refund of trip price</th>
                           </tr>
@@ -137,7 +135,7 @@ export default async function CancellationPage() {
       <section className="mx-auto w-full max-w-6xl px-6 py-20">
         <div className="grid gap-6 rounded border border-border bg-surface p-8 md:grid-cols-[1fr_auto] md:items-center">
           <div>
-            <h2 className="text-2xl font-bold">The full terms</h2>
+            <h2 className="text-2xl ">The full terms</h2>
             <p className="mt-2 text-muted-foreground">
               This page summarizes the cancellation sections of the {brand.name} Terms of Service,
               which govern. Travel insurance covers what we cannot.

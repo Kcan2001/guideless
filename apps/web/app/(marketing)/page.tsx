@@ -123,9 +123,7 @@ export default async function HomePage() {
         <HeroScrim />
         <div className="relative mx-auto flex w-full max-w-6xl flex-col px-6 py-28 md:py-40">
           <p className={cn(heroEyebrowClass, "mb-5")}>Small-group trips to Europe</p>
-          <h1 className="max-w-3xl text-5xl font-bold leading-[1.02] md:text-7xl">
-            {brand.tagline}
-          </h1>
+          <h1 className="max-w-3xl text-5xl leading-[1.02] md:text-7xl">{brand.tagline}</h1>
           <p className="mt-7 max-w-xl text-lg leading-relaxed text-cloud/85 md:text-xl">
             {brand.description}
           </p>
@@ -186,7 +184,7 @@ export default async function HomePage() {
                 <p className="mt-6 font-heading text-sm font-semibold text-link">
                   {String(i + 1).padStart(2, "0")}
                 </p>
-                <h3 className="mt-2 text-2xl font-semibold md:text-3xl">{w.title}</h3>
+                <h3 className="mt-2 text-2xl md:text-3xl">{w.title}</h3>
                 <p className="mt-3 max-w-lg text-lg text-muted-foreground">{w.body}</p>
               </li>
             ))}
@@ -319,10 +317,8 @@ export default async function HomePage() {
                     </>
                   )}
                   <div className="relative">
-                    <p className="text-xs font-medium uppercase tracking-[0.2em] text-aqua">
-                      Event weekend · {tour.event_name}
-                    </p>
-                    <h3 className="mt-2 font-heading text-3xl font-bold">{tour.name}</h3>
+                    <p className="eyebrow text-aqua">Event weekend · {tour.event_name}</p>
+                    <h3 className="mt-2 font-heading text-3xl ">{tour.name}</h3>
                     {version.tagline && <p className="mt-3 text-cloud/80">{version.tagline}</p>}
                     <p className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm text-cloud/80">
                       {tour.event_starts_on && (
@@ -399,7 +395,7 @@ export default async function HomePage() {
           <FaqAccordion items={homeFaq} />
         </div>
         <div className="mt-20 rounded bg-sand p-10 md:p-14">
-          <h2 className="max-w-2xl text-3xl font-bold md:text-4xl">{brand.taglineSecondary}</h2>
+          <h2 className="max-w-2xl text-3xl md:text-4xl">{brand.taglineSecondary}</h2>
           <p className="mt-3 max-w-xl text-muted-foreground">
             Pick a trip. We will handle the rest, and then get out of the way.
           </p>

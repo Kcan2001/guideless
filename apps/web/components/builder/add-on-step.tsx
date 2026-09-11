@@ -100,7 +100,7 @@ export function AddOnStep({
   return (
     <div className="space-y-8">
       <header>
-        <h2 className="text-3xl font-bold">{title}</h2>
+        <h2 className="text-3xl ">{title}</h2>
         <p className="mt-2 text-muted-foreground">{INTRO[mode]}</p>
       </header>
 
@@ -166,7 +166,7 @@ export function AddOnStep({
             </label>
           ) : perTraveler ? (
             <fieldset>
-              <legend className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <legend className="eyebrow mb-2 text-muted-foreground">
                 Who’s in{mode === "race" ? " · one view per traveler" : ""}
               </legend>
               <ul className="flex flex-wrap gap-2">

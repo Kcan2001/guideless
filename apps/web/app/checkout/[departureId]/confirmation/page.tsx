@@ -55,7 +55,7 @@ export default async function ConfirmationPage(
             <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-aqua/30">
               <Check className="h-6 w-6 text-ink" aria-hidden />
             </span>
-            <h1 className="mt-5 text-3xl font-bold">You&rsquo;re booked.</h1>
+            <h1 className="mt-5 text-3xl ">You&rsquo;re booked.</h1>
             <p className="mt-2 text-muted-foreground">
               A confirmation is on its way to your inbox. Nothing else to do right now.
             </p>
@@ -65,7 +65,7 @@ export default async function ConfirmationPage(
             <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-sand">
               <Clock className="h-6 w-6 text-ink" aria-hidden />
             </span>
-            <h1 className="mt-5 text-3xl font-bold">Finishing up your payment…</h1>
+            <h1 className="mt-5 text-3xl ">Finishing up your payment…</h1>
             <p className="mt-2 text-muted-foreground">
               Stripe is confirming the charge. This usually takes a few seconds — refresh this page,
               or check your bookings in a moment. Your seats are held.
@@ -82,7 +82,7 @@ export default async function ConfirmationPage(
         <dl className="mt-8 grid gap-4 border-t border-border pt-6 text-sm sm:grid-cols-2">
           <div>
             <dt className="text-muted-foreground">Confirmation number</dt>
-            <dd className="font-heading text-xl font-bold">{b.confirmation_number}</dd>
+            <dd className="num text-xl">{b.confirmation_number}</dd>
           </div>
           <div>
             <dt className="text-muted-foreground">Trip</dt>

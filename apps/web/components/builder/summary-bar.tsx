@@ -67,7 +67,7 @@ export function SummaryBar({
             aria-haspopup="dialog"
             aria-expanded={open}
           >
-            <span className="flex items-center gap-1 text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+            <span className="eyebrow flex items-center gap-1 text-muted-foreground">
               Total <ChevronUp className="h-3 w-3" aria-hidden />
             </span>
             <span className="font-heading text-lg font-bold leading-tight">

@@ -91,15 +91,13 @@ export function StayTierCards({
 
             <div className="flex flex-1 flex-col gap-3 p-5">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  {o.area ?? "Where you stay"}
-                </p>
-                <h3 className="mt-1.5 font-heading text-xl font-bold">{o.name}</h3>
+                <p className="eyebrow text-muted-foreground">{o.area ?? "Where you stay"}</p>
+                <h3 className="mt-1.5 font-heading text-xl ">{o.name}</h3>
                 {o.tagline && <p className="mt-1 text-sm text-muted-foreground">{o.tagline}</p>}
               </div>
 
               <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-y border-border py-3">
-                <p className="font-heading text-xl font-bold">
+                <p className="num text-xl">
                   {o.price_delta_amount === 0
                     ? "Included"
                     : `${o.price_delta_amount > 0 ? "+" : "−"}${money(Math.abs(o.price_delta_amount), currency)}`}
@@ -146,9 +144,7 @@ export function StayTierCards({
                         <div key={label} className="flex gap-2">
                           <Icon className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden />
                           <div className="min-w-0">
-                            <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-                              {label}
-                            </dt>
+                            <dt className="eyebrow text-muted-foreground">{label}</dt>
                             <dd>{value}</dd>
                           </div>
                         </div>
@@ -166,9 +162,7 @@ export function StayTierCards({
                     <div className="grid gap-4 text-sm sm:grid-cols-2">
                       {o.includes.length > 0 && (
                         <div>
-                          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                            In the price
-                          </p>
+                          <p className="eyebrow text-muted-foreground">In the price</p>
                           <ul className="mt-2 space-y-1.5">
                             {o.includes.map((line) => (
                               <li key={line} className="flex gap-2">
@@ -181,9 +175,7 @@ export function StayTierCards({
                       )}
                       {o.excludes.length > 0 && (
                         <div>
-                          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                            Not in the price
-                          </p>
+                          <p className="eyebrow text-muted-foreground">Not in the price</p>
                           <ul className="mt-2 space-y-1.5 text-muted-foreground">
                             {o.excludes.map((line) => (
                               <li key={line} className="flex gap-2">

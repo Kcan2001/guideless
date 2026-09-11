@@ -17,7 +17,7 @@ export function ReviewForm({ booking }: { booking: ReviewableBooking }) {
       id={`review-${id}`}
     >
       <input type="hidden" name="bookingId" value={booking.bookingId} />
-      <h3 className="font-heading text-lg font-semibold">How was {booking.tourName}?</h3>
+      <h3 className="font-heading text-lg ">How was {booking.tourName}?</h3>
       <p className="mt-1 text-sm text-muted-foreground">
         Written by you, published once we have read it. It appears with your first name.
       </p>

@@ -252,9 +252,7 @@ export default async function AdminVersionPage(
               ] as const
             ).map(([kind, label, items]) => (
               <div key={kind} className="mb-5">
-                <h3 className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  {label}
-                </h3>
+                <h3 className="eyebrow mb-2 text-muted-foreground">{label}</h3>
                 <ul className="space-y-1 text-sm">
                   {items.map((i) => (
                     <li key={i.id} className="flex items-start justify-between gap-3">
@@ -302,9 +300,7 @@ export default async function AdminVersionPage(
               </div>
             ))}
             <div>
-              <h3 className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                FAQ
-              </h3>
+              <h3 className="eyebrow mb-2 text-muted-foreground">FAQ</h3>
               <ul className="space-y-2 text-sm">
                 {faqs.map((f) => (
                   <li key={f.id} className="flex items-start justify-between gap-3">

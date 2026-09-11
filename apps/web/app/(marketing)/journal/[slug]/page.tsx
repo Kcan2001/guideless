@@ -90,11 +90,11 @@ export default async function JournalPostPage(props: PageProps<"/journal/[slug]"
         </nav>
 
         <header className="mt-8">
-          <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="eyebrow text-muted-foreground">
             {formatDate(post.published_at)}
             {post.author_name ? ` · ${post.author_name}` : ""} · {post.readingMinutes} min read
           </p>
-          <h1 className="mt-3 font-heading text-4xl font-bold md:text-5xl">{post.title}</h1>
+          <h1 className="mt-3 font-heading text-4xl md:text-5xl">{post.title}</h1>
           {post.excerpt && <p className="mt-4 text-lg text-muted-foreground">{post.excerpt}</p>}
         </header>
 
@@ -116,10 +116,8 @@ export default async function JournalPostPage(props: PageProps<"/journal/[slug]"
         <aside className="mt-16 rounded border border-border bg-sand/40 p-8">
           {post.tour ? (
             <>
-              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                The trip behind this
-              </p>
-              <h2 className="mt-2 font-heading text-2xl font-bold">{post.tour.name}</h2>
+              <p className="eyebrow text-muted-foreground">The trip behind this</p>
+              <h2 className="mt-2 font-heading text-2xl ">{post.tour.name}</h2>
               <p className="mt-2 text-muted-foreground">
                 Hotels, trains and one good evening at the start are handled. Choose where you stay
                 and what you join.
@@ -130,9 +128,7 @@ export default async function JournalPostPage(props: PageProps<"/journal/[slug]"
             </>
           ) : (
             <>
-              <h2 className="font-heading text-2xl font-bold">
-                Everything planned. Nothing forced.
-              </h2>
+              <h2 className="font-heading text-2xl ">Everything planned. Nothing forced.</h2>
               <p className="mt-2 text-muted-foreground">
                 Hotels, trains and one good evening at the start. The rest of the week is yours.
               </p>

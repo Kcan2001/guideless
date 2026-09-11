@@ -167,7 +167,7 @@ export default function WhyGuidelessPage() {
                 <p className="font-heading text-sm font-semibold text-link">
                   {String(i + 1).padStart(2, "0")}
                 </p>
-                <h2 className="mt-2 text-3xl font-bold md:text-4xl">{b.title}</h2>
+                <h2 className="mt-2 text-3xl md:text-4xl">{b.title}</h2>
                 <p className="mt-3 text-lg text-muted-foreground">{b.lede}</p>
                 <ul className="mt-6 space-y-2.5 text-foreground/90">
                   {b.points.map((p) => (
@@ -189,7 +189,7 @@ export default function WhyGuidelessPage() {
       <section className="mx-auto w-full max-w-6xl px-6 py-24">
         <div className="grid gap-6 rounded bg-ink p-10 text-cloud md:grid-cols-[1fr_auto] md:items-center">
           <div>
-            <h2 className="text-3xl font-bold">See a real trip, priced.</h2>
+            <h2 className="text-3xl ">See a real trip, priced.</h2>
             <p className="mt-3 max-w-xl text-cloud/80">
               Every trip page lists what is included, every optional extra and the deposit before
               you talk to anyone.

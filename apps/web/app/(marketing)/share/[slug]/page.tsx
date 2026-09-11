@@ -31,10 +31,8 @@ export default async function SharePage({ params }: PageProps<"/share/[slug]">) 
 
   return (
     <div className="mx-auto w-full max-w-2xl px-6 py-16">
-      <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-        {brand.shortName}
-      </p>
-      <h1 className="mt-3 font-heading text-4xl font-bold">Tell us about {tour.name}.</h1>
+      <p className="eyebrow text-muted-foreground">{brand.shortName}</p>
+      <h1 className="mt-3 font-heading text-4xl ">Tell us about {tour.name}.</h1>
       <p className="mt-4 text-lg text-muted-foreground">
         You came on one of these before it had a name. If you have a minute, a sentence about what
         it was actually like would help the next group decide to come.

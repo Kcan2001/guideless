@@ -41,7 +41,7 @@ export default async function ReviewsPage() {
       <section className="mx-auto w-full max-w-6xl px-6 py-20">
         {reviews.length === 0 ? (
           <div className="max-w-2xl">
-            <h2 className="font-heading text-2xl font-bold">Nothing here yet.</h2>
+            <h2 className="font-heading text-2xl ">Nothing here yet.</h2>
             <p className="mt-3 text-muted-foreground">
               Our first departures have not travelled yet, so nobody has written a review. When they
               do, their words will appear here unedited. We will not be filling this page with

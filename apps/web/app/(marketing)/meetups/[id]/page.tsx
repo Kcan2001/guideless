@@ -44,10 +44,8 @@ export default async function MeetupPage(props: PageProps<"/meetups/[id]">) {
         >
           <ArrowLeft className="h-4 w-4" aria-hidden /> All evenings
         </Link>
-        <p className="mt-6 text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-          {m.city}
-        </p>
-        <h1 className="mt-3 text-4xl font-bold md:text-5xl">{m.title}</h1>
+        <p className="eyebrow mt-6 text-muted-foreground">{m.city}</p>
+        <h1 className="mt-3 text-4xl md:text-5xl">{m.title}</h1>
         <dl className="mt-6 space-y-2 text-lg">
           <div className="flex items-center gap-2">
             <CalendarDays className="h-5 w-5 text-muted-foreground" aria-hidden />

@@ -46,9 +46,7 @@ export function TourFilters({
       aria-label="Filter trips"
     >
       <label className="text-sm">
-        <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Destination
-        </span>
+        <span className="eyebrow mb-1 block text-muted-foreground">Destination</span>
         <select name="destination" defaultValue={filters.destination ?? ""} className={selectClass}>
           <option value="">Anywhere</option>
           {destinations.map((d) => (
@@ -60,9 +58,7 @@ export function TourFilters({
       </label>
 
       <label className="text-sm">
-        <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Month
-        </span>
+        <span className="eyebrow mb-1 block text-muted-foreground">Month</span>
         <select name="month" defaultValue={filters.month ?? ""} className={selectClass}>
           <option value="">Any month</option>
           {months.map((m) => (
@@ -74,9 +70,7 @@ export function TourFilters({
       </label>
 
       <label className="text-sm">
-        <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Duration
-        </span>
+        <span className="eyebrow mb-1 block text-muted-foreground">Duration</span>
         <select name="duration" defaultValue={filters.duration ?? ""} className={selectClass}>
           <option value="">Any length</option>
           {Object.entries(DURATION_BUCKETS).map(([key, b]) => (
@@ -88,9 +82,7 @@ export function TourFilters({
       </label>
 
       <label className="text-sm">
-        <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Pace
-        </span>
+        <span className="eyebrow mb-1 block text-muted-foreground">Pace</span>
         <select name="activity" defaultValue={filters.activityLevel ?? ""} className={selectClass}>
           <option value="">Any pace</option>
           {LEVELS.map(([value, label]) => (
@@ -102,9 +94,7 @@ export function TourFilters({
       </label>
 
       <label className="text-sm">
-        <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Max price
-        </span>
+        <span className="eyebrow mb-1 block text-muted-foreground">Max price</span>
         <select
           name="maxPrice"
           defaultValue={filters.maxPrice?.toString() ?? ""}

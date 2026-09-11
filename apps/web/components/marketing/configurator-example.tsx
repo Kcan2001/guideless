@@ -16,10 +16,8 @@ export function ConfiguratorExampleCard({ example }: { example: ConfiguratorExam
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_1.1fr] lg:items-center">
       <div>
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-          Show, don&rsquo;t tell
-        </p>
-        <h2 className="mt-3 text-3xl font-bold md:text-5xl">Start with a trip. Make it yours.</h2>
+        <p className="eyebrow text-muted-foreground">Show, don&rsquo;t tell</p>
+        <h2 className="mt-3 text-3xl md:text-5xl">Start with a trip. Make it yours.</h2>
         <p className="mt-4 max-w-lg text-lg text-muted-foreground">
           Every trip starts with the essentials handled. Then you choose where you stay, how you
           watch, what you join. The price updates as you go, and these numbers are the real ones.
@@ -38,9 +36,7 @@ export function ConfiguratorExampleCard({ example }: { example: ConfiguratorExam
         className="rounded border border-border bg-surface p-6 md:p-8"
         data-testid="configurator-example"
       >
-        <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-          {example.tourName}
-        </p>
+        <p className="eyebrow text-muted-foreground">{example.tourName}</p>
         <p className="mt-1 text-sm text-muted-foreground">
           {formatDateRange(example.startDate, example.endDate)} · one traveler
         </p>
@@ -59,8 +55,8 @@ export function ConfiguratorExampleCard({ example }: { example: ConfiguratorExam
         </dl>
         <div className="mt-6 flex items-end justify-between border-t border-border-strong pt-5">
           <div>
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">Total</p>
-            <p className="font-heading text-3xl font-bold">{money(example.total)}</p>
+            <p className="eyebrow text-muted-foreground">Total</p>
+            <p className="num text-3xl">{money(example.total)}</p>
           </div>
           <div className="text-right text-sm text-muted-foreground">
             <p>

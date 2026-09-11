@@ -17,7 +17,7 @@ export function TierLegend({ className }: { className?: string }) {
     >
       {TIERS.map((t) => (
         <div key={t.tier} className="bg-surface p-4">
-          <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-ink">{t.name}</dt>
+          <dt className="eyebrow text-ink">{t.name}</dt>
           <dd className="mt-1 text-sm text-muted-foreground">{t.definition}</dd>
         </div>
       ))}

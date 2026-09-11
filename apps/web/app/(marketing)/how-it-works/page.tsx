@@ -47,10 +47,8 @@ export default function HowItWorksPage() {
   return (
     <>
       <section className="mx-auto w-full max-w-6xl px-6 pt-20 pb-12">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-          How Guideless works
-        </p>
-        <h1 className="mt-3 max-w-3xl text-5xl font-bold md:text-6xl">{brand.taglineSecondary}</h1>
+        <p className="eyebrow text-muted-foreground">How Guideless works</p>
+        <h1 className="mt-3 max-w-3xl text-5xl md:text-6xl">{brand.taglineSecondary}</h1>
         <p className="mt-6 max-w-xl text-lg text-muted-foreground">
           A Guideless trip is organized like a great tour and experienced like independent travel.
           Here is the whole arc, start to finish.
@@ -64,7 +62,7 @@ export default function HowItWorksPage() {
               <span className="font-heading text-sm font-semibold text-link">
                 {String(i + 1).padStart(2, "0")}
               </span>
-              <h2 className="mt-2 text-xl font-semibold">{title}</h2>
+              <h2 className="mt-2 text-xl ">{title}</h2>
               <p className="mt-2 text-muted-foreground">{body}</p>
             </li>
           ))}
@@ -72,10 +70,8 @@ export default function HowItWorksPage() {
 
         <div className="mt-20 grid gap-12 lg:grid-cols-2">
           <div id="pricing" className="scroll-mt-24">
-            <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-              Pricing
-            </p>
-            <h2 className="mt-3 text-3xl font-bold md:text-4xl">Pay only for what you do.</h2>
+            <p className="eyebrow text-muted-foreground">Pricing</p>
+            <h2 className="mt-3 text-3xl md:text-4xl">Pay only for what you do.</h2>
             <p className="mt-3 text-muted-foreground">
               Guided tours bundle everything and charge for the guide. We split it the other way: a
               base trip, then a short list of optional add-ons you choose at booking or later, even
@@ -100,10 +96,8 @@ export default function HowItWorksPage() {
             </Link>
           </div>
           <div id="solo" className="scroll-mt-24">
-            <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-              Travelling solo
-            </p>
-            <h2 className="mt-3 text-3xl font-bold md:text-4xl">Come alone. Leave with a group.</h2>
+            <p className="eyebrow text-muted-foreground">Travelling solo</p>
+            <h2 className="mt-3 text-3xl md:text-4xl">Come alone. Leave with a group.</h2>
             <p className="mt-3 text-muted-foreground">
               Guideless is built for people who book alone. The trip is designed so that never feels
               like a compromise.
@@ -152,7 +146,7 @@ export default function HowItWorksPage() {
 
         <div className="mt-16 grid gap-6 rounded bg-ink p-10 text-cloud md:grid-cols-[1fr_auto] md:items-center">
           <div>
-            <h2 className="text-3xl font-bold">Your guide is the app.</h2>
+            <h2 className="text-3xl ">Your guide is the app.</h2>
             <p className="mt-3 max-w-xl text-cloud/80">
               Every morning it answers three questions: where am I, what is next, and what are my
               options. Everything else is up to you.

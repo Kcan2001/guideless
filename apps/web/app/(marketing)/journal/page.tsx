@@ -40,8 +40,8 @@ export default async function JournalIndexPage() {
       />
 
       <section className="mx-auto w-full max-w-6xl px-6 pt-20 pb-10">
-        <p className="text-xs font-medium uppercase tracking-[0.22em] text-link">Journal</p>
-        <h1 className="mt-3 max-w-3xl font-heading text-4xl font-bold md:text-5xl">
+        <p className="eyebrow text-link">Journal</p>
+        <h1 className="mt-3 max-w-3xl font-heading text-4xl md:text-5xl">
           Notes from the routes we run.
         </h1>
         <p className="mt-4 max-w-xl text-lg text-muted-foreground">
@@ -83,10 +83,10 @@ export default async function JournalIndexPage() {
                 </div>
               )}
               <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                <p className="eyebrow text-muted-foreground">
                   {formatDate(lead.published_at)} · {lead.readingMinutes} min read
                 </p>
-                <h2 className="mt-3 font-heading text-3xl font-bold">{lead.title}</h2>
+                <h2 className="mt-3 font-heading text-3xl ">{lead.title}</h2>
                 <p className="mt-3 text-muted-foreground">{lead.summary}</p>
                 <span className="mt-4 inline-flex items-center gap-1.5 font-medium text-link">
                   Read <ArrowRight className="h-4 w-4" aria-hidden />
@@ -111,10 +111,10 @@ export default async function JournalIndexPage() {
                         />
                       </div>
                     )}
-                    <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                    <p className="eyebrow text-muted-foreground">
                       {formatDate(post.published_at)} · {post.readingMinutes} min
                     </p>
-                    <h3 className="mt-2 font-heading text-xl font-semibold">{post.title}</h3>
+                    <h3 className="mt-2 font-heading text-xl ">{post.title}</h3>
                     <p className="mt-2 text-sm text-muted-foreground">{post.summary}</p>
                   </Link>
                 </li>
