@@ -9,14 +9,17 @@
 //
 // Needs ffmpeg on PATH, or --ffmpeg <path>.
 //
-// What it produces: apps/web/public/video/monaco-hero.{webm,mp4} — silent, 1920x1080, a few seconds
+// --crop moves the 16:9 window up or down a vertical frame (0 top, 0.5 centre, 1 bottom), which is
+// the only control that matters when the source was shot upright and the subject is off-centre.
+//
+// What it produces: apps/web/public/video/monaco-hero.{webm,mp4} — silent, 1280x720 by default,
 // per clip, hard cuts, encoded twice because no single codec is both small and universal.
 //
 // Why the encode looks the way it does:
 //
 //   - **No audio track at all.** `muted` on the element is a promise the browser keeps; shipping
 //     the audio anyway just makes every viewer download a soundtrack nobody will hear.
-//   - **Scaled and cropped to a fixed 1920x1080.** Phone clips arrive in portrait, at 4K, at 60fps
+//   - **Scaled and cropped to one fixed size.** Phone clips arrive in portrait, at 4K, at 60fps
 //     and at wildly different bitrates. Concatenating mixed geometry either fails or produces a
 //     stream that reframes mid-play; normalising first is what makes the cut invisible.
 //   - **30fps.** A background loop gains nothing from 60 and pays double for it.
@@ -39,6 +42,19 @@ const PICK = opt("pick", null);
 const SECONDS = Number(opt("seconds", 4));
 const START = Number(opt("start", 0.5));
 const FFMPEG = opt("ffmpeg", "ffmpeg");
+// Output geometry. The default is 1280x720, not 1080p, because the source is usually a phone held
+// upright: a 1080x1920 clip cropped to 16:9 leaves a 1080x608 strip, and asking that to fill
+// 1920x1080 is a 1.78x upscale — visibly soft. 1280x720 is a 1.19x upscale, and behind a 90% ink
+// scrim with type over it nobody can tell the difference, while the file is a third of the size.
+const OUT_W = Number(opt("width", 1280));
+const OUT_H = Number(opt("height", 720));
+// Where the 16:9 window sits in a vertical frame. 0 = top, 0.5 = centre, 1 = bottom.
+const CROP_Y = Number(opt("crop", 0.5));
+// Quality. Higher is smaller for both codecs, but the scales are not comparable: VP9's CRF runs
+// 0-63 and H.264's 0-51, so the same number means very different things. These defaults land a
+// 20-25s loop of busy footage — crowds, moving cars, a nightclub — inside the budget.
+const CRF_MP4 = Number(opt("crf-mp4", 30));
+const CRF_WEBM = Number(opt("crf-webm", 44));
 const ALL = args.includes("--all");
 const OUT_DIR = path.resolve("apps/web/public/video");
 const BUDGET_MB = 6;
@@ -72,7 +88,7 @@ rmSync(tmp, { recursive: true, force: true });
 mkdirSync(tmp, { recursive: true });
 mkdirSync(OUT_DIR, { recursive: true });
 
-console.log(`Normalising ${clips.length} clips to 1920x1080, ${SECONDS}s each, no audio…`);
+console.log(`Normalising ${clips.length} clips to ${OUT_W}x${OUT_H}, ${SECONDS}s each, no audio…`);
 const parts = [];
 clips.forEach((src, i) => {
   const out = path.join(tmp, `part-${String(i).padStart(2, "0")}.mp4`);
@@ -87,7 +103,8 @@ clips.forEach((src, i) => {
     "-an",
     // Cover, not fit: letterboxing a hero is worse than losing the edges of a frame.
     "-vf",
-    "scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080,fps=30,setsar=1",
+    `scale=${OUT_W}:${OUT_H}:force_original_aspect_ratio=increase,` +
+      `crop=${OUT_W}:${OUT_H}:(iw-ow)/2:(ih-oh)*${CROP_Y},fps=30,setsar=1`,
     "-c:v",
     "libx264",
     "-preset",
@@ -123,7 +140,7 @@ ff([
   "-preset",
   "slow",
   "-crf",
-  "26",
+  String(CRF_MP4),
   "-pix_fmt",
   "yuv420p",
   "-movflags",
@@ -144,11 +161,15 @@ ff([
   "-c:v",
   "libvpx-vp9",
   "-crf",
-  "36",
+  String(CRF_WEBM),
   "-b:v",
   "0",
   "-row-mt",
   "1",
+  "-deadline",
+  "good",
+  "-cpu-used",
+  "2",
   "-pix_fmt",
   "yuv420p",
   webm,
