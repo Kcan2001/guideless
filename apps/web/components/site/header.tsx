@@ -8,15 +8,16 @@ import { SessionNav } from "@/components/auth/session-nav";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-/**
- * The header holds three things: who we are, the one page that explains the product, and the way
- * in. Everything else is in the footer.
+/*
+ * The header holds two things: who we are, and the way in. Everything else is in the footer.
  *
  * It used to carry six links plus a button, three of which ("How it works", "Why Guideless",
- * "Group travel") were the same argument written three times — so the nav asked you to choose
- * between three doors into one room. They are one page now.
+ * "Group travel") were the same argument written three times. Those became one page, and then the
+ * one link left in the centre read as an orphan floating in the space six used to fill. There is
+ * no desktop nav element at all now rather than an empty one: an empty landmark is worse than no
+ * landmark, and a screen reader announcing "Primary navigation" with nothing in it is a dead end.
+ * The full list still lives in the mobile drawer and the footer.
  */
-export const headerNav = [{ href: "/how-it-works", label: "How it works" }] as const;
 
 /** The full set, for the footer and the mobile drawer, where a longer list costs nothing. */
 export const primaryNav = [
@@ -78,21 +79,6 @@ export function SiteHeader() {
         >
           {brand.shortName}
         </Link>
-
-        <nav
-          aria-label="Primary"
-          className="hidden items-center gap-6 font-heading text-xs font-bold uppercase tracking-[0.12em] lg:flex"
-        >
-          {headerNav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="no-underline transition-colors hover:text-link"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
 
         <div className="flex items-center gap-3">
           <SessionNav className="hidden font-heading text-xs font-bold uppercase tracking-[0.12em] no-underline hover:text-link sm:inline" />
