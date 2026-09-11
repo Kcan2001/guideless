@@ -110,7 +110,7 @@ export default async function AdminDeparturePage(props: PageProps<"/admin/depart
             {issues.map((i, idx) => (
               <li key={idx} className="flex gap-2">
                 {i.severity === "warning" ? (
-                  <AlertTriangle className="mt-0.5 h-4 w-4 text-[#8A6414]" aria-hidden />
+                  <AlertTriangle className="mt-0.5 h-4 w-4 text-warning" aria-hidden />
                 ) : (
                   <Info className="mt-0.5 h-4 w-4 text-cyan" aria-hidden />
                 )}

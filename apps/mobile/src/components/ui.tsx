@@ -17,7 +17,7 @@ import {
   type ViewStyle,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { MinTouchTarget, Radius, Spacing } from "@/constants/theme";
+import { Brand, MinTouchTarget, Radius, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 
 /**
@@ -112,17 +112,17 @@ export function Pill({
     tone === "accent"
       ? c.accent
       : tone === "warning"
-        ? "#F4E3B6"
+        ? c.warningSurface
         : tone === "danger"
-          ? "#F3C9CB"
+          ? c.dangerSurface
           : c.backgroundSelected;
   const fg =
     tone === "accent"
-      ? "#0B2025"
+      ? Brand.ink
       : tone === "warning"
-        ? "#8A6414"
+        ? c.warning
         : tone === "danger"
-          ? "#9B2F33"
+          ? c.danger
           : c.textSecondary;
   return (
     <View style={[styles.pill, { backgroundColor: bg }]}>

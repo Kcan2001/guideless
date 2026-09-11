@@ -89,10 +89,22 @@ export const semantic = {
   link: colors.cyan,
   linkHover: colorScale.cyan[700],
   focusRing: colors.cyan,
-  success: "#2FA88A",
-  warning: "#D9A441",
-  danger: "#C9484D",
-  info: colors.cyan,
+  /* Status colours come in threes: the text/icon value, the pale fill a banner sits on, and the
+     edge. They are separate values rather than alpha washes of one hue, because text on a 10%
+     wash of itself can never clear AAA without going maroon. Each text value is >= 7:1 on white,
+     on cloud, and on its own surface. See docs/design-system.md. */
+  success: "#1C5D4C",
+  successSurface: "#ECF6F3",
+  successBorder: "#BBDDD4",
+  warning: "#764610",
+  warningSurface: "#F8F1EA",
+  warningBorder: "#E4CEB4",
+  danger: "#92292F",
+  dangerSurface: "#F6ECED",
+  dangerBorder: "#DDBBBC",
+  info: "#105875",
+  infoSurface: "#EAF4F8",
+  infoBorder: "#B4D6E4",
 } as const;
 
 export type SemanticToken = keyof typeof semantic;

@@ -77,7 +77,7 @@ export function Stat({
       <p
         className={cn(
           "mt-1 font-heading text-2xl font-bold",
-          tone === "warning" && "text-[#8A6414]",
+          tone === "warning" && "text-warning",
           tone === "good" && "text-[#2FA88A]",
         )}
       >

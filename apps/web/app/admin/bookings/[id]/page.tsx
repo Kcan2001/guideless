@@ -338,7 +338,7 @@ export default async function AdminBookingPage(props: PageProps<"/admin/bookings
                   <SubmitButton
                     size="sm"
                     variant="secondary"
-                    className="border-danger text-danger hover:bg-danger/10"
+                    className="border-danger text-danger hover:bg-danger-surface"
                     confirm="Cancel this booking? Seats are released immediately."
                   >
                     Cancel booking

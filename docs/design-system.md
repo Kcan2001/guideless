@@ -39,15 +39,15 @@ The reference build is the three screens at
 
 Measured across `apps/web/app` and `apps/web/components`, not estimated.
 
-| Thing          | State                                                                                          | Verdict               |
-| -------------- | ---------------------------------------------------------------------------------------------- | --------------------- |
-| Colour tokens  | Defined once in `app/globals.css`, exposed to Tailwind                                         | Good                  |
-| Buttons        | 72 files import the shared `buttonVariants`. **Zero hand-rolled buttons**                      | The model             |
-| Cards          | `components/ui/card.tsx` exists and is imported by **zero** files. 64 files hand-roll one      | Broken                |
-| Corner radius  | **Six** different values in use: `xl` ×126, `lg` ×72, `2xl` ×33, `full` ×30, `md` ×13, `sm` ×1 | Broken                |
-| Headings       | **104 of 156** `h1`–`h3` do not set `font-heading`, so they silently render in Inter           | Broken                |
-| Accent as text | `text-teal` ×41, `text-aqua` ×24, `text-danger` ×20 — all below WCAG AA on our own background  | **Accessibility bug** |
-| Shadows        | 11 uses, three values                                                                          | Fine                  |
+| Thing          | State                                                                                                         | Verdict               |
+| -------------- | ------------------------------------------------------------------------------------------------------------- | --------------------- |
+| Colour tokens  | Defined once in `app/globals.css`, exposed to Tailwind                                                        | Good                  |
+| Buttons        | 72 files import the shared `buttonVariants`. **Zero hand-rolled buttons**                                     | The model             |
+| Cards          | `components/ui/card.tsx` exists and is imported by **zero** files. 64 files hand-roll one                     | Broken                |
+| Corner radius  | **Six** different values in use: `xl` ×126, `lg` ×72, `2xl` ×33, `full` ×30, `md` ×13, `sm` ×1                | Broken                |
+| Headings       | **104 of 156** `h1`–`h3` do not set `font-heading`, so they silently render in Inter                          | Broken                |
+| Accent as text | `text-teal` ×41, `text-aqua` ×24 — below WCAG AA on our own background (`text-danger` ×20 **fixed**, now AAA) | **Accessibility bug** |
+| Shadows        | 11 uses, three values                                                                                         | Fine                  |
 
 Buttons prove the system works when there is one component and no alternative. Cards prove what
 happens when there is a component and people do not know about it. **Everything below is written to
@@ -90,16 +90,33 @@ type sits over whatever the photograph is doing behind it, which is a sky at 2.3
 photograph, small text is `cloud` at 80% and the veil is strong enough that the effective ground is
 near-ink. Accent colours go on ink, not on pictures of the sea.
 
-**Semantic — success, warning, danger.** These are **fills with ink text**, never coloured text:
+**Semantic — success, warning, danger, info. Each is a trio, and AAA.**
 
-| Token     | Hex       | on cloud | Verdict                                            |
-| --------- | --------- | -------- | -------------------------------------------------- |
-| `success` | `#2FA88A` | 2.7      | fill only — `bg-success/10` with `text-ink`        |
-| `warning` | `#D9A441` | 2.1      | fill only                                          |
-| `danger`  | `#C9484D` | 4.3      | fill only — it fails AA on our own page background |
+A status colour is three tokens, not one: the **text** value, the pale **surface** a banner sits
+on, and the **border** at its edge. They are separate values rather than alpha washes of a single
+hue, and that is the whole trick. Text on a 10% wash of itself can never reach 7:1 without going
+so dark it stops reading as red at all — the search for one bounced out at `#76282B`, which is
+maroon, and a maroon error message has lost the only job the colour had. Decoupling the surface
+lets the text stay a real red and still clear AAA.
 
-`text-danger` on the default background is **4.28:1 against a 4.5 minimum**. Twenty places do this
-today. Error text is the one thing that must be readable, so this is the first thing to fix.
+| Token     | Text      | Surface   | Border    | on white | on cloud | on its own surface |
+| --------- | --------- | --------- | --------- | -------- | -------- | ------------------ |
+| `danger`  | `#92292F` | `#F6ECED` | `#DDBBBC` | 8.14     | 7.50     | 7.03               |
+| `warning` | `#764610` | `#F8F1EA` | `#E4CEB4` | 7.91     | 7.29     | 7.07               |
+| `success` | `#1C5D4C` | `#ECF6F3` | `#BBDDD4` | 7.72     | 7.11     | 7.00               |
+| `info`    | `#105875` | `#EAF4F8` | `#B4D6E4` | 7.85     | 7.23     | 7.03               |
+
+Every text value clears **7:1 (AAA) on white, on cloud, and on its own surface** — measured in a
+browser against the composited ground, not against the token it nominally sits on. On sand the
+reds land at 5.7:1, which is AA; sand is not a ground these ever use, and the margin is the point.
+
+So `text-danger` is now correct wherever it appears, and the three hardcoded hexes that had grown
+up around the old failing token — `#9B2F33` in the field banner and the badge, `#8A6414` across
+six admin files, `#0B6680` in the info badge — are gone. That drift is the tell: when a token
+fails, people do not report it, they paste a darker hex next to it and move on.
+
+Dark mode inverts the trio rather than borrowing it: the text value lightens (`#F5BABD`,
+`#ECC37B`) and the surface darkens to ink 700, which is where the mobile pills live.
 
 The ratio across a page stays roughly **70% neutral, 20% ink, 10% accent**.
 
@@ -235,7 +252,8 @@ white text — see the contrast table.
 ### Field
 
 Label above, input, helper text below, error replacing helper text. Radius `sm`. Errors use
-`bg-danger/10` with ink text, never `text-danger`.
+`text-danger`, and an error banner is `border-danger-border bg-danger-surface text-danger`. Never
+an alpha wash of the text colour, and never a one-off hex.
 
 ---
 

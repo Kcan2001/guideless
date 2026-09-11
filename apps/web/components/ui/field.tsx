@@ -64,7 +64,7 @@ export function FormError({ message }: { message?: string }) {
   return (
     <p
       role="alert"
-      className="rounded-lg border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-[#9B2F33]"
+      className="rounded-lg border border-danger-border bg-danger-surface px-4 py-3 text-sm text-danger"
     >
       {message}
     </p>

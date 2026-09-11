@@ -69,7 +69,7 @@ export default async function AdminDeparturesPage(props: PageProps<"/admin/depar
             <span key="c">
               {r.availability.confirmed} / {r.availability.held} / {r.departure.capacity}
               {r.availability.confirmed < r.departure.minimum_travelers && (
-                <span className="block text-xs text-[#8A6414]">
+                <span className="block text-xs text-warning">
                   below min {r.departure.minimum_travelers}
                 </span>
               )}

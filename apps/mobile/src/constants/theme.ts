@@ -25,8 +25,11 @@ export const Colors = {
     accent: semantic.accent,
     link: semantic.link,
     success: semantic.success,
+    successSurface: semantic.successSurface,
     warning: semantic.warning,
+    warningSurface: semantic.warningSurface,
     danger: semantic.danger,
+    dangerSurface: semantic.dangerSurface,
   },
   dark: {
     text: colors.cloud,
@@ -39,9 +42,14 @@ export const Colors = {
     primaryText: colors.ink,
     accent: colors.aqua,
     link: colorScale.cyan[400],
-    success: colorScale.aqua[600],
-    warning: semantic.warning,
-    danger: "#E06B6F",
+    /* On ink the status colours invert: the text value lightens and the surface darkens,
+       so a pill stays legible without borrowing the light-mode pair. */
+    success: colorScale.aqua[400],
+    successSurface: colorScale.ink[700],
+    warning: "#ECC37B",
+    warningSurface: colorScale.ink[700],
+    danger: "#F5BABD",
+    dangerSurface: colorScale.ink[700],
   },
 } as const;
 
