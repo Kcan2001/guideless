@@ -44,8 +44,17 @@ export function HeroVideo({
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     // Autoplay can be refused (low power mode, a browser policy, a user setting). That is not an
     // error worth surfacing — it just means the poster stays, which is the designed fallback.
-    // This one IS safe: the rejection lands in a microtask, not during the effect.
-    void el.play().catch(() => setFailed(true));
+    // This one IS safe: the settlement lands in a microtask, not during the effect.
+    //
+    // `play()` resolving is also what reveals the video, and it has to be, because `onCanPlay` is
+    // not reliable here: a cached or fast-starting file can reach that state before React attaches
+    // the handler, and the event never fires again. Shipped exactly that — the video played
+    // correctly at opacity 0, invisible behind its own poster, and looked fine because the poster
+    // is a good hero. Two independent paths to `ready` and the earlier one wins.
+    void el
+      .play()
+      .then(() => setReady(true))
+      .catch(() => setFailed(true));
   }, []);
 
   if (failed) return null;
@@ -63,6 +72,7 @@ export function HeroVideo({
       aria-hidden
       tabIndex={-1}
       onCanPlay={() => setReady(true)}
+      onPlaying={() => setReady(true)}
       onError={() => setFailed(true)}
       style={{ opacity: ready ? 1 : 0, transition: "opacity 900ms ease" }}
     >
