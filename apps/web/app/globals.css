@@ -32,6 +32,9 @@
      that clears WCAG AA (4.5:1) at body sizes. */
   --link: #0b6680;
   --link-hover: #084b5e;
+  /* The same role on an ink ground. The light-mode link is 2.59:1 on ink — fine on cloud, and
+     unreadable in the footer, which is where most of our links to policy pages live. */
+  --link-inverse: #7fd9ea;
   --ring: var(--color-cyan);
   /* Status colours come in threes: text/icon, the pale fill a banner sits on, and the edge.
      Separate values, not alpha washes of one hue — text on a 10% wash of itself cannot clear
@@ -54,6 +57,9 @@
      boxes is the inconsistency this file exists to stop. The names survive so nothing breaks; they
      all resolve to the same 4px. Hard edges are what make this register read as confident rather
      than friendly. */
+  /* Measured from the header's own box: py-4 plus the tallest thing in it. */
+  --header-h: 69px;
+
   --radius-sm: 4px;
   --radius-md: 4px;
   --radius-lg: 4px;
@@ -91,6 +97,7 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-link: var(--link);
   --color-link-hover: var(--link-hover);
+  --color-link-inverse: var(--link-inverse);
   --color-ring: var(--ring);
   --color-success: var(--success);
   --color-success-surface: var(--success-surface);
@@ -275,4 +282,66 @@
   @page {
     margin: 14mm;
   }
+}
+
+/*
+ * The header sits ON a dark hero until you scroll past it.
+ *
+ * CSS rather than React state on purpose: deciding it after hydration painted the solid bar on the
+ * first frame and then flipped it, a visible flash on every load of the home page and the wrong
+ * answer entirely with JavaScript off. `:has()` lets the document answer "is there a dark hero on
+ * this page?" at parse time, which is when the question is actually asked. JS only reports whether
+ * we have scrolled past it.
+ *
+ * Deliberately UNLAYERED. Tailwind puts its utilities in a cascade layer, and an unlayered rule
+ * beats every layer; inside `@layer components` this lost to the header's own `bg-cloud/85`.
+ *
+ * Where `:has()` is unsupported the header stays solid, which is the old behaviour — a plain
+ * degradation, not a broken one.
+ */
+/*
+ * Pull a dark hero up UNDER the header.
+ *
+ * `position: sticky` keeps the header in normal flow, so a transparent background just showed the
+ * page's own cloud ground — the bar looked solid however transparent it computed. The header has to
+ * be drawn on top of the photograph, and the cheapest honest way to do that is to start the hero
+ * where the header starts rather than where it ends. Heroes already carry enough top padding to
+ * clear it (`pt-32`), so nothing collides.
+ */
+body:has([data-hero-dark]) [data-hero-dark] {
+  margin-top: calc(-1 * var(--header-h));
+}
+
+body:has([data-hero-dark]) .site-header:not([data-scrolled]) {
+  background: transparent;
+  border-color: transparent;
+  color: var(--color-cloud);
+  backdrop-filter: none;
+}
+
+/*
+ * The links need the colour set explicitly, not inherited. `@layer base` gives every `a` the link
+ * colour, which beat inheritance and left the nav in dark teal on a dark photograph — legible-ish
+ * at a glance and genuinely bad against the sky.
+ *
+ * `:not(.bg-accent)` spares the one link that paints its own fill: "Explore trips" is an aqua
+ * button with ink text, and repainting it cloud would put cloud on aqua at 1.6:1.
+ */
+body:has([data-hero-dark]) .site-header:not([data-scrolled]) a:not(.bg-accent) {
+  color: var(--color-cloud);
+}
+body:has([data-hero-dark]) .site-header:not([data-scrolled]) a:not(.bg-accent):hover {
+  color: var(--accent);
+}
+
+/*
+ * Links on an ink ground take the inverse link colour.
+ *
+ * `@layer base` gives every `a` the light-mode link colour, which is 2.59:1 on ink — the footer's
+ * policy links, and the one place on the site where a link is most likely to actually be needed.
+ * Unlayered so it beats the base rule, and scoped to the surfaces that are genuinely ink.
+ */
+.bg-ink a:not([class*="bg-"]),
+.bg-surface-inverse a:not([class*="bg-"]) {
+  color: var(--link-inverse);
 }

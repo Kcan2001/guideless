@@ -188,7 +188,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
   return (
     <>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-ink text-cloud">
+      <section data-hero-dark className="relative overflow-hidden bg-ink text-cloud">
         <PhotoBackdrop
           src={version.hero_image_url}
           fallbackAlt={`${tour.name}: ${route.map((r) => r.destination.name).join(", ")}`}

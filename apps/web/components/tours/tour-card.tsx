@@ -20,7 +20,10 @@ export function TourCard({
   const next = departures[0];
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded border border-border bg-surface transition-shadow hover:shadow-lg focus-within:shadow-lg">
+    // `text-foreground` is not decoration: this card is a light surface that can sit on an ink
+    // band, and without it the stats inherit the band's cloud and render at 1.03:1 on white.
+    // A component that paints its own background owns its foreground too.
+    <article className="group flex flex-col overflow-hidden rounded border border-border bg-surface text-foreground transition-shadow hover:shadow-lg focus-within:shadow-lg">
       <Link
         href={`/tours/${tour.slug}`}
         className="relative block aspect-[4/3] overflow-hidden no-underline"
@@ -32,9 +35,9 @@ export function TourCard({
           sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
           imgClassName="transition-transform duration-500 group-hover:scale-[1.03]"
         />
-        <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 bg-gradient-to-t from-ink/80 to-transparent p-5 text-cloud">
+        <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 bg-gradient-to-t from-ink via-ink/85 to-transparent p-5 text-cloud">
           <div>
-            <p className="eyebrow text-aqua">
+            <p className="eyebrow text-cloud">
               {destinations.map((d) => d.name).join(" → ") || "Route"}
             </p>
             <Heading className="mt-1 num text-2xl">

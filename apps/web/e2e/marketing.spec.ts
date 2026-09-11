@@ -9,7 +9,11 @@ test.describe("marketing site", () => {
 
   test("home renders the promise and primary navigation", async ({ page, isMobile }) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Travel with a plan.");
+    // The hero headline is page copy, not the brand tagline — it changed with the 2026-09-10
+    // reskin and will change again. Assert the shape that has to hold: one h1, naming the product.
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(/group trips/i);
+    // The header sits ON the hero until you scroll past it, which is the whole first impression.
+    await expect(page.locator("header.site-header")).not.toHaveAttribute("data-scrolled", "");
     await expect(page.getByRole("heading", { name: /plan every damn thing/i })).toBeVisible();
     await expect(page.getByRole("heading", { name: /in your pocket/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /explore trips/i }).first()).toBeVisible();
