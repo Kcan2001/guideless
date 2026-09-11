@@ -13,6 +13,7 @@ import {
   parseTourFilters,
 } from "@/lib/data/tour-filters";
 import { listPublishedTours } from "@/lib/data/tours";
+import { cn, gridColumns } from "@/lib/utils";
 import { breadcrumbJsonLd } from "@/lib/seo";
 
 export const revalidate = 300;
@@ -56,8 +57,11 @@ export default async function ToursPage(props: PageProps<"/tours">) {
               : `${items.length} ${items.length === 1 ? "trip" : "trips"}`}
         </p>
 
+        {/* Column count follows the catalogue, so two trips do not sit in a three-column grid with
+            40% of the page empty beside them. With two routes published that is not an edge case,
+            it is what the page looks like. */}
         {items.length > 0 ? (
-          <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className={cn("mt-6 grid gap-6", gridColumns(items.length))}>
             {items.map((item) => (
               <TourCard key={item.tour.id} item={item} headingLevel="h2" />
             ))}
