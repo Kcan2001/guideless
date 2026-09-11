@@ -22,8 +22,14 @@
   --surface-muted: var(--color-sand);
   --surface-inverse: var(--color-ink);
   --muted-foreground: #4d575b; /* 5.2:1 on sand, 4.5:1 minimum */
-  --border: #dad9d0;
+  /* Borders carry the whole surface hierarchy in this system — there is one radius and almost no
+     shadow, so if the edge does not read, the panel does not read. Sand at #dad9d0 is 1.15:1
+     against white, which is why the builder looked like unstyled content in a column rather than
+     three panels. This edge is 1.6:1 on white: still quiet, actually visible. */
+  --border: #d2d0c6;
   --border-strong: #b8bfc1;
+  /* The lift a card gets on a cloud page. Small on purpose: enough to separate, not a drop shadow. */
+  --shadow-card: 0 1px 2px rgba(11, 32, 37, 0.04), 0 1px 1px rgba(11, 32, 37, 0.03);
   --primary: var(--color-ink);
   --primary-foreground: var(--color-white);
   --accent: var(--color-aqua);
@@ -90,6 +96,7 @@
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
   --color-border-dark: var(--border-dark);
+  --shadow-card: var(--shadow-card);
   --color-surface-raised: var(--surface-raised);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
@@ -199,6 +206,82 @@
     font-weight: 800;
     line-height: 1.1;
     letter-spacing: -0.02em;
+  }
+
+  /*
+   * Form controls, themed on the element rather than on a component.
+   *
+   * There are Input/Select/Textarea components, and 490 raw controls that do not use them — the
+   * five filters on /tours, "1 traveler" in the builder, the coupon field. Every one of those was
+   * rendering as browser-default chrome, which on a page of Archivo caps and 4px corners is the
+   * single loudest thing wrong with the site. Styling the element fixes all of them at once and
+   * keeps the components as the accessible wrapper rather than the only way to get a themed input.
+   *
+   * In @layer base on purpose: a utility at the call site still wins.
+   */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  select,
+  textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--foreground);
+    padding: 0.625rem 0.75rem;
+    font: inherit;
+    line-height: 1.4;
+    transition:
+      border-color 120ms ease,
+      box-shadow 120ms ease;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"])::placeholder,
+  textarea::placeholder {
+    color: var(--muted-foreground);
+    opacity: 0.75;
+  }
+
+  /* The native dropdown arrow is the giveaway: it carries the OS's own radius and colour. Replacing
+     it with our own chevron is the difference between a themed control and a themed box with a
+     Windows widget in the corner. */
+  select {
+    appearance: none;
+    padding-right: 2.25rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%230B2025' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    cursor: pointer;
+  }
+
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: none;
+    border-color: var(--foreground);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 28%, transparent);
+  }
+
+  input:disabled,
+  select:disabled,
+  textarea:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  input[aria-invalid="true"],
+  select[aria-invalid="true"],
+  textarea[aria-invalid="true"] {
+    border-color: var(--danger);
+  }
+
+  /* Tick boxes and radios keep their native behaviour and take the brand colour. `accent-color` is
+     the whole fix — a hand-built checkbox is a keyboard-accessibility liability for no gain. */
+  input[type="checkbox"],
+  input[type="radio"] {
+    accent-color: var(--accent);
+    width: 1.05rem;
+    height: 1.05rem;
+    cursor: pointer;
   }
 
   a {
