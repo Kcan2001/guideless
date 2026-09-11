@@ -118,6 +118,48 @@ now. If we ever move off K, T is the one to secure in advance.
 
 ---
 
+## How we can actually buy the tickets
+
+There is no API, and there is not going to be one. The ACM sells through its website, an email
+address, a ticket office at 44 rue Grimaldi, and kiosks around the circuit. That is the whole list.
+
+But the resale problem has a well-trodden answer, and it is not "get authorised by the ACM". It is
+to become a **travel-trade partner of an operator who already is**. They hold the allocation and the
+authorisation; we sell inside it and take a commission. Four worth approaching:
+
+| Operator                   | What they offer the trade                                                                                                                                                                                                               | How to open it                                     |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| **Grand Prix Grand Tours** | B2B agreement plus a pricing portal updated daily — hotel and ticket options, inclusions, payment schedule, and the commission shown per combination. ~40 F1 and MotoGP events a year. Dedicated rep and system training on onboarding. | `sales@grandprixgrandtours.com` · +44 20 3966 5680 |
+| **Senate Grand Prix**      | Long-running travel-agent programme, commission paid, Monaco a speciality                                                                                                                                                               | Their travel-agents page                           |
+| **Gootickets**             | Monaco-based, **ACM-authorised**, sells at the same prices as the official channel                                                                                                                                                      | Direct                                             |
+| **Grand Prix Events**      | Official F1 Experiences agent (UK) and authorised Paddock Club distributor                                                                                                                                                              | Direct                                             |
+
+**This solves the exposure.** Selling a grandstand seat at a markup needs authorisation; selling it
+as a trade partner of an authorised operator does not, because the sale happens within their terms.
+It also turns a cost line into a commission line.
+
+Two things to watch:
+
+- **It stays a portal, not an API.** Nobody in this chain offers a feed. Race viewing remains a
+  manual, relationship-driven part of the catalogue whatever else we automate, and that is a fact to
+  design the admin around rather than an integration to wait for.
+- **The ATOL offer does not help us.** GPGT lets partners without their own licence use theirs —
+  genuinely useful, and UK-only. Guideless LLC sells into the US, where the equivalent is state
+  Seller of Travel registration (California, Florida, Hawaii, Washington), which is still open.
+
+## Rail, while we are here
+
+Omio is the right shape for the Nice–Avignon–Paris legs. It aggregates 3,000+ transport providers
+across Europe and offers the trade two models:
+
+- **Meta Search API** — show live results, hand the traveller to an Omio-controlled checkout. Less
+  work, but the booking leaves our journey, which breaks the premise that we book every part of it.
+- **Booking API** — integrate the inventory and keep payment, customer data and the journey. More
+  work, and the only one consistent with what we tell travellers.
+
+Omio is also acquiring Rail Europe, whose B2B network is the established rail-trade channel, so this
+is consolidating rather than fragmenting. The **Booking API** is the one to ask about.
+
 ## What to do with this
 
 These are researched prices, not quotes. The next step is the outreach in the roadmap: pick the
@@ -133,3 +175,9 @@ dates, what is the rate. A published price is a starting point; a group rate is 
 - [Senate Grand Prix — Fairmont Hairpin Suite](https://www.senategrandprix.com/race-viewing-monaco/fairmont-hairpin-suite)
 - [Red Eye Events — 50m yacht hospitality](https://www.redeyeevents.co.uk/events/formula-1/monaco-formula-1-grand-prix-hospitality/monaco-grand-prix-yacht-hospitality/monaco-50-metre-yacht-hospitality/)
 - [Official F1 ticketing — Monaco](https://ticketing.formula1.com/monaco/)
+- [ACM — ticket and package purchase](https://acm.mc/en/epreuves/formula-1-grand-prix-de-monaco/useful-infos/information-about-ticket-or-package-purchase/)
+- [Monaco Grand Prix — terms and conditions of sale](https://monaco-grandprix.com/en/edition/grand-prix-de-monaco-historique-2026/terms-conditions-of-sale/)
+- [Grand Prix Grand Tours — travel agents and B2B](https://www.grandprixgrandtours.com/agents/)
+- [Senate Grand Prix — travel agents](https://www.senategrandprix.com/travel-agents)
+- [Omio — B2B partnerships and solutions](https://www.omio.com/b2b)
+- [Railway Gazette — Omio to acquire Rail Europe](https://www.railwaygazette.com/business/2026/07/17/booking-platform-omio-to-acquire-rail-europe/)
