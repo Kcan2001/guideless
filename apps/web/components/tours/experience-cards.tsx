@@ -1,15 +1,14 @@
 import Image from "next/image";
-import Link from "next/link";
-import type { Route } from "next";
-import { CalendarDays, Check, Clock, MapPin, Minus, Users } from "lucide-react";
+import { CalendarDays, Check, Clock, Layers, MapPin, Minus, Users } from "lucide-react";
 import type { AddOnKind, Currency } from "@guideless/types";
 import { formatDate, formatMoney, formatWallTime } from "@guideless/utils";
 import { OptionLabelBadge, TierBadge } from "@/components/tours/option-label";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
+import { DetailModal } from "@/components/tours/detail-modal";
 import type { AddOnWithCounts } from "@/lib/data/extras";
+import type { AddOnFamily } from "@/lib/data/extras-shared";
 import { photoAlt, photoPosition } from "@/lib/photos";
-import { cn } from "@/lib/utils";
+import { cn, gridColumns } from "@/lib/utils";
 
 const KIND_LABEL: Record<AddOnKind, string> = {
   activity: "Experience",
@@ -53,66 +52,75 @@ function when(a: AddOnWithCounts): string | null {
 }
 
 /**
- * Add-ons as decision-ready cards: what, when, where, price and basis, what is and is not
- * included, why it costs that, who is going (aggregate, real), how many are left (only when
- * few), the cancellation window and any age rule. Selection happens in checkout; the card links
- * there. `size="large"` is for mutually exclusive tiers (race views), `"grid"` for the rest.
+ * Optional things to do, as one card per *thing* rather than one per row you can buy.
  *
- * `pickOne` says the set is exclusive, and the card works out how to phrase it. Since migration
- * 0073 the rule is one per *day*, not one per trip, so a group spread across several days reads
- * "one per day" — saying "choose one" there would tell a Monaco traveler they must pick between
- * Saturday and Sunday when they can have both.
+ * The catalogue holds "Amber Lounge yacht, qualifying day", "…, race day" and "…, both days". They
+ * are three real products and the builder sells all three, but on the tour page they are one
+ * answer to one question: yes, you can watch this from a boat. Rendering them separately turned a
+ * four-rung ladder into a twelve-card wall and made the cheapest rung impossible to find.
+ *
+ * So rows sharing a `family` collapse (see `addOnFamilies`), and a collapsed card:
+ *
+ *   - prices itself **From** the cheapest variant, because a Friday yacht and a Sunday yacht are
+ *     not the same price and quoting either one flat is wrong in one direction or the other;
+ *   - drops the timing, the meeting point and the cancellation window, which belong to a variant
+ *     and are not true of the set;
+ *   - says how many ways there are to do it, and that you choose in the builder.
+ *
+ * A single-variant entry keeps all of that, because there is nothing being generalised away.
+ *
+ * There is no call to action on the card. Selection happens in the builder — this page's job is to
+ * show what exists, and a page-level "Build my trip" already does the asking.
  */
 export function ExperienceCards({
-  addOns,
+  families,
   currency,
   size = "grid",
-  ctaHref,
-  ctaLabel = "Add at booking",
   pickOne = false,
   testId,
 }: {
-  addOns: AddOnWithCounts[];
+  families: AddOnFamily<AddOnWithCounts>[];
   currency: Currency;
   size?: "large" | "grid";
-  ctaHref: Route | null;
-  ctaLabel?: string;
   /** Mutually exclusive set: say so on every card. */
   pickOne?: boolean;
   testId?: string;
 }) {
-  if (addOns.length === 0) return null;
+  if (families.length === 0) return null;
   const today = new Date().toISOString().slice(0, 10);
-  // Distinct days the exclusive set touches, spans included.
+  // Distinct days the exclusive set touches, spans included, across every variant.
   const groupDays = new Set(
-    addOns.flatMap((a) =>
-      a.day_number == null
-        ? []
-        : Array.from(
-            { length: Math.max(a.end_day_number ?? a.day_number, a.day_number) - a.day_number + 1 },
-            (_, i) => a.day_number! + i,
-          ),
+    families.flatMap((f) =>
+      f.variants.flatMap((a) =>
+        a.day_number == null
+          ? []
+          : Array.from(
+              {
+                length: Math.max(a.end_day_number ?? a.day_number, a.day_number) - a.day_number + 1,
+              },
+              (_, i) => a.day_number! + i,
+            ),
+      ),
     ),
   );
   const exclusiveCopy = groupDays.size > 1 ? "one per day" : "choose one";
   return (
-    <ul
-      className={cn(
-        "grid gap-6",
-        size === "large" ? "lg:grid-cols-3" : "md:grid-cols-2 xl:grid-cols-3",
-      )}
-      data-testid={testId}
-    >
-      {addOns.map((a) => {
+    <ul className={cn("grid gap-6", gridColumns(families.length))} data-testid={testId}>
+      {families.map((f) => {
+        const a = f.cheapest;
         const image = a.image_urls[0];
-        const closed = a.bookableUntil < today;
-        const soldOut = a.available !== null && a.available <= 0;
-        const fewLeft = !soldOut && a.available !== null && a.available <= LEFT_MAX;
-        const timing = when(a);
-        const place = a.meeting_point ?? a.location_name;
+        // A family is closed or sold out only when every way of doing it is.
+        const closed = f.variants.every((v) => v.bookableUntil < today);
+        const soldOut = f.variants.every((v) => v.available !== null && v.available <= 0);
+        // Scarcity is a claim about one thing. Across variants it is not a number anyone can act on.
+        const fewLeft = !f.isFrom && !soldOut && a.available !== null && a.available <= LEFT_MAX;
+        // Timing, place and the cancellation window belong to a variant, not to the set.
+        const timing = f.isFrom ? null : when(a);
+        const place = f.isFrom ? null : (a.meeting_point ?? a.location_name);
+        const going = f.variants.reduce((sum, v) => sum + v.going, 0);
         return (
           <li
-            key={a.id}
+            key={f.key}
             className="flex flex-col overflow-hidden rounded-xl border border-border bg-surface"
           >
             {image && (
@@ -124,7 +132,7 @@ export function ExperienceCards({
               >
                 <Image
                   src={image}
-                  alt={photoAlt(image, a.title)}
+                  alt={photoAlt(image, f.title)}
                   fill
                   sizes="(min-width: 1280px) 400px, (min-width: 768px) 50vw, 100vw"
                   className="object-cover"
@@ -148,12 +156,19 @@ export function ExperienceCards({
                   )}
                   {!image && <OptionLabelBadge label={a.label} />}
                 </p>
-                <h3 className="mt-2 font-heading text-xl font-bold md:text-2xl">{a.title}</h3>
+                <h3 className="mt-2 font-heading text-xl font-bold md:text-2xl">{f.title}</h3>
               </div>
 
               <p className="flex flex-wrap items-baseline justify-between gap-2 border-y border-border py-3">
                 <span className="font-heading text-xl font-bold">
-                  {money(a.price_amount, currency)}
+                  {/* The space is a real text node, not a margin: margin does not separate the
+                      words for a screen reader, which would otherwise read "From$6,380". */}
+                  {f.isFrom && (
+                    <>
+                      <span className="text-sm font-normal">From</span>{" "}
+                    </>
+                  )}
+                  {money(f.fromAmount, currency)}
                   <span className="ml-1 text-sm font-normal text-muted-foreground">
                     {a.pricing_basis === "per_traveler" ? "per person" : "per booking"}
                   </span>
@@ -161,13 +176,20 @@ export function ExperienceCards({
                 {soldOut ? (
                   <Badge variant="danger">Sold out</Badge>
                 ) : closed ? (
-                  <Badge variant="neutral">Sales closed {formatDate(a.bookableUntil)}</Badge>
+                  <Badge variant="neutral">Sales closed</Badge>
                 ) : fewLeft ? (
                   <Badge variant="warning">{a.available} left</Badge>
                 ) : null}
               </p>
 
               <dl className="space-y-1.5 text-sm">
+                {f.isFrom && (
+                  <div className="flex items-start gap-2">
+                    <Layers className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden />
+                    <dt className="sr-only">Ways to do it</dt>
+                    <dd>{f.variantCount} ways to do it — you pick when you build the trip</dd>
+                  </div>
+                )}
                 {timing && (
                   <div className="flex items-start gap-2">
                     <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden />
@@ -175,87 +197,114 @@ export function ExperienceCards({
                     <dd>{timing}</dd>
                   </div>
                 )}
-                {place && (
-                  <div className="flex items-start gap-2">
-                    <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden />
-                    <dt className="sr-only">Where</dt>
-                    <dd>{place}</dd>
-                  </div>
-                )}
-                {a.going >= GOING_MIN && (
+                {going >= GOING_MIN && (
                   <div className="flex items-start gap-2">
                     <Users className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden />
                     <dt className="sr-only">Going</dt>
-                    <dd>{a.going} from your group are going</dd>
+                    <dd>{going} from your group are going</dd>
                   </div>
                 )}
               </dl>
 
-              {a.description && <p className="text-muted-foreground">{a.description}</p>}
+              {f.summary && <p className="line-clamp-4 text-muted-foreground">{f.summary}</p>}
 
-              {(a.includes.length > 0 || a.excludes.length > 0) && (
-                <div className="grid gap-4 text-sm sm:grid-cols-2">
-                  {a.includes.length > 0 && (
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                        Included
+              {/* Everything below the fold of the card lives in the sheet, exactly as it does for
+                  the stay tiers. Four cards in a row that each decide for themselves how much to
+                  say is how one section ends up 2,500px tall with three of its four columns empty,
+                  and it is the inconsistency the design system exists to stop. */}
+              <div className="mt-auto pt-1">
+                <DetailModal trigger="See the detail" title={f.title} subtitle={place}>
+                  {f.isFrom ? (
+                    <>
+                      <p className="text-sm">{f.summary}</p>
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          The {f.variantCount} ways to do it
+                        </p>
+                        <ul className="mt-2 space-y-2 text-sm">
+                          {f.variants.map((v) => (
+                            <li
+                              key={v.id}
+                              className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-border pb-2 last:border-0"
+                            >
+                              <span>{v.title}</span>
+                              <span className="font-heading font-bold">
+                                {money(v.price_amount, currency)}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                        <p className="mt-3 text-sm text-muted-foreground">
+                          You choose between these when you build the trip.
+                        </p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {a.description && <p className="text-sm">{a.description}</p>}
+                      {place && (
+                        <p className="flex items-start gap-2 text-sm">
+                          <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden />
+                          {place}
+                        </p>
+                      )}
+                      {(a.includes.length > 0 || a.excludes.length > 0) && (
+                        <div className="grid gap-4 text-sm sm:grid-cols-2">
+                          {a.includes.length > 0 && (
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                Included
+                              </p>
+                              <ul className="mt-2 space-y-1.5">
+                                {a.includes.map((line) => (
+                                  <li key={line} className="flex gap-2">
+                                    <Check
+                                      className="mt-0.5 h-4 w-4 shrink-0 text-teal"
+                                      aria-hidden
+                                    />
+                                    <span>{line}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {a.excludes.length > 0 && (
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                Not included
+                              </p>
+                              <ul className="mt-2 space-y-1.5 text-muted-foreground">
+                                {a.excludes.map((line) => (
+                                  <li key={line} className="flex gap-2">
+                                    <Minus className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+                                    <span>{line}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {a.why_price_note && (
+                        <p className="rounded-lg bg-cloud p-4 text-sm">
+                          <span className="font-semibold">Why this price. </span>
+                          {a.why_price_note}
+                        </p>
+                      )}
+                      <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+                        <span className="inline-flex items-center gap-1">
+                          <Clock className="h-4 w-4" aria-hidden />
+                          {a.cancellable_until_days_before != null &&
+                          a.cancellable_until_days_before > 0
+                            ? `Free cancellation until ${a.cancellable_until_days_before} days before`
+                            : "Non-refundable once booked"}
+                        </span>
+                        {a.min_age != null && a.min_age > 0 && <span>Ages {a.min_age}+</span>}
                       </p>
-                      <ul className="mt-2 space-y-1.5">
-                        {a.includes.map((line) => (
-                          <li key={line} className="flex gap-2">
-                            <Check className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden />
-                            <span>{line}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                    </>
                   )}
-                  {a.excludes.length > 0 && (
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                        Not included
-                      </p>
-                      <ul className="mt-2 space-y-1.5 text-muted-foreground">
-                        {a.excludes.map((line) => (
-                          <li key={line} className="flex gap-2">
-                            <Minus className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-                            <span>{line}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {a.why_price_note && (
-                <p className="rounded-lg bg-cloud p-4 text-sm">
-                  <span className="font-semibold">Why this price. </span>
-                  {a.why_price_note}
-                </p>
-              )}
-
-              <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                <span className="inline-flex items-center gap-1">
-                  <Clock className="h-3.5 w-3.5" aria-hidden />
-                  {a.cancellable_until_days_before != null && a.cancellable_until_days_before > 0
-                    ? `Free cancellation until ${a.cancellable_until_days_before} days before`
-                    : "Non-refundable once booked"}
-                </span>
-                {a.min_age != null && a.min_age > 0 && <span>Ages {a.min_age}+</span>}
-                {a.capacity != null && <span>Up to {a.capacity} per departure</span>}
-              </p>
-
-              {ctaHref && !soldOut && !closed && (
-                <div className="mt-auto pt-1">
-                  <Link
-                    href={ctaHref}
-                    className={buttonVariants({ variant: "secondary", size: "sm" })}
-                  >
-                    {ctaLabel}
-                  </Link>
-                </div>
-              )}
+                </DetailModal>
+              </div>
             </div>
           </li>
         );

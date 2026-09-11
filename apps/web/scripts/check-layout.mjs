@@ -137,6 +137,14 @@ for (const theme of THEMES)
         if (cs.visibility === "hidden" || cs.opacity === "0" || cs.display === "none") continue;
         const r = el.getBoundingClientRect();
         if (r.width < 8 || r.height < 8 || r.top > window.innerHeight * 6) continue;
+        const x = Math.round(r.left + Math.min(r.width / 2, 30));
+        const y = Math.round(r.top + r.height / 2);
+        // Is this text actually painted at that point, or is something on top of it?
+        // A closed <details> menu still computes `display: block` with a real rect, so the visibility
+        // checks above pass and the gate happily measured ink-on-ink for a menu nobody can see.
+        // Hit-testing is the only honest answer to "is this on screen".
+        const top = document.elementFromPoint(x, y);
+        if (!top || !(top === el || el.contains(top) || top.contains(el))) continue;
         const size = parseFloat(cs.fontSize);
         const weight = parseInt(cs.fontWeight, 10) || 400;
         const large = size >= 24 || (size >= 18.66 && weight >= 700);
@@ -145,8 +153,8 @@ for (const theme of THEMES)
           color: cs.color,
           size: Math.round(size),
           large,
-          x: Math.round(r.left + Math.min(r.width / 2, 30)),
-          y: Math.round(r.top + r.height / 2),
+          x,
+          y,
           sel:
             el.tagName.toLowerCase() +
             (el.className && typeof el.className === "string"
@@ -164,7 +172,25 @@ for (const theme of THEMES)
       });
     });
 
-    const parse = (c) => (c.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+    // Resolve ANY CSS colour to sRGB by painting it, rather than reading digits out of the string.
+    // Tailwind v4 emits `oklab(0.97 -0.002 0.004 / 0.7)` for something as ordinary as
+    // `text-cloud/70`, and the old regex took the first three numbers as if they were 0-255 RGB —
+    // so near-white read as near-black and the gate reported 54 contrast failures on a page that
+    // had none. A gate that cries wolf is worse than no gate, because you start ignoring it.
+    const resolve = async (css) => {
+      const out = await page.evaluate((c) => {
+        const cv = document.createElement("canvas");
+        cv.width = cv.height = 1;
+        const ctx = cv.getContext("2d", { willReadFrequently: true });
+        ctx.clearRect(0, 0, 1, 1);
+        ctx.fillStyle = "#000";
+        ctx.fillStyle = c; // Invalid values leave the previous fillStyle in place.
+        ctx.fillRect(0, 0, 1, 1);
+        const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
+        return [r, g, b, a / 255];
+      }, css);
+      return out;
+    };
     const lum = ([r, g, b]) => {
       const f = (v) => {
         v /= 255;
@@ -184,16 +210,30 @@ for (const theme of THEMES)
       // is a tint over the page. Both were false positives before this walked and blended.
       const behind = await page.evaluate(
         ({ x, y }) => {
+          // Same canvas trick as `resolve`, inside the page: it handles oklab, oklch, color()
+          // and colour keywords alike, which no reasonable regex does.
+          const cv = document.createElement("canvas");
+          cv.width = cv.height = 1;
+          const ctx = cv.getContext("2d", { willReadFrequently: true });
+          const toRgba = (c) => {
+            if (!c || c === "transparent") return null;
+            ctx.clearRect(0, 0, 1, 1);
+            ctx.fillStyle = "#000";
+            ctx.fillStyle = c;
+            ctx.fillRect(0, 0, 1, 1);
+            const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
+            return a === 0 ? null : [r, g, b, a / 255];
+          };
           const layers = [];
           let node = document.elementFromPoint(x, y);
           while (node) {
             const cs = getComputedStyle(node);
             if (cs.backgroundImage !== "none" || node.tagName === "IMG") return "IMAGE";
-            const m = (cs.backgroundColor.match(/[\d.]+/g) || []).map(Number);
-            if (m.length >= 3) {
-              const a = m.length > 3 ? m[3] : 1;
+            const m = toRgba(cs.backgroundColor);
+            if (m) {
+              const a = m[3];
               if (a > 0) {
-                layers.push([m[0], m[1], m[2], a]);
+                layers.push(m);
                 if (a >= 0.999) break;
               }
             }
@@ -213,7 +253,12 @@ for (const theme of THEMES)
         { x: t.x, y: t.y },
       );
       if (!behind || behind === "IMAGE") continue; // Photographs need a human eye, not a sample.
-      const r = ratio(parse(t.color), parse(behind));
+      const fg = await resolve(t.color);
+      const bg = await resolve(behind);
+      // Text can be translucent too: blend it onto the ground before measuring, or `text-ink/60`
+      // reports as full-strength ink and passes when it should not.
+      const blended = [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]));
+      const r = ratio(blended, bg);
       const need = t.large ? 3 : 4.5;
       if (r < need) {
         found.push({

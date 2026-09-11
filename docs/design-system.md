@@ -235,6 +235,39 @@ Already correct, and the template for the rest. Variants: `primary` (**aqua fill
 (border, no fill), `inverse` (cloud fill, for use on ink), `ghost`. Sizes `sm`, `md`, `lg`. Radius
 `4px`, label in Archivo caps. **One primary button per screen region.**
 
+### The tour page shows what exists; the builder is where you choose
+
+The two pages answer different questions, and every card on them follows from which question it is
+answering.
+
+|                         | Tour page                                                           | Builder                                                |
+| ----------------------- | ------------------------------------------------------------------- | ------------------------------------------------------ |
+| The reader              | deciding whether this trip is for them, and which budget            | has decided, and is picking                            |
+| A stay tier             | what the **price band** means: area, distance, what is in the price | the actual properties, their photographs and addresses |
+| An add-on with variants | **one card** for the thing, priced `From`                           | every variant, priced exactly                          |
+| Call to action          | one per section                                                     | on every card, because now it is a control             |
+
+Three rules come out of this.
+
+**No per-card call to action on the tour page.** Four buttons that all go to the same builder ask
+"which one?" of somebody who has not seen a room yet. One button per section, naming what happens
+next — "See the rooms and prices" — and the choosing happens where the information is.
+
+**A card on the tour page never names a hotel.** A named property on a marketing page is a promise
+about inventory we only hold once a tier is linked and in date. The card shows the tier's own
+photograph of the _area_ instead, which is true at every point in the cycle.
+
+**Variants of one thing are one card.** The catalogue holds three Amber Lounge yacht rows; the tour
+page shows one, priced `From` the cheapest, with "3 ways to do it — you pick when you build the
+trip". Grouping is a real column (`departure_add_ons.family`), not a title prefix, because guessing
+at names silently mis-groups the next thing anyone seeds.
+
+And one rule that is really about consistency: **a card decides how much to say by its component,
+not by how much content it happens to have.** Letting each card render whatever it had made the
+Monaco race-viewing section 2,549px tall with three of its four columns empty, because one option
+had a long inclusions list and another had none. Everything past the summary goes in the detail
+sheet. Same card, same height, same row.
+
 ### Prices — a trip price is always prefixed "From"
 
 The number on a trip card is the **cheapest tier**, so it reads `From $1,603`, never `$1,603`.
