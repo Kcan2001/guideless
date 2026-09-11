@@ -49,6 +49,20 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "static.cupid.travel", pathname: "/hotels/**" },
     ],
   },
+  /**
+   * "How it works", "Why Guideless" and "Group travel" were three pages making the same argument,
+   * so the nav asked a visitor to choose between three doors into one room. They are one page now.
+   *
+   * Permanent, because these URLs are indexed and linked: a 301 moves the ranking rather than
+   * throwing it away, and anyone with an old link still lands somewhere sensible.
+   */
+  async redirects() {
+    return [
+      { source: "/why-guideless", destination: "/how-it-works", permanent: true },
+      { source: "/group-travel", destination: "/how-it-works", permanent: true },
+    ];
+  },
+
   async headers() {
     return [
       {

@@ -217,25 +217,6 @@ for (const theme of THEMES)
       return picks;
     });
 
-    // Resolve ANY CSS colour to sRGB by painting it, rather than reading digits out of the string.
-    // Tailwind v4 emits `oklab(0.97 -0.002 0.004 / 0.7)` for something as ordinary as
-    // `text-cloud/70`, and the old regex took the first three numbers as if they were 0-255 RGB —
-    // so near-white read as near-black and the gate reported 54 contrast failures on a page that
-    // had none. A gate that cries wolf is worse than no gate, because you start ignoring it.
-    const resolve = async (css) => {
-      const out = await page.evaluate((c) => {
-        const cv = document.createElement("canvas");
-        cv.width = cv.height = 1;
-        const ctx = cv.getContext("2d", { willReadFrequently: true });
-        ctx.clearRect(0, 0, 1, 1);
-        ctx.fillStyle = "#000";
-        ctx.fillStyle = c; // Invalid values leave the previous fillStyle in place.
-        ctx.fillRect(0, 0, 1, 1);
-        const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
-        return [r, g, b, a / 255];
-      }, css);
-      return out;
-    };
     const lum = ([r, g, b]) => {
       const f = (v) => {
         v /= 255;

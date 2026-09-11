@@ -209,14 +209,31 @@ test.describe("marketing site", () => {
     await expect(page.getByRole("status")).toContainText(/thank you/i);
   });
 
+  test("the three explainer pages are one page, and the old URLs still land", async ({
+    page,
+    isMobile,
+  }) => {
+    for (const old of ["/why-guideless", "/group-travel"]) {
+      const res = await page.goto(old);
+      expect(res?.status(), old).toBe(200);
+      await expect(page).toHaveURL(/\/how-it-works$/);
+    }
+    // One link in the header, not three doors into one room. Desktop only: small screens collapse
+    // the nav into the drawer, where a longer list costs nothing and this assertion means nothing.
+    if (!isMobile) {
+      await expect(page.getByRole("navigation", { name: "Primary" }).getByRole("link")).toHaveCount(
+        1,
+      );
+    }
+  });
+
   test("marketing pages render with a heading, hero photo and breadcrumb data", async ({
     page,
   }) => {
     for (const path of [
-      "/why-guideless",
+      "/how-it-works",
       "/faq",
       "/contact",
-      "/group-travel",
       "/cancellation",
       "/travel-insurance",
       "/about",
@@ -256,7 +273,7 @@ test.describe("marketing site", () => {
     expect(body).toContain("/host");
     expect(body).toContain("/terms");
     expect(body).toContain("/privacy");
-    expect(body).toContain("/why-guideless");
+    expect(body).toContain("/how-it-works");
     expect(body).toContain("/faq");
     expect(body).toContain("/cancellation");
     const robots = await request.get("/robots.txt");

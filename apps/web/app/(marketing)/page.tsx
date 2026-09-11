@@ -11,7 +11,6 @@ import { ConfiguratorExampleCard } from "@/components/marketing/configurator-exa
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import { FounderBlock } from "@/components/marketing/founder-block";
 import { SectionHeading } from "@/components/marketing/page-hero";
-import { RosterStrip } from "@/components/marketing/roster-strip";
 import { JsonLd } from "@/components/site/json-ld";
 import { HeroScrim, heroEyebrowClass } from "@/components/site/hero-scrim";
 import { PhotoBackdrop } from "@/components/site/photo-hero";
@@ -21,7 +20,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { faqByIds, HOME_FAQ_IDS } from "@/content/faq";
 import { listAppScreens } from "@/lib/app-screens";
 import { getConfiguratorExample } from "@/lib/data/configurator";
-import { getRosterStats } from "@/lib/data/extras";
+import {} from "@/lib/data/extras";
 import { listPublishedTours } from "@/lib/data/tours";
 import { sitePhotos } from "@/lib/photos";
 import { faqJsonLd } from "@/lib/seo";
@@ -68,33 +67,6 @@ const COMPARE = [
   },
 ];
 
-const WHY = [
-  {
-    title: "Your trip, your choices",
-    body: "Start with the essentials handled. Choose where you stay, which experiences you join, how you get from the airport, and see the price change as you decide.",
-    photo: sitePhotos.choices,
-    alt: "View of the harbour grandstands from a yacht deck",
-  },
-  {
-    title: "Travel with people, not a tour group",
-    body: "Everyone on your departure is in one group. Meet at the welcome drinks, chat before you fly, join a dinner or a boat when you feel like it, and go your own way when you do not.",
-    photo: sitePhotos.people,
-    alt: "Parisians sitting along the Seine quay in the evening",
-  },
-  {
-    title: "Everything lives in the app",
-    body: "Today's plan, the full itinerary, a map of everything, your tickets and confirmations, the group, chat and support. It works offline for the parts you need on the move.",
-    photo: sitePhotos.app,
-    alt: "A Métropolitain sign in front of a Haussmann façade",
-  },
-  {
-    title: "Keep adding to your trip",
-    body: "Not sure about the boat yet? Reserve the trip now and add experiences later from your account or the app, even mid-trip, subject to availability.",
-    photo: sitePhotos.addLater,
-    alt: "Yachts moored side by side in the Monaco harbour on race week",
-  },
-];
-
 export default async function HomePage() {
   const [tours, example] = await Promise.all([listPublishedTours(), getConfiguratorExample()]);
   const routes = tours.filter((t) => t.tour.kind !== "event");
@@ -102,13 +74,6 @@ export default async function HomePage() {
   const featured = routes.slice(0, 3);
   const screens = listAppScreens();
   const homeFaq = faqByIds(HOME_FAQ_IDS);
-
-  // "Independent, not alone" shows real roster numbers only once a departure has three bookings.
-  const nextDeparture = tours
-    .flatMap((t) => t.departures)
-    .sort((a, b) => a.startDate.localeCompare(b.startDate))[0];
-  const roster = nextDeparture ? await getRosterStats(nextDeparture.id) : null;
-  const showRoster = roster != null && roster.booked >= 3;
 
   return (
     <>
@@ -260,7 +225,7 @@ export default async function HomePage() {
         <SectionHeading
           eyebrow="The problem"
           title="You want to travel. You don’t want to plan every damn thing."
-          lede="There have been two ways to see Europe: do all the work yourself, or hand your days to a tour guide. Guideless is the third."
+          lede="Do it all yourself, or hand your days to a guide. We are the third option."
         />
         <CompareObserver section="home_problem">
           <div className="mt-12">
@@ -269,49 +234,13 @@ export default async function HomePage() {
         </CompareObserver>
       </section>
 
-      {/* Why Guideless */}
-      <section className="bg-surface py-24">
-        <div className="mx-auto w-full max-w-6xl px-6">
-          <SectionHeading
-            eyebrow="Why Guideless"
-            title="We plan the hard parts. You choose the rest."
-          />
-          <ul className="mt-14 grid gap-10 md:grid-cols-2">
-            {WHY.map((w, i) => (
-              <li key={w.title} className="group">
-                <div className="relative aspect-[3/2] overflow-hidden rounded">
-                  <PhotoBackdrop
-                    src={w.photo}
-                    fallbackAlt={w.alt}
-                    sizes="(min-width: 768px) 50vw, 100vw"
-                    imgClassName="transition-transform duration-500 group-hover:scale-[1.02]"
-                  />
-                </div>
-                <p className="mt-6 font-heading text-sm font-semibold text-link">
-                  {String(i + 1).padStart(2, "0")}
-                </p>
-                <h3 className="mt-2 text-2xl md:text-3xl">{w.title}</h3>
-                <p className="mt-3 max-w-lg text-lg text-muted-foreground">{w.body}</p>
-              </li>
-            ))}
-          </ul>
-          <Link
-            href="/why-guideless"
-            className={cn(buttonVariants({ variant: "link" }), "mt-10 px-0")}
-          >
-            Why someone books Guideless instead of doing it themselves{" "}
-            <ArrowRight className="h-4 w-4" aria-hidden />
-          </Link>
-        </div>
-      </section>
-
       {/* The app */}
       <section className="bg-ink py-24 text-cloud">
         <div className="mx-auto w-full max-w-6xl px-6">
           <SectionHeading
             eyebrow="The app"
             title="Your entire trip. In your pocket."
-            lede="Guideless is a travel company with an app instead of a guide. Every morning it answers three questions: where am I, what is next, and what are my options."
+            lede="Where you are, what is next, what is nearby. No guide required."
             inverse
           />
           <div className="mt-14">
@@ -326,57 +255,6 @@ export default async function HomePage() {
           <ConfiguratorExampleCard example={example} />
         </section>
       )}
-
-      {/* Independent, not alone */}
-      <section className={cn("py-24", example ? "bg-surface" : "")}>
-        <div className="mx-auto grid w-full max-w-6xl gap-12 px-6 lg:grid-cols-2 lg:items-center">
-          <div className="relative aspect-[4/5] overflow-hidden rounded">
-            <PhotoBackdrop
-              src={sitePhotos.together}
-              fallbackAlt="A café terrace in Paris"
-              sizes="(min-width: 1024px) 50vw, 100vw"
-            />
-          </div>
-          <div>
-            <SectionHeading
-              eyebrow="Independent, not alone"
-              title="Travel independently. Don’t travel alone."
-              lede="Guideless is built for people who book on their own. The trip is designed so that never feels like a compromise."
-            />
-            <ul className="mt-8 space-y-4 text-lg">
-              {[
-                ["Welcome drinks on night one.", "Included. You will know faces by breakfast."],
-                [
-                  "The group chat opens before you fly.",
-                  "Thirty to forty-five days out, the roster, chat and Live Moments switch on together.",
-                ],
-                [
-                  "Optional dinners, boats and meetups.",
-                  "Each one shows how many of your group are in before you decide.",
-                ],
-                [
-                  "City evenings at home.",
-                  "Meet other Guideless travelers in your own city before you ever board a plane.",
-                ],
-              ].map(([title, body]) => (
-                <li key={title}>
-                  <span className="font-semibold">{title}</span>{" "}
-                  <span className="text-muted-foreground">{body}</span>
-                </li>
-              ))}
-            </ul>
-            {showRoster && <RosterStrip stats={roster} className="mt-8" />}
-            <div className="mt-8 flex flex-wrap gap-4">
-              <Link href="/group-travel" className={buttonVariants({ variant: "secondary" })}>
-                Traveling with friends
-              </Link>
-              <Link href="/meetups" className={cn(buttonVariants({ variant: "link" }), "px-0")}>
-                City evenings <ArrowRight className="h-4 w-4" aria-hidden />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Trust */}
       <section className="bg-surface py-24">

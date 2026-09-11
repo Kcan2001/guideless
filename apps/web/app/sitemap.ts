@@ -22,13 +22,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: siteUrl("/tours"), lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: siteUrl("/destinations"), lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: siteUrl("/how-it-works"), lastModified: now, changeFrequency: "monthly", priority: 0.6 },
-    {
-      url: siteUrl("/why-guideless"),
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    { url: siteUrl("/group-travel"), lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: siteUrl("/faq"), lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: siteUrl("/about"), lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: siteUrl("/contact"), lastModified: now, changeFrequency: "yearly", priority: 0.4 },

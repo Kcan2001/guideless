@@ -38,9 +38,7 @@ const COLUMNS: Array<{ label: string; links: Array<{ href: Route; label: string 
     label: "Company",
     links: [
       { href: "/about", label: "About" },
-      { href: "/why-guideless", label: "Why Guideless" },
       { href: "/how-it-works", label: "How it works" },
-      { href: "/group-travel", label: "Traveling with friends" },
       { href: "/faq", label: "FAQ" },
       { href: "/contact", label: "Contact" },
     ],

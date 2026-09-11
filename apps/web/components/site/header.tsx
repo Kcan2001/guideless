@@ -8,13 +8,21 @@ import { SessionNav } from "@/components/auth/session-nav";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-/** Primary navigation (plan v2 §6). Order follows the visitor's questions: what, where, how, why. */
+/**
+ * The header holds three things: who we are, the one page that explains the product, and the way
+ * in. Everything else is in the footer.
+ *
+ * It used to carry six links plus a button, three of which ("How it works", "Why Guideless",
+ * "Group travel") were the same argument written three times — so the nav asked you to choose
+ * between three doors into one room. They are one page now.
+ */
+export const headerNav = [{ href: "/how-it-works", label: "How it works" }] as const;
+
+/** The full set, for the footer and the mobile drawer, where a longer list costs nothing. */
 export const primaryNav = [
   { href: "/tours", label: "Trips" },
   { href: "/destinations", label: "Destinations" },
   { href: "/how-it-works", label: "How it works" },
-  { href: "/why-guideless", label: "Why Guideless" },
-  { href: "/group-travel", label: "Group travel" },
   { href: "/faq", label: "FAQ" },
 ] as const;
 
@@ -62,19 +70,20 @@ export function SiteHeader() {
       className="site-header sticky top-0 z-40 border-b border-border/70 bg-cloud/95 text-foreground backdrop-blur transition-colors duration-200 supports-[backdrop-filter]:bg-cloud/85"
     >
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-6 px-6 py-4">
+        {/* The visible word is the whole accessible name. The sr-only span used to append to it,
+            so a screen reader announced "Guideless Guideless Travel home". */}
         <Link
           href="/"
           className="font-heading text-lg font-black uppercase tracking-[0.02em] no-underline"
         >
           {brand.shortName}
-          <span className="sr-only">{brand.name} home</span>
         </Link>
 
         <nav
           aria-label="Primary"
           className="hidden items-center gap-6 font-heading text-xs font-bold uppercase tracking-[0.12em] lg:flex"
         >
-          {primaryNav.map((item) => (
+          {headerNav.map((item) => (
             <Link
               key={item.href}
               href={item.href}
