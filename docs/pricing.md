@@ -202,6 +202,7 @@ cost below is retail plus our margin.
 | ------------------------------------- | -------------------------------------------------------------------------------------------- | --------- |
 | Base trip, Nice, 5 nights             | Room about EUR 280/night race week, plus train pass, welcome round, ops: about $1,650 landed | $2,450    |
 | Monte Carlo upgrade                   | EUR 900–1,200/night against EUR 280: about $3,900 more over five nights                      | $4,450    |
+| Secteur Rocher, three days standing   | 2026 face EUR 45 / 75 / 130, about 10% off as a combination: EUR 225, about $261             | $395      |
 | Grandstand K, three-day pass          | 2026 K1–K2 face EUR 1,420, plus 9%: about $1,690                                             | $2,190    |
 | Terrace, Saturday and Sunday, catered | Hospitality rate about EUR 2,300/day                                                         | $5,450    |
 | Amber Lounge yacht, Sunday            | EUR 4,500 + 20% VAT + 3% card fee = EUR 5,562, about $6,060                                  | $6,750    |
@@ -210,6 +211,14 @@ cost below is retail plus our margin.
 | Friday night party                    | EUR 1,100 grossed up, about $1,480                                                           | $1,690    |
 | Sunday after party                    | EUR 1,500 grossed up, about $2,020                                                           | $2,290    |
 | Private airport transfer              | A car from Nice airport runs EUR 90–140                                                      | $150      |
+| Wednesday: Bar Américain + Casino     | Two rounds about EUR 55, casino entry EUR 20 less EUR 10 returned as credit: about $75       | $110      |
+
+**The entry tier could not afford to watch the race.** The trip starts at $1,603 and the cheapest
+race viewing was Grandstand K at $2,190 — 137% of the trip price. Monaco does sell a
+general-admission ticket, Secteur Rocher, and we were not offering it. Seed 092 adds it at $395,
+which makes an Explorer weekend with a Grand Prix in it cost about $2,000 all in. It is a hill and
+not a seat, and the listing says so first rather than last. The full published price table for
+every stand is in `docs/experiences.md`.
 
 **Grandstand K was described as a product that does not exist.** Monaco sells grandstand seats as
 three-day passes covering Friday, Saturday and Sunday. There is no Saturday-and-Sunday seat. The

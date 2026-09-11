@@ -29,6 +29,48 @@ Four answers from Kyle shape this, and two of them changed the schema after it w
 - **Viator Basic** turned out to be the least gated option, not the most: no approval, no
   certification, instant key. The barrier applies to booking on our own site, not to finding things.
 
+## Grand Prix tickets: nobody sells them through an API
+
+Asked and answered on 10 September 2026, so nobody has to look again. **There is no API anywhere
+that sells a Monaco grandstand seat.** Everything checked:
+
+| Checked                        | What it actually is                                                                              |
+| ------------------------------ | ------------------------------------------------------------------------------------------------ |
+| Viator (our live key)          | Zero F1 tickets. Tours and activities only.                                                      |
+| Ticketmaster Discovery         | Wrong geography. Monaco is not on it.                                                            |
+| GetYourGuide / Klook           | Experiences, not motorsport seating.                                                             |
+| Motorsport Tickets, Gootickets | Real resellers, but affiliate links or a web checkout. No booking API.                           |
+| F1 Experiences                 | Official, and has an Authorised Sales Agent programme — a commercial agreement, not an endpoint. |
+
+**The route is the Automobile Club de Monaco, direct.** ACM is the promoter and sells its own
+tickets at [monaco-grandprix.com](https://www.monaco-grandprix.com/) and from its office at 44 rue
+Grimaldi, Monaco (Monday to Friday, 09:00–17:00). A trade allocation is a phone call and a contract
+with them, and it is the only way to hold seats rather than buy them one at a time at face value
+like a customer would.
+
+Published 2026 face values, for pricing against (Monaco Tribune, February 2026):
+
+|                                             | Friday | Saturday | Sunday       |
+| ------------------------------------------- | ------ | -------- | ------------ |
+| Secteur Rocher (standing, the only GA zone) | €45    | €75      | €130         |
+| Zone Z1 (standing, Nouvelle Chicane–Tabac)  | €65    | €110     | —            |
+| Grandstand T / L (technical)                | €150   | €300–550 | €700–1,050   |
+| Grandstand K (Tabac / port)                 | €175   | €400–550 | €900–1,050   |
+| Grandstand A (Sainte-Dévote)                | €175   | €450     | €950         |
+| Grandstand B (Casino)                       | €155   | €550–650 | €1,050–1,150 |
+
+Roughly 10% comes off a two- or three-day combination; children 6–15 are half price and under-6s
+free, neither of which matters on an 18+ departure.
+
+**What this changed in the product.** Our cheapest race viewing was Grandstand K at $2,190 against
+a trip that starts at $1,603 — the entry tier could not afford to see the race. Secteur Rocher at
+$395 (seed 092) fixes that, and it is an honest product as long as the copy leads with the fact
+that it is a hill and not a seat.
+
+**Before either takes real money**, the ticket line needs an ACM conversation: an allocation, a
+trade rate, and a name-change policy, because these are bought months ahead in a named traveler's
+name and no supplier takes them back.
+
 ## There is no Viator adapter yet, on purpose
 
 `EXPERIENCE_SUPPLIER=viator` is accepted by the config and falls back to the mock with a warning,
