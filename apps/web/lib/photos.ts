@@ -37,6 +37,20 @@ export function photo(src: string): SitePhoto | null {
 }
 
 /** Fixed picks for surfaces that are not driven by a database row. */
+/**
+ * The home hero film: a short silent loop cut from Kyle's own Monaco footage across the 2024, 2025
+ * and 2026 race weekends. Built by scripts/build-hero-video.mjs, which is where the clip list and
+ * the encode settings live.
+ *
+ * Two files because no single codec is both small and universal: WebM/VP9 is meaningfully lighter
+ * and every current browser takes it; the H.264 MP4 is the fallback for older Safari. The browser
+ * picks the first `<source>` it understands, so WebM is listed first.
+ */
+export const heroVideo = {
+  webm: "/video/monaco-hero.webm",
+  mp4: "/video/monaco-hero.mp4",
+} as const;
+
 export const sitePhotos = {
   home: "/photos/nice-promenade-dusk.jpg",
   homeSecondary: "/photos/monaco-hairpin-race.jpg",
