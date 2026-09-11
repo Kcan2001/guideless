@@ -111,9 +111,14 @@ clips.forEach((src, i) => {
     "-vf",
     `scale=${OUT_W}:${OUT_H}:force_original_aspect_ratio=increase,` +
       `crop=${OUT_W}:${OUT_H}:(iw-ow)/2:(ih-oh)*${CROP_Y},fps=30,setsar=1` +
+      // Gamma does most of the lifting, not brightness. Adding brightness raises every pixel by the
+      // same amount, so the clips that are already bright — the beach sunset, the white grandstands
+      // — clip to flat white before the dark foregrounds have come up at all. Gamma lifts the
+      // midtones and leaves the highlights where they are, which is the shape of the problem:
+      // phone footage shot into Mediterranean sun meters for the sky.
       (LIFT > 0
-        ? `,eq=brightness=${(0.06 * LIFT).toFixed(3)}:contrast=${(1 + 0.07 * LIFT).toFixed(3)}` +
-          `:saturation=${(1 + 0.1 * LIFT).toFixed(3)},gblur=sigma=0:steps=1`
+        ? `,eq=gamma=${(1 + 0.09 * LIFT).toFixed(3)}:brightness=${(0.025 * LIFT).toFixed(3)}` +
+          `:contrast=${(1 + 0.03 * LIFT).toFixed(3)}:saturation=${(1 + 0.07 * LIFT).toFixed(3)}`
         : ""),
     "-c:v",
     "libx264",
