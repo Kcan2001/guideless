@@ -74,18 +74,44 @@ export function TripBuilder({
     () => false,
   );
   const [step, setStep] = useState<BuilderStepKey>(initialStep);
-  const [draft, setDraft] = useState<BuilderDraft>(() => {
-    const base = defaultDraft(departure, user?.email ?? "");
+  // Server-known state only. Reading sessionStorage here would run during the FIRST client render,
+  // where the server has already rendered the default draft and cannot have seen the local one —
+  // so a returning traveller with a saved draft hydrated into different text and React threw #418.
+  // It only broke for people mid-booking, which is why it showed up in Sentry as a trickle rather
+  // than on every load, and why it survived every test that started from a clean session.
+  const [draft, setDraft] = useState<BuilderDraft>(() =>
+    mergeDraft(
+      defaultDraft(departure, user?.email ?? ""),
+      (serverDraft?.draft as Partial<BuilderDraft> | undefined) ?? null,
+    ),
+  );
+
+  // The local copy is folded in once, during the first render AFTER hydration.
+  //
+  // Setting state during render rather than in an effect is deliberate and is React's own
+  // recommendation for adjusting state in response to a changed input: React re-runs this component
+  // immediately, before committing anything to the DOM, so there is no second paint and no flash of
+  // the default draft. An effect would do the same work one commit later and trips
+  // react-hooks/set-state-in-effect, which is the rule warning about exactly that extra pass.
+  //
+  // `hydrated` is false on the server and on the first client render, so the branch cannot run
+  // until hydration has finished — which is the whole point.
+  const [localApplied, setLocalApplied] = useState(false);
+  if (hydrated && !localApplied) {
+    setLocalApplied(true);
     const local = loadSessionDraft(departure.id);
-    const remote = serverDraft?.draft as Partial<BuilderDraft> | undefined;
-    // The newer of the two stores wins; the server copy is what makes cross-device resume work.
-    const remoteNewer =
-      remote &&
-      (!local?.updatedAt ||
-        !remote.updatedAt ||
-        new Date(remote.updatedAt) >= new Date(local.updatedAt));
-    return mergeDraft(base, remoteNewer ? (remote ?? null) : local);
-  });
+    if (local) {
+      setDraft((current) => {
+        // The newer of the two stores wins. The server copy is what makes cross-device resume
+        // work; the local one covers a signed-out traveller whose draft never reached the server.
+        const currentNewer =
+          current.updatedAt &&
+          local.updatedAt &&
+          new Date(current.updatedAt) >= new Date(local.updatedAt);
+        return currentNewer ? current : mergeDraft(current, local);
+      });
+    }
+  }
 
   const update = useCallback(
     (patch: Partial<BuilderDraft> | ((d: BuilderDraft) => Partial<BuilderDraft>)) => {
