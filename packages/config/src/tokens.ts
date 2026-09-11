@@ -109,11 +109,21 @@ export const semantic = {
 
 export type SemanticToken = keyof typeof semantic;
 
+/**
+ * One radius, four names.
+ *
+ * The scale collapsed on 2026-09-10 (docs/design-system.md). Six values were in use across the web
+ * app because `rounded-xl` and `rounded-2xl` are Tailwind defaults nobody mapped to a token. The
+ * names are kept so call sites do not all have to change at once, and they all resolve to 4px.
+ *
+ * `full` survives for the things that are genuinely circular — avatars, status dots, spinners —
+ * and for nothing else. A 999px button beside a 4px card is the loudest inconsistency available.
+ */
 export const radius = {
-  sm: 6,
-  md: 10,
-  lg: 16,
-  xl: 24,
+  sm: 4,
+  md: 4,
+  lg: 4,
+  xl: 4,
   full: 9999,
 } as const;
 

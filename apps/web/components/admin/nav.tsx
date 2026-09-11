@@ -68,13 +68,7 @@ export function AdminNav({ email, roles }: { email: string | null; roles: Role[]
   return (
     <aside className="flex w-full flex-col border-b border-border bg-ink text-cloud lg:min-h-screen lg:w-60 lg:border-b-0 lg:border-r">
       <div className="flex items-center gap-3 px-5 py-5">
-        <Image
-          src="/brand/guideless-logo.webp"
-          alt=""
-          width={32}
-          height={32}
-          className="rounded-md"
-        />
+        <Image src="/brand/guideless-logo.webp" alt="" width={32} height={32} className="rounded" />
         <div>
           <p className="font-heading text-sm font-bold leading-tight">{brand.shortName}</p>
           <p className="text-[11px] uppercase tracking-[0.18em] text-aqua">Operations</p>
@@ -85,7 +79,7 @@ export function AdminNav({ email, roles }: { email: string | null; roles: Role[]
           <Link
             key={href}
             href={href as Route}
-            className="flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2 text-sm text-cloud/85 no-underline hover:bg-cloud/10 hover:text-cloud"
+            className="flex items-center gap-3 whitespace-nowrap rounded px-3 py-2 text-sm text-cloud/85 no-underline hover:bg-cloud/10 hover:text-cloud"
           >
             <Icon className="h-4 w-4 text-aqua" aria-hidden />
             {label}

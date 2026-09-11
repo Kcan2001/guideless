@@ -34,7 +34,7 @@ export function DepartureList({
 }) {
   if (departures.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-border p-8 text-center">
+      <div className="rounded border border-dashed border-border p-8 text-center">
         <p className="font-heading text-lg font-semibold">New dates are being finalized.</p>
         <p className="mt-1 text-muted-foreground">Check back soon, or explore other trips.</p>
         <PendingLink
@@ -48,7 +48,7 @@ export function DepartureList({
   }
 
   return (
-    <ul className="divide-y divide-border rounded-xl border border-border bg-surface">
+    <ul className="divide-y divide-border rounded border border-border bg-surface">
       {departures.map((d) => {
         const badge = availabilityBadge(d);
         const drop = dropState(d.opensAt);

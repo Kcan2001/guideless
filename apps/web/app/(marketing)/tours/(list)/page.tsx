@@ -65,7 +65,7 @@ export default async function ToursPage(props: PageProps<"/tours">) {
             ))}
           </div>
         ) : (
-          <div className="mt-6 rounded-xl border border-dashed border-border p-10 text-center">
+          <div className="mt-6 rounded border border-dashed border-border p-10 text-center">
             <p className="font-heading text-lg font-semibold">
               {all.length === 0 ? "Our first routes are being finalized." : "Nothing here yet."}
             </p>

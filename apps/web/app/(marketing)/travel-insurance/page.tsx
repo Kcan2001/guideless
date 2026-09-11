@@ -67,7 +67,7 @@ export default function TravelInsurancePage() {
           </div>
           <div>
             <h2 className="text-2xl font-bold">What a good policy covers</h2>
-            <dl className="mt-6 divide-y divide-border rounded-xl border border-border bg-surface">
+            <dl className="mt-6 divide-y divide-border rounded border border-border bg-surface">
               {COVER.map(([title, body]) => (
                 <div key={title} className="p-5">
                   <dt className="font-semibold">{title}</dt>
@@ -78,7 +78,7 @@ export default function TravelInsurancePage() {
           </div>
         </div>
 
-        <div className="mt-16 grid gap-6 rounded-2xl bg-sand p-8 md:grid-cols-[1fr_auto] md:items-center">
+        <div className="mt-16 grid gap-6 rounded bg-sand p-8 md:grid-cols-[1fr_auto] md:items-center">
           <div>
             <h2 className="text-2xl font-bold">What Guideless covers itself</h2>
             <p className="mt-2 text-muted-foreground">

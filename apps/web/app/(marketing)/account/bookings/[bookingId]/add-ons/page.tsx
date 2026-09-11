@@ -79,17 +79,14 @@ export default async function BookingAddOnsPage(
         You can come back to this page any time, even during the trip.
       </p>
       {sp.cancelled === "1" && (
-        <p
-          role="status"
-          className="mt-6 rounded-lg border border-border bg-sand/60 px-4 py-3 text-sm"
-        >
+        <p role="status" className="mt-6 rounded border border-border bg-sand/60 px-4 py-3 text-sm">
           Payment was cancelled. Nothing was charged.
         </p>
       )}
 
       <div className="mt-10">
         {notPayable ? (
-          <p className="rounded-xl border border-dashed border-border p-6 text-sm text-muted-foreground">
+          <p className="rounded border border-dashed border-border p-6 text-sm text-muted-foreground">
             Add-ons can be added once this booking is confirmed.
           </p>
         ) : (

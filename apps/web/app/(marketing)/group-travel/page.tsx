@@ -66,7 +66,7 @@ export default function GroupTravelPage() {
         />
         <ul className="mt-12 grid gap-6 md:grid-cols-2">
           {HOW.map(({ icon: Icon, title, body }) => (
-            <li key={title} className="rounded-xl border border-border bg-surface p-7">
+            <li key={title} className="rounded border border-border bg-surface p-7">
               <Icon className="h-6 w-6 text-teal" aria-hidden />
               <h3 className="mt-4 text-xl font-semibold">{title}</h3>
               <p className="mt-2 text-muted-foreground">{body}</p>
@@ -99,7 +99,7 @@ export default function GroupTravelPage() {
               ))}
             </ol>
           </div>
-          <div className="relative aspect-[4/5] overflow-hidden rounded-2xl">
+          <div className="relative aspect-[4/5] overflow-hidden rounded">
             <PhotoBackdrop
               src={sitePhotos.together}
               fallbackAlt="A café terrace in Paris"
@@ -110,7 +110,7 @@ export default function GroupTravelPage() {
       </section>
 
       <section className="mx-auto w-full max-w-6xl px-6 py-24">
-        <div className="grid gap-6 rounded-2xl bg-ink p-10 text-cloud md:grid-cols-[1fr_auto] md:items-center">
+        <div className="grid gap-6 rounded bg-ink p-10 text-cloud md:grid-cols-[1fr_auto] md:items-center">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.2em] text-aqua">
               Bringing a crowd?

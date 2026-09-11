@@ -39,7 +39,7 @@ export function TravelerDetails({
             key={t.id}
             id={`traveler-${t.id}`}
             open={openTravelerId === t.id || !done}
-            className="group rounded-xl border border-border bg-surface"
+            className="group rounded border border-border bg-surface"
           >
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 [&::-webkit-details-marker]:hidden">
               <span>

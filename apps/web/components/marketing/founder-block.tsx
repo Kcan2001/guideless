@@ -10,7 +10,7 @@ import { sitePhotos } from "@/lib/photos";
 export function FounderBlock({ showPrinciples = true }: { showPrinciples?: boolean }) {
   return (
     <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:items-start">
-      <figure className="relative aspect-[4/5] overflow-hidden rounded-2xl lg:aspect-auto lg:min-h-[520px]">
+      <figure className="relative aspect-[4/5] overflow-hidden rounded lg:aspect-auto lg:min-h-[520px]">
         <PhotoBackdrop
           src={sitePhotos.founder}
           fallbackAlt="Oak barrels in a stone cellar at Châteauneuf-du-Pape"

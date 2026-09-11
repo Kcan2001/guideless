@@ -22,7 +22,7 @@ export function PhotoGallery({
   const [lead, ...rest] = urls;
   return (
     <div className={cn("grid gap-3 sm:grid-cols-3", className)}>
-      <div className="relative aspect-[4/5] overflow-hidden rounded-xl sm:col-span-1 sm:row-span-2">
+      <div className="relative aspect-[4/5] overflow-hidden rounded sm:col-span-1 sm:row-span-2">
         <Image
           src={lead!}
           alt={photoAlt(lead, subject)}
@@ -34,7 +34,7 @@ export function PhotoGallery({
       </div>
       <ul className="contents">
         {rest.map((src, i) => (
-          <li key={src} className="relative aspect-[4/3] overflow-hidden rounded-xl">
+          <li key={src} className="relative aspect-[4/3] overflow-hidden rounded">
             <Image
               src={src}
               alt={photoAlt(src, `${subject}, photo ${i + 2}`)}

@@ -73,7 +73,7 @@ export default async function SupportThreadPage(props: PageProps<"/admin/support
                 <li
                   key={m.id}
                   className={cn(
-                    "rounded-xl border p-4 text-sm",
+                    "rounded border p-4 text-sm",
                     m.is_internal_note
                       ? "border-warning-border bg-warning-surface"
                       : m.is_from_staff
@@ -101,7 +101,7 @@ export default async function SupportThreadPage(props: PageProps<"/admin/support
                               href={a.url}
                               target="_blank"
                               rel="noreferrer"
-                              className="rounded-md border border-border bg-cloud px-2 py-1 text-xs no-underline hover:underline"
+                              className="rounded border border-border bg-cloud px-2 py-1 text-xs no-underline hover:underline"
                             >
                               Attachment ({a.mime_type}, {Math.round(a.size_bytes / 1024)} KB)
                             </a>

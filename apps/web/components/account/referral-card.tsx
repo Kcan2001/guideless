@@ -75,7 +75,7 @@ export function ReferralCard({
   return (
     <section
       aria-labelledby="referral-heading"
-      className="rounded-xl border border-border bg-surface p-5"
+      className="rounded border border-border bg-surface p-5"
     >
       <div className="flex items-start gap-3">
         <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-aqua/25">
@@ -91,7 +91,7 @@ export function ReferralCard({
           </p>
           {code ? (
             <div className="mt-4 flex flex-wrap items-center gap-2">
-              <code className="rounded-lg border border-border bg-cloud px-3 py-2 font-heading text-lg font-bold tracking-wider">
+              <code className="rounded border border-border bg-cloud px-3 py-2 font-heading text-lg font-bold tracking-wider">
                 {code}
               </code>
               <Button type="button" variant="secondary" size="sm" onClick={copy}>
@@ -125,8 +125,8 @@ export function ReferralCard({
                     key={t.referrals}
                     className={
                       t.reached
-                        ? "flex items-baseline justify-between gap-3 rounded-lg border border-aqua/50 bg-aqua/10 px-3 py-2 text-sm"
-                        : "flex items-baseline justify-between gap-3 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground"
+                        ? "flex items-baseline justify-between gap-3 rounded border border-aqua/50 bg-aqua/10 px-3 py-2 text-sm"
+                        : "flex items-baseline justify-between gap-3 rounded border border-border px-3 py-2 text-sm text-muted-foreground"
                     }
                   >
                     <span>

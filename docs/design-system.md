@@ -30,6 +30,18 @@ it meets a price ladder — four figures from $1,603 to $30,153 set in 40px caps
 table. So anywhere a number has to be trusted or a form has to be completed, the band goes to
 cloud and Inter does the reading. Loud on ink, calm on paper.
 
+**Shipped 2026-09-10.** This is no longer a proposal: Archivo is loaded in `app/layout.tsx`, the
+radius tokens all resolve to 4px, `h1`–`h4` carry the caps treatment in the base layer so a heading
+cannot opt out by forgetting a class, and `buttonVariants` makes aqua the primary. A heading that
+needs to be prose rather than a title takes `.sentence`.
+
+**The scrim is a component, not a copied gradient.** `HeroScrim` exists because four heroes had the
+same `from-ink/90 via-ink/70 to-ink/20` pasted into them and it was not strong enough: measured
+against the brightest decile of the real painted pixels, cloud reached 3.4:1 against a 4.5 minimum,
+and the aqua eyebrow on the home page was **2.31:1**. That is the third time the "a photograph is
+not an ink ground" rule has been written and then broken by the person who wrote it, which is the
+argument for putting the value in one component with the number it has to hit.
+
 The reference build is the three screens at
 <https://claude.ai/code/artifact/c2433971-86b7-49bd-b433-f581bad7a8e2>.
 

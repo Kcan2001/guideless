@@ -24,7 +24,7 @@ export function BookedExperiences({ fulfilments }: { fulfilments: MyFulfilment[]
         Bought through our partners and run by them. You paid us; we booked it in your name.
       </p>
 
-      <ul className="mt-4 divide-y divide-border rounded-xl border border-border bg-surface">
+      <ul className="mt-4 divide-y divide-border rounded border border-border bg-surface">
         {fulfilments.map((f) => (
           <li key={f.id} className="p-5">
             <div className="flex flex-wrap items-center gap-3">

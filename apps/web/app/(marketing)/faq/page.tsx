@@ -33,7 +33,7 @@ export default function FaqPage() {
         <div className="max-w-3xl">
           <FaqAccordion items={FAQ} />
         </div>
-        <div className="mt-16 grid gap-6 rounded-2xl border border-border bg-surface p-8 md:grid-cols-[1fr_auto] md:items-center">
+        <div className="mt-16 grid gap-6 rounded border border-border bg-surface p-8 md:grid-cols-[1fr_auto] md:items-center">
           <div>
             <h2 className="text-2xl font-bold">Still wondering about something?</h2>
             <p className="mt-2 text-muted-foreground">

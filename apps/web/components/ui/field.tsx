@@ -8,7 +8,7 @@ import type {
 import { cn } from "@/lib/utils";
 
 const control =
-  "w-full rounded-lg border border-border bg-surface px-3 text-base text-foreground placeholder:text-muted-foreground/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-60 aria-invalid:border-danger";
+  "w-full rounded border border-border bg-surface px-3 text-base text-foreground placeholder:text-muted-foreground/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-60 aria-invalid:border-danger";
 
 export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
   return <input className={cn(control, "h-11", className)} {...props} />;
@@ -64,7 +64,7 @@ export function FormError({ message }: { message?: string }) {
   return (
     <p
       role="alert"
-      className="rounded-lg border border-danger-border bg-danger-surface px-4 py-3 text-sm text-danger"
+      className="rounded border border-danger-border bg-danger-surface px-4 py-3 text-sm text-danger"
     >
       {message}
     </p>
@@ -74,10 +74,7 @@ export function FormError({ message }: { message?: string }) {
 export function FormMessage({ message }: { message?: string }) {
   if (!message) return null;
   return (
-    <p
-      role="status"
-      className="rounded-lg border border-aqua bg-aqua/15 px-4 py-3 text-sm text-ink"
-    >
+    <p role="status" className="rounded border border-aqua bg-aqua/15 px-4 py-3 text-sm text-ink">
       {message}
     </p>
   );

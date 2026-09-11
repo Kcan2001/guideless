@@ -26,7 +26,7 @@ function monthLabel(yyyyMm: string): string {
 }
 
 const selectClass =
-  "h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
+  "h-10 w-full rounded border border-border bg-surface px-3 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
 
 /** Server-rendered GET form: works without JavaScript and keeps URLs shareable. */
 export function TourFilters({
@@ -42,7 +42,7 @@ export function TourFilters({
     <form
       method="get"
       action="/tours"
-      className="grid gap-3 rounded-xl border border-border bg-surface p-4 sm:grid-cols-2 lg:grid-cols-[repeat(5,1fr)_auto]"
+      className="grid gap-3 rounded border border-border bg-surface p-4 sm:grid-cols-2 lg:grid-cols-[repeat(5,1fr)_auto]"
       aria-label="Filter trips"
     >
       <label className="text-sm">

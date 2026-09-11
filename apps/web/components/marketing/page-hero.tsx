@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { PhotoBackdrop } from "@/components/site/photo-hero";
+import { HeroScrim, heroEyebrowClass } from "@/components/site/hero-scrim";
 import { cn } from "@/lib/utils";
 
 /**
@@ -29,14 +30,14 @@ export function PageHero({
   return (
     <section className="relative overflow-hidden bg-ink text-cloud">
       <PhotoBackdrop src={photo} fallbackAlt={fallbackAlt} priority position={position} />
-      <div className="absolute inset-0 bg-ink/65" aria-hidden />
+      <HeroScrim />
       <div
         className={cn(
           "relative mx-auto flex w-full max-w-6xl flex-col px-6",
           compact ? "py-20 md:py-24" : "py-24 md:py-32",
         )}
       >
-        <p className="mb-4 text-sm font-medium uppercase tracking-[0.22em] text-aqua">{eyebrow}</p>
+        <p className={cn(heroEyebrowClass, "mb-4")}>{eyebrow}</p>
         <h1 className="max-w-3xl text-4xl font-bold leading-[1.05] md:text-6xl">{title}</h1>
         {lede && <p className="mt-6 max-w-2xl text-lg leading-relaxed text-cloud/85">{lede}</p>}
         {children && <div className="mt-8 flex flex-wrap gap-4">{children}</div>}

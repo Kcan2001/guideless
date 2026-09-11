@@ -28,7 +28,7 @@ export function CancelBooking({
 
   if (pending) {
     return (
-      <div className="mt-4 rounded-xl border border-warning-border bg-warning-surface p-4 text-sm">
+      <div className="mt-4 rounded border border-warning-border bg-warning-surface p-4 text-sm">
         <p className="font-medium">
           Cancellation requested {formatDate(pending.requested_at.slice(0, 10))}.
         </p>
@@ -47,7 +47,7 @@ export function CancelBooking({
   }
 
   return (
-    <details id={`cancel-${bookingId}`} className="mt-4 rounded-xl border border-border bg-surface">
+    <details id={`cancel-${bookingId}`} className="mt-4 rounded border border-border bg-surface">
       <summary className="cursor-pointer list-none p-4 text-sm font-medium text-muted-foreground hover:text-foreground [&::-webkit-details-marker]:hidden">
         Need to cancel this booking?
         <span className="sr-only"> Expand to see your refund and request a cancellation</span>

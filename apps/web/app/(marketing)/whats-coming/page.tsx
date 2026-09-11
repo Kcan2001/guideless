@@ -66,7 +66,7 @@ export default async function WhatsComingPage() {
             {drops.map((d) => (
               <li
                 key={d.id}
-                className="flex flex-wrap items-center gap-4 rounded-xl border border-border bg-surface p-5"
+                className="flex flex-wrap items-center gap-4 rounded border border-border bg-surface p-5"
               >
                 <div className="min-w-0 flex-1">
                   <p className="font-heading text-lg font-semibold">{d.title}</p>
@@ -96,7 +96,7 @@ export default async function WhatsComingPage() {
             {departures.map((d) => (
               <li
                 key={d.id}
-                className="flex flex-wrap items-center gap-4 rounded-xl border border-border bg-surface p-5"
+                className="flex flex-wrap items-center gap-4 rounded border border-border bg-surface p-5"
               >
                 <CalendarDays className="h-4 w-4 text-teal" aria-hidden />
                 <div className="min-w-0 flex-1">
@@ -129,7 +129,7 @@ export default async function WhatsComingPage() {
             {meetups.map((m) => (
               <li
                 key={m.id}
-                className="flex flex-wrap items-center gap-4 rounded-xl border border-border bg-surface p-5"
+                className="flex flex-wrap items-center gap-4 rounded border border-border bg-surface p-5"
               >
                 <Wine className="h-4 w-4 text-teal" aria-hidden />
                 <div className="min-w-0 flex-1">
@@ -149,13 +149,13 @@ export default async function WhatsComingPage() {
       )}
 
       {coming.length === 0 && (
-        <p className="mt-12 rounded-xl border border-border bg-surface p-6 text-muted-foreground">
+        <p className="mt-12 rounded border border-border bg-surface p-6 text-muted-foreground">
           Nothing scheduled at the moment. Leave your email below and you&rsquo;ll be the first to
           know when there is.
         </p>
       )}
 
-      <section className="mt-16 rounded-2xl border border-border bg-cloud p-8" id="tell-me">
+      <section className="mt-16 rounded border border-border bg-cloud p-8" id="tell-me">
         <h2 className="font-heading text-2xl font-semibold">Tell me when</h2>
         <p className="mt-2 max-w-2xl text-muted-foreground">
           Pick somewhere we already go, or tell us where you&rsquo;d rather we went. We only run two

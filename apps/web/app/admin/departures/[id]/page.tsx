@@ -104,7 +104,7 @@ export default async function AdminDeparturePage(props: PageProps<"/admin/depart
       </div>
 
       {issues.length > 0 && (
-        <div className="mt-6 rounded-xl border border-[#D9A441]/50 bg-[#D9A441]/10 p-4 text-sm">
+        <div className="mt-6 rounded border border-[#D9A441]/50 bg-[#D9A441]/10 p-4 text-sm">
           <p className="font-semibold">Issues</p>
           <ul className="mt-2 space-y-1">
             {issues.map((i, idx) => (
@@ -280,7 +280,7 @@ export default async function AdminDeparturePage(props: PageProps<"/admin/depart
         >
           <div className="space-y-6">
             {extras.stays.map((st) => (
-              <details key={st.id} className="rounded-lg border border-border p-4" open={false}>
+              <details key={st.id} className="rounded border border-border p-4" open={false}>
                 <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-3 text-sm">
                   <span>
                     <span className="font-medium">{st.name}</span>
@@ -331,7 +331,7 @@ export default async function AdminDeparturePage(props: PageProps<"/admin/depart
               </details>
             ))}
             {canOps && (
-              <details className="rounded-lg border border-dashed border-border p-4">
+              <details className="rounded border border-dashed border-border p-4">
                 <summary className="cursor-pointer text-sm font-medium">Add a stay option</summary>
                 <div className="mt-4">
                   <StayOptionForm
@@ -393,7 +393,7 @@ export default async function AdminDeparturePage(props: PageProps<"/admin/depart
           />
           <div className="mt-6 space-y-4">
             {extras.addOns.map((a) => (
-              <details key={a.id} className="rounded-lg border border-border p-4">
+              <details key={a.id} className="rounded border border-border p-4">
                 <summary className="cursor-pointer text-sm font-medium">Edit: {a.title}</summary>
                 <div className="mt-4 space-y-3">
                   <AddOnForm
@@ -417,7 +417,7 @@ export default async function AdminDeparturePage(props: PageProps<"/admin/depart
               </details>
             ))}
             {canOps && (
-              <details className="rounded-lg border border-dashed border-border p-4">
+              <details className="rounded border border-dashed border-border p-4">
                 <summary className="cursor-pointer text-sm font-medium">Add an add-on</summary>
                 <div className="mt-4">
                   <AddOnForm
@@ -441,7 +441,7 @@ export default async function AdminDeparturePage(props: PageProps<"/admin/depart
                 <summary className="cursor-pointer text-link">New supplier</summary>
                 <form
                   action={createSupplierAction}
-                  className="mt-2 flex flex-wrap items-end gap-2 rounded-lg border border-border bg-cloud p-3"
+                  className="mt-2 flex flex-wrap items-end gap-2 rounded border border-border bg-cloud p-3"
                 >
                   <input
                     type="hidden"
@@ -537,7 +537,7 @@ export default async function AdminDeparturePage(props: PageProps<"/admin/depart
           {canOps && (
             <form
               action={addSupplierServiceAction}
-              className="mt-5 grid gap-3 rounded-lg border border-dashed border-border p-4 sm:grid-cols-4"
+              className="mt-5 grid gap-3 rounded border border-dashed border-border p-4 sm:grid-cols-4"
             >
               <input type="hidden" name="departureId" value={d.id} />
               <label className={labelClass}>
@@ -639,7 +639,7 @@ export default async function AdminDeparturePage(props: PageProps<"/admin/depart
             </form>
             <ul className="space-y-3 text-sm">
               {notes.map((n) => (
-                <li key={n.id} className="rounded-lg bg-cloud p-3">
+                <li key={n.id} className="rounded bg-cloud p-3">
                   <p>{n.body}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {formatDate(n.created_at.slice(0, 10))}

@@ -92,7 +92,7 @@ export function ItineraryTimeline({ days }: { days: TourDetail["days"] }) {
                   </span>
                   <div
                     className={cn(
-                      "rounded-lg border p-4",
+                      "rounded border p-4",
                       isFree ? "border-dashed border-aqua bg-aqua/10" : "border-border bg-surface",
                     )}
                   >

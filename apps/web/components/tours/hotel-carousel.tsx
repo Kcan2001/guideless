@@ -37,7 +37,7 @@ export function HotelCarousel({
   const go = (next: number) => setI((next + count) % count);
 
   return (
-    <div className={cn("group/car relative overflow-hidden bg-muted", className)}>
+    <div className={cn("group/car relative overflow-hidden bg-surface-muted", className)}>
       {/* Only the active frame is rendered: ten hotels' worth of eager images would be the heaviest
           thing on the page, and the ones behind it are never seen. */}
       <Image

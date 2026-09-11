@@ -83,7 +83,7 @@ function PreTripQuestions({ existing }: { existing: SurveyAnswers | null }) {
 function PostTripQuestions({ existing }: { existing: SurveyAnswers | null }) {
   return (
     <>
-      <div className="grid gap-4 rounded-xl border border-border bg-surface p-6">
+      <div className="grid gap-4 rounded border border-border bg-surface p-6">
         {POST_TRIP_SCORES.map((s) => (
           <ScoreScale
             key={s.field}

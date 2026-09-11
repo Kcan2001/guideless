@@ -85,7 +85,7 @@ export function OptionCard({
         // A container, not just a box: what is inside should lay out against the card's own
         // width. These cards sit one-up on a quiet day and two-up on a busy one, so a viewport
         // breakpoint splits a narrow card into two crushed columns on a wide screen.
-        "@container relative flex flex-col overflow-hidden rounded-xl border bg-surface transition-colors",
+        "@container relative flex flex-col overflow-hidden rounded border bg-surface transition-colors",
         selected ? "border-ink ring-1 ring-ink" : "border-border",
         disabled && "opacity-60",
       )}
@@ -186,7 +186,7 @@ export function OptionCard({
         )}
 
         {!collapse && whyPriceNote && (
-          <p className="rounded-lg bg-cloud p-3 text-sm">
+          <p className="rounded bg-cloud p-3 text-sm">
             <span className="font-semibold">Why this price. </span>
             {whyPriceNote}
           </p>
@@ -232,7 +232,7 @@ export function OptionCard({
               </div>
             )}
             {whyPriceNote && (
-              <p className="rounded-lg bg-cloud p-4 text-sm">
+              <p className="rounded bg-cloud p-4 text-sm">
                 <span className="font-semibold">Why this price. </span>
                 {whyPriceNote}
               </p>

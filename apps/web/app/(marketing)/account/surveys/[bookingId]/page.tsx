@@ -75,7 +75,7 @@ export default async function SurveyPage(props: PageProps<"/account/surveys/[boo
       )}
 
       {existing && (
-        <p className="mt-6 rounded-lg border border-border bg-surface px-4 py-3 text-sm text-muted-foreground">
+        <p className="mt-6 rounded border border-border bg-surface px-4 py-3 text-sm text-muted-foreground">
           You answered this on {formatDate(existing.submittedAt.slice(0, 10))}. Changing anything
           below replaces that answer.
         </p>

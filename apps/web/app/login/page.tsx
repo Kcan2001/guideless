@@ -37,13 +37,7 @@ export default async function LoginPage(props: PageProps<"/login">) {
         href="/"
         className="mb-10 flex items-center gap-3 self-start text-foreground no-underline"
       >
-        <Image
-          src="/brand/guideless-logo.webp"
-          alt=""
-          width={36}
-          height={36}
-          className="rounded-md"
-        />
+        <Image src="/brand/guideless-logo.webp" alt="" width={36} height={36} className="rounded" />
         <span className="font-heading text-lg font-bold">{brand.shortName}</span>
       </Link>
       <h1 className="text-3xl font-bold">Sign in</h1>

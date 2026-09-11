@@ -4,7 +4,7 @@ import { Sparkles } from "lucide-react";
 export function AddLaterCallout() {
   return (
     <aside
-      className="rounded-2xl border border-aqua bg-aqua/10 p-6 md:p-8"
+      className="rounded border border-aqua bg-aqua/10 p-6 md:p-8"
       aria-labelledby="add-later-heading"
       data-testid="add-later"
     >

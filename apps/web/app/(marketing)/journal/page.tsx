@@ -52,7 +52,7 @@ export default async function JournalIndexPage() {
 
       {posts.length === 0 ? (
         <section className="mx-auto w-full max-w-6xl px-6 pb-24">
-          <div className="rounded-xl border border-border bg-surface p-10 text-center">
+          <div className="rounded border border-border bg-surface p-10 text-center">
             <p className="font-heading text-xl font-semibold">The first piece is being written.</p>
             <p className="mx-auto mt-2 max-w-md text-muted-foreground">
               Until then, the trips themselves are the best read: each one lists its route, its
@@ -71,7 +71,7 @@ export default async function JournalIndexPage() {
               className="group grid gap-6 no-underline md:grid-cols-2 md:items-center"
             >
               {lead.hero_image_url && (
-                <div className="relative aspect-[4/3] overflow-hidden rounded-xl">
+                <div className="relative aspect-[4/3] overflow-hidden rounded">
                   <Image
                     src={lead.hero_image_url}
                     alt={photoAlt(lead.hero_image_url, lead.title)}
@@ -101,7 +101,7 @@ export default async function JournalIndexPage() {
                 <li key={post.id} className="grid">
                   <Link href={`/journal/${post.slug}`} className="group no-underline">
                     {post.hero_image_url && (
-                      <div className="relative mb-4 aspect-[3/2] overflow-hidden rounded-xl">
+                      <div className="relative mb-4 aspect-[3/2] overflow-hidden rounded">
                         <Image
                           src={post.hero_image_url}
                           alt={photoAlt(post.hero_image_url, post.title)}

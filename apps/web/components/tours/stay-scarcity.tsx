@@ -33,7 +33,7 @@ export function StayScarcity({
     return (
       <span
         className={cn(
-          "inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground",
+          "inline-flex items-center rounded bg-surface-muted px-2 py-0.5 font-heading text-[11px] font-extrabold uppercase tracking-[0.1em] text-foreground",
           className,
         )}
       >
@@ -45,16 +45,11 @@ export function StayScarcity({
   return (
     <span className={cn("inline-flex items-center gap-1.5 text-xs", className)}>
       {isLimited && (
-        <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 font-medium text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+        <span className="inline-flex items-center rounded bg-warning-surface px-2 py-0.5 font-heading text-[11px] font-extrabold uppercase tracking-[0.1em] text-warning">
           Only a few left
         </span>
       )}
-      <span
-        className={cn(
-          "font-medium",
-          isLimited ? "text-amber-900 dark:text-amber-200" : "text-muted-foreground",
-        )}
-      >
+      <span className={cn("font-medium", isLimited ? "text-warning" : "text-muted-foreground")}>
         {spotsLeft} {spotsLeft === 1 ? "place" : "places"} left
       </span>
       {!allocationHeld && (

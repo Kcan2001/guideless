@@ -13,7 +13,7 @@ export function ReviewForm({ booking }: { booking: ReviewableBooking }) {
   return (
     <form
       action={submitReviewAction}
-      className="rounded-xl border border-border bg-surface p-6"
+      className="rounded border border-border bg-surface p-6"
       id={`review-${id}`}
     >
       <input type="hidden" name="bookingId" value={booking.bookingId} />

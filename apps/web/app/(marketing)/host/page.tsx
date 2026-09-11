@@ -54,7 +54,7 @@ export default async function HostPage(props: PageProps<"/host">) {
       <section className="mx-auto w-full max-w-6xl px-6 pb-16">
         <ol className="grid gap-6 md:grid-cols-3">
           {HOW.map(([title, body], i) => (
-            <li key={title} className="rounded-xl border border-border bg-surface p-6">
+            <li key={title} className="rounded border border-border bg-surface p-6">
               <span className="font-heading text-sm font-semibold text-link">
                 {String(i + 1).padStart(2, "0")}
               </span>
@@ -80,7 +80,7 @@ export default async function HostPage(props: PageProps<"/host">) {
       <section id="apply" className="scroll-mt-24 bg-surface py-20">
         <div className="mx-auto w-full max-w-3xl px-6">
           {applied ? (
-            <div role="status" className="rounded-2xl border border-aqua bg-aqua/10 p-8">
+            <div role="status" className="rounded border border-aqua bg-aqua/10 p-8">
               <h2 className="text-3xl font-bold">Thank you. We&rsquo;ll be in touch.</h2>
               <p className="mt-3 text-muted-foreground">
                 A real person reads every application, usually within two working days. We&rsquo;ll

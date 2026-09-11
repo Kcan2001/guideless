@@ -10,6 +10,7 @@ import { formatDateRange, formatMoney, formatWallTime } from "@guideless/utils";
 import { TrackView } from "@/components/analytics/track-view";
 import { ReferralHint, RoomRule } from "@/components/marketing/make-it-yours";
 import { JsonLd } from "@/components/site/json-ld";
+import { HeroScrim, heroEyebrowClass } from "@/components/site/hero-scrim";
 import { PhotoBackdrop } from "@/components/site/photo-hero";
 import { AddLaterCallout } from "@/components/tours/add-later-callout";
 import { BaseIncludes } from "@/components/tours/base-includes";
@@ -195,14 +196,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
           priority
           className={version.hero_image_url ? undefined : "opacity-70"}
         />
-        <div
-          className={
-            version.hero_image_url
-              ? "absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/70 to-ink/20"
-              : "absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/30"
-          }
-          aria-hidden
-        />
+        <HeroScrim hasPhoto={Boolean(version.hero_image_url)} />
         <div className="relative mx-auto w-full max-w-6xl px-6 pt-20 pb-16 md:pt-28 md:pb-20">
           <nav aria-label="Breadcrumb" className="text-sm text-cloud/70">
             <Link href="/tours" className="text-cloud/70 no-underline hover:text-cloud">
@@ -213,7 +207,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
             </span>
             <span>{tour.name}</span>
           </nav>
-          <p className="mt-6 text-sm font-medium uppercase tracking-[0.22em] text-aqua">
+          <p className={cn(heroEyebrowClass, "mt-6")}>
             {isEvent && tour.event_name
               ? tour.event_name
               : route.map((r) => r.destination.name).join(" → ")}
@@ -353,7 +347,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
             </blockquote>
           )}
         </div>
-        <aside className="rounded-xl border border-border bg-surface p-6">
+        <aside className="rounded border border-border bg-surface p-6">
           <h2 className="font-heading text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             Your route
           </h2>
@@ -516,7 +510,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
         </p>
         {anchor && (
           <aside
-            className="mt-10 max-w-3xl rounded-2xl border border-aqua bg-aqua/10 p-6"
+            className="mt-10 max-w-3xl rounded border border-aqua bg-aqua/10 p-6"
             aria-labelledby="night-one"
             data-testid="anchor-callout"
           >
@@ -602,7 +596,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
           </p>
           <ul className="mt-8 grid max-w-4xl gap-4 md:grid-cols-3">
             {requirements.map((requirement) => (
-              <li key={requirement.id} className="rounded-xl border bg-card p-5">
+              <li key={requirement.id} className="rounded border bg-card p-5">
                 <h3 className="font-semibold">{requirement.title}</h3>
                 {requirement.description && (
                   <p className="mt-2 text-sm text-muted-foreground">{requirement.description}</p>

@@ -58,7 +58,7 @@ function HotelBlock({ hotel, showLeg }: { hotel: StayHotel; showLeg: boolean }) 
       : `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
 
   return (
-    <div className="rounded-lg border border-border bg-muted/40 p-4 text-sm">
+    <div className="rounded border border-border bg-surface-muted/40 p-4 text-sm">
       {showLeg && (hotel.legName || hotel.nights > 0) && (
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           {hotel.legName}
@@ -102,7 +102,7 @@ function HotelBlock({ hotel, showLeg }: { hotel: StayHotel; showLeg: boolean }) 
           {hotel.amenities.slice(0, 8).map((a) => (
             <li
               key={a}
-              className="rounded-full border border-border bg-surface px-2 py-0.5 text-xs text-muted-foreground"
+              className="rounded border border-border bg-surface px-2 py-0.5 text-xs text-muted-foreground"
             >
               {a}
             </li>

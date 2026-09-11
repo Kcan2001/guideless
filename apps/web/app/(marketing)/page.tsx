@@ -13,6 +13,7 @@ import { FounderBlock } from "@/components/marketing/founder-block";
 import { SectionHeading } from "@/components/marketing/page-hero";
 import { RosterStrip } from "@/components/marketing/roster-strip";
 import { JsonLd } from "@/components/site/json-ld";
+import { HeroScrim, heroEyebrowClass } from "@/components/site/hero-scrim";
 import { PhotoBackdrop } from "@/components/site/photo-hero";
 import { TourCard } from "@/components/tours/tour-card";
 import { Badge } from "@/components/ui/badge";
@@ -119,14 +120,9 @@ export default async function HomePage() {
           priority
           position="center 55%"
         />
-        <div
-          className="absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/70 to-ink/20"
-          aria-hidden
-        />
+        <HeroScrim />
         <div className="relative mx-auto flex w-full max-w-6xl flex-col px-6 py-28 md:py-40">
-          <p className="mb-5 text-sm font-medium uppercase tracking-[0.22em] text-aqua">
-            Small-group trips to Europe
-          </p>
+          <p className={cn(heroEyebrowClass, "mb-5")}>Small-group trips to Europe</p>
           <h1 className="max-w-3xl text-5xl font-bold leading-[1.02] md:text-7xl">
             {brand.tagline}
           </h1>
@@ -179,7 +175,7 @@ export default async function HomePage() {
           <ul className="mt-14 grid gap-10 md:grid-cols-2">
             {WHY.map((w, i) => (
               <li key={w.title} className="group">
-                <div className="relative aspect-[3/2] overflow-hidden rounded-2xl">
+                <div className="relative aspect-[3/2] overflow-hidden rounded">
                   <PhotoBackdrop
                     src={w.photo}
                     fallbackAlt={w.alt}
@@ -230,7 +226,7 @@ export default async function HomePage() {
       {/* Independent, not alone */}
       <section className={cn("py-24", example ? "bg-surface" : "")}>
         <div className="mx-auto grid w-full max-w-6xl gap-12 px-6 lg:grid-cols-2 lg:items-center">
-          <div className="relative aspect-[4/5] overflow-hidden rounded-2xl">
+          <div className="relative aspect-[4/5] overflow-hidden rounded">
             <PhotoBackdrop
               src={sitePhotos.together}
               fallbackAlt="A café terrace in Paris"
@@ -307,7 +303,7 @@ export default async function HomePage() {
               return (
                 <li
                   key={tour.id}
-                  className="relative flex flex-col justify-between gap-6 overflow-hidden rounded-2xl bg-ink p-8 text-cloud"
+                  className="relative flex flex-col justify-between gap-6 overflow-hidden rounded bg-ink p-8 text-cloud"
                 >
                   {version.hero_image_url && (
                     <>
@@ -402,7 +398,7 @@ export default async function HomePage() {
         <div className="mt-8 max-w-3xl">
           <FaqAccordion items={homeFaq} />
         </div>
-        <div className="mt-20 rounded-2xl bg-sand p-10 md:p-14">
+        <div className="mt-20 rounded bg-sand p-10 md:p-14">
           <h2 className="max-w-2xl text-3xl font-bold md:text-4xl">{brand.taglineSecondary}</h2>
           <p className="mt-3 max-w-xl text-muted-foreground">
             Pick a trip. We will handle the rest, and then get out of the way.

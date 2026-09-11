@@ -83,7 +83,7 @@ export function ItineraryEditor({
         <article
           key={day.id}
           id={`day-${day.id}`}
-          className="scroll-mt-6 rounded-xl border border-border"
+          className="scroll-mt-6 rounded border border-border"
         >
           <header className="flex flex-wrap items-start justify-between gap-3 border-b border-border bg-cloud/60 px-4 py-3">
             <div>
@@ -100,7 +100,7 @@ export function ItineraryEditor({
                 <summary className="cursor-pointer text-link">Edit day</summary>
                 <form
                   action={actions.updateDay}
-                  className="mt-3 grid w-72 gap-2 rounded-lg border border-border bg-surface p-3"
+                  className="mt-3 grid w-72 gap-2 rounded border border-border bg-surface p-3"
                 >
                   {hiddenInputs}
                   <input type="hidden" name="dayId" value={day.id} />
@@ -201,7 +201,7 @@ export function ItineraryEditor({
                     {scope === "trip" && actions.markItemChanged && (
                       <form
                         action={actions.markItemChanged}
-                        className="mt-3 space-y-2 rounded-lg border border-border bg-background p-3"
+                        className="mt-3 space-y-2 rounded border border-border bg-background p-3"
                       >
                         {hiddenInputs}
                         <input type="hidden" name="itemId" value={item.id} />
@@ -285,7 +285,7 @@ export function ItineraryEditor({
       ))}
 
       {!locked && actions.addDay && (
-        <details className="rounded-xl border border-dashed border-border px-4 py-3 text-sm">
+        <details className="rounded border border-dashed border-border px-4 py-3 text-sm">
           <summary className="cursor-pointer font-medium text-link">+ Add day {nextDay}</summary>
           <form action={actions.addDay} className="mt-3 grid gap-3 sm:grid-cols-4">
             {hiddenInputs}
@@ -353,7 +353,7 @@ function ItemForm({
   return (
     <form
       action={action}
-      className="mt-3 grid gap-3 rounded-lg border border-border bg-surface p-3 sm:grid-cols-6"
+      className="mt-3 grid gap-3 rounded border border-border bg-surface p-3 sm:grid-cols-6"
     >
       {Object.entries(hidden).map(([k, v]) => (
         <input key={k} type="hidden" name={k} value={v} />

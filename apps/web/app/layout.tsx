@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Manrope } from "next/font/google";
+import { Archivo, Inter } from "next/font/google";
 import { brand } from "@guideless/config";
 import { Suspense } from "react";
 import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
@@ -14,10 +14,13 @@ const inter = Inter({
   display: "swap",
 });
 
-// Variable font: one file covers 600–800 instead of three static instances (LCP is the hero h1).
-const manrope = Manrope({
-  variable: "--font-manrope",
+// The display face (docs/design-system.md, "The direction, decided 2026-09-10"). Archivo is a
+// variable font, so 700–900 is one file rather than three static instances, and the hero h1 is the
+// LCP element on every marketing page — it has to arrive in one request.
+const archivo = Archivo({
+  variable: "--font-archivo",
   subsets: ["latin"],
+  weight: ["700", "800", "900"],
   display: "swap",
 });
 
@@ -52,7 +55,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${inter.variable} ${manrope.variable} h-full antialiased`}>
+    <html lang="en" className={`${inter.variable} ${archivo.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         {children}
         <GoogleAnalytics />

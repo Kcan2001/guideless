@@ -65,19 +65,19 @@ export function ReviewStep({
       </header>
 
       {user ? (
-        <div className="rounded-xl border border-aqua bg-aqua/10 p-6">
+        <div className="rounded border border-aqua bg-aqua/10 p-6">
           <p className="font-semibold">Signed in{user.email ? ` as ${user.email}` : ""}.</p>
           <p className="mt-1 text-sm text-muted-foreground">
             The booking is attached to this account.
           </p>
         </div>
       ) : (
-        <div className="rounded-xl border border-border bg-surface p-6">
+        <div className="rounded border border-border bg-surface p-6">
           <LoginForm compact next={loginNext} initialMode="signup" googleEnabled={googleEnabled} />
         </div>
       )}
 
-      <ul className="space-y-3 rounded-xl border border-border bg-surface p-6">
+      <ul className="space-y-3 rounded border border-border bg-surface p-6">
         <li className="text-xs text-muted-foreground">Terms version {brand.termsVersion}.</li>
         {TERMS.map(([key, label, link]) => (
           <li key={key}>

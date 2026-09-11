@@ -35,7 +35,7 @@ export function ConfiguratorExampleCard({ example }: { example: ConfiguratorExam
       </div>
 
       <div
-        className="rounded-2xl border border-border bg-surface p-6 md:p-8"
+        className="rounded border border-border bg-surface p-6 md:p-8"
         data-testid="configurator-example"
       >
         <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">

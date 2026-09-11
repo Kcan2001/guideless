@@ -29,7 +29,7 @@ export function SavedAndAlerts({
       <h2 className="text-xl font-semibold">Kept for later</h2>
 
       {saved.length > 0 && (
-        <ul className="mt-4 divide-y divide-border rounded-xl border border-border bg-surface">
+        <ul className="mt-4 divide-y divide-border rounded border border-border bg-surface">
           {saved.map((s) => (
             <li key={s.tourId} className="flex flex-wrap items-center gap-4 p-5">
               <Bookmark className="h-4 w-4 text-teal" aria-hidden />
@@ -71,7 +71,7 @@ export function SavedAndAlerts({
       {alerts.length > 0 && (
         <div className="mt-6">
           <h3 className="font-medium">You&rsquo;ll hear from us about</h3>
-          <ul className="mt-3 divide-y divide-border rounded-xl border border-border bg-surface">
+          <ul className="mt-3 divide-y divide-border rounded border border-border bg-surface">
             {alerts.map((a) => (
               <li key={a.id} className="flex flex-wrap items-center gap-4 p-4">
                 <Bell className="h-4 w-4 text-teal" aria-hidden />

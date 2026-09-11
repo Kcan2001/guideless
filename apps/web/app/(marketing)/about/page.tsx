@@ -54,7 +54,7 @@ export default function AboutPage() {
               </li>
             </ul>
           </div>
-          <div className="relative aspect-[4/5] overflow-hidden rounded-2xl">
+          <div className="relative aspect-[4/5] overflow-hidden rounded">
             <PhotoBackdrop
               src={sitePhotos.howItWorks}
               fallbackAlt="Flower stalls at the Cours Saleya market in Nice"
@@ -77,7 +77,7 @@ export default function AboutPage() {
         <SectionHeading eyebrow="How we operate" title="Commitments the product already keeps." />
         <ul className="mt-12 grid gap-6 md:grid-cols-2">
           {operatingPrinciples.map((p) => (
-            <li key={p.title} className="rounded-xl border border-border bg-surface p-6">
+            <li key={p.title} className="rounded border border-border bg-surface p-6">
               <h3 className="text-xl font-semibold">{p.title}</h3>
               <p className="mt-2 text-muted-foreground">{p.body}</p>
             </li>
@@ -88,7 +88,7 @@ export default function AboutPage() {
           departures are Nice → Avignon → Paris and the Monaco Grand Prix weekend, and everything on
           this site, from the trip pages to the app, was built in-house.
         </p>
-        <div className="mt-16 grid gap-6 rounded-2xl bg-ink p-10 text-cloud md:grid-cols-[1fr_auto] md:items-center">
+        <div className="mt-16 grid gap-6 rounded bg-ink p-10 text-cloud md:grid-cols-[1fr_auto] md:items-center">
           <div>
             <h2 className="text-3xl font-bold">{brand.taglineSecondary}</h2>
             <p className="mt-3 max-w-xl text-cloud/80">

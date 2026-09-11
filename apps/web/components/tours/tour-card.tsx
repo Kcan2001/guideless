@@ -20,7 +20,7 @@ export function TourCard({
   const next = departures[0];
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-shadow hover:shadow-lg focus-within:shadow-lg">
+    <article className="group flex flex-col overflow-hidden rounded border border-border bg-surface transition-shadow hover:shadow-lg focus-within:shadow-lg">
       <Link
         href={`/tours/${tour.slug}`}
         className="relative block aspect-[4/3] overflow-hidden no-underline"

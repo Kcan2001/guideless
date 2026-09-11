@@ -67,7 +67,7 @@ export default async function CancellationPage() {
       <section className="mx-auto w-full max-w-6xl px-6 py-20">
         <ul className="grid gap-6 md:grid-cols-2">
           {RULES.map((r) => (
-            <li key={r.title} className="rounded-xl border border-border bg-surface p-6">
+            <li key={r.title} className="rounded border border-border bg-surface p-6">
               <h2 className="text-lg font-semibold">{r.title}</h2>
               <p className="mt-2 text-muted-foreground">{r.body}</p>
             </li>
@@ -89,7 +89,7 @@ export default async function CancellationPage() {
                   (a, b) => b.daysBeforeDeparture - a.daysBeforeDeparture,
                 );
                 return (
-                  <div key={tour.id} className="rounded-xl border border-border bg-cloud p-6">
+                  <div key={tour.id} className="rounded border border-border bg-cloud p-6">
                     <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
                       {tour.name}
                     </p>
@@ -135,7 +135,7 @@ export default async function CancellationPage() {
       )}
 
       <section className="mx-auto w-full max-w-6xl px-6 py-20">
-        <div className="grid gap-6 rounded-2xl border border-border bg-surface p-8 md:grid-cols-[1fr_auto] md:items-center">
+        <div className="grid gap-6 rounded border border-border bg-surface p-8 md:grid-cols-[1fr_auto] md:items-center">
           <div>
             <h2 className="text-2xl font-bold">The full terms</h2>
             <p className="mt-2 text-muted-foreground">

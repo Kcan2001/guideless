@@ -156,7 +156,7 @@ export default function WhyGuidelessPage() {
                 i % 2 === 1 && "lg:[&>*:first-child]:order-2",
               )}
             >
-              <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
+              <div className="relative aspect-[4/3] overflow-hidden rounded">
                 <PhotoBackdrop
                   src={b.photo}
                   fallbackAlt={b.alt}
@@ -187,7 +187,7 @@ export default function WhyGuidelessPage() {
       </section>
 
       <section className="mx-auto w-full max-w-6xl px-6 py-24">
-        <div className="grid gap-6 rounded-2xl bg-ink p-10 text-cloud md:grid-cols-[1fr_auto] md:items-center">
+        <div className="grid gap-6 rounded bg-ink p-10 text-cloud md:grid-cols-[1fr_auto] md:items-center">
           <div>
             <h2 className="text-3xl font-bold">See a real trip, priced.</h2>
             <p className="mt-3 max-w-xl text-cloud/80">

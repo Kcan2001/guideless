@@ -178,7 +178,7 @@ export function AddOnStep({
                     <li key={idx}>
                       <label
                         className={cn(
-                          "inline-flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-sm",
+                          "inline-flex cursor-pointer items-center gap-2 rounded border px-3 py-1.5 text-sm",
                           on ? "border-ink bg-ink text-cloud" : "border-border bg-surface",
                           !room && !on && "cursor-not-allowed opacity-50",
                         )}
@@ -207,7 +207,7 @@ export function AddOnStep({
               </label>
               <select
                 id={`qty-${a.id}`}
-                className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm"
+                className="rounded border border-border bg-surface px-3 py-1.5 text-sm"
                 value={count}
                 onChange={(e) => {
                   const q = Number(e.target.value);

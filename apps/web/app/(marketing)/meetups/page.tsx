@@ -40,7 +40,7 @@ export default async function MeetupsPage() {
 
       <section className="mx-auto w-full max-w-6xl px-6 pb-24">
         {meetups.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border p-10">
+          <div className="rounded border border-dashed border-border p-10">
             <p className="font-heading text-xl font-semibold">Nothing on the calendar right now.</p>
             <p className="mt-1 text-muted-foreground">
               New evenings are announced to past travelers first, then here.
@@ -60,7 +60,7 @@ export default async function MeetupsPage() {
                       return (
                         <li
                           key={m.id}
-                          className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-5"
+                          className="flex flex-col gap-3 rounded border border-border bg-surface p-5"
                         >
                           <div>
                             <Link

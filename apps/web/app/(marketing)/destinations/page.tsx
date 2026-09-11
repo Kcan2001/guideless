@@ -40,7 +40,7 @@ export default async function DestinationsPage() {
               <li key={d.id}>
                 <Link
                   href={`/destinations/${d.slug}`}
-                  className="group flex h-full flex-col overflow-hidden rounded-xl border border-border bg-surface no-underline transition-shadow hover:shadow-lg"
+                  className="group flex h-full flex-col overflow-hidden rounded border border-border bg-surface no-underline transition-shadow hover:shadow-lg"
                 >
                   <div className="relative aspect-[3/2] overflow-hidden">
                     <PhotoBackdrop

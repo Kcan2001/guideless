@@ -127,7 +127,7 @@ export function PaymentStep({
           <label
             key={o.value}
             className={cn(
-              "flex cursor-pointer items-start gap-3 rounded-xl border p-4",
+              "flex cursor-pointer items-start gap-3 rounded border p-4",
               draft.paymentOption === o.value
                 ? "border-ink bg-surface"
                 : "border-border bg-surface/60",
@@ -164,7 +164,7 @@ export function PaymentStep({
         ))}
       </fieldset>
 
-      <div className="rounded-xl border border-border bg-surface p-6 text-sm">
+      <div className="rounded border border-border bg-surface p-6 text-sm">
         <h2 className="font-heading text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
           Travelers
         </h2>

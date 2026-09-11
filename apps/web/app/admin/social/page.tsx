@@ -106,7 +106,7 @@ export default async function AdminSocialPage(props: PageProps<"/admin/social">)
                   alt={p.alt_texts[i] || ""}
                   width={48}
                   height={48}
-                  className="h-12 w-12 rounded-md border border-border object-cover"
+                  className="h-12 w-12 rounded border border-border object-cover"
                 />
               ))}
               {p.media_paths.length > 3 && (

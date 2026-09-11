@@ -62,7 +62,7 @@ export function NewsletterForm({
           placeholder="you@example.com"
           aria-invalid={state.status === "error" || undefined}
           aria-describedby={state.status === "error" ? `newsletter-error-${source}` : undefined}
-          className="h-10 w-full rounded-md border border-border bg-cloud px-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          className="h-10 w-full rounded border border-border bg-cloud px-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         />
         {state.status === "error" && (
           <p id={`newsletter-error-${source}`} role="alert" className="mt-1 text-xs text-danger">

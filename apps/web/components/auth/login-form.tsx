@@ -44,14 +44,8 @@ export function LoginForm({
   ];
 
   return (
-    <div
-      className={cn("space-y-6", compact ? "" : "rounded-2xl border border-border bg-surface p-8")}
-    >
-      <div
-        role="tablist"
-        aria-label="Sign-in method"
-        className="flex gap-1 rounded-lg bg-sand/60 p-1"
-      >
+    <div className={cn("space-y-6", compact ? "" : "rounded border border-border bg-surface p-8")}>
+      <div role="tablist" aria-label="Sign-in method" className="flex gap-1 rounded bg-sand/60 p-1">
         {tabs.map(([value, label]) => (
           <button
             key={value}
@@ -60,7 +54,7 @@ export function LoginForm({
             aria-selected={mode === value}
             onClick={() => setMode(value)}
             className={cn(
-              "flex-1 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              "flex-1 rounded px-3 py-2 text-sm font-medium transition-colors",
               mode === value
                 ? "bg-surface text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground",

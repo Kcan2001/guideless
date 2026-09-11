@@ -14,7 +14,7 @@ export function CompareTable({ columns }: { columns: CompareColumn[] }) {
         <div
           key={c.title}
           className={cn(
-            "rounded-xl border p-6",
+            "rounded border p-6",
             c.highlight
               ? "border-ink bg-ink text-cloud"
               : "border-border bg-surface text-foreground",

@@ -77,7 +77,7 @@ export default async function AdminExperiencesPage(props: PageProps<"/admin/expe
       <Flash searchParams={sp} />
 
       {supplierId === "mock" && (
-        <p className="rounded-xl border border-warning-border bg-warning-surface p-4 text-sm">
+        <p className="rounded border border-warning-border bg-warning-surface p-4 text-sm">
           <strong>Running on the mock supplier.</strong> There is no Viator adapter yet, on purpose:
           the last adapter written from documentation rather than a real response was never
           trustworthy. Get a key, run <code>node scripts/viator-probe.mjs</code>, and write it from

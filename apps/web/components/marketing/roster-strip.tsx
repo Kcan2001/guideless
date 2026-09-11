@@ -27,7 +27,7 @@ export function RosterStrip({
 
   return (
     <div
-      className={cn("rounded-xl border border-aqua/60 bg-aqua/10 p-4 text-sm", className)}
+      className={cn("rounded border border-aqua/60 bg-aqua/10 p-4 text-sm", className)}
       data-testid="roster-strip"
     >
       <p className="flex flex-wrap items-center gap-x-2 gap-y-1">

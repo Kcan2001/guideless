@@ -57,7 +57,7 @@ export function WaitlistForm({
           required
           autoComplete="email"
           placeholder="you@example.com"
-          className="h-10 min-w-0 flex-1 rounded-lg border border-border bg-surface px-3 text-sm"
+          className="h-10 min-w-0 flex-1 rounded border border-border bg-surface px-3 text-sm"
         />
         <Button type="submit" size="sm" disabled={pending}>
           <Bell className="h-4 w-4" aria-hidden /> {pending ? "Adding…" : label}

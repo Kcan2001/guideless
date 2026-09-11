@@ -47,7 +47,7 @@ export default async function TripPage(props: PageProps<"/trips/[tripId]">) {
         {formatDateRange(trip.start_date, trip.end_date)} · {days.length} days ·{" "}
         <Badge variant="info">{trip.status}</Badge>
       </p>
-      <div className="mt-6 rounded-xl border border-aqua bg-aqua/10 p-5 text-sm">
+      <div className="mt-6 rounded border border-aqua bg-aqua/10 p-5 text-sm">
         The Guideless app is the best place for this — live updates, your group&rsquo;s chat and
         Live Moments. This page keeps everything readable if you lose your phone.
       </div>
@@ -74,9 +74,7 @@ export default async function TripPage(props: PageProps<"/trips/[tripId]">) {
               {days.map((day) => (
                 <li
                   key={day.id}
-                  className={cn(
-                    today?.id === day.id && "rounded-xl border border-aqua bg-aqua/5 p-4",
-                  )}
+                  className={cn(today?.id === day.id && "rounded border border-aqua bg-aqua/5 p-4")}
                 >
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-link">
                     Day {day.day_number} ·{" "}
@@ -89,7 +87,7 @@ export default async function TripPage(props: PageProps<"/trips/[tripId]">) {
                   </p>
                   <h3 className="text-xl font-semibold">{day.title}</h3>
                   {day.summary && <p className="text-muted-foreground">{day.summary}</p>}
-                  <ul className="mt-4 divide-y divide-border rounded-xl border border-border bg-surface">
+                  <ul className="mt-4 divide-y divide-border rounded border border-border bg-surface">
                     {day.items.map((i) => (
                       <li
                         key={i.id}
@@ -142,7 +140,7 @@ export default async function TripPage(props: PageProps<"/trips/[tripId]">) {
         </div>
 
         <aside className="space-y-8">
-          <section className="rounded-xl border border-border bg-surface p-5">
+          <section className="rounded border border-border bg-surface p-5">
             <h2 className="flex items-center gap-2 font-heading text-lg font-semibold">
               <Bed className="h-4 w-4 text-link" aria-hidden /> Hotels
             </h2>
@@ -162,7 +160,7 @@ export default async function TripPage(props: PageProps<"/trips/[tripId]">) {
             </ul>
           </section>
 
-          <section className="rounded-xl border border-border bg-surface p-5">
+          <section className="rounded border border-border bg-surface p-5">
             <h2 className="flex items-center gap-2 font-heading text-lg font-semibold">
               <Sparkles className="h-4 w-4 text-link" aria-hidden /> Live Moments
             </h2>
@@ -186,13 +184,13 @@ export default async function TripPage(props: PageProps<"/trips/[tripId]">) {
             </ul>
           </section>
 
-          <section className="rounded-xl border border-border bg-surface p-5">
+          <section className="rounded border border-border bg-surface p-5">
             <h2 className="flex items-center gap-2 font-heading text-lg font-semibold">
               <Users className="h-4 w-4 text-link" aria-hidden /> Your group · {members.length}
             </h2>
             <ul className="mt-4 flex flex-wrap gap-2 text-sm">
               {members.map((m) => (
-                <li key={m.user_id} className="rounded-full bg-sand px-3 py-1">
+                <li key={m.user_id} className="rounded bg-sand px-3 py-1">
                   {m.profile?.display_name || "Traveler"}
                 </li>
               ))}
@@ -202,7 +200,7 @@ export default async function TripPage(props: PageProps<"/trips/[tripId]">) {
             </p>
           </section>
 
-          <section className="rounded-xl bg-ink p-5 text-cloud">
+          <section className="rounded bg-ink p-5 text-cloud">
             <h2 className="flex items-center gap-2 font-heading text-lg font-semibold">
               <Flag className="h-4 w-4 text-aqua" aria-hidden /> Need a hand?
             </h2>
@@ -217,7 +215,7 @@ export default async function TripPage(props: PageProps<"/trips/[tripId]">) {
             </a>
           </section>
 
-          <section className="rounded-xl border border-border bg-surface p-5">
+          <section className="rounded border border-border bg-surface p-5">
             <h2 className="flex items-center gap-2 font-heading text-lg font-semibold">
               <CalendarDays className="h-4 w-4 text-accent" aria-hidden /> Put it in your calendar
             </h2>

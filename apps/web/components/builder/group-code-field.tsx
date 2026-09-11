@@ -73,7 +73,7 @@ export function GroupCodeField({
   }, [text, departureId]);
 
   return (
-    <fieldset className="rounded-xl border border-border bg-surface p-6">
+    <fieldset className="rounded border border-border bg-surface p-6">
       <legend className="px-2 font-heading text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
         Traveling with friends?
       </legend>

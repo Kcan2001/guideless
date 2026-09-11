@@ -124,12 +124,19 @@ test.describe("trip builder", () => {
       .getByRole("article")
       .filter({ has: page.getByRole("checkbox") })
       .first();
-    const firstTitle = await card.locator("h3").innerText();
+    // `textContent`, not `innerText`: headings are uppercased in CSS since the 2026-09-10 reskin,
+    // and `innerText` returns the *rendered* text. Comparing a transformed title to the summary's
+    // untransformed one fails on casing alone, which is not what this test is about.
+    const firstTitle = (await card.locator("h3").textContent()) ?? "";
     await card.getByRole("checkbox").first().check();
 
-    // What a traveler is buying has to be named in the summary, not only priced.
-    await expect(page.getByTestId("order-summary").first()).toContainText(firstTitle.trim(), {
-      timeout: 15_000,
-    });
+    // What a traveler is buying has to be named in the summary, not only priced. Compared
+    // lower-cased rather than as a regex: add-on titles carry apostrophes, accents and parentheses
+    // ("Sunday at Jimmy'z, closing night"), and escaping those into a pattern is a bug waiting to
+    // happen for an assertion that is really just "does the summary say this".
+    const summary = page.getByTestId("order-summary").first();
+    await expect
+      .poll(async () => ((await summary.textContent()) ?? "").toLowerCase(), { timeout: 15_000 })
+      .toContain(firstTitle.trim().toLowerCase());
   });
 });

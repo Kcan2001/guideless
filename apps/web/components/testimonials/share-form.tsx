@@ -154,7 +154,7 @@ export function ShareForm({ tourSlug, tourName }: { tourSlug: string; tourName: 
         />
         <label
           htmlFor={id("photos")}
-          className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-cloud"
+          className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded border border-border px-4 py-2 text-sm font-medium hover:bg-cloud"
         >
           {uploading ? (
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
@@ -175,7 +175,7 @@ export function ShareForm({ tourSlug, tourName }: { tourSlug: string; tourName: 
                 <img
                   src={p.preview}
                   alt={p.name}
-                  className="h-24 w-24 rounded-lg border border-border object-cover"
+                  className="h-24 w-24 rounded border border-border object-cover"
                 />
                 <button
                   type="button"
@@ -191,7 +191,7 @@ export function ShareForm({ tourSlug, tourName }: { tourSlug: string; tourName: 
         )}
       </div>
 
-      <label className="flex items-start gap-3 rounded-xl border border-border bg-cloud/60 p-4">
+      <label className="flex items-start gap-3 rounded border border-border bg-cloud/60 p-4">
         <input type="checkbox" name="consentPublic" required className="mt-1" />
         <span className="text-sm">
           <span className="font-medium">

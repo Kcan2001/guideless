@@ -159,33 +159,33 @@ export default async function AccountPage(props: PageProps<"/account">) {
       </div>
 
       {added && (
-        <p role="status" className="mt-8 rounded-xl border border-aqua bg-aqua/10 p-4 text-sm">
+        <p role="status" className="mt-8 rounded border border-aqua bg-aqua/10 p-4 text-sm">
           Added. Your new add-ons are being confirmed and will show under the booking within a
           minute. Your group can see who&rsquo;s in.
         </p>
       )}
       {paid && (
-        <p role="status" className="mt-8 rounded-xl border border-aqua bg-aqua/10 p-4 text-sm">
+        <p role="status" className="mt-8 rounded border border-aqua bg-aqua/10 p-4 text-sm">
           Thank you. Your payment for {paid} is being confirmed and will show below within a minute.
         </p>
       )}
       {error && (
         <p
           role="alert"
-          className="mt-8 rounded-xl border border-warning-border bg-warning-surface p-4 text-sm"
+          className="mt-8 rounded border border-warning-border bg-warning-surface p-4 text-sm"
         >
           {error}
         </p>
       )}
       {notice && (
-        <p role="status" className="mt-8 rounded-xl border border-aqua bg-aqua/10 p-4 text-sm">
+        <p role="status" className="mt-8 rounded border border-aqua bg-aqua/10 p-4 text-sm">
           {notice}
         </p>
       )}
       {errorMsg && (
         <p
           role="alert"
-          className="mt-8 rounded-xl border border-warning-border bg-warning-surface p-4 text-sm"
+          className="mt-8 rounded border border-warning-border bg-warning-surface p-4 text-sm"
         >
           {errorMsg}
         </p>
@@ -196,7 +196,7 @@ export default async function AccountPage(props: PageProps<"/account">) {
           <h2 className="text-xl font-semibold">Open trip</h2>
           <ul className="mt-4 grid gap-4 md:grid-cols-2">
             {liveTrips.map((t) => (
-              <li key={t.id} className="rounded-xl border border-aqua bg-aqua/10 p-5">
+              <li key={t.id} className="rounded border border-aqua bg-aqua/10 p-5">
                 <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
                   {t.status}
                 </p>
@@ -217,7 +217,7 @@ export default async function AccountPage(props: PageProps<"/account">) {
       )}
 
       {bookings.length === 0 ? (
-        <div className="mt-12 rounded-xl border border-dashed border-border p-10">
+        <div className="mt-12 rounded border border-dashed border-border p-10">
           <p className="font-heading text-xl font-semibold">{emptyStates.noTrips.title}</p>
           <p className="mt-1 text-muted-foreground">{emptyStates.noTrips.body}</p>
           <PendingLink href="/tours" className={buttonVariants() + " mt-6"}>
@@ -324,7 +324,7 @@ export default async function AccountPage(props: PageProps<"/account">) {
                 Where to eat, what&rsquo;s near the hotel, what to do with a free morning. It knows
                 your route and what we recommend, and anything you save is private to you.
               </p>
-              <ul className="mt-4 divide-y divide-border rounded-xl border border-border bg-surface">
+              <ul className="mt-4 divide-y divide-border rounded border border-border bg-surface">
                 {upcoming.map((b) => (
                   <li key={b.booking.id} className="flex flex-wrap items-center gap-4 p-5">
                     <div className="min-w-0 flex-1">
@@ -359,7 +359,7 @@ export default async function AccountPage(props: PageProps<"/account">) {
                 Private, and never published. Before a trip it tells us what you are expecting;
                 after one it tells us what to change.
               </p>
-              <ul className="mt-4 divide-y divide-border rounded-xl border border-border bg-surface">
+              <ul className="mt-4 divide-y divide-border rounded border border-border bg-surface">
                 {surveys.map((s) => (
                   <li key={s.bookingId} className="flex flex-wrap items-center gap-4 p-5">
                     <div className="min-w-0 flex-1">
@@ -409,7 +409,7 @@ export default async function AccountPage(props: PageProps<"/account">) {
                   <ReviewForm key={b.bookingId} booking={b} />
                 ))}
                 {myReviews.map((r) => (
-                  <div key={r.id} className="rounded-xl border border-border bg-surface p-6">
+                  <div key={r.id} className="rounded border border-border bg-surface p-6">
                     <p className="font-medium">{r.tourName}</p>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {r.status === "published"
@@ -471,7 +471,7 @@ function BookingList({
   return (
     <section className="mt-12">
       <h2 className="text-xl font-semibold">{title}</h2>
-      <ul className="mt-4 divide-y divide-border rounded-xl border border-border bg-surface">
+      <ul className="mt-4 divide-y divide-border rounded border border-border bg-surface">
         {items.map(({ booking: b, departure, tour, travelers }) => {
           const currency = b.currency as Parameters<typeof formatMoney>[0]["currency"];
           const balance = Math.max(b.total_amount - b.amount_paid, 0);

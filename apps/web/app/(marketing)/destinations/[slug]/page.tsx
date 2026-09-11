@@ -5,6 +5,8 @@ import { ArrowRight, MapPin, Phone } from "lucide-react";
 import { emptyStates } from "@guideless/config";
 import { TrackView } from "@/components/analytics/track-view";
 import { JsonLd } from "@/components/site/json-ld";
+import { HeroScrim, heroEyebrowClass } from "@/components/site/hero-scrim";
+import { cn } from "@/lib/utils";
 import { PhotoBackdrop } from "@/components/site/photo-hero";
 import { TourCard } from "@/components/tours/tour-card";
 import { Badge } from "@/components/ui/badge";
@@ -65,14 +67,7 @@ export default async function DestinationPage(props: PageProps<"/destinations/[s
           priority
           className={d.hero_image_url ? undefined : "opacity-70"}
         />
-        <div
-          className={
-            d.hero_image_url
-              ? "absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/70 to-ink/20"
-              : "absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/30"
-          }
-          aria-hidden
-        />
+        <HeroScrim hasPhoto={Boolean(d.hero_image_url)} />
         <div className="relative mx-auto w-full max-w-6xl px-6 pt-20 pb-16 md:pt-28">
           <nav aria-label="Breadcrumb" className="text-sm text-cloud/70">
             <Link href="/destinations" className="text-cloud/70 no-underline hover:text-cloud">
@@ -83,7 +78,7 @@ export default async function DestinationPage(props: PageProps<"/destinations/[s
             </span>
             <span>{d.name}</span>
           </nav>
-          <p className="mt-6 flex items-center gap-2 text-sm font-medium uppercase tracking-[0.22em] text-aqua">
+          <p className={cn(heroEyebrowClass, "mt-6 flex items-center gap-2")}>
             <MapPin className="h-4 w-4" aria-hidden />
             {d.region ? `${d.region}, ` : ""}
             {d.country_name}
@@ -143,7 +138,7 @@ export default async function DestinationPage(props: PageProps<"/destinations/[s
             {recommendations.length > 0 ? (
               <ul className="mt-8 grid gap-4 sm:grid-cols-2">
                 {recommendations.map((r) => (
-                  <li key={r.id} className="rounded-xl border border-border bg-cloud p-5">
+                  <li key={r.id} className="rounded border border-border bg-cloud p-5">
                     <div className="flex flex-wrap gap-1.5">
                       {r.categories.map((c) => (
                         <Badge key={c} variant="included">
@@ -162,7 +157,7 @@ export default async function DestinationPage(props: PageProps<"/destinations/[s
                 ))}
               </ul>
             ) : (
-              <div className="mt-8 rounded-xl border border-dashed border-border p-8">
+              <div className="mt-8 rounded border border-dashed border-border p-8">
                 <p className="font-heading text-lg font-semibold">
                   {emptyStates.noRecommendations.title}
                 </p>
@@ -171,7 +166,7 @@ export default async function DestinationPage(props: PageProps<"/destinations/[s
             )}
           </div>
 
-          <aside className="rounded-xl border border-border bg-cloud p-6">
+          <aside className="rounded border border-border bg-cloud p-6">
             <h2 className="font-heading text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               Good to know
             </h2>
@@ -208,7 +203,7 @@ export default async function DestinationPage(props: PageProps<"/destinations/[s
       </section>
 
       <section className="mx-auto w-full max-w-6xl px-6 py-20">
-        <div className="rounded-2xl bg-ink px-8 py-12 text-cloud md:px-12">
+        <div className="rounded bg-ink px-8 py-12 text-cloud md:px-12">
           <h2 className="font-heading text-3xl font-bold md:text-4xl">
             {bookable ? `See ${d.name} on your own terms.` : `${d.name} is on the list.`}
           </h2>
