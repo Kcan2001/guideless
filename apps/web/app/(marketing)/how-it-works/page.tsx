@@ -1,162 +1,141 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, BedDouble, Check, Users } from "lucide-react";
+import { ArrowRight, Check, Minus } from "lucide-react";
 import { brand } from "@guideless/config";
-import { buttonVariants } from "@/components/ui/button";
+import { PageHero } from "@/components/marketing/page-hero";
 import { JsonLd } from "@/components/site/json-ld";
+import { buttonVariants } from "@/components/ui/button";
+import { sitePhotos } from "@/lib/photos";
 import { breadcrumbJsonLd } from "@/lib/seo";
-import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "How it works",
-  description: `${brand.description} Here is exactly what we do, and what you do.`,
+  description:
+    "We book the hotels, trains and transfers. You pick your budget, keep your days, and travel with a group that is there when you want it.",
   alternates: { canonical: "/how-it-works" },
 };
 
+/**
+ * The one page that explains the product.
+ *
+ * It replaces three — "How it works", "Why Guideless" and "Group travel" — which were the same
+ * argument written three times and made the nav ask you to pick between three doors into one room.
+ * `/why-guideless` and `/group-travel` redirect here (next.config.ts).
+ *
+ * Short on purpose. The old version opened with nine numbered steps for a proposition that has
+ * three, and the length was doing the opposite of its job: a simple idea described at length reads
+ * as a complicated one.
+ */
 const STEPS = [
-  ["Pick a trip", "Choose a route and a departure date. Small groups — six to fourteen travelers."],
-  [
-    "Book",
-    "Reserve your place with a deposit. We book the hotels, trains, transfers and a handful of experiences.",
-  ],
-  [
-    "Fly in",
-    "You book your own flight. We tell you exactly when to land and where to walk when you do.",
-  ],
-  [
-    "Meet the group",
-    "A shared welcome drive and a first evening together. Optional, like everything else.",
-  ],
-  [
-    "Follow your itinerary",
-    "Your phone knows where you are staying, when the train leaves, and what is nearby.",
-  ],
-  ["Explore independently", "Free time is built in on purpose. No headcounts. No flag to follow."],
-  [
-    "Join optional experiences",
-    "A wine afternoon, a sunset walk, a long dinner — when you feel like it.",
-  ],
-  ["Travel onward", "Trains and hotels are arranged for every stop on the route."],
-  [
-    "Stay connected",
-    "Group chat before, during and after. Real people at Guideless when you need them.",
-  ],
+  ["Pick a trip", "A route and a date. Small groups, one welcome drink, no flag to follow."],
+  ["Choose your level", "Four budgets, same trip. Pick your hotel and any extras you want."],
+  ["Turn up", "We have booked the rest. Your phone knows where you sleep and when the train goes."],
+] as const;
+
+const ORGANISED = [
+  "Hotels for every night",
+  "Trains and transfers between cities",
+  "A welcome drink on night one",
+  "One person to call, any hour",
+] as const;
+
+const YOURS = [
+  "Your flights",
+  "Your days",
+  "Your dinners",
+  "Whether you join anything at all",
 ] as const;
 
 export default function HowItWorksPage() {
   return (
     <>
-      <section className="mx-auto w-full max-w-6xl px-6 pt-20 pb-12">
-        <p className="eyebrow text-muted-foreground">How Guideless works</p>
-        <h1 className="mt-3 max-w-3xl text-5xl md:text-6xl">{brand.taglineSecondary}</h1>
-        <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-          A Guideless trip is organized like a great tour and experienced like independent travel.
-          Here is the whole arc, start to finish.
-        </p>
-      </section>
+      <PageHero
+        photo={sitePhotos.howItWorks}
+        fallbackAlt="The flower market on the Cours Saleya in Nice"
+        eyebrow="How it works"
+        title={brand.tagline}
+        lede="We organise the parts that are tedious to book and easy to get wrong. The rest of the trip is yours."
+        compact
+      >
+        <Link href="/tours" className={buttonVariants({ size: "lg" })}>
+          See the trips <ArrowRight className="h-4 w-4" aria-hidden />
+        </Link>
+      </PageHero>
 
-      <section className="mx-auto w-full max-w-6xl px-6 pb-24">
-        <ol className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="mx-auto w-full max-w-6xl px-6 py-20">
+        <ol className="grid gap-10 sm:grid-cols-3">
           {STEPS.map(([title, body], i) => (
-            <li key={title} className="rounded border border-border bg-surface p-6">
-              <span className="font-heading text-sm font-semibold text-link">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <h2 className="mt-2 text-xl ">{title}</h2>
+            <li key={title}>
+              <p className="num text-4xl text-accent">{String(i + 1).padStart(2, "0")}</p>
+              <h2 className="mt-3 text-2xl">{title}</h2>
               <p className="mt-2 text-muted-foreground">{body}</p>
             </li>
           ))}
         </ol>
+      </section>
 
-        <div className="mt-20 grid gap-12 lg:grid-cols-2">
-          <div id="pricing" className="scroll-mt-24">
-            <p className="eyebrow text-muted-foreground">Pricing</p>
-            <h2 className="mt-3 text-3xl md:text-4xl">Pay only for what you do.</h2>
-            <p className="mt-3 text-muted-foreground">
-              Guided tours bundle everything and charge for the guide. We split it the other way: a
-              base trip, then a short list of optional add-ons you choose at booking or later, even
-              mid-trip.
-            </p>
-            <ul className="mt-6 space-y-3 text-sm">
-              {[
-                "The base trip: hotels, trains between cities, the welcome drinks and your Guide in the app.",
-                "Add-ons are optional and priced one by one: a boat day, a wine afternoon, race tickets, an extra night. You see how many of your group are in before you decide.",
-                "Your own room is the default. Two travelers can share one room and each pay less. Never more than two.",
-                "Reserve with a deposit; the balance is due before departure. Add-ons are paid in full when you choose them.",
-                "Cancellation tiers are published on every departure page before you book.",
-              ].map((t) => (
-                <li key={t} className="flex gap-3">
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden /> {t}
+      <section className="bg-surface py-20">
+        <div className="mx-auto grid w-full max-w-6xl gap-12 px-6 sm:grid-cols-2">
+          <div>
+            <p className="eyebrow text-muted-foreground">We book</p>
+            <ul className="mt-5 space-y-3">
+              {ORGANISED.map((line) => (
+                <li key={line} className="flex gap-3">
+                  <Check className="mt-1 h-4 w-4 shrink-0 text-teal" aria-hidden />
+                  <span>{line}</span>
                 </li>
               ))}
             </ul>
-            <Link href="/tours" className={cn(buttonVariants({ variant: "link" }), "mt-4 px-0")}>
-              See a departure&rsquo;s full price breakdown{" "}
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </Link>
           </div>
-          <div id="solo" className="scroll-mt-24">
-            <p className="eyebrow text-muted-foreground">Travelling solo</p>
-            <h2 className="mt-3 text-3xl md:text-4xl">Come alone. Leave with a group.</h2>
-            <p className="mt-3 text-muted-foreground">
-              Guideless is built for people who book alone. The trip is designed so that never feels
-              like a compromise.
-            </p>
-            <ul className="mt-6 space-y-4 text-sm">
-              <li className="flex gap-3">
-                <BedDouble className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden />
-                <span>
-                  <span className="font-medium text-foreground">No single supplement games.</span>{" "}
-                  Your own room is the price on the page. Sharing is a choice, not a default.
-                </span>
-              </li>
-              <li className="flex gap-3">
-                <Users className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden />
-                <span>
-                  <span className="font-medium text-foreground">
-                    See who&rsquo;s going before you book.
-                  </span>{" "}
-                  Every departure shows how many are booked, how many are solo, how many countries.
-                  Numbers, never names.
-                </span>
-              </li>
-              <li className="flex gap-3">
-                <Check className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden />
-                <span>
-                  <span className="font-medium text-foreground">Welcome drinks on night one.</span>{" "}
-                  The first round is on us. You will know faces by breakfast.
-                </span>
-              </li>
-              <li className="flex gap-3">
-                <Check className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden />
-                <span>
-                  <span className="font-medium text-foreground">
-                    Your Group opens 30 to 45 days out.
-                  </span>{" "}
-                  Chat, the roster and Live Moments switch on together, so nobody is alone in an
-                  empty room.
-                </span>
-              </li>
-            </ul>
-            <Link href="/meetups" className={cn(buttonVariants({ variant: "link" }), "mt-4 px-0")}>
-              Meet travelers at a city evening first <ArrowRight className="h-4 w-4" aria-hidden />
-            </Link>
-          </div>
-        </div>
-
-        <div className="mt-16 grid gap-6 rounded bg-ink p-10 text-cloud md:grid-cols-[1fr_auto] md:items-center">
           <div>
-            <h2 className="text-3xl ">Your guide is the app.</h2>
-            <p className="mt-3 max-w-xl text-cloud/80">
-              Every morning it answers three questions: where am I, what is next, and what are my
-              options. Everything else is up to you.
-            </p>
+            <p className="eyebrow text-muted-foreground">You keep</p>
+            <ul className="mt-5 space-y-3 text-muted-foreground">
+              {YOURS.map((line) => (
+                <li key={line} className="flex gap-3">
+                  <Minus className="mt-1 h-4 w-4 shrink-0" aria-hidden />
+                  <span>{line}</span>
+                </li>
+              ))}
+            </ul>
           </div>
-          <Link href="/tours" className={cn(buttonVariants({ variant: "inverse", size: "lg" }))}>
-            Explore trips <ArrowRight className="h-4 w-4" aria-hidden />
-          </Link>
         </div>
       </section>
+
+      <section className="bg-ink py-20 text-cloud">
+        <div className="mx-auto w-full max-w-6xl px-6">
+          <p className="eyebrow text-aqua">The group</p>
+          <h2 className="mt-3 max-w-2xl text-3xl md:text-5xl">Together, separately.</h2>
+          <dl className="mt-10 grid gap-8 sm:grid-cols-3">
+            <div>
+              <dt className="text-xl">Everyone pays for themselves</dt>
+              <dd className="mt-2 text-cloud/75">
+                No one fronts the money and chases it afterwards. Separate bookings, same departure.
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xl">Your own room by default</dt>
+              <dd className="mt-2 text-cloud/75">
+                Share with someone and you both pay less. No single supplement either way.
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xl">Bring people, earn credit</dt>
+              <dd className="mt-2 text-cloud/75">
+                Host a departure and you earn $100 of credit per traveler you bring, up to $1,000.
+              </dd>
+            </div>
+          </dl>
+          <div className="mt-12 flex flex-wrap items-center gap-x-5 gap-y-3">
+            <Link href="/tours" className={buttonVariants({ size: "lg" })}>
+              See the trips <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+            <Link href="/host" className={buttonVariants({ variant: "outline", size: "lg" })}>
+              Host a departure
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <JsonLd
         data={breadcrumbJsonLd([
           { name: "Home", path: "/" },
