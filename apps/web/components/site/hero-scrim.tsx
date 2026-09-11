@@ -38,7 +38,7 @@ export function HeroScrim({
     <>
       {/* 2 — the text column */}
       <div
-        className="absolute inset-0 bg-gradient-to-r from-ink/98 via-ink/94 to-ink/45"
+        className="absolute inset-0 bg-gradient-to-r from-ink/98 via-ink/92 to-ink/75 lg:to-ink/22"
         aria-hidden
       />
       {/* 1 — the header band */}

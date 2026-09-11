@@ -38,18 +38,36 @@ export function photo(src: string): SitePhoto | null {
 
 /** Fixed picks for surfaces that are not driven by a database row. */
 /**
- * The home hero film: a short silent loop cut from Kyle's own Monaco footage across the 2024, 2025
- * and 2026 race weekends. Built by scripts/build-hero-video.mjs, which is where the clip list and
- * the encode settings live.
+ * Hero films, cut from Kyle's own footage by scripts/build-hero-video.mjs.
  *
- * Two files because no single codec is both small and universal: WebM/VP9 is meaningfully lighter
- * and every current browser takes it; the H.264 MP4 is the fallback for older Safari. The browser
- * picks the first `<source>` it understands, so WebM is listed first.
+ * Keyed by the thing they belong to: the home page, and then by tour slug. `heroVideoFor` returns
+ * undefined for anything without footage, and every hero treats that as "no video" rather than a
+ * broken source — the photograph is the fallback and it is a perfectly good hero.
+ *
+ * Two files each because no single codec is both small and universal: WebM/VP9 is meaningfully
+ * lighter and every current browser takes it; the H.264 MP4 covers older Safari. The browser picks
+ * the first `<source>` it understands, so WebM is listed first.
  */
-export const heroVideo = {
-  webm: "/video/monaco-hero.webm",
-  mp4: "/video/monaco-hero.mp4",
-} as const;
+export interface HeroVideo {
+  webm: string;
+  mp4: string;
+}
+
+const heroVideos: Record<string, HeroVideo> = {
+  home: { webm: "/video/home-hero.webm", mp4: "/video/home-hero.mp4" },
+  "monaco-grand-prix": { webm: "/video/monaco-hero.webm", mp4: "/video/monaco-hero.mp4" },
+  "southern-france": {
+    webm: "/video/southern-france-hero.webm",
+    mp4: "/video/southern-france-hero.mp4",
+  },
+};
+
+export const heroVideo = heroVideos.home!;
+
+/** The film for a tour slug, or undefined where we have no footage yet. */
+export function heroVideoFor(slug: string): HeroVideo | undefined {
+  return heroVideos[slug];
+}
 
 export const sitePhotos = {
   home: "/photos/nice-promenade-dusk.jpg",

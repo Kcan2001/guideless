@@ -35,7 +35,7 @@ export function TourCard({
           sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
           imgClassName="transition-transform duration-500 group-hover:scale-[1.03]"
         />
-        <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 bg-gradient-to-t from-ink via-ink/85 to-transparent p-5 text-cloud">
+        <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 bg-gradient-to-t from-ink via-ink/92 to-ink/55 p-5 text-cloud">
           <div>
             <p className="eyebrow text-cloud">
               {destinations.map((d) => d.name).join(" → ") || "Route"}
