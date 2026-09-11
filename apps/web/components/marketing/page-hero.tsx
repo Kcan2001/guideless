@@ -28,7 +28,7 @@ export function PageHero({
   position?: string;
 }) {
   return (
-    <section className="relative overflow-hidden bg-ink text-cloud">
+    <section data-hero-dark className="relative overflow-hidden bg-ink text-cloud">
       <PhotoBackdrop src={photo} fallbackAlt={fallbackAlt} priority position={position} />
       <HeroScrim />
       <div

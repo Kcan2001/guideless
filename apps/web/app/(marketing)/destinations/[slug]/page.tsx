@@ -59,7 +59,7 @@ export default async function DestinationPage(props: PageProps<"/destinations/[s
 
   return (
     <>
-      <section className="relative overflow-hidden bg-ink text-cloud">
+      <section data-hero-dark className="relative overflow-hidden bg-ink text-cloud">
         <PhotoBackdrop
           src={d.hero_image_url}
           fallbackAlt={`${d.name}, ${d.country_name}`}

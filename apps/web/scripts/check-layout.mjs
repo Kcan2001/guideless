@@ -124,6 +124,16 @@ for (const theme of THEMES)
     });
 
     // ── 5. Contrast, sampled from what is actually painted ─────────────────
+    // Overlays come out BEFORE anything is collected. The consent banner is `fixed`, so in a
+    // full-page capture it lies across whatever content sits at that scroll offset. Removing it
+    // after collection was worse than not removing it at all: the banner's own text stayed in the
+    // node list with coordinates now pointing at unrelated content, so "Privacy policy" was
+    // reported against a different ground on every page.
+    await page.evaluate(() => {
+      for (const el of document.querySelectorAll('[role="dialog"], [role="alertdialog"]')) {
+        if (getComputedStyle(el).position === "fixed") el.remove();
+      }
+    });
     const textNodes = await page.evaluate(() => {
       const picks = [];
       const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
@@ -135,7 +145,13 @@ for (const theme of THEMES)
         if (!el) continue;
         const cs = getComputedStyle(el);
         if (cs.visibility === "hidden" || cs.opacity === "0" || cs.display === "none") continue;
-        const r = el.getBoundingClientRect();
+        // The TEXT NODE's own rect, not its parent's box. `<h1>Group trips, <span>built your
+        // way.</span></h1>` has one box covering both colours, and the aqua span filled enough of
+        // it that the dominant-colour sampler nominated aqua as the ground for the cloud words —
+        // reporting 1.49:1 for type that is nowhere near the aqua.
+        const range = document.createRange();
+        range.selectNodeContents(n);
+        const r = range.getBoundingClientRect();
         if (r.width < 8 || r.height < 8 || r.top > window.innerHeight * 6) continue;
         const x = Math.round(r.left + Math.min(r.width / 2, 30));
         const y = Math.round(r.top + r.height / 2);
@@ -155,6 +171,35 @@ for (const theme of THEMES)
           large,
           x,
           y,
+          // The text's box, for sampling the painted ground beside it.
+          left: Math.round(r.left),
+          top: Math.round(r.top),
+          bottom: Math.round(r.bottom),
+          width: Math.round(r.width),
+          height: Math.round(r.height),
+          // An element that paints its own opaque fill IS its own ground. Sampling pixels beside
+          // an aqua button reads the dark hero underneath and reports ink-on-ink at 1.00:1 for a
+          // button that is actually 10.4:1 — the single loudest false positive in this check.
+          // An element that paints its own opaque fill IS its own ground: sampling pixels beside an
+          // aqua button reads the dark hero underneath and reports ink-on-ink at 1.00:1 for a
+          // button that is really 10.4:1.
+          //
+          // Deliberately shallow — the element and two ancestors, and only while the box stays
+          // close to the size of the text. Walking further reached `body` and returned its cloud
+          // for a wordmark sitting on a transparent header over a photograph, which is the same
+          // false positive in the other direction. Past that point the painted pixels are the
+          // better answer, so we stop and let them speak.
+          ownBg: (() => {
+            let node = el;
+            for (let depth = 0; node && depth < 3; depth++, node = node.parentElement) {
+              const cs = getComputedStyle(node);
+              if (node.getBoundingClientRect().height > r.height * 4) return null;
+              if (cs.backgroundImage !== "none") return null;
+              const m = (cs.backgroundColor.match(/[\d.]+/g) || []).map(Number);
+              if (m.length >= 3 && (m.length < 4 || m[3] >= 0.999)) return cs.backgroundColor;
+            }
+            return null;
+          })(),
           sel:
             el.tagName.toLowerCase() +
             (el.className && typeof el.className === "string"
@@ -162,14 +207,14 @@ for (const theme of THEMES)
               : ""),
         });
       }
-      // One sample per distinct colour/selector pair keeps this fast.
-      const seen = new Set();
-      return picks.filter((p) => {
-        const k = p.sel + p.color + p.large;
-        if (seen.has(k)) return false;
-        seen.add(k);
-        return true;
-      });
+      // Every node, not one per selector/colour pair.
+      //
+      // The old dedupe hid a real bug: `p.font-semibold` in cloud appears both on an ink band
+      // (fine) and inside a white card sitting on that band (1.03:1, invisible). Sampling the first
+      // and skipping the rest reported the page clean. The same class on a different ground is a
+      // different question, and the ground is not known until after measuring — so measure them
+      // all. It costs one screenshot and one batched evaluate, which is what it cost before.
+      return picks;
     });
 
     // Resolve ANY CSS colour to sRGB by painting it, rather than reading digits out of the string.
@@ -203,68 +248,113 @@ for (const theme of THEMES)
       return (hi + 0.05) / (lo + 0.05);
     };
 
-    for (const t of textNodes) {
-      // The ground is the element's own ancestry composited down, not the first background found.
-      // A button paints its own fill, so hiding it and sampling underneath reports cloud-on-white for
-      // a perfectly readable ink button; and a 6%-alpha inline code fill is not an opaque ground, it
-      // is a tint over the page. Both were false positives before this walked and blended.
-      const behind = await page.evaluate(
-        ({ x, y }) => {
-          // Same canvas trick as `resolve`, inside the page: it handles oklab, oklch, color()
-          // and colour keywords alike, which no reasonable regex does.
-          const cv = document.createElement("canvas");
-          cv.width = cv.height = 1;
-          const ctx = cv.getContext("2d", { willReadFrequently: true });
-          const toRgba = (c) => {
-            if (!c || c === "transparent") return null;
-            ctx.clearRect(0, 0, 1, 1);
-            ctx.fillStyle = "#000";
-            ctx.fillStyle = c;
-            ctx.fillRect(0, 0, 1, 1);
-            const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
-            return a === 0 ? null : [r, g, b, a / 255];
-          };
-          const layers = [];
-          let node = document.elementFromPoint(x, y);
-          while (node) {
-            const cs = getComputedStyle(node);
-            if (cs.backgroundImage !== "none" || node.tagName === "IMG") return "IMAGE";
-            const m = toRgba(cs.backgroundColor);
-            if (m) {
-              const a = m[3];
-              if (a > 0) {
-                layers.push(m);
-                if (a >= 0.999) break;
-              }
-            }
-            node = node.parentElement;
+    // ── The ground comes from the pixels, not from the DOM ────────────────
+    //
+    // Compositing background-colours up the ancestor chain gets the common case right and the
+    // interesting cases wrong, because what is painted behind a pixel is not always an ancestor.
+    // The site header is transparent and overlays the hero photograph — a *sibling* pulled up under
+    // it — so the DOM walk found `body`'s cloud and reported cloud-on-cloud at 1.00:1 for nav links
+    // that actually sit at 14:1 over a dark photo. Seven false failures on every page with a hero.
+    //
+    // So: screenshot once per width, then sample the real painted pixels in a band beside each run
+    // of text. Both tails are checked — the brightest pixels are the worst case for light text and
+    // the darkest are the worst case for dark text — and the lower ratio is the one reported.
+    // Full page, not the viewport. Text below the fold has a bounding box past the viewport edge,
+    // and clamping its sample band to that edge measured whatever happened to be sitting there —
+    // the cookie banner, in practice, which is white and reported cloud-on-white for a heading on
+    // an ink band. Nothing is ever scrolled here, so client coordinates are document coordinates.
+    const shot = (await page.screenshot({ type: "png", fullPage: true })).toString("base64");
+    const measured = await page.evaluate(
+      async ({ b64, nodes }) => {
+        const img = new Image();
+        await new Promise((r) => {
+          img.onload = r;
+          img.src = "data:image/png;base64," + b64;
+        });
+        const cv = document.createElement("canvas");
+        cv.width = img.width;
+        cv.height = img.height;
+        const ctx = cv.getContext("2d", { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0);
+        const probe = document.createElement("canvas").getContext("2d", {
+          willReadFrequently: true,
+        });
+        const resolve = (c) => {
+          // clearRect matters: the probe canvas is reused for every node, and fillRect composites
+          // onto whatever is already there. Without it a translucent colour painted over the last
+          // one saturates towards opaque, so `text-ink/55` measured as full-strength ink and the
+          // gate stopped reporting exactly the failures it exists to catch.
+          probe.clearRect(0, 0, 1, 1);
+          probe.fillStyle = "#000";
+          probe.fillStyle = c;
+          probe.fillRect(0, 0, 1, 1);
+          const d = probe.getImageData(0, 0, 1, 1).data;
+          return [d[0], d[1], d[2], d[3] / 255];
+        };
+        return nodes.map((n) => {
+          // The ground is sampled INSIDE the text's own box, not in a band beneath it.
+          //
+          // A band below crosses boundaries: under a `dt` near the bottom of a card it landed on
+          // the next card's photograph and reported muted-grey on sky blue. Inside the box there
+          // is nowhere else to land. Glyphs cover a minority of the pixels, so the most common
+          // colour in the box IS the background — and pixels close to the text colour are dropped
+          // so dense type cannot nominate itself as its own ground.
+          const x = Math.min(Math.max(n.left, 0), img.width - 2);
+          const y = Math.min(Math.max(n.top, 0), img.height - 2);
+          const w = Math.max(2, Math.min(n.width, img.width - x));
+          const h = Math.max(2, Math.min(n.height, img.height - y));
+          const box = ctx.getImageData(x, y, w, h).data;
+          const fgProbe = resolve(n.color);
+          const near = (p) =>
+            Math.abs(p[0] - fgProbe[0]) +
+              Math.abs(p[1] - fgProbe[1]) +
+              Math.abs(p[2] - fgProbe[2]) <
+            60;
+          const counts = new Map();
+          for (let i = 0; i < box.length; i += 4) {
+            const px = [box[i], box[i + 1], box[i + 2]];
+            if (fgProbe[3] > 0.9 && near(px)) continue;
+            // Quantise so anti-aliasing does not shatter the background into a thousand buckets.
+            const k = (px[0] >> 3) * 4096 + (px[1] >> 3) * 64 + (px[2] >> 3);
+            const e = counts.get(k);
+            if (e) e.n++;
+            else counts.set(k, { n: 1, px });
           }
-          if (!layers.length) return null;
-          // Composite from the bottom up.
-          let [r, g, b] = layers[layers.length - 1];
-          for (let i = layers.length - 2; i >= 0; i--) {
-            const [sr, sg, sb, sa] = layers[i];
-            r = sr * sa + r * (1 - sa);
-            g = sg * sa + g * (1 - sa);
-            b = sb * sa + b * (1 - sa);
+          if (!counts.size) return null;
+          let best = null;
+          for (const e of counts.values()) if (!best || e.n > best.n) best = e;
+          const dark = best.px;
+          const light = best.px;
+          const fg = resolve(n.color);
+          // Translucent text is blended onto whichever ground it is being measured against.
+          const on = (g) => [0, 1, 2].map((i) => fg[i] * fg[3] + g[i] * (1 - fg[3]));
+          if (n.ownBg) {
+            const own = resolve(n.ownBg).slice(0, 3);
+            return { dark: own, light: own, fgOnDark: on(own), fgOnLight: on(own) };
           }
-          return `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
-        },
-        { x: t.x, y: t.y },
-      );
-      if (!behind || behind === "IMAGE") continue; // Photographs need a human eye, not a sample.
-      const fg = await resolve(t.color);
-      const bg = await resolve(behind);
-      // Text can be translucent too: blend it onto the ground before measuring, or `text-ink/60`
-      // reports as full-strength ink and passes when it should not.
-      const blended = [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]));
-      const r = ratio(blended, bg);
+          return { dark, light, fgOnDark: on(dark), fgOnLight: on(light) };
+        });
+      },
+      { b64: shot, nodes: textNodes },
+    );
+
+    for (let i = 0; i < textNodes.length; i++) {
+      const t = textNodes[i];
+      const m = measured[i];
+      if (!m) continue;
       const need = t.large ? 3 : 4.5;
+      // The worse of the two tails. A gradient or a photograph gives a range, and text has to hold
+      // across it, not merely at the average.
+      const onDark = ratio(m.fgOnDark, m.dark);
+      const onLight = ratio(m.fgOnLight, m.light);
+      const r = Math.min(onDark, onLight);
+      const ground = onDark < onLight ? m.dark : m.light;
       if (r < need) {
+        // Deduped on the way out instead: identical selector, colour and ground is one finding.
         found.push({
           kind: "contrast",
           where: t.sel,
-          detail: `${r.toFixed(2)}:1 needs ${need} — "${t.text}" ${t.color} on ${behind}`,
+          detail: `${r.toFixed(2)}:1 needs ${need} — "${t.text}" ${t.color} on rgb(${ground.join(", ")})`,
         });
       }
     }
