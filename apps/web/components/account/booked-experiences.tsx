@@ -19,7 +19,7 @@ export function BookedExperiences({ fulfilments }: { fulfilments: MyFulfilment[]
 
   return (
     <section className="mt-12" id="booked-experiences">
-      <h2 className="text-xl font-semibold">Experiences we booked for you</h2>
+      <h2 className="text-xl ">Experiences we booked for you</h2>
       <p className="mt-1 text-sm text-muted-foreground">
         Bought through our partners and run by them. You paid us; we booked it in your name.
       </p>

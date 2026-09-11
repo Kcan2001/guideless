@@ -187,7 +187,7 @@ export function EventTierMenu({
       <StayTiers options={stayOptions} currency={currency} />
       {viewing.length > 0 && (
         <div>
-          <h3 className="font-heading text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <h3 className="font-heading text-sm uppercase tracking-[0.18em] text-muted-foreground">
             How you watch {eventName.replace(/^Formula 1 /, "")}
           </h3>
           <ul className="mt-3 space-y-3">

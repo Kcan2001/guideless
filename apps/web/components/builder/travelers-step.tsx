@@ -91,7 +91,7 @@ export function TravelersStep({
   return (
     <form id={STEP_FORM_ID} onSubmit={form.handleSubmit(onNext)} className="space-y-8" noValidate>
       <header>
-        <h2 className="text-3xl font-bold">{title}</h2>
+        <h2 className="text-3xl ">{title}</h2>
         <p className="mt-2 text-muted-foreground">
           Names as on passports. Only what hotels and rail operators need.
         </p>
@@ -370,7 +370,7 @@ function RoomsPanel({
     >
       <h2
         id="rooms-heading"
-        className="font-heading text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground"
+        className="font-heading text-sm uppercase tracking-[0.18em] text-muted-foreground"
       >
         Rooms
       </h2>

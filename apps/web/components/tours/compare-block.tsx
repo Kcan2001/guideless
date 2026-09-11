@@ -48,7 +48,7 @@ export function CompareBlock({
   return (
     <div className="grid gap-6 md:grid-cols-2" data-testid="compare-block">
       <section className="rounded border border-border bg-surface p-7">
-        <h3 className="font-heading text-lg font-semibold text-muted-foreground">{other.title}</h3>
+        <h3 className="font-heading text-lg text-muted-foreground">{other.title}</h3>
         <ul className="mt-5 space-y-3 text-muted-foreground">
           {other.lines.map((line) => (
             <li key={line} className="flex gap-3">
@@ -59,7 +59,7 @@ export function CompareBlock({
         </ul>
       </section>
       <section className="rounded bg-ink p-7 text-cloud">
-        <h3 className="font-heading text-lg font-semibold text-aqua">Guideless</h3>
+        <h3 className="font-heading text-lg text-aqua">Guideless</h3>
         <ul className="mt-5 space-y-3">
           {ours.map((line) => (
             <li key={line} className="flex gap-3">

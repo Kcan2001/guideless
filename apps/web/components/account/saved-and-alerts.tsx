@@ -26,7 +26,7 @@ export function SavedAndAlerts({
 
   return (
     <section className="mt-12" id="saved">
-      <h2 className="text-xl font-semibold">Kept for later</h2>
+      <h2 className="text-xl ">Kept for later</h2>
 
       {saved.length > 0 && (
         <ul className="mt-4 divide-y divide-border rounded border border-border bg-surface">
@@ -70,7 +70,7 @@ export function SavedAndAlerts({
 
       {alerts.length > 0 && (
         <div className="mt-6">
-          <h3 className="font-medium">You&rsquo;ll hear from us about</h3>
+          <h3 className="">You&rsquo;ll hear from us about</h3>
           <ul className="mt-3 divide-y divide-border rounded border border-border bg-surface">
             {alerts.map((a) => (
               <li key={a.id} className="flex flex-wrap items-center gap-4 p-4">

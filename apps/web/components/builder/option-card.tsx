@@ -127,12 +127,12 @@ export function OptionCard({
       )}
       <div className="flex flex-1 flex-col gap-4 p-5 md:p-6">
         <div className={cn(selected && !image && !gallery?.length && "pr-9")}>
-          <p className="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="eyebrow flex flex-wrap items-center gap-2 text-muted-foreground">
             {!image && !gallery?.length && <TierBadge tier={tier ?? null} />}
             {eyebrow}
             {!image && !gallery?.length && <OptionLabelBadge label={label ?? null} />}
           </p>
-          <h3 id={titleId} className="mt-1.5 font-heading text-xl font-bold">
+          <h3 id={titleId} className="mt-1.5 font-heading text-xl ">
             {title}
           </h3>
         </div>

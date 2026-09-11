@@ -21,10 +21,8 @@ export default async function DestinationsPage() {
   return (
     <>
       <section className="mx-auto w-full max-w-6xl px-6 pt-20 pb-10">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-          Destinations
-        </p>
-        <h1 className="mt-3 text-5xl font-bold md:text-6xl">Where the routes go.</h1>
+        <p className="eyebrow text-muted-foreground">Destinations</p>
+        <h1 className="mt-3 text-5xl md:text-6xl">Where the routes go.</h1>
         <p className="mt-4 max-w-xl text-lg text-muted-foreground">
           Places worth several days and no schedule. Each one appears on at least one Guideless
           route.
@@ -53,13 +51,11 @@ export default async function DestinationsPage() {
                     />
                   </div>
                   <div className="flex flex-1 flex-col p-5">
-                    <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                    <p className="eyebrow text-muted-foreground">
                       {d.region ? `${d.region} · ` : ""}
                       {d.country_name}
                     </p>
-                    <h2 className="mt-1 font-heading text-2xl font-bold text-foreground">
-                      {d.name}
-                    </h2>
+                    <h2 className="mt-1 font-heading text-2xl text-foreground">{d.name}</h2>
                     {d.summary && <p className="mt-2 text-muted-foreground">{d.summary}</p>}
                     <span className="mt-auto inline-flex items-center gap-1 pt-4 text-sm font-medium text-link">
                       Explore {d.name}{" "}

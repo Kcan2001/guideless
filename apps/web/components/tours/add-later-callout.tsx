@@ -8,9 +8,7 @@ export function AddLaterCallout() {
       aria-labelledby="add-later-heading"
       data-testid="add-later"
     >
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-        Not sure yet?
-      </p>
+      <p className="eyebrow text-muted-foreground">Not sure yet?</p>
       <h3
         id="add-later-heading"
         className="mt-1 flex items-center gap-2 font-heading text-2xl font-semibold"

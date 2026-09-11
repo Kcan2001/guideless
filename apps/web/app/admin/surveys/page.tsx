@@ -134,7 +134,7 @@ function Quote({ label, text }: { label: string; text: string | null }) {
   if (!text) return null;
   return (
     <div className="mt-3">
-      <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="eyebrow text-muted-foreground">{label}</p>
       <p className="mt-0.5 whitespace-pre-line text-sm">{text}</p>
     </div>
   );

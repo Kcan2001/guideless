@@ -12,9 +12,7 @@ export function ResponsibilityList({ included, excluded }: { included: Item[]; e
   return (
     <div className="grid gap-6 md:grid-cols-2">
       <section className="rounded bg-ink p-7 text-cloud">
-        <h3 className="font-heading text-lg font-semibold text-aqua">
-          {responsibilityLabels.guideless}
-        </h3>
+        <h3 className="font-heading text-lg text-aqua">{responsibilityLabels.guideless}</h3>
         <ul className="mt-5 space-y-4">
           {included.map((i) => (
             <li key={i.id} className="flex gap-3">
@@ -28,7 +26,7 @@ export function ResponsibilityList({ included, excluded }: { included: Item[]; e
         </ul>
       </section>
       <section className="rounded border border-border bg-surface p-7">
-        <h3 className="font-heading text-lg font-semibold">{responsibilityLabels.traveler}</h3>
+        <h3 className="font-heading text-lg ">{responsibilityLabels.traveler}</h3>
         <ul className="mt-5 space-y-4">
           {excluded.map((i) => (
             <li key={i.id} className="flex gap-3">

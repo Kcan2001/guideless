@@ -50,10 +50,8 @@ export function BaseIncludes({
       <div className="mx-auto w-full max-w-6xl px-6 py-12 md:py-14">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-              Base trip includes
-            </p>
-            <h2 id="base-includes-heading" className="mt-2 text-2xl font-bold md:text-3xl">
+            <p className="eyebrow text-muted-foreground">Base trip includes</p>
+            <h2 id="base-includes-heading" className="mt-2 text-2xl md:text-3xl">
               The important stuff is handled.
             </h2>
           </div>

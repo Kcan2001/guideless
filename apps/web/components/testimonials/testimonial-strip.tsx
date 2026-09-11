@@ -25,10 +25,8 @@ export function TestimonialStrip({
   return (
     <section id="testimonials" className="border-t border-border">
       <div className="mx-auto w-full max-w-6xl px-6 py-20">
-        <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-          {heading}
-        </p>
-        <h2 className="mt-3 max-w-2xl font-heading text-3xl font-bold">{title}</h2>
+        <p className="eyebrow text-muted-foreground">{heading}</p>
+        <h2 className="mt-3 max-w-2xl font-heading text-3xl ">{title}</h2>
 
         <ul className="mt-10 grid gap-6 md:grid-cols-2">
           {testimonials.map((t) => (

@@ -38,7 +38,7 @@ export function PageHero({
         )}
       >
         <p className={cn(heroEyebrowClass, "mb-4")}>{eyebrow}</p>
-        <h1 className="max-w-3xl text-4xl font-bold leading-[1.05] md:text-6xl">{title}</h1>
+        <h1 className="max-w-3xl text-4xl leading-[1.05] md:text-6xl">{title}</h1>
         {lede && <p className="mt-6 max-w-2xl text-lg leading-relaxed text-cloud/85">{lede}</p>}
         {children && <div className="mt-8 flex flex-wrap gap-4">{children}</div>}
       </div>
@@ -62,15 +62,8 @@ export function SectionHeading({
 }) {
   return (
     <div className={cn("max-w-2xl", className)}>
-      <p
-        className={cn(
-          "text-sm font-medium uppercase tracking-[0.2em]",
-          inverse ? "text-aqua" : "text-muted-foreground",
-        )}
-      >
-        {eyebrow}
-      </p>
-      <h2 className="mt-3 text-3xl font-bold md:text-5xl">{title}</h2>
+      <p className={cn("eyebrow", inverse ? "text-aqua" : "text-muted-foreground")}>{eyebrow}</p>
+      <h2 className="mt-3 text-3xl md:text-5xl">{title}</h2>
       {lede && (
         <p className={cn("mt-4 text-lg", inverse ? "text-cloud/80" : "text-muted-foreground")}>
           {lede}

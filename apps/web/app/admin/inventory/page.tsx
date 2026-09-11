@@ -101,9 +101,7 @@ function DepartureCard({ row }: { row: DepartureInventory }) {
 
       {row.tiers.length > 0 && (
         <div className="mt-6">
-          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Where they stay
-          </h3>
+          <h3 className="eyebrow mb-2 text-muted-foreground">Where they stay</h3>
           <Table
             head={["Tier", "Taken", "Remaining", "Hotel rates"]}
             rows={row.tiers.map((t) => [
@@ -136,9 +134,7 @@ function DepartureCard({ row }: { row: DepartureInventory }) {
 
       {row.addOns.length > 0 && (
         <div className="mt-6">
-          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            What they add
-          </h3>
+          <h3 className="eyebrow mb-2 text-muted-foreground">What they add</h3>
           <Table
             head={["Add-on", "Taken", "Remaining", "Sales close"]}
             rows={row.addOns.map((x) => [
@@ -170,7 +166,7 @@ function DepartureCard({ row }: { row: DepartureInventory }) {
 
       {row.holds.length > 0 && (
         <div className="mt-6">
-          <h3 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <h3 className="eyebrow mb-2 flex items-center gap-1.5 text-muted-foreground">
             <Clock className="h-3.5 w-3.5" aria-hidden /> Live holds
           </h3>
           <Table

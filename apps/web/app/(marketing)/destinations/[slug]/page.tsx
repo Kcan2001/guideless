@@ -83,7 +83,7 @@ export default async function DestinationPage(props: PageProps<"/destinations/[s
             {d.region ? `${d.region}, ` : ""}
             {d.country_name}
           </p>
-          <h1 className="mt-3 text-5xl font-bold md:text-7xl">{d.name}</h1>
+          <h1 className="mt-3 text-5xl md:text-7xl">{d.name}</h1>
           {d.summary && (
             <p className="mt-6 max-w-xl text-lg text-cloud/80 md:text-xl">{d.summary}</p>
           )}
@@ -100,7 +100,7 @@ export default async function DestinationPage(props: PageProps<"/destinations/[s
         <section className="mx-auto w-full max-w-3xl px-6 pb-8">
           {guides.map((guide) => (
             <div key={guide.id} className="mb-12 last:mb-0">
-              <h2 className="font-heading text-2xl font-bold md:text-3xl">{guide.title}</h2>
+              <h2 className="font-heading text-2xl md:text-3xl">{guide.title}</h2>
               <Prose markdown={guide.body_markdown} className="mt-4" />
             </div>
           ))}
@@ -109,7 +109,7 @@ export default async function DestinationPage(props: PageProps<"/destinations/[s
 
       <section className="mx-auto w-full max-w-6xl px-6 py-16">
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <h2 className="text-3xl font-bold md:text-4xl">Trips through {d.name}.</h2>
+          <h2 className="text-3xl md:text-4xl">Trips through {d.name}.</h2>
           <Link href="/tours" className={buttonVariants({ variant: "secondary" })}>
             All trips
           </Link>
@@ -130,7 +130,7 @@ export default async function DestinationPage(props: PageProps<"/destinations/[s
       <section className="bg-surface py-16">
         <div className="mx-auto grid w-full max-w-6xl gap-12 px-6 md:grid-cols-[1.4fr_1fr]">
           <div>
-            <h2 className="text-3xl font-bold md:text-4xl">Recommendations.</h2>
+            <h2 className="text-3xl md:text-4xl">Recommendations.</h2>
             <p className="mt-2 max-w-xl text-muted-foreground">
               Curated by people who have spent real time here. Travelers see the full list, by
               neighborhood and time of day, in the app.
@@ -167,7 +167,7 @@ export default async function DestinationPage(props: PageProps<"/destinations/[s
           </div>
 
           <aside className="rounded border border-border bg-cloud p-6">
-            <h2 className="font-heading text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            <h2 className="font-heading text-sm uppercase tracking-[0.18em] text-muted-foreground">
               Good to know
             </h2>
             <dl className="mt-4 space-y-3 text-sm">
@@ -204,7 +204,7 @@ export default async function DestinationPage(props: PageProps<"/destinations/[s
 
       <section className="mx-auto w-full max-w-6xl px-6 py-20">
         <div className="rounded bg-ink px-8 py-12 text-cloud md:px-12">
-          <h2 className="font-heading text-3xl font-bold md:text-4xl">
+          <h2 className="font-heading text-3xl md:text-4xl">
             {bookable ? `See ${d.name} on your own terms.` : `${d.name} is on the list.`}
           </h2>
           <p className="mt-3 max-w-xl text-cloud/80">

@@ -27,12 +27,8 @@ export function TourReviews({
       <div className="mx-auto w-full max-w-6xl px-6 py-20">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-              From travelers
-            </p>
-            <h2 className="mt-3 font-heading text-3xl font-bold">
-              What people said about {tourName}.
-            </h2>
+            <p className="eyebrow text-muted-foreground">From travelers</p>
+            <h2 className="mt-3 font-heading text-3xl ">What people said about {tourName}.</h2>
             <p className="mt-3 flex flex-wrap items-center gap-3 text-muted-foreground">
               <Stars rating={stats.average} size="lg" />
               <span>

@@ -77,7 +77,7 @@ export function DepartureList({
             </div>
             <Badge variant={badge.variant}>{badge.label}</Badge>
             <div className="text-right">
-              <p className="font-heading text-xl font-bold">
+              <p className="num text-xl">
                 {formatMoney({ amount: d.priceAmount, currency: d.currency }, { compact: true })}
               </p>
               <p className="text-xs text-muted-foreground">per traveler</p>

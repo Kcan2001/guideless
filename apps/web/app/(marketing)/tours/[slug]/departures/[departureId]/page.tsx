@@ -85,10 +85,8 @@ export default async function DeparturePage(
           </span>
           <span>{formatDateRange(d.startDate, d.endDate)}</span>
         </nav>
-        <p className="mt-6 text-sm font-medium uppercase tracking-[0.22em] text-link">
-          {route.map((r) => r.destination.name).join(" → ")}
-        </p>
-        <h1 className="mt-3 text-4xl font-bold md:text-6xl">{tour.name}</h1>
+        <p className="eyebrow mt-6 text-link">{route.map((r) => r.destination.name).join(" → ")}</p>
+        <h1 className="mt-3 text-4xl md:text-6xl">{tour.name}</h1>
         <p className="mt-3 flex flex-wrap items-center gap-3 text-xl">
           <CalendarDays className="h-5 w-5 text-muted-foreground" aria-hidden />
           {formatDateRange(d.startDate, d.endDate)}
@@ -100,7 +98,7 @@ export default async function DeparturePage(
         <div className="space-y-12">
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded border border-border bg-surface p-5">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">Group</p>
+              <p className="eyebrow text-muted-foreground">Group</p>
               <p className="mt-1 flex items-center gap-2 text-lg font-semibold">
                 <Users className="h-4 w-4 text-muted-foreground" aria-hidden />{" "}
                 {d.availability.confirmed} of {d.capacity} booked
@@ -110,16 +108,14 @@ export default async function DeparturePage(
               </p>
             </div>
             <div className="rounded border border-border bg-surface p-5">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                Booking deadline
-              </p>
+              <p className="eyebrow text-muted-foreground">Booking deadline</p>
               <p className="mt-1 flex items-center gap-2 text-lg font-semibold">
                 <Clock className="h-4 w-4 text-muted-foreground" aria-hidden />
                 {d.bookingDeadline ? formatDate(d.bookingDeadline) : "Until full"}
               </p>
             </div>
             <div className="rounded border border-border bg-surface p-5">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">Time zone</p>
+              <p className="eyebrow text-muted-foreground">Time zone</p>
               <p className="mt-1 text-lg font-semibold">{d.timezone.replace("_", " ")}</p>
               <p className="mt-1 text-sm text-muted-foreground">All itinerary times are local</p>
             </div>
@@ -130,7 +126,7 @@ export default async function DeparturePage(
           {hasExtras && (
             <div id="make-it-yours" className="scroll-mt-24 space-y-8">
               <div>
-                <h2 className="text-2xl font-bold">Make it yours.</h2>
+                <h2 className="text-2xl ">Make it yours.</h2>
                 <p className="mt-2 text-muted-foreground">
                   Choose at booking or add later from your account, even during the trip. Add-ons
                   are paid in full when chosen and never count toward the deposit.
@@ -144,7 +140,7 @@ export default async function DeparturePage(
           )}
 
           <div>
-            <h2 className="text-2xl font-bold">Payment schedule</h2>
+            <h2 className="text-2xl ">Payment schedule</h2>
             <dl className="mt-4 divide-y divide-border rounded border border-border bg-surface">
               <div className="flex justify-between gap-4 p-4">
                 <dt>Deposit at booking</dt>
@@ -173,12 +169,12 @@ export default async function DeparturePage(
           </div>
 
           <div>
-            <h2 className="text-2xl font-bold">Cancellation policy</h2>
+            <h2 className="text-2xl ">Cancellation policy</h2>
             <p className="mt-2 text-muted-foreground">
               Refund of the amount paid, by how far ahead you cancel.
             </p>
             <table className="mt-4 w-full overflow-hidden rounded border border-border bg-surface text-left text-sm">
-              <thead className="bg-cloud text-xs uppercase tracking-wide text-muted-foreground">
+              <thead className="eyebrow bg-cloud text-muted-foreground">
                 <tr>
                   <th scope="col" className="px-4 py-3 font-medium">
                     Cancel
@@ -207,7 +203,7 @@ export default async function DeparturePage(
           </div>
 
           <div>
-            <h2 className="text-2xl font-bold">Who handles what.</h2>
+            <h2 className="text-2xl ">Who handles what.</h2>
             <div className="mt-6">
               <ResponsibilityList included={included} excluded={excluded} />
             </div>
@@ -216,9 +212,7 @@ export default async function DeparturePage(
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <div className="rounded border border-border bg-surface p-6 shadow-sm">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">
-              Per traveler · own room
-            </p>
+            <p className="eyebrow text-muted-foreground">Per traveler · own room</p>
             <p className="mt-1 font-heading text-4xl font-bold">{money(d.priceAmount)}</p>
             {d.depositAmount > 0 && (
               <p className="mt-1 text-sm text-muted-foreground">

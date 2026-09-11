@@ -27,7 +27,7 @@ function ReviewRow({ review }: { review: ModerationReview }) {
             <Stars rating={review.rating} />
             <StatusBadge kind="generic" status={review.status} />
           </div>
-          {review.title && <h3 className="mt-2 font-semibold">{review.title}</h3>}
+          {review.title && <h3 className="mt-2 ">{review.title}</h3>}
           <p className="mt-1 text-sm text-muted-foreground">
             {review.authorName} · {review.tourName}
             {review.tripEndDate && ` · travelled ${when(review.tripEndDate)}`} · written{" "}

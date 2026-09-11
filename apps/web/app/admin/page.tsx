@@ -127,7 +127,7 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
                 if (group.length === 0) return null;
                 return (
                   <div key={severity}>
-                    <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    <h3 className="eyebrow mb-1.5 text-muted-foreground">
                       {severity === "warning" ? "Needs a decision" : "Worth knowing"}
                     </h3>
                     <ul className="space-y-2 text-sm">

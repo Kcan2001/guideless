@@ -34,10 +34,8 @@ export default async function ToursPage(props: PageProps<"/tours">) {
   return (
     <>
       <section className="mx-auto w-full max-w-6xl px-6 pt-20 pb-10">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-          Trips
-        </p>
-        <h1 className="mt-3 text-5xl font-bold md:text-6xl">Pick a route.</h1>
+        <p className="eyebrow text-muted-foreground">Trips</p>
+        <h1 className="mt-3 text-5xl md:text-6xl">Pick a route.</h1>
         <p className="mt-4 max-w-xl text-lg text-muted-foreground">
           Every trip is organized end to end and experienced entirely on your own terms.
         </p>

@@ -68,7 +68,7 @@ export default function GroupTravelPage() {
           {HOW.map(({ icon: Icon, title, body }) => (
             <li key={title} className="rounded border border-border bg-surface p-7">
               <Icon className="h-6 w-6 text-teal" aria-hidden />
-              <h3 className="mt-4 text-xl font-semibold">{title}</h3>
+              <h3 className="mt-4 text-xl ">{title}</h3>
               <p className="mt-2 text-muted-foreground">{body}</p>
             </li>
           ))}
@@ -112,10 +112,8 @@ export default function GroupTravelPage() {
       <section className="mx-auto w-full max-w-6xl px-6 py-24">
         <div className="grid gap-6 rounded bg-ink p-10 text-cloud md:grid-cols-[1fr_auto] md:items-center">
           <div>
-            <p className="text-sm font-medium uppercase tracking-[0.2em] text-aqua">
-              Bringing a crowd?
-            </p>
-            <h2 className="mt-3 text-3xl font-bold">Host a departure and travel free.</h2>
+            <p className="eyebrow text-aqua">Bringing a crowd?</p>
+            <h2 className="mt-3 text-3xl ">Host a departure and travel free.</h2>
             <p className="mt-3 max-w-xl text-cloud/80">
               Bring eight friends to one departure and your own place is on us. Apply on the host
               page and we will set the group up around you.

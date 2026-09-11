@@ -49,10 +49,8 @@ export default async function SurveyPage(props: PageProps<"/account/surveys/[boo
         <ArrowLeft className="h-4 w-4" aria-hidden /> Back to your account
       </Link>
 
-      <p className="mt-6 text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-        {survey.tourName}
-      </p>
-      <h1 className="mt-2 font-heading text-3xl font-bold">
+      <p className="eyebrow mt-6 text-muted-foreground">{survey.tourName}</p>
+      <h1 className="mt-2 font-heading text-3xl ">
         {pre ? "Before you go" : `How was ${survey.tripName}?`}
       </h1>
       <p className="mt-2 text-sm text-muted-foreground">

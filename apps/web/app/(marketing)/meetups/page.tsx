@@ -26,10 +26,8 @@ export default async function MeetupsPage() {
   return (
     <>
       <section className="mx-auto w-full max-w-6xl px-6 pt-20 pb-12">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-          City evenings
-        </p>
-        <h1 className="mt-3 max-w-3xl text-5xl font-bold md:text-6xl">
+        <p className="eyebrow text-muted-foreground">City evenings</p>
+        <h1 className="mt-3 max-w-3xl text-5xl md:text-6xl">
           Meet the group before there is a group.
         </h1>
         <p className="mt-6 max-w-xl text-lg text-muted-foreground">
@@ -50,7 +48,7 @@ export default async function MeetupsPage() {
           <div className="space-y-12">
             {cities.map((city) => (
               <div key={city}>
-                <h2 className="text-2xl font-bold">{city}</h2>
+                <h2 className="text-2xl ">{city}</h2>
                 <ul className="mt-4 grid gap-4 md:grid-cols-2">
                   {meetups
                     .filter((m) => m.city === city)

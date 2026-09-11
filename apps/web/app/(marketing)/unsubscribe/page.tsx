@@ -41,10 +41,8 @@ export default async function UnsubscribePage(props: PageProps<"/unsubscribe">) 
 
   return (
     <div className="mx-auto w-full max-w-xl px-6 py-24">
-      <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-        {brand.shortName}
-      </p>
-      <h1 className="mt-3 font-heading text-4xl font-bold">That&rsquo;s done.</h1>
+      <p className="eyebrow text-muted-foreground">{brand.shortName}</p>
+      <h1 className="mt-3 font-heading text-4xl ">That&rsquo;s done.</h1>
       <p className="mt-4 text-lg text-muted-foreground">
         You won&rsquo;t get any more of those. Nothing else changes, and if you have a trip booked
         we&rsquo;ll still send you the things you need for it.

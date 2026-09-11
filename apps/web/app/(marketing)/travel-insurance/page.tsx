@@ -66,7 +66,7 @@ export default function TravelInsurancePage() {
             </ul>
           </div>
           <div>
-            <h2 className="text-2xl font-bold">What a good policy covers</h2>
+            <h2 className="text-2xl ">What a good policy covers</h2>
             <dl className="mt-6 divide-y divide-border rounded border border-border bg-surface">
               {COVER.map(([title, body]) => (
                 <div key={title} className="p-5">
@@ -80,7 +80,7 @@ export default function TravelInsurancePage() {
 
         <div className="mt-16 grid gap-6 rounded bg-sand p-8 md:grid-cols-[1fr_auto] md:items-center">
           <div>
-            <h2 className="text-2xl font-bold">What Guideless covers itself</h2>
+            <h2 className="text-2xl ">What Guideless covers itself</h2>
             <p className="mt-2 text-muted-foreground">
               The trip price follows the published refund tiers, most optional extras refund in full
               until their own deadline, and if we cancel a departure you get everything back. A few

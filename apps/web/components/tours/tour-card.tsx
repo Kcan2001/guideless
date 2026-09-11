@@ -34,10 +34,10 @@ export function TourCard({
         />
         <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 bg-gradient-to-t from-ink/80 to-transparent p-5 text-cloud">
           <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-aqua">
+            <p className="eyebrow text-aqua">
               {destinations.map((d) => d.name).join(" → ") || "Route"}
             </p>
-            <Heading className="mt-1 font-heading text-2xl font-bold">
+            <Heading className="mt-1 num text-2xl">
               {tour.name}
               <span className="sr-only"> — view trip</span>
             </Heading>
@@ -50,25 +50,25 @@ export function TourCard({
 
         <dl className="grid grid-cols-3 gap-3 text-sm">
           <div>
-            <dt className="text-xs uppercase tracking-wide text-muted-foreground">Days</dt>
+            <dt className="eyebrow text-muted-foreground">Days</dt>
             <dd className="font-semibold">{tour.duration_days}</dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-wide text-muted-foreground">Group</dt>
+            <dt className="eyebrow text-muted-foreground">Group</dt>
             <dd className="font-semibold">
               {tour.group_size_min}–{tour.group_size_max}
             </dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-wide text-muted-foreground">Pace</dt>
+            <dt className="eyebrow text-muted-foreground">Pace</dt>
             <dd className="font-semibold">{LEVEL_LABEL[tour.activity_level]}</dd>
           </div>
         </dl>
 
         <div className="mt-auto flex items-end justify-between gap-3 border-t border-border pt-4">
           <div>
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">From</p>
-            <p className="font-heading text-xl font-bold">
+            <p className="eyebrow text-muted-foreground">From</p>
+            <p className="num text-xl">
               {price ? formatMoney(price, { compact: true }) : "Price on request"}
             </p>
           </div>

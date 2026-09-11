@@ -77,7 +77,7 @@ export function DetailModal({
           <div className="flex max-h-[88vh] flex-col">
             <header className="flex items-start justify-between gap-4 border-b border-border px-6 py-4">
               <div className="min-w-0">
-                <h2 className="font-heading text-xl font-bold">{title}</h2>
+                <h2 className="font-heading text-xl ">{title}</h2>
                 {subtitle && <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>}
               </div>
               <button

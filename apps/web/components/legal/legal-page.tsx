@@ -8,10 +8,10 @@ export function LegalPage({ doc }: { doc: LegalDocument }) {
   return (
     <div className="mx-auto w-full max-w-5xl px-6 py-16">
       <header className="max-w-3xl">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
+        <p className="eyebrow text-muted-foreground">
           {brand.legalName} · {brand.name}
         </p>
-        <h1 className="mt-3 text-4xl font-bold md:text-5xl">{doc.title}</h1>
+        <h1 className="mt-3 text-4xl md:text-5xl">{doc.title}</h1>
         <p className="mt-4 text-lg text-muted-foreground">{doc.lede}</p>
         <p className="mt-4 text-sm text-muted-foreground">
           Version {doc.version} · Last updated {formatDate(doc.lastUpdated)}
@@ -47,7 +47,7 @@ export function LegalPage({ doc }: { doc: LegalDocument }) {
         <article className="max-w-3xl space-y-10">
           {doc.sections.map((s) => (
             <section key={s.id} id={s.id} className="scroll-mt-24">
-              <h2 className="text-2xl font-semibold">{s.title}</h2>
+              <h2 className="text-2xl ">{s.title}</h2>
               {s.paragraphs?.map((p, i) => (
                 <p key={i} className="mt-3 leading-relaxed text-foreground/90">
                   {p}

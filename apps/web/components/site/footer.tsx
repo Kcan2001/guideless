@@ -61,7 +61,9 @@ export function SiteFooter() {
     <footer className="mt-24 border-t border-border bg-surface">
       <div className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-14 md:grid-cols-[1.6fr_1fr_1fr_1fr]">
         <div>
-          <p className="font-heading text-lg font-bold">{brand.name}</p>
+          <p className="font-heading text-lg font-black uppercase tracking-[0.02em]">
+            {brand.name}
+          </p>
           <p className="mt-3 max-w-sm text-muted-foreground">{brand.tagline}</p>
           <p className="mt-1 max-w-sm font-heading text-sm font-semibold text-foreground">
             {brand.signature}

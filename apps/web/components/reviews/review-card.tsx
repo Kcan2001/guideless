@@ -14,7 +14,7 @@ export function ReviewCard({
   return (
     <article className="rounded border border-border bg-surface p-6">
       <Stars rating={review.rating} />
-      {review.title && <h3 className="mt-3 font-heading text-lg font-semibold">{review.title}</h3>}
+      {review.title && <h3 className="mt-3 font-heading text-lg ">{review.title}</h3>}
       <p className="mt-2 whitespace-pre-line text-muted-foreground">{review.body}</p>
       <footer className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
         <span className="font-medium text-foreground">{review.authorName}</span>

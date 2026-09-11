@@ -28,11 +28,16 @@ export function SiteHeader() {
             className="rounded"
             priority
           />
-          <span className="font-heading text-lg font-bold tracking-tight">{brand.shortName}</span>
+          <span className="font-heading text-lg font-black uppercase tracking-[0.02em]">
+            {brand.shortName}
+          </span>
           <span className="sr-only">{brand.name} home</span>
         </Link>
 
-        <nav aria-label="Primary" className="hidden items-center gap-6 text-sm lg:flex">
+        <nav
+          aria-label="Primary"
+          className="hidden items-center gap-6 font-heading text-xs font-bold uppercase tracking-[0.12em] lg:flex"
+        >
           {primaryNav.map((item) => (
             <Link
               key={item.href}
@@ -45,7 +50,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <SessionNav className="hidden text-sm text-foreground no-underline hover:text-link sm:inline" />
+          <SessionNav className="hidden font-heading text-xs font-bold uppercase tracking-[0.12em] text-foreground no-underline hover:text-link sm:inline" />
           <Link
             href="/tours"
             className={cn(buttonVariants({ size: "sm" }), "hidden sm:inline-flex")}
@@ -72,24 +77,24 @@ export function SiteHeader() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="rounded px-3 py-2 text-foreground no-underline hover:bg-sand/60"
+                  className="rounded px-3 py-2 font-heading text-xs font-bold uppercase tracking-[0.12em] text-foreground no-underline hover:bg-sand/60"
                 >
                   {item.label}
                 </Link>
               ))}
               <Link
                 href="/about"
-                className="rounded px-3 py-2 text-foreground no-underline hover:bg-sand/60"
+                className="rounded px-3 py-2 font-heading text-xs font-bold uppercase tracking-[0.12em] text-foreground no-underline hover:bg-sand/60"
               >
                 About
               </Link>
               <Link
                 href="/contact"
-                className="rounded px-3 py-2 text-foreground no-underline hover:bg-sand/60"
+                className="rounded px-3 py-2 font-heading text-xs font-bold uppercase tracking-[0.12em] text-foreground no-underline hover:bg-sand/60"
               >
                 Contact
               </Link>
-              <SessionNav className="rounded px-3 py-2 text-foreground no-underline hover:bg-sand/60 sm:hidden" />
+              <SessionNav className="rounded px-3 py-2 font-heading text-xs font-bold uppercase tracking-[0.12em] text-foreground no-underline hover:bg-sand/60 sm:hidden" />
               <Link
                 href="/tours"
                 className={cn(buttonVariants({ size: "sm" }), "mt-1 justify-center")}

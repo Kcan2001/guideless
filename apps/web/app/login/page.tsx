@@ -40,7 +40,7 @@ export default async function LoginPage(props: PageProps<"/login">) {
         <Image src="/brand/guideless-logo.webp" alt="" width={36} height={36} className="rounded" />
         <span className="font-heading text-lg font-bold">{brand.shortName}</span>
       </Link>
-      <h1 className="text-3xl font-bold">Sign in</h1>
+      <h1 className="text-3xl ">Sign in</h1>
       <p className="mt-2 text-muted-foreground">
         Your bookings, your trips, your group — in one place.
       </p>

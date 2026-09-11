@@ -23,7 +23,7 @@ export function OnboardingChecklist({
       className="rounded border border-border bg-surface p-5"
     >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h3 id="onboarding-heading" className="font-heading text-lg font-semibold">
+        <h3 id="onboarding-heading" className="font-heading text-lg ">
           Before {tourName}
         </h3>
         <p className="text-sm text-muted-foreground">

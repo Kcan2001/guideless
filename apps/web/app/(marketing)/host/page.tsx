@@ -38,12 +38,8 @@ export default async function HostPage(props: PageProps<"/host">) {
   return (
     <>
       <section className="mx-auto w-full max-w-6xl px-6 pt-20 pb-12">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-          Host program
-        </p>
-        <h1 className="mt-3 max-w-3xl text-5xl font-bold md:text-6xl">
-          Bring your people, pay less.
-        </h1>
+        <p className="eyebrow text-muted-foreground">Host program</p>
+        <h1 className="mt-3 max-w-3xl text-5xl md:text-6xl">Bring your people, pay less.</h1>
         <p className="mt-6 max-w-xl text-lg text-muted-foreground">
           Running clubs, alumni groups, a company social committee, a newsletter, a group chat that
           keeps saying &ldquo;we should travel together&rdquo;. You bring the people. We book the
@@ -58,7 +54,7 @@ export default async function HostPage(props: PageProps<"/host">) {
               <span className="font-heading text-sm font-semibold text-link">
                 {String(i + 1).padStart(2, "0")}
               </span>
-              <h2 className="mt-2 text-xl font-semibold">{title}</h2>
+              <h2 className="mt-2 text-xl ">{title}</h2>
               <p className="mt-2 text-muted-foreground">{body}</p>
             </li>
           ))}
@@ -81,7 +77,7 @@ export default async function HostPage(props: PageProps<"/host">) {
         <div className="mx-auto w-full max-w-3xl px-6">
           {applied ? (
             <div role="status" className="rounded border border-aqua bg-aqua/10 p-8">
-              <h2 className="text-3xl font-bold">Thank you. We&rsquo;ll be in touch.</h2>
+              <h2 className="text-3xl ">Thank you. We&rsquo;ll be in touch.</h2>
               <p className="mt-3 text-muted-foreground">
                 A real person reads every application, usually within two working days. We&rsquo;ll
                 reply from {brand.supportEmail} with dates that could work for your group.
@@ -92,7 +88,7 @@ export default async function HostPage(props: PageProps<"/host">) {
             </div>
           ) : (
             <>
-              <h2 className="text-3xl font-bold">Tell us about your people.</h2>
+              <h2 className="text-3xl ">Tell us about your people.</h2>
               <p className="mt-2 text-muted-foreground">
                 Five questions. No commitment either way.
               </p>

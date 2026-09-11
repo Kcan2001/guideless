@@ -148,7 +148,7 @@ export function ExperienceCards({
             )}
             <div className="flex flex-1 flex-col gap-4 p-6">
               <div>
-                <p className="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                <p className="eyebrow flex flex-wrap items-center gap-2 text-muted-foreground">
                   {!image && <TierBadge tier={a.tier} />}
                   {KIND_LABEL[a.kind]}
                   {pickOne && (
@@ -156,11 +156,11 @@ export function ExperienceCards({
                   )}
                   {!image && <OptionLabelBadge label={a.label} />}
                 </p>
-                <h3 className="mt-2 font-heading text-xl font-bold md:text-2xl">{f.title}</h3>
+                <h3 className="mt-2 font-heading text-xl md:text-2xl">{f.title}</h3>
               </div>
 
               <p className="flex flex-wrap items-baseline justify-between gap-2 border-y border-border py-3">
-                <span className="font-heading text-xl font-bold">
+                <span className="num text-xl">
                   {/* The space is a real text node, not a margin: margin does not separate the
                       words for a screen reader, which would otherwise read "From$6,380". */}
                   {f.isFrom && (
@@ -218,7 +218,7 @@ export function ExperienceCards({
                     <>
                       <p className="text-sm">{f.summary}</p>
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        <p className="eyebrow text-muted-foreground">
                           The {f.variantCount} ways to do it
                         </p>
                         <ul className="mt-2 space-y-2 text-sm">
@@ -252,9 +252,7 @@ export function ExperienceCards({
                         <div className="grid gap-4 text-sm sm:grid-cols-2">
                           {a.includes.length > 0 && (
                             <div>
-                              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                                Included
-                              </p>
+                              <p className="eyebrow text-muted-foreground">Included</p>
                               <ul className="mt-2 space-y-1.5">
                                 {a.includes.map((line) => (
                                   <li key={line} className="flex gap-2">
@@ -270,9 +268,7 @@ export function ExperienceCards({
                           )}
                           {a.excludes.length > 0 && (
                             <div>
-                              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                                Not included
-                              </p>
+                              <p className="eyebrow text-muted-foreground">Not included</p>
                               <ul className="mt-2 space-y-1.5 text-muted-foreground">
                                 {a.excludes.map((line) => (
                                   <li key={line} className="flex gap-2">

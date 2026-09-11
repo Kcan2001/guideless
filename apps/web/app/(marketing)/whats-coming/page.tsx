@@ -43,10 +43,8 @@ export default async function WhatsComingPage() {
 
   return (
     <div className="mx-auto w-full max-w-4xl px-6 py-16">
-      <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-        {brand.shortName}
-      </p>
-      <h1 className="mt-3 text-4xl font-bold md:text-5xl">What&rsquo;s coming.</h1>
+      <p className="eyebrow text-muted-foreground">{brand.shortName}</p>
+      <h1 className="mt-3 text-4xl md:text-5xl">What&rsquo;s coming.</h1>
       <p className="mt-3 max-w-2xl text-lg text-muted-foreground">
         Everything we have scheduled, and everything about to open. Nothing here needs you to book
         anything — it&rsquo;s just what&rsquo;s happening.
@@ -58,7 +56,7 @@ export default async function WhatsComingPage() {
 
       {drops.length > 0 && (
         <section className="mt-12">
-          <h2 className="font-heading text-2xl font-semibold">Opening soon</h2>
+          <h2 className="font-heading text-2xl ">Opening soon</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Priced and visible, not yet bookable. They open on the date shown.
           </p>
@@ -91,7 +89,7 @@ export default async function WhatsComingPage() {
 
       {departures.length > 0 && (
         <section className="mt-12">
-          <h2 className="font-heading text-2xl font-semibold">Still to run</h2>
+          <h2 className="font-heading text-2xl ">Still to run</h2>
           <ul className="mt-4 grid gap-4">
             {departures.map((d) => (
               <li
@@ -121,7 +119,7 @@ export default async function WhatsComingPage() {
 
       {meetups.length > 0 && (
         <section className="mt-12">
-          <h2 className="font-heading text-2xl font-semibold">Evenings</h2>
+          <h2 className="font-heading text-2xl ">Evenings</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             No trip required. Come and meet people who travel the way you do.
           </p>
@@ -156,7 +154,7 @@ export default async function WhatsComingPage() {
       )}
 
       <section className="mt-16 rounded border border-border bg-cloud p-8" id="tell-me">
-        <h2 className="font-heading text-2xl font-semibold">Tell me when</h2>
+        <h2 className="font-heading text-2xl ">Tell me when</h2>
         <p className="mt-2 max-w-2xl text-muted-foreground">
           Pick somewhere we already go, or tell us where you&rsquo;d rather we went. We only run two
           trips today, and what people ask for is how we decide the third.

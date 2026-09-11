@@ -197,9 +197,7 @@ export function DayPlanStep({
       </label>
     ) : perTraveler ? (
       <fieldset>
-        <legend className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Who&rsquo;s in
-        </legend>
+        <legend className="eyebrow mb-2 text-muted-foreground">Who&rsquo;s in</legend>
         <ul className="flex flex-wrap gap-2">
           {travelerNames.map((name, i) => {
             const idx = i + 1;
@@ -312,7 +310,7 @@ export function DayPlanStep({
   return (
     <div className="space-y-8">
       <header>
-        <h2 className="text-3xl font-bold">{title}</h2>
+        <h2 className="text-3xl ">{title}</h2>
         <p className="mt-2 max-w-2xl text-muted-foreground">
           Day by day. Add as much or as little as you like — the only things you cannot combine are
           two views of the same session. Everything here can also be added later in the app.
@@ -326,7 +324,7 @@ export function DayPlanStep({
           return (
             <li key={day.dayNumber} data-testid={`day-${day.dayNumber}`}>
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-border pb-2">
-                <h2 className="font-heading text-xl font-semibold">Day {day.dayNumber}</h2>
+                <h2 className="font-heading text-xl ">Day {day.dayNumber}</h2>
                 {day.date && (
                   <span className="text-sm text-muted-foreground">
                     {formatDate(day.date, "en-US", {
@@ -394,7 +392,7 @@ export function DayPlanStep({
       {plan.anytime.length > 0 && (
         <section>
           <div className="border-b border-border pb-2">
-            <h2 className="font-heading text-xl font-semibold">Any time on the trip</h2>
+            <h2 className="font-heading text-xl ">Any time on the trip</h2>
           </div>
           <ul className={cn("mt-4 grid gap-5", plan.anytime.length > 1 && "md:grid-cols-2")}>
             {plan.anytime.map((a) => (

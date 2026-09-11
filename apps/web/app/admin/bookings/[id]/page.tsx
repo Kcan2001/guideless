@@ -130,14 +130,12 @@ export default async function AdminBookingPage(props: PageProps<"/admin/bookings
           <Section id="payments" title="Money">
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="rounded bg-cloud p-3">
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">Total</p>
-                <p className="font-heading text-xl font-bold">
-                  {money(b.total_amount, b.currency)}
-                </p>
+                <p className="eyebrow text-muted-foreground">Total</p>
+                <p className="num text-xl">{money(b.total_amount, b.currency)}</p>
               </div>
               <div className="rounded bg-cloud p-3">
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">Paid</p>
-                <p className="font-heading text-xl font-bold">{money(b.amount_paid, b.currency)}</p>
+                <p className="eyebrow text-muted-foreground">Paid</p>
+                <p className="num text-xl">{money(b.amount_paid, b.currency)}</p>
                 {b.amount_refunded > 0 && (
                   <p className="text-xs text-muted-foreground">
                     refunded {money(b.amount_refunded, b.currency)}
@@ -145,8 +143,8 @@ export default async function AdminBookingPage(props: PageProps<"/admin/bookings
                 )}
               </div>
               <div className="rounded bg-cloud p-3">
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">Balance</p>
-                <p className="font-heading text-xl font-bold">{money(balance, b.currency)}</p>
+                <p className="eyebrow text-muted-foreground">Balance</p>
+                <p className="num text-xl">{money(balance, b.currency)}</p>
                 <p className="text-xs text-muted-foreground">
                   due{" "}
                   {departure.balance_due_date
@@ -156,9 +154,7 @@ export default async function AdminBookingPage(props: PageProps<"/admin/bookings
               </div>
             </div>
 
-            <h3 className="mt-6 mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              Line items
-            </h3>
+            <h3 className="eyebrow mt-6 mb-2 text-muted-foreground">Line items</h3>
             <Table
               head={["Item", "Qty", "Unit", "Total"]}
               rows={items.map((i) => [
@@ -169,9 +165,7 @@ export default async function AdminBookingPage(props: PageProps<"/admin/bookings
               ])}
             />
 
-            <h3 className="mt-6 mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              Payments
-            </h3>
+            <h3 className="eyebrow mt-6 mb-2 text-muted-foreground">Payments</h3>
             <Table
               head={["When", "Kind", "Amount", "Stripe status", "Reference"]}
               rows={payments.map((p) => [
@@ -190,9 +184,7 @@ export default async function AdminBookingPage(props: PageProps<"/admin/bookings
             />
             {refunds.length > 0 && (
               <>
-                <h3 className="mt-6 mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  Refunds
-                </h3>
+                <h3 className="eyebrow mt-6 mb-2 text-muted-foreground">Refunds</h3>
                 <Table
                   head={["When", "Amount", "Status", "Reason"]}
                   rows={refunds.map((r) => [

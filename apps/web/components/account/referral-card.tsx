@@ -82,7 +82,7 @@ export function ReferralCard({
           <Gift className="h-4 w-4" aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
-          <h3 id="referral-heading" className="font-heading text-lg font-semibold">
+          <h3 id="referral-heading" className="font-heading text-lg ">
             Bring a friend
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">

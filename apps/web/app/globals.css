@@ -116,6 +116,35 @@
   --radius-xl: var(--radius-xl);
 }
 
+/*
+ * Two recurring display roles that were being hand-rolled at 126 call sites in a dozen slightly
+ * different ways — `text-sm font-medium uppercase tracking-[0.2em]`, `text-xs uppercase
+ * tracking-wide`, `text-[11px] font-semibold uppercase tracking-[0.16em]` — all meaning the same
+ * thing and all rendering in Inter because none of them set `font-heading`. That is the exact
+ * failure this design system exists to stop: the same element looking different on two pages.
+ *
+ * They are component classes rather than utilities so a call site can still set colour and spacing
+ * next to them, which is the only thing that legitimately varies.
+ */
+@layer components {
+  .eyebrow {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+  }
+
+  /* Prices, counts, statistics. Tabular figures so a column of prices lines up on the decimal. */
+  .num {
+    font-family: var(--font-heading);
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.015em;
+  }
+}
+
 /* Base styles live in @layer base so Tailwind utilities (e.g. text-foreground) can override them. */
 @layer base {
   html {
