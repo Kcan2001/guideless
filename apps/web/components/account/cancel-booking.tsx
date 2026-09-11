@@ -28,7 +28,7 @@ export function CancelBooking({
 
   if (pending) {
     return (
-      <div className="mt-4 rounded-xl border border-warning/40 bg-warning/10 p-4 text-sm">
+      <div className="mt-4 rounded-xl border border-warning-border bg-warning-surface p-4 text-sm">
         <p className="font-medium">
           Cancellation requested {formatDate(pending.requested_at.slice(0, 10))}.
         </p>

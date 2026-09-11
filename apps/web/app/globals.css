@@ -33,9 +33,21 @@
   --link: #0b6680;
   --link-hover: #084b5e;
   --ring: var(--color-cyan);
-  --success: #2fa88a;
-  --warning: #d9a441;
-  --danger: #c9484d;
+  /* Status colours come in threes: text/icon, the pale fill a banner sits on, and the edge.
+     Separate values, not alpha washes of one hue — text on a 10% wash of itself cannot clear
+     AAA without going maroon. Every text value is >= 7:1 on white, cloud, and its own surface. */
+  --success: #1c5d4c;
+  --success-surface: #ecf6f3;
+  --success-border: #bbddd4;
+  --warning: #764610;
+  --warning-surface: #f8f1ea;
+  --warning-border: #e4ceb4;
+  --danger: #92292f;
+  --danger-surface: #f6eced;
+  --danger-border: #ddbbbc;
+  --info: #105875;
+  --info-surface: #eaf4f8;
+  --info-border: #b4d6e4;
 
   --radius-sm: 6px;
   --radius-md: 10px;
@@ -69,8 +81,17 @@
   --color-link-hover: var(--link-hover);
   --color-ring: var(--ring);
   --color-success: var(--success);
+  --color-success-surface: var(--success-surface);
+  --color-success-border: var(--success-border);
   --color-warning: var(--warning);
+  --color-warning-surface: var(--warning-surface);
+  --color-warning-border: var(--warning-border);
   --color-danger: var(--danger);
+  --color-danger-surface: var(--danger-surface);
+  --color-danger-border: var(--danger-border);
+  --color-info: var(--info);
+  --color-info-surface: var(--info-surface);
+  --color-info-border: var(--info-border);
 
   /* Typography — Inter for body/UI, Manrope for headings */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;

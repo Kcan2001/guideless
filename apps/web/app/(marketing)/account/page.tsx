@@ -172,7 +172,7 @@ export default async function AccountPage(props: PageProps<"/account">) {
       {error && (
         <p
           role="alert"
-          className="mt-8 rounded-xl border border-warning/40 bg-warning/10 p-4 text-sm"
+          className="mt-8 rounded-xl border border-warning-border bg-warning-surface p-4 text-sm"
         >
           {error}
         </p>
@@ -185,7 +185,7 @@ export default async function AccountPage(props: PageProps<"/account">) {
       {errorMsg && (
         <p
           role="alert"
-          className="mt-8 rounded-xl border border-warning/40 bg-warning/10 p-4 text-sm"
+          className="mt-8 rounded-xl border border-warning-border bg-warning-surface p-4 text-sm"
         >
           {errorMsg}
         </p>

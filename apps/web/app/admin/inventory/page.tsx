@@ -37,7 +37,7 @@ function CapacityBar({
       </span>
       <span className="tabular-nums">
         {confirmed}
-        {held > 0 && <span className="text-[#8A6414]"> +{held}</span>}
+        {held > 0 && <span className="text-warning"> +{held}</span>}
         <span className="text-muted-foreground"> / {capacity}</span>
       </span>
     </span>
@@ -49,7 +49,7 @@ function HoldClock({ expiresAt }: { expiresAt: string }) {
   const mins = minutesUntil(expiresAt, new Date());
   const urgent = mins <= 60;
   return (
-    <span className={urgent ? "font-medium text-[#8A6414]" : "text-muted-foreground"}>
+    <span className={urgent ? "font-medium text-warning" : "text-muted-foreground"}>
       {mins <= 0 ? "expiring now" : mins < 60 ? `${mins} min` : `${Math.round(mins / 60)} h`}
     </span>
   );
@@ -125,7 +125,7 @@ function DepartureCard({ row }: { row: DepartureInventory }) {
                 ) : t.lastRateAt ? (
                   `Refreshed ${t.lastRateAt.slice(0, 10)}`
                 ) : (
-                  <span className="text-[#8A6414]">No rates yet</span>
+                  <span className="text-warning">No rates yet</span>
                 )}
               </span>,
             ])}

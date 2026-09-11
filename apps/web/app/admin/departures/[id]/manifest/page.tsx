@@ -79,7 +79,7 @@ export default async function ManifestPage(props: PageProps<"/admin/departures/[
       </div>
 
       {rooming.overfilled.length > 0 && (
-        <p className="mt-4 flex items-start gap-2 rounded-lg border border-danger/40 bg-danger/5 p-3 text-sm">
+        <p className="mt-4 flex items-start gap-2 rounded-lg border border-danger-border bg-danger-surface p-3 text-sm">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-danger" aria-hidden />
           <span>
             {rooming.overfilled.length} room
@@ -114,9 +114,7 @@ export default async function ManifestPage(props: PageProps<"/admin/departures/[
                     {t.dateOfBirth && ` · ${t.dateOfBirth}`}
                   </span>
                   {missing.length > 0 && (
-                    <span className="block text-xs text-[#8A6414]">
-                      Missing {missing.join(", ")}
-                    </span>
+                    <span className="block text-xs text-warning">Missing {missing.join(", ")}</span>
                   )}
                 </span>,
                 <span key="r" className="whitespace-nowrap">

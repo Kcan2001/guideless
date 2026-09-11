@@ -75,7 +75,7 @@ export default async function SupportThreadPage(props: PageProps<"/admin/support
                   className={cn(
                     "rounded-xl border p-4 text-sm",
                     m.is_internal_note
-                      ? "border-warning/40 bg-warning/10"
+                      ? "border-warning-border bg-warning-surface"
                       : m.is_from_staff
                         ? "ml-6 border-aqua/60 bg-aqua/10"
                         : "mr-6 border-border bg-surface",

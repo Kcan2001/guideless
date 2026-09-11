@@ -127,7 +127,7 @@ export function AssistantChat({
                   turn.role === "user"
                     ? "max-w-[85%] rounded-2xl rounded-br-sm bg-ink px-4 py-2.5 text-sm text-cloud"
                     : turn.failed
-                      ? "max-w-[85%] rounded-2xl rounded-bl-sm border border-warning/40 bg-warning/10 px-4 py-2.5 text-sm"
+                      ? "max-w-[85%] rounded-2xl rounded-bl-sm border border-warning-border bg-warning-surface px-4 py-2.5 text-sm"
                       : "max-w-[85%] rounded-2xl rounded-bl-sm bg-cloud px-4 py-2.5 text-sm"
                 }
               >

@@ -84,7 +84,7 @@ export default async function SocialPostPage(props: PageProps<"/admin/social/[id
       {post.status === "failed" && post.last_error && (
         <div
           role="alert"
-          className="mb-6 rounded-lg border border-danger/40 bg-danger/10 p-4 text-sm"
+          className="mb-6 rounded-lg border border-danger-border bg-danger-surface p-4 text-sm"
         >
           <p className="font-semibold">Last attempt failed (attempt {post.attempts})</p>
           <p className="mt-1 break-words">{post.last_error}</p>

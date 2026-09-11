@@ -27,7 +27,7 @@ export default async function AdminAssistantPage() {
       />
 
       {!configured && (
-        <p className="rounded-xl border border-warning/40 bg-warning/10 p-4 text-sm">
+        <p className="rounded-xl border border-warning-border bg-warning-surface p-4 text-sm">
           <strong>Not switched on.</strong> `ANTHROPIC_API_KEY` is missing in this environment, so
           the assistant is off and no traveler can reach it. Everything below is history.
         </p>
