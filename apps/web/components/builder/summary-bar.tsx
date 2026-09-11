@@ -94,14 +94,14 @@ export function SummaryBar({
           onClick={() => setOpen(false)}
         >
           <div
-            className="max-h-[85vh] w-full overflow-y-auto rounded-t-2xl bg-cloud p-4"
+            className="max-h-[85vh] w-full overflow-y-auto rounded-t bg-cloud p-4"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-2 flex justify-end">
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-full border border-border p-2"
+                className="rounded border border-border p-2"
                 aria-label="Close summary"
               >
                 <X className="h-4 w-4" aria-hidden />

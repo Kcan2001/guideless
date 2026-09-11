@@ -49,10 +49,20 @@
   --info-surface: #eaf4f8;
   --info-border: #b4d6e4;
 
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
+  /* One radius. The scale collapsed on 2026-09-10: six values were in use because `rounded` and
+     `rounded` are Tailwind defaults nobody mapped to a token, and two corner radii on adjacent
+     boxes is the inconsistency this file exists to stop. The names survive so nothing breaks; they
+     all resolve to the same 4px. Hard edges are what make this register read as confident rather
+     than friendly. */
+  --radius-sm: 4px;
+  --radius-md: 4px;
+  --radius-lg: 4px;
+  --radius-xl: 4px;
+
+  /* A border that reads on ink. `--border` is sand and disappears against a dark ground. */
+  --border-dark: rgba(245, 246, 242, 0.22);
+  /* One step up from ink, for a surface that has to separate from an ink band. */
+  --surface-raised: #122c32;
 }
 
 @theme inline {
@@ -73,6 +83,8 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
+  --color-border-dark: var(--border-dark);
+  --color-surface-raised: var(--surface-raised);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-accent: var(--accent);
@@ -95,7 +107,8 @@
 
   /* Typography — Inter for body/UI, Manrope for headings */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-heading: var(--font-manrope), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-heading:
+    var(--font-archivo), "Helvetica Neue", Arial, ui-sans-serif, system-ui, sans-serif;
 
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
@@ -117,13 +130,39 @@
     text-rendering: optimizeLegibility;
   }
 
+  /* The display treatment lives here, once, so a heading cannot opt out by forgetting a class.
+     104 of 156 headings were missing `font-heading` and rendered in Inter, which is the single
+     most common reason two pages looked like different products. */
   h1,
   h2,
   h3,
   h4 {
     font-family: var(--font-heading);
-    letter-spacing: -0.02em;
+    font-weight: 900;
+    text-transform: uppercase;
+    line-height: 0.88;
+    letter-spacing: -0.022em;
     text-wrap: balance;
+  }
+
+  /* Caps at small sizes need the tracking back: -0.022em is tuned for a 64px hero and closes h4 up
+     to the point of illegibility. */
+  h3,
+  h4 {
+    letter-spacing: -0.01em;
+    line-height: 0.95;
+  }
+
+  /* An opt-out for the few headings that are prose rather than a title — a question in an FAQ, a
+     name in a testimonial. Caps shout, and shouting a sentence is worse than not shouting at all. */
+  h1.sentence,
+  h2.sentence,
+  h3.sentence,
+  h4.sentence {
+    text-transform: none;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
   }
 
   a {

@@ -48,7 +48,7 @@ export function QuotePanel({
   return (
     <aside
       className={cn(
-        "rounded-2xl border border-border bg-surface",
+        "rounded border border-border bg-surface",
         compact ? "p-5" : "p-6 lg:sticky lg:top-6",
         className,
       )}
@@ -132,7 +132,7 @@ export function QuotePanel({
             We couldn&rsquo;t price this right now. Your choices are safe; try again in a moment.
           </p>
         ) : (
-          <div className="h-20 animate-pulse rounded-lg bg-sand/60" aria-hidden />
+          <div className="h-20 animate-pulse rounded bg-sand/60" aria-hidden />
         )}
       </dl>
 
@@ -164,7 +164,7 @@ export function QuotePanel({
         </label>
         <button
           type="submit"
-          className="rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-sand/60"
+          className="rounded border border-border px-3 py-2 text-sm font-medium hover:bg-sand/60"
         >
           Apply
         </button>

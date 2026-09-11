@@ -94,7 +94,7 @@ function PhotoRow({ photo }: { photo: ModerationPhoto }) {
   return (
     <article className="border-b border-border py-6 first:pt-0 last:border-0 last:pb-0">
       <div className="flex flex-wrap gap-4">
-        <div className="relative h-32 w-44 shrink-0 overflow-hidden rounded-lg bg-cloud">
+        <div className="relative h-32 w-44 shrink-0 overflow-hidden rounded bg-cloud">
           {photo.signedUrl ? (
             <Image
               src={photo.signedUrl}

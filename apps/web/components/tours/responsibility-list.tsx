@@ -11,7 +11,7 @@ interface Item {
 export function ResponsibilityList({ included, excluded }: { included: Item[]; excluded: Item[] }) {
   return (
     <div className="grid gap-6 md:grid-cols-2">
-      <section className="rounded-xl bg-ink p-7 text-cloud">
+      <section className="rounded bg-ink p-7 text-cloud">
         <h3 className="font-heading text-lg font-semibold text-aqua">
           {responsibilityLabels.guideless}
         </h3>
@@ -27,7 +27,7 @@ export function ResponsibilityList({ included, excluded }: { included: Item[]; e
           ))}
         </ul>
       </section>
-      <section className="rounded-xl border border-border bg-surface p-7">
+      <section className="rounded border border-border bg-surface p-7">
         <h3 className="font-heading text-lg font-semibold">{responsibilityLabels.traveler}</h3>
         <ul className="mt-5 space-y-4">
           {excluded.map((i) => (

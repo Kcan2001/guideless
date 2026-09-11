@@ -59,7 +59,7 @@ export function StayTiers({
           <li
             key={o.id}
             className={cn(
-              "rounded-xl border p-4",
+              "rounded border p-4",
               o.is_default ? "border-aqua bg-aqua/10" : "border-border bg-surface",
             )}
           >
@@ -114,7 +114,7 @@ export function AddOnList({
       <Heading className="font-heading text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
         {title}
       </Heading>
-      <ul className="mt-3 divide-y divide-border rounded-xl border border-border bg-surface">
+      <ul className="mt-3 divide-y divide-border rounded border border-border bg-surface">
         {shown.map((a) => {
           const closed = a.bookableUntil < new Date().toISOString().slice(0, 10);
           const soldOut = a.available !== null && a.available <= 0;
@@ -192,7 +192,7 @@ export function EventTierMenu({
           </h3>
           <ul className="mt-3 space-y-3">
             {viewing.map((a) => (
-              <li key={a.id} className="rounded-xl border border-border bg-surface p-4">
+              <li key={a.id} className="rounded border border-border bg-surface p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="font-semibold">{a.title}</p>
                   <span className="font-semibold">{money(a.price_amount, currency)}</span>

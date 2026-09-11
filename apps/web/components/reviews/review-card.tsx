@@ -12,7 +12,7 @@ export function ReviewCard({
   showTour?: boolean;
 }) {
   return (
-    <article className="rounded-xl border border-border bg-surface p-6">
+    <article className="rounded border border-border bg-surface p-6">
       <Stars rating={review.rating} />
       {review.title && <h3 className="mt-3 font-heading text-lg font-semibold">{review.title}</h3>}
       <p className="mt-2 whitespace-pre-line text-muted-foreground">{review.body}</p>

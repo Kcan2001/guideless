@@ -60,7 +60,7 @@ export function GroupCodeCard({
   }
 
   return (
-    <div className="rounded-xl border border-border bg-surface p-6" data-testid="group-code-card">
+    <div className="rounded border border-border bg-surface p-6" data-testid="group-code-card">
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
         Bring friends along
       </p>
@@ -68,7 +68,7 @@ export function GroupCodeCard({
         Friends book their own spot and enter your code. Same dates, same group, separate payments.
       </p>
       <div className="mt-4 flex flex-wrap items-center gap-3">
-        <code className="rounded-lg border border-border bg-cloud px-3 py-2 font-heading text-lg font-bold tracking-wide">
+        <code className="rounded border border-border bg-cloud px-3 py-2 font-heading text-lg font-bold tracking-wide">
           {info.code}
         </code>
         <Button type="button" variant="secondary" size="sm" onClick={copy}>

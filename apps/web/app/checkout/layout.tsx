@@ -15,7 +15,7 @@ export default function CheckoutLayout({ children }: LayoutProps<"/checkout">) {
               alt=""
               width={32}
               height={32}
-              className="rounded-md"
+              className="rounded"
             />
             <span className="font-heading font-bold">{brand.shortName}</span>
           </Link>

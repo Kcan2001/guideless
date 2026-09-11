@@ -48,7 +48,7 @@ export default function ContactPage() {
       />
       <section className="mx-auto w-full max-w-6xl px-6 py-20">
         <div className="grid gap-6 md:grid-cols-3">
-          <div className="rounded-xl border border-border bg-surface p-6">
+          <div className="rounded border border-border bg-surface p-6">
             <Mail className="h-6 w-6 text-teal" aria-hidden />
             <h2 className="mt-4 text-xl font-semibold">Before you book</h2>
             <p className="mt-2 text-muted-foreground">
@@ -62,7 +62,7 @@ export default function ContactPage() {
               {emails.hello}
             </a>
           </div>
-          <div className="rounded-xl border border-border bg-surface p-6">
+          <div className="rounded border border-border bg-surface p-6">
             <MessageSquare className="h-6 w-6 text-teal" aria-hidden />
             <h2 className="mt-4 text-xl font-semibold">Once you have booked</h2>
             <p className="mt-2 text-muted-foreground">
@@ -80,7 +80,7 @@ export default function ContactPage() {
               .
             </p>
           </div>
-          <div className="rounded-xl border border-border bg-surface p-6">
+          <div className="rounded border border-border bg-surface p-6">
             <Phone className="h-6 w-6 text-teal" aria-hidden />
             <h2 className="mt-4 text-xl font-semibold">In an emergency</h2>
             <p className="mt-2 text-muted-foreground">

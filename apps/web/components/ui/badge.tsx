@@ -2,8 +2,12 @@ import { cva, type VariantProps } from "class-variance-authority";
 import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
+/**
+ * Badges follow the buttons: Archivo in caps, 4px, no pills. A 999px badge beside a 4px card was
+ * the loudest inconsistency on any page that had both.
+ */
 export const badgeVariants = cva(
-  "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap",
+  "inline-flex items-center gap-1 rounded px-2 py-0.5 font-heading text-[11px] font-extrabold uppercase tracking-[0.1em] whitespace-nowrap",
   {
     variants: {
       variant: {

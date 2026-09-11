@@ -184,7 +184,7 @@ export function TripBuilder({
   const builderPath = `/tours/${tourSlug}/build?departure=${departure.id}`;
 
   const stepView = !hydrated ? (
-    <div className="h-64 animate-pulse rounded-xl bg-sand/60" aria-busy="true" />
+    <div className="h-64 animate-pulse rounded bg-sand/60" aria-busy="true" />
   ) : step === "dates" ? (
     <DepartureStep
       title={current.title}
@@ -275,13 +275,13 @@ export function TripBuilder({
         {cancelled && step === "dates" && (
           <p
             role="status"
-            className="mt-6 rounded-lg border border-border bg-sand/60 px-4 py-3 text-sm"
+            className="mt-6 rounded border border-border bg-sand/60 px-4 py-3 text-sm"
           >
             Payment was cancelled. Nothing was charged; your choices are still here.
           </p>
         )}
         {soldOut ? (
-          <div className="mt-10 rounded-xl border border-dashed border-border p-8">
+          <div className="mt-10 rounded border border-dashed border-border p-8">
             <h2 className="text-2xl font-bold">This departure just sold out.</h2>
             <p className="mt-2 text-muted-foreground">Other dates may still be open.</p>
           </div>

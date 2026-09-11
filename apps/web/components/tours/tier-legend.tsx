@@ -9,7 +9,7 @@ export function TierLegend({ className }: { className?: string }) {
   return (
     <dl
       className={cn(
-        "grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4",
+        "grid gap-px overflow-hidden rounded border border-border bg-border sm:grid-cols-2 lg:grid-cols-4",
         className,
       )}
       data-testid="tier-legend"

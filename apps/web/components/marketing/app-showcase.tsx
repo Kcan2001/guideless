@@ -12,7 +12,7 @@ export function AppShowcase({ screens }: { screens: AppScreen[] }) {
       {screens.map((s) => (
         <li
           key={s.id}
-          className="flex flex-col overflow-hidden rounded-xl border border-cloud/15 bg-cloud/5"
+          className="flex flex-col overflow-hidden rounded border border-cloud/15 bg-cloud/5"
         >
           {s.src && (
             <div className="relative aspect-[9/19] w-full bg-ink">

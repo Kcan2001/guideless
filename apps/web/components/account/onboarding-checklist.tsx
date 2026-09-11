@@ -20,7 +20,7 @@ export function OnboardingChecklist({
   return (
     <section
       aria-labelledby="onboarding-heading"
-      className="rounded-xl border border-border bg-surface p-5"
+      className="rounded border border-border bg-surface p-5"
     >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h3 id="onboarding-heading" className="font-heading text-lg font-semibold">

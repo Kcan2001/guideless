@@ -68,7 +68,7 @@ export function StayTierCards({
           <li
             key={o.id}
             className={cn(
-              "flex flex-col overflow-hidden rounded-xl border bg-surface",
+              "flex flex-col overflow-hidden rounded border bg-surface",
               o.is_default ? "border-ink" : "border-border",
             )}
           >
@@ -198,7 +198,7 @@ export function StayTierCards({
                   )}
 
                   {o.why_price_note && (
-                    <p className="rounded-lg bg-cloud p-4 text-sm">
+                    <p className="rounded bg-cloud p-4 text-sm">
                       <span className="font-semibold">Why this price. </span>
                       {o.why_price_note}
                     </p>

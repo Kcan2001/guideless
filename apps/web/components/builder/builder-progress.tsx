@@ -54,7 +54,7 @@ export function BuilderProgress({
               <button
                 type="button"
                 onClick={() => onSelect(s.key)}
-                className="flex items-center gap-2 rounded-md hover:underline"
+                className="flex items-center gap-2 rounded hover:underline"
               >
                 {inner}
               </button>

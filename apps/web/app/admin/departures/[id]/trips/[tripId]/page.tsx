@@ -236,7 +236,7 @@ export default async function AdminTripPage(
             )}
             <ul className="space-y-3 text-sm">
               {moments.map((m) => (
-                <li key={m.id} className="rounded-lg bg-cloud p-3">
+                <li key={m.id} className="rounded bg-cloud p-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
                       <p className="font-medium">
@@ -324,7 +324,7 @@ export default async function AdminTripPage(
               {documents.map((d) => (
                 <li
                   key={d.id}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-cloud p-3"
+                  className="flex flex-wrap items-center justify-between gap-2 rounded bg-cloud p-3"
                 >
                   <div className="min-w-0">
                     <p className="font-medium">
@@ -388,7 +388,7 @@ export default async function AdminTripPage(
             </form>
             <ul className="space-y-3 text-sm">
               {notes.map((n) => (
-                <li key={n.id} className="rounded-lg bg-cloud p-3">
+                <li key={n.id} className="rounded bg-cloud p-3">
                   <p>{n.body}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {formatDate(n.created_at.slice(0, 10))}

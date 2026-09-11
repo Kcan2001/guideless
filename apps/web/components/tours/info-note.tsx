@@ -37,7 +37,7 @@ export function InfoNote({
       <div
         role="note"
         className={cn(
-          "absolute z-20 mt-2 w-64 rounded-lg border border-border bg-surface p-3 text-xs leading-relaxed text-muted-foreground shadow-lg",
+          "absolute z-20 mt-2 w-64 rounded border border-border bg-surface p-3 text-xs leading-relaxed text-muted-foreground shadow-lg",
           align === "right" ? "right-0" : "left-0",
         )}
       >

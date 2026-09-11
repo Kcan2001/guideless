@@ -100,7 +100,7 @@ export default async function AdminFinancePage(props: PageProps<"/admin/finance"
               <Link
                 key={w}
                 href={`/admin/finance?window=${w}`}
-                className={`rounded-md border px-3 py-1.5 text-sm ${
+                className={`rounded border px-3 py-1.5 text-sm ${
                   w === windowDays ? "border-foreground font-medium" : "border-border"
                 }`}
               >

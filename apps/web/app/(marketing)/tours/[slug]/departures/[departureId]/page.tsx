@@ -99,7 +99,7 @@ export default async function DeparturePage(
       <section className="mx-auto grid w-full max-w-6xl gap-10 px-6 pb-20 lg:grid-cols-[1fr_380px]">
         <div className="space-y-12">
           <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-xl border border-border bg-surface p-5">
+            <div className="rounded border border-border bg-surface p-5">
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Group</p>
               <p className="mt-1 flex items-center gap-2 text-lg font-semibold">
                 <Users className="h-4 w-4 text-muted-foreground" aria-hidden />{" "}
@@ -109,7 +109,7 @@ export default async function DeparturePage(
                 Departs with {d.minimumTravelers}+ travelers
               </p>
             </div>
-            <div className="rounded-xl border border-border bg-surface p-5">
+            <div className="rounded border border-border bg-surface p-5">
               <p className="text-xs uppercase tracking-wide text-muted-foreground">
                 Booking deadline
               </p>
@@ -118,7 +118,7 @@ export default async function DeparturePage(
                 {d.bookingDeadline ? formatDate(d.bookingDeadline) : "Until full"}
               </p>
             </div>
-            <div className="rounded-xl border border-border bg-surface p-5">
+            <div className="rounded border border-border bg-surface p-5">
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Time zone</p>
               <p className="mt-1 text-lg font-semibold">{d.timezone.replace("_", " ")}</p>
               <p className="mt-1 text-sm text-muted-foreground">All itinerary times are local</p>
@@ -145,7 +145,7 @@ export default async function DeparturePage(
 
           <div>
             <h2 className="text-2xl font-bold">Payment schedule</h2>
-            <dl className="mt-4 divide-y divide-border rounded-xl border border-border bg-surface">
+            <dl className="mt-4 divide-y divide-border rounded border border-border bg-surface">
               <div className="flex justify-between gap-4 p-4">
                 <dt>Deposit at booking</dt>
                 <dd className="font-semibold">
@@ -177,7 +177,7 @@ export default async function DeparturePage(
             <p className="mt-2 text-muted-foreground">
               Refund of the amount paid, by how far ahead you cancel.
             </p>
-            <table className="mt-4 w-full overflow-hidden rounded-xl border border-border bg-surface text-left text-sm">
+            <table className="mt-4 w-full overflow-hidden rounded border border-border bg-surface text-left text-sm">
               <thead className="bg-cloud text-xs uppercase tracking-wide text-muted-foreground">
                 <tr>
                   <th scope="col" className="px-4 py-3 font-medium">
@@ -215,7 +215,7 @@ export default async function DeparturePage(
         </div>
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
-          <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+          <div className="rounded border border-border bg-surface p-6 shadow-sm">
             <p className="text-xs uppercase tracking-wide text-muted-foreground">
               Per traveler · own room
             </p>

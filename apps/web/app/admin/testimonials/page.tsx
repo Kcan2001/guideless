@@ -73,7 +73,7 @@ export default async function AdminTestimonialsPage(props: PageProps<"/admin/tes
         ) : (
           <ul className="grid gap-4">
             {submissions.map((sub) => (
-              <li key={sub.id} className="rounded-xl border border-border p-5">
+              <li key={sub.id} className="rounded border border-border p-5">
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
                   <p className="font-medium">
                     {sub.author_name}
@@ -101,10 +101,10 @@ export default async function AdminTestimonialsPage(props: PageProps<"/admin/tes
                           <img
                             src={p.url}
                             alt=""
-                            className="h-24 w-28 rounded-lg border border-border object-cover"
+                            className="h-24 w-28 rounded border border-border object-cover"
                           />
                         ) : (
-                          <div className="h-24 w-28 rounded-lg border border-border bg-cloud" />
+                          <div className="h-24 w-28 rounded border border-border bg-cloud" />
                         )}
                         {sub.testimonial_id && sub.consent_photos && (
                           <form action={useSubmissionPhotoAction} className="mt-1">
@@ -218,7 +218,7 @@ export default async function AdminTestimonialsPage(props: PageProps<"/admin/tes
         <Section title="Edit" description="Pick one to change. Saving replaces what is there.">
           <div className="grid gap-8">
             {rows.map((t) => (
-              <details key={t.id} className="rounded-xl border border-border p-4">
+              <details key={t.id} className="rounded border border-border p-4">
                 <summary className="cursor-pointer text-sm font-medium">
                   {t.author_name} · {t.trip_label}
                 </summary>

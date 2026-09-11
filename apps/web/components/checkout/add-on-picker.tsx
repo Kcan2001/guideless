@@ -60,7 +60,7 @@ export function AddOnPicker({
 
   if (addOns.length === 0) {
     return (
-      <p className="rounded-xl border border-dashed border-border p-6 text-sm text-muted-foreground">
+      <p className="rounded border border-dashed border-border p-6 text-sm text-muted-foreground">
         Nothing extra to add for this departure. The included experiences are already yours.
       </p>
     );
@@ -90,7 +90,7 @@ export function AddOnPicker({
                 key={a.id}
                 aria-labelledby={`addon-${a.id}-title`}
                 className={cn(
-                  "rounded-xl border p-5",
+                  "rounded border p-5",
                   chosenCount > 0 ? "border-ink bg-surface" : "border-border bg-surface/60",
                   disabled && "opacity-70",
                 )}
@@ -162,7 +162,7 @@ export function AddOnPicker({
                           <li key={idx}>
                             <label
                               className={cn(
-                                "inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-sm",
+                                "inline-flex cursor-pointer items-center gap-2 rounded border px-3 py-1.5 text-sm",
                                 on ? "border-ink bg-ink text-cloud" : "border-border bg-surface",
                                 !capacityLeft && !on && "cursor-not-allowed opacity-50",
                               )}
@@ -190,7 +190,7 @@ export function AddOnPicker({
                       </label>
                       <select
                         id={`qty-${a.id}`}
-                        className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm"
+                        className="rounded border border-border bg-surface px-3 py-1.5 text-sm"
                         value={chosenCount}
                         onChange={(e) => {
                           const q = Number(e.target.value);

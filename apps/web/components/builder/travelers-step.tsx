@@ -100,7 +100,7 @@ export function TravelersStep({
       {fields.map((f, i) => {
         const e = errors.travelers?.[i];
         return (
-          <fieldset key={f.id} className="rounded-xl border border-border bg-surface p-6">
+          <fieldset key={f.id} className="rounded border border-border bg-surface p-6">
             <legend className="px-2 font-heading text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               {i === 0 ? "Lead traveler (you)" : `Traveler ${i + 1}`}
             </legend>
@@ -224,7 +224,7 @@ export function TravelersStep({
         onRooms={onRooms}
       />
 
-      <fieldset className="rounded-xl border border-border bg-surface p-6">
+      <fieldset className="rounded border border-border bg-surface p-6">
         <legend className="px-2 font-heading text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
           Emergency contact
         </legend>
@@ -279,7 +279,7 @@ export function TravelersStep({
         </div>
       </fieldset>
 
-      <fieldset className="rounded-xl border border-border bg-surface p-6">
+      <fieldset className="rounded border border-border bg-surface p-6">
         <legend className="px-2 font-heading text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
           Preferences
         </legend>
@@ -366,7 +366,7 @@ function RoomsPanel({
   return (
     <section
       aria-labelledby="rooms-heading"
-      className="rounded-xl border border-border bg-surface p-6"
+      className="rounded border border-border bg-surface p-6"
     >
       <h2
         id="rooms-heading"
@@ -381,7 +381,7 @@ function RoomsPanel({
         {[...occupancy.entries()].map(([room, travelers]) => (
           <li
             key={room}
-            className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border p-4"
+            className="flex flex-wrap items-center justify-between gap-3 rounded border border-border p-4"
           >
             <div className="flex items-center gap-3">
               <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sand">

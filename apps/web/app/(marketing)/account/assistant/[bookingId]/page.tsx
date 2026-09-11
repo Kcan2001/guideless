@@ -88,7 +88,7 @@ export default async function AssistantPage(props: PageProps<"/account/assistant
             suggestions={suggestionsFor(ctx.phase)}
           />
         ) : (
-          <p className="rounded-xl border border-border bg-surface p-6 text-sm text-muted-foreground">
+          <p className="rounded border border-border bg-surface p-6 text-sm text-muted-foreground">
             The assistant isn&rsquo;t switched on yet. Your own plans below work regardless, and our
             team answers anything at{" "}
             <Link href="/contact" className="text-link">
@@ -107,7 +107,7 @@ export default async function AssistantPage(props: PageProps<"/account/assistant
         </p>
 
         {plans.length > 0 ? (
-          <ul className="mt-4 divide-y divide-border rounded-xl border border-border bg-surface">
+          <ul className="mt-4 divide-y divide-border rounded border border-border bg-surface">
             {plans.map((p) => (
               <li key={p.id} className="flex flex-wrap items-center gap-4 p-4">
                 <div className="min-w-0 flex-1">
@@ -138,12 +138,12 @@ export default async function AssistantPage(props: PageProps<"/account/assistant
             ))}
           </ul>
         ) : (
-          <p className="mt-4 rounded-xl border border-border bg-surface p-6 text-sm text-muted-foreground">
+          <p className="mt-4 rounded border border-border bg-surface p-6 text-sm text-muted-foreground">
             Nothing yet. Add something below, or ask the assistant and say yes.
           </p>
         )}
 
-        <details className="mt-4 rounded-xl border border-border bg-surface p-5">
+        <details className="mt-4 rounded border border-border bg-surface p-5">
           <summary className="cursor-pointer text-sm font-medium">Add something yourself</summary>
           <form action={addPlanAction} className="mt-4 grid gap-4">
             <input type="hidden" name="bookingId" value={bookingId} />

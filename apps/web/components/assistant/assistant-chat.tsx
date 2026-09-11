@@ -103,7 +103,7 @@ export function AssistantChat({
   const out = messagesLeft <= 0;
 
   return (
-    <div className="rounded-xl border border-border bg-surface">
+    <div className="rounded border border-border bg-surface">
       <div className="max-h-[28rem] overflow-y-auto p-5" aria-live="polite">
         {turns.length === 0 && (
           <div className="py-6 text-center">
@@ -125,17 +125,17 @@ export function AssistantChat({
               <div
                 className={
                   turn.role === "user"
-                    ? "max-w-[85%] rounded-2xl rounded-br-sm bg-ink px-4 py-2.5 text-sm text-cloud"
+                    ? "max-w-[85%] rounded rounded-br bg-ink px-4 py-2.5 text-sm text-cloud"
                     : turn.failed
-                      ? "max-w-[85%] rounded-2xl rounded-bl-sm border border-warning-border bg-warning-surface px-4 py-2.5 text-sm"
-                      : "max-w-[85%] rounded-2xl rounded-bl-sm bg-cloud px-4 py-2.5 text-sm"
+                      ? "max-w-[85%] rounded rounded-bl border border-warning-border bg-warning-surface px-4 py-2.5 text-sm"
+                      : "max-w-[85%] rounded rounded-bl bg-cloud px-4 py-2.5 text-sm"
                 }
               >
                 <p className="whitespace-pre-line">{turn.content}</p>
                 {turn.actions?.map((a, j) => (
                   <p
                     key={j}
-                    className="mt-2 rounded-lg border border-aqua/50 bg-aqua/10 px-3 py-1.5 text-xs"
+                    className="mt-2 rounded border border-aqua/50 bg-aqua/10 px-3 py-1.5 text-xs"
                   >
                     {a.summary}
                     {typeof a.detail?.message === "string" && (
@@ -150,7 +150,7 @@ export function AssistantChat({
           ))}
           {busy && (
             <li className="flex justify-start">
-              <p className="rounded-2xl rounded-bl-sm bg-cloud px-4 py-2.5 text-sm text-muted-foreground">
+              <p className="rounded rounded-bl bg-cloud px-4 py-2.5 text-sm text-muted-foreground">
                 Thinking&hellip;
               </p>
             </li>
@@ -167,7 +167,7 @@ export function AssistantChat({
               type="button"
               onClick={() => void send(s)}
               disabled={busy || out}
-              className="rounded-full border border-border px-3 py-1.5 text-xs hover:border-teal disabled:opacity-50"
+              className="rounded border border-border px-3 py-1.5 text-xs hover:border-teal disabled:opacity-50"
             >
               {s}
             </button>

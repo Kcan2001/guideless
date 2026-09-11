@@ -121,7 +121,7 @@ export function ExperienceCards({
         return (
           <li
             key={f.key}
-            className="flex flex-col overflow-hidden rounded-xl border border-border bg-surface"
+            className="flex flex-col overflow-hidden rounded border border-border bg-surface"
           >
             {image && (
               <div
@@ -286,7 +286,7 @@ export function ExperienceCards({
                         </div>
                       )}
                       {a.why_price_note && (
-                        <p className="rounded-lg bg-cloud p-4 text-sm">
+                        <p className="rounded bg-cloud p-4 text-sm">
                           <span className="font-semibold">Why this price. </span>
                           {a.why_price_note}
                         </p>

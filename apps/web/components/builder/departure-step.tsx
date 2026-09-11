@@ -59,7 +59,7 @@ export function DepartureStep({
               <li key={d.id}>
                 <label
                   className={cn(
-                    "flex cursor-pointer flex-wrap items-center gap-4 rounded-xl border bg-surface p-5",
+                    "flex cursor-pointer flex-wrap items-center gap-4 rounded border bg-surface p-5",
                     isSelected ? "border-ink ring-1 ring-ink" : "border-border",
                     gone && "cursor-not-allowed opacity-60",
                   )}
@@ -110,7 +110,7 @@ export function DepartureStep({
         </ul>
       </fieldset>
 
-      <div className="rounded-xl border border-border bg-surface p-6">
+      <div className="rounded border border-border bg-surface p-6">
         <label htmlFor="traveler-count" className="flex items-center gap-2 font-semibold">
           <Users className="h-4 w-4 text-muted-foreground" aria-hidden /> How many travelers?
         </label>

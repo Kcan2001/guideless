@@ -11,7 +11,7 @@ import type { FaqItem } from "@/content/faq";
 export function FaqAccordion({ items }: { items: FaqItem[] }) {
   if (items.length === 0) return null;
   return (
-    <div className="divide-y divide-border rounded-xl border border-border bg-surface">
+    <div className="divide-y divide-border rounded border border-border bg-surface">
       {items.map((f) => (
         <details
           key={f.id}

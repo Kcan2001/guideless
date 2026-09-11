@@ -71,7 +71,7 @@ export function DetailModal({
         onClick={(e) => {
           if (e.target === ref.current) setOpen(false);
         }}
-        className="m-auto max-h-[88vh] w-[min(52rem,92vw)] overflow-hidden rounded-2xl border border-border bg-surface p-0 text-ink backdrop:bg-ink/50"
+        className="m-auto max-h-[88vh] w-[min(52rem,92vw)] overflow-hidden rounded border border-border bg-surface p-0 text-ink backdrop:bg-ink/50"
       >
         {open && (
           <div className="flex max-h-[88vh] flex-col">

@@ -53,7 +53,7 @@ function PresentationFields({
   disabled?: boolean;
 }) {
   return (
-    <fieldset className="grid gap-3 rounded-lg border border-border p-3 sm:col-span-2 sm:grid-cols-2">
+    <fieldset className="grid gap-3 rounded border border-border p-3 sm:col-span-2 sm:grid-cols-2">
       <legend className="px-1 text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
         Presentation
       </legend>
@@ -389,7 +389,7 @@ export function StayOptionForm({
           disabled={disabled}
         />
       </div>
-      <fieldset className="grid gap-3 rounded-lg border border-border p-3 sm:col-span-2 sm:grid-cols-3">
+      <fieldset className="grid gap-3 rounded border border-border p-3 sm:col-span-2 sm:grid-cols-3">
         <legend className="px-1 text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
           Practicalities
         </legend>

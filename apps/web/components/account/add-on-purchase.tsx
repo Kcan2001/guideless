@@ -85,7 +85,7 @@ export function AddOnPurchase({
         onChange={setSelection}
       />
       <aside
-        className="rounded-2xl border border-border bg-surface p-6 lg:sticky lg:top-6 lg:self-start"
+        className="rounded border border-border bg-surface p-6 lg:sticky lg:top-6 lg:self-start"
         aria-live="polite"
       >
         <h2 className="font-heading text-lg font-semibold">Your additions</h2>

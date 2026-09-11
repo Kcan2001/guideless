@@ -84,7 +84,7 @@ export default async function SocialPostPage(props: PageProps<"/admin/social/[id
       {post.status === "failed" && post.last_error && (
         <div
           role="alert"
-          className="mb-6 rounded-lg border border-danger-border bg-danger-surface p-4 text-sm"
+          className="mb-6 rounded border border-danger-border bg-danger-surface p-4 text-sm"
         >
           <p className="font-semibold">Last attempt failed (attempt {post.attempts})</p>
           <p className="mt-1 break-words">{post.last_error}</p>
@@ -113,7 +113,7 @@ export default async function SocialPostPage(props: PageProps<"/admin/social/[id
                       alt={post.alt_texts[i] || ""}
                       width={320}
                       height={320}
-                      className="aspect-square w-full rounded-lg border border-border object-cover"
+                      className="aspect-square w-full rounded border border-border object-cover"
                     />
                     <p className="truncate text-xs text-muted-foreground" title={path}>
                       {i + 1}. {path.split("/").pop()}
@@ -242,7 +242,7 @@ export default async function SocialPostPage(props: PageProps<"/admin/social/[id
 
         <div className="space-y-6">
           <Section title="Preview" description="Exactly what the publisher sends.">
-            <pre className="whitespace-pre-wrap rounded-lg bg-cloud p-3 text-sm leading-relaxed">
+            <pre className="whitespace-pre-wrap rounded bg-cloud p-3 text-sm leading-relaxed">
               {preview || <span className="text-muted-foreground">Nothing yet.</span>}
             </pre>
           </Section>

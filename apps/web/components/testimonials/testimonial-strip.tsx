@@ -34,7 +34,7 @@ export function TestimonialStrip({
           {testimonials.map((t) => (
             <li
               key={t.id}
-              className="flex flex-col gap-4 rounded-2xl border border-border bg-surface p-6"
+              className="flex flex-col gap-4 rounded border border-border bg-surface p-6"
             >
               {t.imageUrl && (
                 <Image
@@ -42,7 +42,7 @@ export function TestimonialStrip({
                   alt=""
                   width={640}
                   height={360}
-                  className="h-44 w-full rounded-xl object-cover"
+                  className="h-44 w-full rounded object-cover"
                 />
               )}
               <blockquote className="text-lg leading-relaxed">&ldquo;{t.quote}&rdquo;</blockquote>

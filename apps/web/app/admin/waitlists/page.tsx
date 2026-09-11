@@ -40,7 +40,7 @@ export default async function AdminWaitlistsPage(props: PageProps<"/admin/waitli
             </p>
           )}
           {departures.map((d) => (
-            <div key={d.departureId} className="rounded-xl border border-border p-4">
+            <div key={d.departureId} className="rounded border border-border p-4">
               <div className="flex flex-wrap items-baseline justify-between gap-3">
                 <div>
                   <p className="font-medium">
@@ -58,7 +58,7 @@ export default async function AdminWaitlistsPage(props: PageProps<"/admin/waitli
               </div>
 
               <div className="mt-4 grid gap-4 lg:grid-cols-3">
-                <form action={notifyWaitlistAction} className="rounded-lg border border-border p-3">
+                <form action={notifyWaitlistAction} className="rounded border border-border p-3">
                   <input type="hidden" name="departureId" value={d.departureId} />
                   <p className="text-sm font-medium">Tell them it is open</p>
                   <p className="mt-1 text-xs text-muted-foreground">
@@ -71,10 +71,7 @@ export default async function AdminWaitlistsPage(props: PageProps<"/admin/waitli
                   </SubmitButton>
                 </form>
 
-                <form
-                  action={setDepartureDropAction}
-                  className="rounded-lg border border-border p-3"
-                >
+                <form action={setDepartureDropAction} className="rounded border border-border p-3">
                   <input type="hidden" name="departureId" value={d.departureId} />
                   <label className="text-sm font-medium" htmlFor={`drop-${d.departureId}`}>
                     Drop at
@@ -88,7 +85,7 @@ export default async function AdminWaitlistsPage(props: PageProps<"/admin/waitli
                     name="opensAt"
                     type="datetime-local"
                     defaultValue={d.opensAt ? d.opensAt.slice(0, 16) : ""}
-                    className="mt-2 h-9 w-full rounded-lg border border-border px-2 text-sm"
+                    className="mt-2 h-9 w-full rounded border border-border px-2 text-sm"
                   />
                   <SubmitButton className="mt-3" size="sm" variant="secondary">
                     Save drop
@@ -97,7 +94,7 @@ export default async function AdminWaitlistsPage(props: PageProps<"/admin/waitli
 
                 <form
                   action={saveDepartureUnlockAction}
-                  className="rounded-lg border border-border p-3"
+                  className="rounded border border-border p-3"
                 >
                   <input type="hidden" name="departureId" value={d.departureId} />
                   <p className="text-sm font-medium">Group unlock</p>
@@ -113,7 +110,7 @@ export default async function AdminWaitlistsPage(props: PageProps<"/admin/waitli
                       required
                       placeholder="8"
                       aria-label="Travelers needed"
-                      className="h-9 w-20 rounded-lg border border-border px-2 text-sm"
+                      className="h-9 w-20 rounded border border-border px-2 text-sm"
                     />
                     <input
                       name="reward"
@@ -121,7 +118,7 @@ export default async function AdminWaitlistsPage(props: PageProps<"/admin/waitli
                       maxLength={200}
                       placeholder="A harbour boat for everyone"
                       aria-label="What they get"
-                      className="h-9 min-w-0 flex-1 rounded-lg border border-border px-2 text-sm"
+                      className="h-9 min-w-0 flex-1 rounded border border-border px-2 text-sm"
                     />
                   </div>
                   <input type="hidden" name="isActive" value="on" />

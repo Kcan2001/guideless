@@ -129,13 +129,13 @@ export default async function AdminBookingPage(props: PageProps<"/admin/bookings
 
           <Section id="payments" title="Money">
             <div className="grid gap-4 sm:grid-cols-3">
-              <div className="rounded-lg bg-cloud p-3">
+              <div className="rounded bg-cloud p-3">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">Total</p>
                 <p className="font-heading text-xl font-bold">
                   {money(b.total_amount, b.currency)}
                 </p>
               </div>
-              <div className="rounded-lg bg-cloud p-3">
+              <div className="rounded bg-cloud p-3">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">Paid</p>
                 <p className="font-heading text-xl font-bold">{money(b.amount_paid, b.currency)}</p>
                 {b.amount_refunded > 0 && (
@@ -144,7 +144,7 @@ export default async function AdminBookingPage(props: PageProps<"/admin/bookings
                   </p>
                 )}
               </div>
-              <div className="rounded-lg bg-cloud p-3">
+              <div className="rounded bg-cloud p-3">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">Balance</p>
                 <p className="font-heading text-xl font-bold">{money(balance, b.currency)}</p>
                 <p className="text-xs text-muted-foreground">
@@ -208,7 +208,7 @@ export default async function AdminBookingPage(props: PageProps<"/admin/bookings
             {canFinance && active && balance > 0 && (
               <form
                 action={recordManualPaymentAction}
-                className="mt-6 flex flex-wrap items-end gap-2 rounded-lg border border-dashed border-border p-3"
+                className="mt-6 flex flex-wrap items-end gap-2 rounded border border-dashed border-border p-3"
               >
                 <input type="hidden" name="bookingId" value={b.id} />
                 <label className={labelClass}>
@@ -264,7 +264,7 @@ export default async function AdminBookingPage(props: PageProps<"/admin/bookings
             >
               <ul className="space-y-3 text-sm">
                 {data.cancellationRequests.map((r) => (
-                  <li key={r.id} className="rounded-lg bg-cloud p-3">
+                  <li key={r.id} className="rounded bg-cloud p-3">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <p>
                         <StatusBadge kind="generic" status={r.status} />{" "}
@@ -369,7 +369,7 @@ export default async function AdminBookingPage(props: PageProps<"/admin/bookings
             </form>
             <ul className="space-y-3 text-sm">
               {notes.map((n) => (
-                <li key={n.id} className="rounded-lg bg-cloud p-3">
+                <li key={n.id} className="rounded bg-cloud p-3">
                   <p>{n.body}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {formatDate(n.created_at.slice(0, 10))}

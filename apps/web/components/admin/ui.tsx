@@ -46,7 +46,7 @@ export function Section({
   return (
     <section
       id={id}
-      className={cn("scroll-mt-6 rounded-xl border border-border bg-surface", className)}
+      className={cn("scroll-mt-6 rounded border border-border bg-surface", className)}
     >
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border px-5 py-4">
         <div>
@@ -72,7 +72,7 @@ export function Stat({
   tone?: "neutral" | "warning" | "good";
 }) {
   return (
-    <div className="rounded-xl border border-border bg-surface p-4">
+    <div className="rounded border border-border bg-surface p-4">
       <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
       <p
         className={cn(
@@ -199,5 +199,5 @@ export function DL({ rows }: { rows: Array<[ReactNode, ReactNode]> }) {
 
 /** Lightweight input class for admin forms (denser than customer forms). */
 export const inputClass =
-  "h-9 w-full rounded-md border border-border bg-cloud px-2.5 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
+  "h-9 w-full rounded border border-border bg-cloud px-2.5 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
 export const labelClass = "mb-1 block text-xs font-medium text-muted-foreground";

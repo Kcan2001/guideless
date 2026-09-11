@@ -25,7 +25,7 @@ export function SiteHeader() {
             alt=""
             width={36}
             height={36}
-            className="rounded-md"
+            className="rounded"
             priority
           />
           <span className="font-heading text-lg font-bold tracking-tight">{brand.shortName}</span>
@@ -56,7 +56,7 @@ export function SiteHeader() {
             <summary
               role="button"
               aria-haspopup="menu"
-              className="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-lg border border-border text-foreground [&::-webkit-details-marker]:hidden"
+              className="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded border border-border text-foreground [&::-webkit-details-marker]:hidden"
               aria-label="Open menu"
             >
               <span
@@ -66,30 +66,30 @@ export function SiteHeader() {
             </summary>
             <nav
               aria-label="Mobile"
-              className="absolute right-0 mt-2 flex w-60 flex-col gap-1 rounded-xl border border-border bg-surface p-2 shadow-lg"
+              className="absolute right-0 mt-2 flex w-60 flex-col gap-1 rounded border border-border bg-surface p-2 shadow-lg"
             >
               {primaryNav.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="rounded-lg px-3 py-2 text-foreground no-underline hover:bg-sand/60"
+                  className="rounded px-3 py-2 text-foreground no-underline hover:bg-sand/60"
                 >
                   {item.label}
                 </Link>
               ))}
               <Link
                 href="/about"
-                className="rounded-lg px-3 py-2 text-foreground no-underline hover:bg-sand/60"
+                className="rounded px-3 py-2 text-foreground no-underline hover:bg-sand/60"
               >
                 About
               </Link>
               <Link
                 href="/contact"
-                className="rounded-lg px-3 py-2 text-foreground no-underline hover:bg-sand/60"
+                className="rounded px-3 py-2 text-foreground no-underline hover:bg-sand/60"
               >
                 Contact
               </Link>
-              <SessionNav className="rounded-lg px-3 py-2 text-foreground no-underline hover:bg-sand/60 sm:hidden" />
+              <SessionNav className="rounded px-3 py-2 text-foreground no-underline hover:bg-sand/60 sm:hidden" />
               <Link
                 href="/tours"
                 className={cn(buttonVariants({ size: "sm" }), "mt-1 justify-center")}

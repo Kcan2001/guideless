@@ -60,7 +60,7 @@ export default function HowItWorksPage() {
       <section className="mx-auto w-full max-w-6xl px-6 pb-24">
         <ol className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {STEPS.map(([title, body], i) => (
-            <li key={title} className="rounded-xl border border-border bg-surface p-6">
+            <li key={title} className="rounded border border-border bg-surface p-6">
               <span className="font-heading text-sm font-semibold text-link">
                 {String(i + 1).padStart(2, "0")}
               </span>
@@ -150,7 +150,7 @@ export default function HowItWorksPage() {
           </div>
         </div>
 
-        <div className="mt-16 grid gap-6 rounded-2xl bg-ink p-10 text-cloud md:grid-cols-[1fr_auto] md:items-center">
+        <div className="mt-16 grid gap-6 rounded bg-ink p-10 text-cloud md:grid-cols-[1fr_auto] md:items-center">
           <div>
             <h2 className="text-3xl font-bold">Your guide is the app.</h2>
             <p className="mt-3 max-w-xl text-cloud/80">

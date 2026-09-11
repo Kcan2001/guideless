@@ -99,7 +99,7 @@ export default async function JournalPostPage(props: PageProps<"/journal/[slug]"
         </header>
 
         {post.hero_image_url && (
-          <div className="relative mt-10 aspect-[16/9] overflow-hidden rounded-xl">
+          <div className="relative mt-10 aspect-[16/9] overflow-hidden rounded">
             <Image
               src={post.hero_image_url}
               alt={photoAlt(post.hero_image_url, post.title)}
@@ -113,7 +113,7 @@ export default async function JournalPostPage(props: PageProps<"/journal/[slug]"
 
         <Prose markdown={post.body_markdown} className="mt-10" />
 
-        <aside className="mt-16 rounded-xl border border-border bg-sand/40 p-8">
+        <aside className="mt-16 rounded border border-border bg-sand/40 p-8">
           {post.tour ? (
             <>
               <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">

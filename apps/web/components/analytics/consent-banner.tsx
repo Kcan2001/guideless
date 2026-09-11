@@ -71,7 +71,7 @@ export function ConsentBanner() {
       role="dialog"
       aria-live="polite"
       aria-label="Cookie preferences"
-      className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-2xl rounded-2xl border border-border bg-surface p-5 shadow-lg sm:flex sm:items-center sm:gap-6"
+      className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-2xl rounded border border-border bg-surface p-5 shadow-lg sm:flex sm:items-center sm:gap-6"
     >
       <p className="text-sm text-muted-foreground sm:flex-1">
         We use analytics cookies to understand which trips people look at and to improve the site.

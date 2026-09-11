@@ -49,7 +49,7 @@ export default async function ConfirmationPage(
 
   return (
     <div className="mx-auto w-full max-w-3xl px-6 py-10">
-      <section className="mt-10 rounded-2xl border border-border bg-surface p-8">
+      <section className="mt-10 rounded border border-border bg-surface p-8">
         {confirmed ? (
           <>
             <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-aqua/30">
@@ -111,7 +111,7 @@ export default async function ConfirmationPage(
           </div>
         </dl>
 
-        <div className="mt-8 rounded-xl bg-cloud p-5 text-sm">
+        <div className="mt-8 rounded bg-cloud p-5 text-sm">
           <p className="font-semibold">What happens next</p>
           <ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground">
             <li>90 days out: trip overview and where to fly into.</li>
