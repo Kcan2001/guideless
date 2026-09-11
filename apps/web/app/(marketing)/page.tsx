@@ -13,6 +13,7 @@ import { FounderBlock } from "@/components/marketing/founder-block";
 import { SectionHeading } from "@/components/marketing/page-hero";
 import { JsonLd } from "@/components/site/json-ld";
 import { HeroScrim, heroEyebrowClass } from "@/components/site/hero-scrim";
+import { HeroVideo } from "@/components/site/hero-video";
 import { PhotoBackdrop } from "@/components/site/photo-hero";
 import { TourCard } from "@/components/tours/tour-card";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +23,7 @@ import { listAppScreens } from "@/lib/app-screens";
 import { getConfiguratorExample } from "@/lib/data/configurator";
 import {} from "@/lib/data/extras";
 import { listPublishedTours } from "@/lib/data/tours";
-import { sitePhotos } from "@/lib/photos";
+import { heroVideo, sitePhotos } from "@/lib/photos";
 import { faqJsonLd } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
@@ -81,11 +82,19 @@ export default async function HomePage() {
           photograph; `fadeToInk` dissolves the base into the trips band below instead of ending
           on a hard horizontal edge. */}
       <section data-hero-dark className="relative overflow-hidden bg-ink text-cloud">
+        {/* The photograph is the poster and the LCP: Next preloads it, the largest paint happens
+            on it, and the video resolves in on top once it can actually play. Reduced motion, a
+            refused autoplay or a missing file all leave the photograph, which is a fine hero. */}
         <PhotoBackdrop
           src={sitePhotos.home}
           fallbackAlt="The Riviera at dusk"
           priority
           position="center 55%"
+        />
+        <HeroVideo
+          webm={heroVideo.webm}
+          mp4={heroVideo.mp4}
+          className="absolute inset-0 h-full w-full object-cover"
         />
         <HeroScrim fadeToInk />
         <div className="relative mx-auto flex w-full max-w-6xl flex-col px-6 pt-32 pb-28 md:pt-44 md:pb-40">
