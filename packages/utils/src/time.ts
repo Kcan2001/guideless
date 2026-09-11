@@ -153,21 +153,41 @@ export function formatDate(
   options: Intl.DateTimeFormatOptions = { month: "short", day: "numeric", year: "numeric" },
 ): string {
   const [y, m, d] = splitDate(date);
-  return new Intl.DateTimeFormat(locale, { ...options, timeZone: "UTC" }).format(
-    new Date(Date.UTC(y, m, d)),
+  return normalizeSpaces(
+    new Intl.DateTimeFormat(locale, { ...options, timeZone: "UTC" }).format(
+      new Date(Date.UTC(y, m, d)),
+    ),
   );
+}
+
+/**
+ * Collapse the exotic spaces `Intl` emits into ordinary ones.
+ *
+ * Node and the browser ship different ICU builds, and they disagree about which space goes around
+ * an en-dash. For the same range, Node returns "Jun 2 – 7, 2027" (thin spaces) and Chrome
+ * returns "Jun 2 – 7, 2027" (ordinary ones). They are identical to the eye and different to
+ * `===`, which is all React needs to throw a hydration mismatch — every client component rendering
+ * a date range hydrated dirty, and the builder threw React #418 on a clean first load.
+ *
+ * Normalising here rather than at each call site means any formatter added later inherits the fix.
+ * U+2009 thin space, U+202F narrow no-break space, U+00A0 no-break space, U+2007 figure space.
+ */
+function normalizeSpaces(formatted: string): string {
+  return formatted.replace(/[    ]/g, " ");
 }
 
 /** "2027-05-14", "2027-05-22" → "May 14 – 22, 2027"; crosses months/years gracefully. */
 export function formatDateRange(start: ISODate, end: ISODate, locale = "en-US"): string {
   const [sy, sm, sd] = splitDate(start);
   const [ey, em, ed] = splitDate(end);
-  return new Intl.DateTimeFormat(locale, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  }).formatRange(new Date(Date.UTC(sy, sm, sd)), new Date(Date.UTC(ey, em, ed)));
+  return normalizeSpaces(
+    new Intl.DateTimeFormat(locale, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      timeZone: "UTC",
+    }).formatRange(new Date(Date.UTC(sy, sm, sd)), new Date(Date.UTC(ey, em, ed))),
+  );
 }
 
 function splitDate(date: ISODate): [number, number, number] {

@@ -68,6 +68,21 @@ describe("time zones", () => {
     expect(formatDateRange("2027-09-28", "2027-10-06")).toMatch(/Sep 28\s*[–-]\s*Oct 6, 2027/);
   });
 
+  it("emits only ordinary spaces, so the server and the browser agree byte for byte", () => {
+    // Node and the browser ship different ICU builds and disagree about the space around an
+    // en-dash: Node gives U+2009 thin spaces, Chrome gives U+0020. Identical to the eye, different
+    // to `===`, which is all React needs to throw a hydration mismatch — this is what made the
+    // builder throw React #418 on a clean first load.
+    //
+    // The `\s*` in the assertions above is why it survived: that pattern matches either one, so the
+    // test passed while the bug shipped. These assert the exact string.
+    const exotic = /[    ]/;
+    expect(formatDateRange("2027-06-02", "2027-06-07")).toBe("Jun 2 – 7, 2027");
+    expect(formatDateRange("2027-06-02", "2027-06-07")).not.toMatch(exotic);
+    expect(formatDateRange("2027-09-28", "2027-10-06")).not.toMatch(exotic);
+    expect(formatDate("2027-06-02")).not.toMatch(exotic);
+  });
+
   it("does calendar-day arithmetic", () => {
     expect(daysBetween("2027-05-14", "2027-05-23")).toBe(9);
     expect(daysBetween("2027-05-23", "2027-05-14")).toBe(-9);
