@@ -11,6 +11,8 @@ import { TrackView } from "@/components/analytics/track-view";
 import { ReferralHint, RoomRule } from "@/components/marketing/make-it-yours";
 import { JsonLd } from "@/components/site/json-ld";
 import { HeroScrim, heroEyebrowClass } from "@/components/site/hero-scrim";
+import { HeroVideo } from "@/components/site/hero-video";
+import { heroVideoFor } from "@/lib/photos";
 import { PhotoBackdrop } from "@/components/site/photo-hero";
 import { AddLaterCallout } from "@/components/tours/add-later-callout";
 import { BaseIncludes } from "@/components/tours/base-includes";
@@ -184,6 +186,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
   // page that matters most. The count is anonymous, so it caches fine, and "what I saved" lives on
   // the account page where per-person state belongs.
   const saveCount = await getSaveCount(tour.id);
+  const heroFilm = heroVideoFor(tour.slug);
 
   return (
     <>
@@ -196,10 +199,17 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
           priority
           className={version.hero_image_url ? undefined : "opacity-70"}
         />
+        {heroFilm && (
+          <HeroVideo
+            webm={heroFilm.webm}
+            mp4={heroFilm.mp4}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        )}
         <HeroScrim hasPhoto={Boolean(version.hero_image_url)} />
         <div className="relative mx-auto w-full max-w-6xl px-6 pt-20 pb-16 md:pt-28 md:pb-20">
-          <nav aria-label="Breadcrumb" className="text-sm text-cloud/70">
-            <Link href="/tours" className="text-cloud/70 no-underline hover:text-cloud">
+          <nav aria-label="Breadcrumb" className="text-sm text-cloud/85">
+            <Link href="/tours" className="text-cloud/85 no-underline hover:text-cloud">
               Trips
             </Link>
             <span className="mx-2" aria-hidden>
@@ -232,7 +242,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
                   <MapPin className="h-4 w-4 text-aqua" aria-hidden /> {tour.event_location}
                 </span>
               )}
-              <span className="text-cloud/70">
+              <span className="text-cloud/85">
                 · {route.map((r) => r.destination.name).join(" & ")}
               </span>
             </p>
@@ -245,7 +255,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
           >
             {next ? (
               <div>
-                <dt className="flex items-center gap-1.5 text-cloud/70">
+                <dt className="flex items-center gap-1.5 text-cloud/85">
                   <CalendarDays className="h-4 w-4 text-aqua" aria-hidden /> Next departure
                 </dt>
                 <dd className="mt-1 font-heading text-base font-bold">
@@ -254,7 +264,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
               </div>
             ) : (
               <div>
-                <dt className="flex items-center gap-1.5 text-cloud/70">
+                <dt className="flex items-center gap-1.5 text-cloud/85">
                   <Gauge className="h-4 w-4 text-aqua" aria-hidden /> Pace
                 </dt>
                 <dd className="mt-1 font-heading text-base font-bold">
@@ -263,7 +273,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
               </div>
             )}
             <div>
-              <dt className="flex items-center gap-1.5 text-cloud/70">
+              <dt className="flex items-center gap-1.5 text-cloud/85">
                 <MoonStar className="h-4 w-4 text-aqua" aria-hidden /> Length
               </dt>
               <dd className="mt-1 font-heading text-base font-bold">
@@ -271,7 +281,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
               </dd>
             </div>
             <div>
-              <dt className="flex items-center gap-1.5 text-cloud/70">
+              <dt className="flex items-center gap-1.5 text-cloud/85">
                 <Users className="h-4 w-4 text-aqua" aria-hidden /> Group
               </dt>
               <dd className="mt-1 font-heading text-base font-bold">
@@ -280,10 +290,10 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
             </div>
             {price && (
               <div>
-                <dt className="text-cloud/70">From</dt>
+                <dt className="text-cloud/85">From</dt>
                 <dd className="mt-1 font-heading text-base font-bold">
                   {formatMoney(price, { compact: true })}
-                  <span className="ml-1 text-xs font-normal text-cloud/70">per person</span>
+                  <span className="ml-1 text-xs font-normal text-cloud">per person</span>
                 </dd>
               </div>
             )}

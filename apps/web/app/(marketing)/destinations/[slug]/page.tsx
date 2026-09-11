@@ -69,8 +69,8 @@ export default async function DestinationPage(props: PageProps<"/destinations/[s
         />
         <HeroScrim hasPhoto={Boolean(d.hero_image_url)} />
         <div className="relative mx-auto w-full max-w-6xl px-6 pt-20 pb-16 md:pt-28">
-          <nav aria-label="Breadcrumb" className="text-sm text-cloud/70">
-            <Link href="/destinations" className="text-cloud/70 no-underline hover:text-cloud">
+          <nav aria-label="Breadcrumb" className="text-sm text-cloud/85">
+            <Link href="/destinations" className="text-cloud/85 no-underline hover:text-cloud">
               Destinations
             </Link>
             <span className="mx-2" aria-hidden>

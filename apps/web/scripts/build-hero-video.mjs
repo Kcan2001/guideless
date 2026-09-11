@@ -12,7 +12,7 @@
 // --crop moves the 16:9 window up or down a vertical frame (0 top, 0.5 centre, 1 bottom), which is
 // the only control that matters when the source was shot upright and the subject is off-centre.
 //
-// What it produces: apps/web/public/video/monaco-hero.{webm,mp4} — silent, 1280x720 by default,
+// What it produces: apps/web/public/video/<out>.{webm,mp4} — silent, 1280x720 by default,
 // per clip, hard cuts, encoded twice because no single codec is both small and universal.
 //
 // Why the encode looks the way it does:
@@ -55,6 +55,12 @@ const CROP_Y = Number(opt("crop", 0.5));
 // 20-25s loop of busy footage — crowds, moving cars, a nightclub — inside the budget.
 const CRF_MP4 = Number(opt("crf-mp4", 30));
 const CRF_WEBM = Number(opt("crf-webm", 44));
+// Output basename, so one script can build the home loop and a loop per trip.
+const NAME = opt("out", "monaco-hero");
+// Phone footage shot into Mediterranean sun meters for the sky and leaves the foreground dark, and
+// then it sits under a 90% ink scrim, which takes it darker still. A modest lift puts the life back
+// without looking graded. 0 disables it.
+const LIFT = Number(opt("brighten", 1));
 const ALL = args.includes("--all");
 const OUT_DIR = path.resolve("apps/web/public/video");
 const BUDGET_MB = 6;
@@ -83,7 +89,7 @@ if (clips.length === 0) {
 
 const ff = (a) => execFileSync(FFMPEG, a, { stdio: ["ignore", "ignore", "pipe"], maxBuffer: 1e8 });
 
-const tmp = path.join(OUT_DIR, "_tmp");
+const tmp = path.join(OUT_DIR, `_tmp-${NAME}`);
 rmSync(tmp, { recursive: true, force: true });
 mkdirSync(tmp, { recursive: true });
 mkdirSync(OUT_DIR, { recursive: true });
@@ -104,7 +110,11 @@ clips.forEach((src, i) => {
     // Cover, not fit: letterboxing a hero is worse than losing the edges of a frame.
     "-vf",
     `scale=${OUT_W}:${OUT_H}:force_original_aspect_ratio=increase,` +
-      `crop=${OUT_W}:${OUT_H}:(iw-ow)/2:(ih-oh)*${CROP_Y},fps=30,setsar=1`,
+      `crop=${OUT_W}:${OUT_H}:(iw-ow)/2:(ih-oh)*${CROP_Y},fps=30,setsar=1` +
+      (LIFT > 0
+        ? `,eq=brightness=${(0.06 * LIFT).toFixed(3)}:contrast=${(1 + 0.07 * LIFT).toFixed(3)}` +
+          `:saturation=${(1 + 0.1 * LIFT).toFixed(3)},gblur=sigma=0:steps=1`
+        : ""),
     "-c:v",
     "libx264",
     "-preset",
@@ -122,8 +132,8 @@ clips.forEach((src, i) => {
 const listFile = path.join(tmp, "concat.txt");
 writeFileSync(listFile, parts.map((p) => `file '${p.replace(/\\/g, "/")}'`).join("\n"));
 
-const mp4 = path.join(OUT_DIR, "monaco-hero.mp4");
-const webm = path.join(OUT_DIR, "monaco-hero.webm");
+const mp4 = path.join(OUT_DIR, `${NAME}.mp4`);
+const webm = path.join(OUT_DIR, `${NAME}.webm`);
 
 console.log("Encoding MP4 (H.264)…");
 ff([
