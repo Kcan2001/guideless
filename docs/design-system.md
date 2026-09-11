@@ -10,6 +10,31 @@ to write `rounded-2xl border border-border bg-surface` by hand, stop and read
 
 ---
 
+## The direction, decided 2026-09-10
+
+Kyle chose the loud one. Six hero directions were built against five pages of the CSS Design
+Awards travel gallery; the winner is heavy caps on ink with the accent doing real work. Three
+things in this document change because of it, and everything else holds.
+
+|              | Was                              | Is                                                              |
+| ------------ | -------------------------------- | --------------------------------------------------------------- |
+| Display face | Manrope 800, sentence case       | **Archivo 900, uppercase**, line-height 0.88, tracking −0.022em |
+| Radius       | four values: 6 / 10 / 16 / full  | **one value: 4px**                                              |
+| Ground       | cloud, with ink as a text colour | **ink is the default surface**; light bands are the exception   |
+
+Aqua stops being decoration and becomes the primary button plus exactly one phrase per screen. On
+ink it is 10.4:1, so for the first time the brand colour can carry weight.
+
+**Light bands are not a fallback, they are the pressure valve.** A loud register fails the moment
+it meets a price ladder — four figures from $1,603 to $30,153 set in 40px caps is a poster, not a
+table. So anywhere a number has to be trusted or a form has to be completed, the band goes to
+cloud and Inter does the reading. Loud on ink, calm on paper.
+
+The reference build is the three screens at
+<https://claude.ai/code/artifact/c2433971-86b7-49bd-b433-f581bad7a8e2>.
+
+---
+
 ## The audit, 2026-09-10
 
 Measured across `apps/web/app` and `apps/web/components`, not estimated.
@@ -84,14 +109,18 @@ The ratio across a page stays roughly **70% neutral, 20% ink, 10% accent**.
 
 Two families. There is no third, and there is no case for one.
 
-| Role          | Family      | Where                                                                   |
-| ------------- | ----------- | ----------------------------------------------------------------------- |
-| **Primary**   | **Manrope** | `h1`–`h4`, prices, statistics, the wordmark. Nothing else.              |
-| **Secondary** | **Inter**   | Body, labels, buttons, navigation, tables, form fields, everything else |
+| Role          | Family                     | Where                                                                      |
+| ------------- | -------------------------- | -------------------------------------------------------------------------- |
+| **Primary**   | **Archivo 900, uppercase** | `h1`–`h4`, prices, statistics, button labels, the wordmark. Nothing else.  |
+| **Secondary** | **Inter**                  | Body, helper text, form fields, tables, anything you read rather than scan |
 
-`font-heading` is Manrope. **Every `h1`–`h4` sets it.** A heading without it renders in Inter and is
-the single most common reason two pages look like different products. 104 of 156 headings currently
-miss it.
+`font-heading` is Archivo. **Every `h1`–`h4` sets it**, in caps, at line-height 0.88. A heading
+without it renders in Inter and is the single most common reason two pages look like different
+products. 104 of 156 headings currently miss it.
+
+The division is scan versus read. Archivo is for text the eye lands on; Inter is for text the eye
+moves through. A card title is Archivo, the sentence under it is Inter, and a paragraph is never
+Archivo however short it is.
 
 ### The scale
 
@@ -118,19 +147,15 @@ column get `font-variant-numeric: tabular-nums`; prices in a ladder always do.
 
 ## Shape, spacing and elevation
 
-### Radius — four values, and Tailwind's defaults are not them
+### Radius — one value
 
-| Token  | Value | Use                                                 |
-| ------ | ----- | --------------------------------------------------- |
-| `sm`   | 6px   | Inputs, checkboxes, small chips                     |
-| `md`   | 10px  | Buttons, badges, inline controls                    |
-| `lg`   | 16px  | **Cards.** Every card. Panels, modals, media frames |
-| `full` | 999px | Pills, avatars, the one floating booking bar        |
+**4px. Everything.** Cards, buttons, inputs, badges, media frames, modals. There is no scale to
+remember and no decision to make, which is the point: six radii are in use today because
+`rounded-xl` and `rounded-2xl` are Tailwind defaults nobody mapped to a token, and a page with two
+corner radii on two adjacent boxes is exactly the inconsistency this document exists to stop.
 
-Six radii are in use today because `rounded-xl` (12px) and `rounded-2xl` (16px) are Tailwind
-defaults that nobody mapped to the tokens. **Fix the mapping, then use `rounded-lg` for every
-card.** A page with two corner radii on two adjacent boxes is the thing Kyle is complaining about,
-and it is always this.
+Pills are gone. Hard edges are what make this register read as confident rather than friendly, and
+a 999px button beside a 4px card is the single loudest inconsistency available.
 
 ### Spacing
 
@@ -162,8 +187,8 @@ what the third path looks like after six months.
 
 ### Card — one card, four slots
 
-`components/ui/card.tsx` is the only card. It is `rounded-lg border border-border bg-surface`, and
-nothing overrides its border, radius or background.
+`components/ui/card.tsx` is the only card. It is `rounded border border-border` on `surface` (light
+bands) or `surface-inverse` (ink bands), and nothing overrides its border, radius or background.
 
 ```tsx
 <Card>
@@ -178,24 +203,33 @@ nothing overrides its border, radius or background.
 
 Permitted variation, and only this:
 
-| Prop / class      | Effect                                                         |
-| ----------------- | -------------------------------------------------------------- |
-| `selected`        | `border-ink` instead of `border-border`. Nothing else changes. |
-| `media` slot      | A 16:10 image above `CardHeader`, flush to the card edge       |
-| `className="p-0"` | For a card whose content manages its own padding               |
+| Prop / class      | Effect                                                      |
+| ----------------- | ----------------------------------------------------------- |
+| `selected`        | A 2px `accent` border instead of 1px. Nothing else changes. |
+| `media` slot      | A 16:10 image above `CardHeader`, flush to the card edge    |
+| `className="p-0"` | For a card whose content manages its own padding            |
 
 Everything else — a different radius, a coloured border, a gradient, a shadow — is a new component
 and needs a reason in this file.
 
 ### Button
 
-Already correct, and the template for the rest. Variants: `primary` (ink fill), `secondary`
+Already correct, and the template for the rest. Variants: `primary` (**aqua fill, ink label**), `secondary`
 (border, no fill), `inverse` (cloud fill, for use on ink), `ghost`. Sizes `sm`, `md`, `lg`. Radius
-`full`. **One primary button per screen region.**
+`4px`, label in Archivo caps. **One primary button per screen region.**
+
+### Prices — a trip price is always prefixed "From"
+
+The number on a trip card is the **cheapest tier**, so it reads `From $1,603`, never `$1,603`.
+Stating it bare claims a price for a trip most people will not pay, and the four-tier ladder is the
+whole product — the spread is a feature, not something to hide behind a single figure.
+
+A tier price on a trip page or in the builder is exact and takes no prefix. A delta takes its sign:
+`+$2,460`.
 
 ### Badge
 
-`rounded-md`, `label` type style, a `/10` tint fill with ink text. Never a saturated fill with
+`rounded` (4px), `label` type style, a solid `accent` fill with ink text. Never a saturated fill with
 white text — see the contrast table.
 
 ### Field
