@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { expect, type Page } from "@playwright/test";
+import type { Role } from "@guideless/types";
 
 /**
  * Shared machinery for the authenticated end-to-end tests.
@@ -98,6 +99,28 @@ export async function signIn(page: Page, email: string, password = PASSWORD): Pr
   await page.getByRole("button", { name: /^sign in$/i }).click();
 }
 
+/**
+ * Signs the current session out through the button a real person uses.
+ *
+ * Needed because `signIn` cannot start from a signed-in browser: /login redirects an authenticated
+ * visitor straight to /account, so the "Password" tab never appears and the spec fails sixty
+ * seconds later pointing at a tab selector rather than at the session it forgot to end.
+ */
+export async function signOut(page: Page): Promise<void> {
+  await page.goto("/account");
+  await page.getByRole("button", { name: /^sign out$/i }).click();
+  // signOut() redirects home. Waiting on the path rather than a pattern, because "/" matches
+  // every URL there is.
+  await page.waitForURL((url) => url.pathname === "/", { timeout: 30_000 });
+}
+
+/** Ends the current session and starts another. Specs that cross a role boundary need this. */
+export async function switchUser(page: Page, email: string, password = PASSWORD): Promise<void> {
+  await signOut(page);
+  await signIn(page, email, password);
+  await page.waitForURL(/\/account/, { timeout: 30_000 });
+}
+
 export async function expectSignedIn(page: Page): Promise<void> {
   await page.goto("/account");
   await expect(page).toHaveURL(/\/account/);
@@ -122,6 +145,8 @@ export async function seedConfirmedBooking(opts: {
   stayOptionId?: string | null;
   addOnIds?: string[];
   emailPrefix?: string;
+  /** Account credit to grant before booking, in minor units. The quote spends it automatically. */
+  creditMinor?: number;
 }): Promise<SeededBooking> {
   const email = uniqueEmail(opts.emailPrefix ?? "booked");
   const admin = serviceClient();
@@ -132,6 +157,10 @@ export async function seedConfirmedBooking(opts: {
     email_confirm: true,
   });
   if (createErr || !created.user) throw new Error(`could not create user: ${createErr?.message}`);
+
+  // Granted before booking on purpose: the quote applies whatever credit the traveler holds, so
+  // this is how a real balance reaches a real booking rather than being pasted onto one.
+  if (opts.creditMinor) await grantCredit(created.user.id, opts.creditMinor);
 
   // Book as the traveler, so RLS, capacity guards and the quote all apply exactly as in production.
   const asUser = anonClient();
@@ -233,4 +262,66 @@ export async function removeUser(userId: string): Promise<void> {
 export async function cleanUp(booked: SeededBooking): Promise<void> {
   await removeBooking(booked.bookingId);
   await removeUser(booked.userId);
+}
+
+// ── Staff and credit ─────────────────────────────────────────────────────────
+
+export interface SeededStaff {
+  email: string;
+  userId: string;
+  roles: Role[];
+}
+
+/**
+ * A staff account with exactly the roles given, and nothing else.
+ *
+ * The roles go in with the service role because `user_roles` is admin-managed under RLS — which is
+ * the point: a test that could grant itself a role through the product would be testing a hole. The
+ * browser still signs in through the real form, so `getStaffContext` reads the roles back as the
+ * user, exactly as a real member of staff does.
+ */
+export async function seedStaff(roles: Role[], emailPrefix = "staff"): Promise<SeededStaff> {
+  if (roles.length === 0) throw new Error("seedStaff needs at least one role");
+  const email = uniqueEmail(emailPrefix);
+  const admin = serviceClient();
+  const { data: created, error } = await admin.auth.admin.createUser({
+    email,
+    password: PASSWORD,
+    email_confirm: true,
+  });
+  if (error || !created.user) throw new Error(`could not create staff user: ${error?.message}`);
+  const { error: roleErr } = await admin
+    .from("user_roles")
+    .insert(roles.map((role) => ({ user_id: created.user.id, role })));
+  if (roleErr) throw new Error(`could not grant ${roles.join(", ")}: ${roleErr.message}`);
+  return { email, userId: created.user.id, roles };
+}
+
+/** Puts credit on an account the way a referral reward or a goodwill grant does. */
+export async function grantCredit(
+  userId: string,
+  amountMinor: number,
+  currency = "USD",
+): Promise<void> {
+  const { error } = await serviceClient().from("account_credits").insert({
+    user_id: userId,
+    amount: amountMinor,
+    currency,
+    source: "manual",
+    note: "e2e grant",
+  });
+  if (error) throw new Error(`could not grant credit: ${error.message}`);
+}
+
+/**
+ * Accepts the `window.confirm` guard on destructive admin buttons.
+ *
+ * Playwright dismisses dialogs by default, which makes `SubmitButton`'s confirm return false and
+ * quietly cancel the submit — the form does nothing and the assertion fails somewhere else
+ * entirely. Opting in explicitly keeps the guard in the test rather than around it.
+ */
+export async function confirmDialogs(page: Page): Promise<void> {
+  page.on("dialog", (dialog) => {
+    void dialog.accept();
+  });
 }
